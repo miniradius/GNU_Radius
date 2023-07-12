@@ -1,0 +1,15 @@
+This directory contains utilities contributed by GNU Radius users.
+
+* web-radact		A web interface to GNU Radius accounting database.
+			Written by Oswaldo E. Aguirre M. <oaguirre@reacciun.ve>
+			and Francisco J. Obispo S. <fobispo@reacciun.ve>
+
+* passwd_to_db		Converts master password database on FreeBSD systems
+			to SQL.
+			Written by Gerald Coon <gcoon@inch.com>
+
+* passcvt		Converts system passwd and shadow to SQL.
+			Written by Sergey Poznyakoff <gray@mirddin.farlep.net>
+
+* radsend		A perl wrapper for radtest utility.
+			Written by <garcia_j14@tsm.es>.

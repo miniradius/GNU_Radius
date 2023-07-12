@@ -1,0 +1,323 @@
+\input texinfo @c -*-texinfo-*-
+@smallbook
+@c %**start of header
+@setfilename radius.info
+@settitle GNU radius
+@c %**end of header
+@setchapternewpage odd
+
+@c Define new indices
+@c at -- Attribute index
+@defcodeindex at
+@c kw -- Keyword index
+@defcodeindex kw
+@c ex -- Example index
+@defindex ex
+
+@c Combine everything into one
+@syncodeindex at cp
+@syncodeindex kw cp
+@syncodeindex ex cp
+@syncodeindex fn cp
+@syncodeindex pg cp
+
+@include version.texi
+@include config.texi
+@include rendition.texi
+@settitle GNU Radius Reference Manual
+
+@copying
+This manual documents GNU Radius (version @value{VERSION}, @value{UPDATED}).
+
+@multitable @columnfractions .50 .50
+@item Published by:              @tab
+@item @tab
+@item GNU Press                  @tab Website: www.gnupress.org
+@item a division of the          @tab General: press@@gnu.org
+@item Free Software Foundation   @tab Orders: sales@@gnu.org
+@item 51 Franklin Street, Fifth Floor @tab Tel: 617-542-5942
+@item Boston, MA 02110-1301 USA  @tab Fax: 617-542-2652
+@end multitable
+@sp 2
+Copyright @copyright{} 1999, 2000, 2001, 2002, 2003 Free Software
+Foundation
+@sp 1
+@quotation
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License, Version 1.2 or
+any later version published by the Free Software Foundation; with no
+Invariant Sections, with the Front-Cover texts being ``A GNU Manual'',
+and with the Back-Cover Texts as in (a) below.  A copy of the license
+is included in the section entitled ``GNU Free Documentation License''.
+
+(a) The FSF's Back-Cover Text is: ``You have freedom to copy and modify
+this GNU Manual, like GNU software.  Copies published by the Free
+Software Foundation raise funds for GNU development.''
+@end quotation
+@end copying
+
+@dircategory GNU radius
+@direntry
+* Radius: (radius).           GNU Radius.
+* radwho: (radius)Radwho.     Show who is logged in by radius now.
+* radlast: (radius)Radlast.   Show the history of logins by radius.
+* radzap: (radius)Radzap.     Modify the login records.
+* radgrep: (radius)Radgrep.   Quickly find the login record.
+* radping: (radius)Radping.   Ping the remote machine by the username.
+* radtest: (radius)Radtest.   A RADIUS client shell.
+* radauth: (radius)Radauth.   Check if a user can be authenticated.
+* radctl: (radius)Radctl.     Radctl monitor.
+* builddbm: (radius)Builddbm. Create DBM version of the @file{raddb/users} file.
+* radscm: (radius)Radscm.     A Guile interface to radius functions.
+@end direntry
+
+
+@iftex
+@shorttitlepage GNU Radius Reference Manual
+@end iftex
+
+@titlepage
+@title GNU Radius Reference Manual
+@subtitle version @value{VERSION}, @value{UPDATED}
+@author Sergey Poznyakoff
+
+@page
+@vskip 0pt plus 1filll
+@insertcopying
+@sp2
+Cover art by Etienne Suvasa.  Cover design by Jonathan Richard.
+@end titlepage
+
+@node Top, Intro, , (dir)
+
+@ifinfo
+@top The GNU Radius
+
+GNU Radius is a suite of programs for performing user authentication
+and accounting using @RADIUS{} protocol.
+
+This Info file documents the version @value{VERSION} of the package.
+
+@end ifinfo
+
+@comment *******************************************************************
+@menu
+* Intro::               An introduction to @RADIUS{} concepts
+
+The @RADIUS{} daemon
+* Naming Conventions::  Conventions about naming files and directories
+* Operation::           How @radiusd{} operates
+* Invocation::          How to start the daemon
+* Configuration Files:: @radiusd{} configuration files
+* Request Comparison::  How duplicate requests are dealt with
+* Authentication::      How users are authenticated
+* Accounting::          Accounting methods
+* Logging::             What gets logged and where
+* Problem Tracking::    Fixing configuration errors
+* Extensions::          Extending GNU Radius
+
+* Utility Programs::
+* Client Package::
+
+Radius Attributes
+* Attribute List::      Some frequently used attributes
+
+Reporting Bugs and getting information
+* Bugs::                How to report a bug
+* News::                Where to get info about GNU Radius
+
+Obtaining GNU Radius
+* Distrib::             How to Obtain the GNU Radius
+* Glossary::            The glossary
+* Acknowledgements::
+
+What Next?
+
+* GNU configuration::   New configuration 
+
+Appendices
+
+* Copying This Manual:: The GNU Free Documentation License.
+
+Indices
+* Index::               
+
+Here are some other nodes which are really inferiors of the ones
+already listed, mentioned here so you can get to them in one step:
+
+ --- The Detailed Node Listing ---
+
+Radius Configuration
+
+* config file::         Run-time configuration options.
+* dictionary file::     Radius dictionary.
+* clients file::        Clients lists the @NAS{}es that are allowed to
+                        communicate with radius.
+* naslist file::        The naslist file keeps general information about
+                        the @NAS{}es.
+* nastypes file::       Information about how to query the @NAS{}es about
+                        active user sessions.
+* hints file::          Important user information that is common for the
+                        users whose names match some pattern.
+* huntgroups file::     Group users by the @NAS{} (and, possibly, a port
+                        number) they come from.
+* realms file::         Communication with remote radius servers
+* users file::          User profile.
+* access.deny file::    List of users which are denied access.
+* sqlserver file::      SQL server configuration.
+* rewrite file::        Rewrite functions allow to change the input
+                        packets.
+* menus directory::     Menus allow user to select the type of
+                        service.
+
+Client configuration
+
+* client.conf::         Main client configuration file.
+                        
+@end menu
+
+@comment *******************************************************************
+
+@include intro.texi
+@include naming.texi
+@include operation.texi
+@include invoke.texi
+@include configure.texi
+@include comp.texi
+@include auth.texi
+@include acct.texi
+@include logging.texi
+@include debug.texi
+@include extensions.texi
+@include programs.texi
+@include client.texi
+@include attributes.texi
+@include bugs.texi
+
+@comment *******************************************************************
+@node Distrib, Glossary, Top, Top
+@unnumbered How to Obtain Radius
+
+GNU Radius is @dfn{free software}; this means that everyone is free to
+use it and free to redistribute it on certain conditions.  GNU Radius is
+not in the public domain; it is copyrighted and there are restrictions
+on its distribution, but these restrictions are designed to permit
+everything that a good cooperating citizen would want to do.  What is
+not allowed is to try to prevent others from further sharing any version
+of GNU Radius that they might get from you.  The precise conditions are
+found in the GNU General Public License that comes with Radius and also
+appears following this section.
+
+One way to get a copy of GNU Radius is from someone else who has it.  You
+need not ask for our permission to do so, or tell any one else; just
+copy it.  If you have access to the Internet, you can get the latest
+distribution version of GNU Radius by anonymous FTP. It is available at
+@url{ftp://ftp.gnu.org/pub/gnu/radius}
+
+@comment *******************************************************************
+@node Glossary, Acknowledgements, Distrib, Top
+@unnumbered Radius Glossary
+
+Throughout this document the following terms are used:
+
+@table @asis
+
+@item @RADIUS{} (small capitals)
+The Remote Authentication Dial In User Service
+protocol as described in RFC 2138, 2865, and 2866.
+
+@cindex @sc{nas}
+@cindex Network Access Server
+@item @NAS{}
+A network access server, that is, a computer or a special device
+designed to provide access to the network.  For example, it can be a
+computer connected to the network and equipped with several modems.
+Such a
+@NAS{} will allow a user connecting to one of its modems to access the
+network. 
+
+@cindex Service
+@item Service
+A service, such as PPP, SLIP, or telnet, provided to a user by the @NAS{}.
+
+@cindex Session
+@item Session
+Each instance of a service.  Sessions start when the service is
+first provided and close when the service is ended.  A user may be
+allowed to have multiple
+sessions active simultaneously.
+
+@cindex Session ID
+@item Session @sc{id}
+The session identifier: a string of characters uniquely identifying the session.
+
+@cindex A/V pair
+@cindex Attribute
+@cindex Attribute-Value pair
+@item @AVP{}
+Attribute-value pair: see @ref{Attributes}. 
+
+@cindex Dial-in user
+@cindex Dial-up user
+@item Dial-in or dial-up user
+A user connecting to a service through the modem line.
+
+@item User database
+A database where a @RADIUS{} server keeps information about users, their
+authentication information, etc.
+
+@item User's profile
+A record in the user database describing a particular user for
+purposes of authentication and authorization, i.e., how the user should
+be authenticated as well as which services he is allowed to be
+provided and parameters of these services.
+
+@end table
+
+@comment *******************************************************************
+@node Acknowledgements, GNU configuration, Glossary, Top
+@unnumbered Acknowledgements
+
+I would like to acknowledge Oswaldo Aguirre and Francisco
+Obispo, who invested a lot of time and effort to debug and test
+the program. They also wrote @command{web-radact} --- a web interface
+to the radius database.
+
+Alexandre Oliva provided a lot of good advice and offered valuable
+help in testing Radius on various platforms.
+
+The following people provided many helpful comments, bug reports and
+patches: Dustin Mitchell, Jody Owens, Andrey Y. Mosienko, Oleg Gawriloff,
+Adrian P. van Bloois, Michael Samuel, Michael Smirnov, Andrey Pavlenko,
+Michael Weiser, Eric Salom@'e, Clement Gerouville, Dave Restall,
+Vlad Lungu, Robert Abbate, Jaime Tellez Sanchez, Cornel Cristea,
+Krzysztof Kopera, and David Friedman.
+
+Additional people need to be thanked for their assistance in producing
+this manual. Lisa M. Goldstein coordinated its preparation and Joseph
+C. Fineman and Daniel Barowy did a remarkable job of editing.
+
+And of course, thanks to Richard M. Stallman for founding the FSF and
+starting the GNU project.
+
+@comment *******************************************************************
+@node GNU configuration, Copying This Manual, Acknowledgements, Top
+@include gradient.texi
+
+@comment *******************************************************************
+@node Copying This Manual, Index, GNU configuration, Top
+@include fdl.texi
+
+@node Index, , Copying This Manual, Top
+@unnumbered Index
+@printindex cp
+@page
+
+@summarycontents
+@contents
+
+@bye
+
+Local Variables:
+compile-command: "makeinfo --force radius.texi"
+End:

@@ -1,0 +1,18 @@
+.\" $Id$
+.so config.so
+.TH radzap 8 "\*(DA" "GNU Radius"
+.SH NAME
+radzap - delete Radius login record.
+
+.SH SYNOPSIS
+\fBradzap\fR
+[\fB-c\fR|\fB-q\fR]
+[\fB-h\fR]
+[\fB-n\fR NAS]
+[\fB-p\fR port]
+username
+
+.SH DESCRIPTION
+.De radzap
+.SH AUTHORS
+\*(AU

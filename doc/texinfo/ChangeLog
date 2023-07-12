@@ -1,0 +1,415 @@
+2005-03-09  Sergey Poznyakoff  <gray@Mirddin.farlep.net>
+
+	* attributes.texi (Scheme-Procedure,Exec-Program-Wait): Updated
+	definitions
+
+2005-01-28  Sergey Poznyakoff  <gray@Mirddin.farlep.net>
+
+	* radtest.texi: Fixed minor bug
+
+2005-01-17  Sergey Poznyakoff  <gray@Mirddin.farlep.net>
+
+	* fdl.texi: Fixed sectioning. Reverted to @appendix
+	* gradient.texi: Likewise.
+
+2005-01-15  Sergey Poznyakoff  <gray@Mirddin.farlep.net>
+
+	* Makefile.am: Rewritten to use gendocs.sh. Currently
+	(as of texinfo 4.8) the CVS version of gendocs.sh is needed
+	* fdl.texi: Use @unnumbered instead of @appendix
+	* gradient.texi: Likewise
+	* index.html.in: Removed
+	* gendocs_template: New file
+	
+2005-01-11  Sergey Poznyakoff  <gray@Mirddin.farlep.net>
+
+	* auth.texi: Fix typo
+
+2004-11-20  Sergey Poznyakoff  <gray@Mirddin.farlep.net>
+
+	* acct.texi: Updated
+	* attributes.texi: Updated
+	* auth.texi: Updated
+	* configure.texi: Updated
+	* gradient.texi: Updated
+	* radctl.texi: Updated
+
+2004-11-03  Sergey Poznyakoff  <gray@Mirddin.farlep.net>
+
+	* auth.texi: Updated
+	* configure.texi: Updated
+	* gradient.texi: Updated
+	* naming.texi: Updated
+	* radtest.texi: Updated
+	
+	* index.html.in: Rewritten in XHTML 1.0
+
+2004-11-02  Sergey Poznyakoff  <gray@Mirddin.farlep.net>
+
+	* attributes.texi: Updated
+	* radtest.texi: Updated
+
+2004-11-01  Sergey Poznyakoff  <gray@Mirddin.farlep.net>
+
+ 	* Makefile.am: Updated copyright date
+	* acct.texi: Untabify
+	* attributes.texi: Likewise
+	* auth.texi: Likewise
+	* comp.texi: Likewise
+	* configure.texi: Likewise
+	* extensions.texi: Likewise
+	* gradient.texi: Likewise
+	* radtest.texi: Likewise
+
+2004-11-01  Sergey Poznyakoff  
+
+	* attributes.texi: Updated 
+	* auth.texi: Updated 
+	* configure.texi: Updated 
+	* debug.texi: Updated 
+	* extensions.texi: Updated 
+
+2004-09-09  Sergey Poznyakoff
+
+	* configure.texi: Updated 
+
+2004-08-06  Sergey Poznyakoff
+
+	* radauth.texi: Updated
+	* radtest.texi: Updated
+
+2004-08-05  Sergey Poznyakoff
+
+	* Makefile.am: Webdoc rules updated.
+	* index.html.in: Move <BASE> inside <HEAD></HEAD> block
+	* radtest.texi: Updated
+
+2004-08-04  Sergey Poznyakoff
+
+	* radtest.texi: Updated
+
+2004-07-31  Sergey Poznyakoff
+
+	* radtest.texi (Conversion Between Data Types): Document
+	conversions of operands in unary operations.
+
+2004-07-20  Sergey Poznyakoff 
+
+        * radtest.texi: New file.
+	* Makefile.am: Added radtest.texi
+	* client.texi: Likewise
+	* radius.texi: Likewise
+	
+2004-06-25  Sergey Poznyakoff 
+
+	* configure.texi: Documented string quoting in macro
+	substitutions
+
+2004-06-16  Sergey Poznyakoff
+
+	* auth.texi: Minor changes
+	* configure.texi: Minor changes
+	* radctl.texi: Minor changes
+
+2004-05-27  Sergey Poznyakoff
+
+	* auth.texi: Minor fix.
+
+2004-05-25  Sergey Poznyakoff
+
+	* acct.texi: Updated
+	* attributes.texi: Updated
+	* gradient.texi: Updated
+
+2004-05-24  Sergey Poznyakoff 
+
+	* gradient.texi: Minor change.
+
+2004-05-24  Sergey Poznyakoff 
+
+	* rendition.texi: New file
+	* gradient.texi: New file
+	* Makefile.am: Updated
+	* .cvsignore: Updated
+	* attributes.texi: Minor change
+	* configure.texi: Minor change
+	* radctl.texi: Minor change
+	* radius.texi: Include rendition.texi. Added a new node
+	'GNU configuration'.
+	
+2004-04-26  Sergey Poznyakoff
+
+	* comp.texi: Documented new features.
+	* configure.texi: Likewise
+
+2004-04-13  Sergey Poznyakoff 
+
+ 	* doc/texinfo/configure.texi: Updated
+
+2004-03-22  Sergey Poznyakoff
+
+	* extensions.texi: Documented new builtin functions
+
+2004-03-02  Sergey Poznyakoff
+
+	* extensions.texi: Minor fix
+
+2004-02-27  Sergey Poznyakoff
+
+	* extensions.texi (Built-in Functions): Documented gettext
+	interfaces
+	* config.texi: Documented DATADIR
+	* naming.texi: Likewise
+	* configure.texi: Documented `rewrite' statement.
+
+2004-02-24  Sergey Poznyakoff 
+
+	* extensions.texi: Updated
+
+2003-12-03  Sergey Poznyakoff
+
+	* radius.texi: Added detailed node listing
+	* configure.texi: Document new dictionary statements
+	* client.texi: Minor change
+	* radauth.texi: Minor change
+
+2003-12-02  Sergey Poznyakoff 
+
+	* extensions.texi: Minor change
+	* configure.texi: Document radiusd-user statement
+	* debug.texi: Documented test shell mode.
+
+2003-11-28  Sergey Poznyakoff 
+
+	* configure.texi: Document new features.
+	* extensions.texi: Document new features.
+
+2003-11-25  Sergey Poznyakoff
+
+	* configure.texi (realms file): Document ignorecase
+	option.
+
+2003-11-08  Sergey Poznyakoff 
+
+	* debug.texi: Documented rule tracing mode.
+
+2003-11-07  Sergey Poznyakoff 
+
+	* acct.texi: Documented new features.
+	* configure.texi: Documented new features.
+	* extensions.texi: Documented new features.
+
+2003-11-01  Sergey Poznyakoff 
+
+	* extensions.texi: Minor change
+
+2003-10-26  Sergey Poznyakoff  
+
+	* configure.texi: Minor change
+	* logging.texi: Likewise.
+	* radius.texi: Likewise.
+	* debug.texi: Added placeholders for two new nodes.
+	* extensions.texi: Document new features.
+
+2003-10-16  Sergey Poznyakoff  
+
+	* attributes.texi: Removed description of the deprecated
+	attribute Add-Port-To-IP-Address.
+	* configure.texi: Initial documentation of trace-rules attribute.
+	* extensions.texi: Minor change.
+	
+2003-09-29  Sergey Poznyakoff
+
+	* radius.texi: List particular radius utilities in the
+	main Info directory.
+
+2003-08-30  Sergey Poznyakoff  
+
+	* configure.texi: Provide a brief summary of configuration
+	files.
+	* attributes.texi: Fixed cross-references.
+
+2003-08-14  Sergey Poznyakoff 
+
+	* configure.texi: Removed obsolete proxy statement
+
+2003-07-20  Sergey Poznyakoff 
+
+	* radius.texi: Combine indices into one.
+	* configure.texi: Lots of changes.
+	* acct.texi: Minor change.
+	* attributes.texi: Minor change.
+	* auth.texi: Minor change.
+	* extensions.texi: Minor change.
+	* invoke.texi: Minor change.
+	* radscm.texi: Minor change.
+
+2003-06-23  Sergey Poznyakoff 
+
+	* configure.texi: Documented missing keywords.
+
+2003-06-16  Sergey Poznyakoff  
+
+	* fdl.texi: New file
+	* Makefile.am: Added fdl.texi
+	* radius.texi: Use @copying statement.
+	Fixed the two-column output in `Published by'.
+	
+2003-06-13  Sergey Poznyakoff 
+
+	* comp.texi: Fixed request-cleanup-delay formula
+	* intro.texi: Minor change.
+	* invoke.texi: Likewise.
+	* operation.texi: Fixed typo. 
+
+2003-06-10  Sergey Poznyakoff
+
+	* radius.texi (Acknowledgements): Minor change.
+
+2003-05-30  Sergey Poznyakoff
+
+	* attribute.texi (Proxy-Replied): New node.
+	* radius.texi (Acknowledgements): New node.
+
+2003-05-29  Sergey Poznyakoff  
+
+	* doc/texinfo/configure.texi: Document `outfile' statement.
+
+2003-05-28  Sergey Poznyakoff  <gray@Mirddin.farlep.net>
+
+	* radping.texi: Minor change.	
+	* radauth.texi: Minor change. 	
+
+2003-05-24  Sergey Poznyakoff  <gray@Noldor.runasimi.org>
+
+	* radius.texi: Rearranged chapters.
+	* intro.texi: Likewise.
+	* naming.texi: Likewise.
+	
+	* acct.texi: Use @small... commands
+	* attributes.texi: Likewise.
+	* auth.texi: Likewise.
+	* client.texi: Likewise.
+	* comp.texi: Likewise.
+	* config.texi: Likewise.
+	* configure.texi: Likewise.
+	* debug.texi: Likewise.
+	* extensions.texi: Likewise.
+	* invoke.texi: Likewise.
+	* logging.texi: Likewise.
+	* radauth.texi: Likewise.
+	* radctl.texi: Likewise.
+	* radping.texi: Likewise.
+	* radscm.texi: Likewise.
+	* raduse.texi: Likewise.
+	* radwho.texi: Likewise.
+	* radzap.texi: Likewise.
+
+2003-05-23  Sergey Poznyakoff
+
+	* radctl.texi: Minor change
+	* radlast.texi: Minor change
+	* radscm.texi: Downcase @var{} arguments. Provide a
+	cross-reference to Guile format function.
+	* radwho.texi: Minor change.
+
+2003-05-22  Lisa M. Opus Goldstein <opus@gnu.org>
+
+	* builddbm.texi: Last revision from Joe
+	* radauth.texi: Likewise.
+	* radctl.texi: Likewise.
+	* radgrep.texi: Likewise.
+	* radlast.texi: Likewise.
+	* radping.texi: Likewise.
+	* radscm.texi: Likewise. 
+	* raduse.texi: Likewise.
+	* radwho.texi: Likewise.
+	* radzap.texi: Likewise.
+
+2003-05-22  Sergey Poznyakoff 
+
+	* attributes.texi: Corrections by Joe Fineman.
+	* bugs.texi: Likewise.
+	* client.texi: Likewise.
+	* programs.texi: Likewise.
+	* intro.texi: Minor change.
+	
+2003-05-21  Sergey Poznyakoff
+
+	* acct.texi: Corrections by Joe Fineman
+	* debug.texi: Likewise.
+	* extensions.texi: Likewise.
+	* logging.texi: Likewise.
+
+2003-05-20  Lisa M. Opus Goldstein <opus@gnu.org>
+	
+	* Radius-Style-Sheet.txt: New file
+
+2003-05-18  Sergey Poznyakoff 
+
+	* intro.e.texi: Removed.
+	* naming.e.texi: Removed.
+	* operation.e.texi: Removed.
+	* intro.e.log: Removed.
+	* intro.texi: Corrections by Joe Fineman
+	* naming.texi: Likewise.
+	* operation.texi: Likewise.
+
+	* attributes.texi: Minor changes in wording.
+	* configure.texi: Removed no longer relevant keywords print-tid
+	and common.
+	* extensions.texi: Removed node `Common Filters'.
+	
+2003-02-23  Daniel Barowy <dan@barowy.net>
+
+	* operation.texi: Some grammatical changes.
+
+2003-02-10  Daniel Barowy <dan@barowy.net>
+
+	* added missing ChangeLog entry (2003-02-03).
+	
+2003-02-06  Sergey Poznyakoff
+
+	* operation.texi: Removed stray @xref.
+	* radius.texi: Use @radiusd{} where appropriate.
+
+2003-02-03  Daniel Barowy <dan@barowy.net>
+
+	* config.texi: Changed macro '@radius{}' to '@radiusd{}' for clarity.
+	
+	* radius.texi: More minor rewordings, changed copright holder from
+	"Sergey Poznyakoff" to "Free Software Foundation".
+
+	* intro.texi: Changed copyright holder.  Added section on 'failed
+	requests due to a high server load' at the end (from
+	operation.texi).
+
+	* naming.texi: Changed copyright holder, some spelling, grammar, &
+	rewording, substitution of '@command{radiusd}' with '@radiusd{}'.
+
+	* operation.texi: Removed redundant general RADIUS information,
+	referencing the Introduction.  Information on high server loads
+	moved to intro.texi.  Grammar and rewording changes.
+	
+2003-01-31  Sergey Poznyakoff
+
+	* intro.texi: Fixed Texinfo syntax.
+
+2003-01-30  Daniel Barowy <dan@barowy.net>
+
+	* Grammar corrections and minor rewordings for
+	  clarification in 'radius.texi', and 'intro.tex'.
+
+	* Added the macro '@radius{}' to 'config.texi' to
+	  display the radius daemon name (radius) as a texinfo-formatted
+	  command.
+
+2003-01-27  Sergey Poznyakoff
+	
+	* Added this file to repository
+
+
+Local Variables:
+mode: change-log
+version-control: never
+End:

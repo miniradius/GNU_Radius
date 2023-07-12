@@ -1,0 +1,27 @@
+.\" $Id$
+.so config.so
+.TH radwho 1 "\*(DA" "GNU Radius"
+.SH NAME
+radwho - display who is logged on by the Radius
+
+.SH SYNOPSIS
+\fBradwho\fR
+[\fB-A\fR, \fB--all\fR]
+[\fB-c\fR, \fB--calling-id\fR]
+[\fB-d,--directory\fR DIR]
+[\fB-D,--date-format\fR {short|abbr|full}]
+[\fB-e,--empty\fR STRING]
+[\fB-f,--file\fR FILE]
+[\fB-F,--finger\fR]
+[\fB-h,--help\fR]
+[\fB-H,--no-header\fR]
+[\fB-i,--session-id\fR]
+[\fB-I,--ip-format\fR {smart|ip|nodomain}]
+[\fB-o,--format\fR FORMAT]
+[\fB-s,--secure\fR]
+
+
+.SH DESCRIPTION
+.De radwho
+.SH AUTHORS
+\*(AU

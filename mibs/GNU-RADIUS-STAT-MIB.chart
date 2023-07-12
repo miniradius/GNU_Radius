@@ -1,0 +1,43 @@
+-- Enterprises tree:
+.1.3.6.1.4.1.9163.	(.iso.org.dod.internet.private.enterprises.gnu-radius.)
+.1.3.6.1.4.1.11591.1. (.iso.org.dod.internet.private.enterprises.gnu.radius.)
+-- -------------------------------------
+
+       +-(3) radiusStatistics
+        +-(1) radiusStatMIB
+          +-(1) radiusStatIdent            -- System ID
+          +-(2) radiusStatUpTime           -- Statistics uptime
+          +-(3) radiusStatConfigReset      -- (wr) to reset statistics
+          +-(4) radiusStatTotalLines       -- Total number of d.u. lines
+          +-(5) radiusStatTotalLinesInUse  -- dialups currently in use
+          +-(6) radiusStatTotalLinesIdle   -- dialups currently idle
+          +-(7) radiusStatNASTable
+            +-(1) radiusStatNASEntry
+              +-(1) NASIndex               
+              +-(2) NASAddress
+              +-(3) NASID
+              +-(4) NASLines
+              +-(5) NASLinesInUse
+              +-(6) NASLinesIdle
+          +-(8) radiusStatNASPortTable
+             +-(1) radiusStatNASPortEntry
+               +-(1) radiusStatPortIndex
+               +-(2) radiusStatPortNASIndex
+               +-(3) radiusStatPortID
+               +-(4) radiusStatPortFramedAddress
+               +-(5) radiusStatPortTotalLogins
+               +-(6) radiusStatPortStatus
+               +-(7) radiusStatPortStatusDate
+               +-(8) radiusStatPortUpTime
+               +-(9) radiusStatPortLastLoginName
+               +-(10) radiusStatPortLastLoginDate
+               +-(11) radiusStatPortLastLogoutDate
+               +-(12) radiusStatPortIdleTotalTime
+	       +-(13) radiusStatPortIdleMaxTime
+               +-(14) radiusStatPortIdleMaxDate
+               +-(15) radiusStatPortInUseTotalTime
+	       +-(16) radiusStatPortInUseMaxTime
+               +-(17) radiusStatPortInUseMaxDate        
+
+
+

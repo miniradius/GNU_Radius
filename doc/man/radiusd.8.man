@@ -1,0 +1,25 @@
+.\" $Id$
+.so config.so
+.TH Radiusd 8 "\*(DA" "GNU Radius"
+.SH NAME
+radiusd - Authentication and accounting server
+.SH SYNOPSIS
+\fBradiusd\fR
+[\fB-A\fR]
+[\fB-a\fR acct_dir]
+[\fB-b\fR]
+[\fB-d\fR config_dir]
+[\fB-f\fR]
+[\fB-l\fR log_dir]
+[\fB-mb\fR]
+[\fB-mc\fR]
+[\fB-mt\fR]
+[\fB-n\fR]
+[\fB-p\fR port]
+[\fB-Ssv\fR]
+[\fB-x\fR debug_level]
+[\fB-yz\fR]
+.SH DESCRIPTION
+.De radiusd
+.SH AUTHORS
+\*(AU

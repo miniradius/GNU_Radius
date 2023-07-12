@@ -1,0 +1,70 @@
+@c This is part of the Radius manual.
+@c Copyright (C) 1999,2000,2001,2002,2003 Free Software Foundation, Inc.
+@c Written by Sergey Poznyakoff
+@c See file radius.texi for copying conditions.
+@comment *******************************************************************
+@node Radzap, Radgrep, Radlast, Utility Programs
+@section @command{radzap}
+@pindex radzap
+@cindex Deleting hung user sessions
+
+@command{radzap} searches the Radius accounting database for matching login
+records and closes them.
+
+At least one of the options @option{-n}, @option{-p}, or the user name must be
+specified. If they are used in conjunction, they are taken as if
+joined by the logical @sc{and} operation.
+
+@command{radzap} operates in two modes: silent and confirm. The silent
+mode is enabled by default. When run in this mode, @command{radzap} deletes
+every record that matches the search conditions given.
+
+In confirm mode @command{radzap} will ask for a confirmation
+before zapping each matching record. Any line beginning with a @samp{y}
+is taken as a positive response; any other line is taken as a negative
+response.
+
+The confirm mode is toggled by the command line option @option{-c}.
+
+@subheading Syntax
+
+@smallexample
+radzap [@var{options}] [@var{username}]
+@end smallexample
+
+@noindent
+Options are:
+
+@table @option
+@item -c
+@itemx --confirm
+Enable confirm mode. 
+@item -d @var{dir}
+@itemx --directory @var{dir}
+Specify alternate configuration directory. Default is @file{@value{RADDB}}.
+@item -f @var{file}
+@itemx --file @var{file}
+Operate on @var{file} instead of the default
+@file{@var{RADLOG}/radutmp}.
+@item -l @var{dir}
+@itemx --log-directory @var{dir}
+Search the file @file{radutmp} in the given directory.
+
+This option is deprecated. It is currently retained for backward
+compatibility with previous versions.
+@item -q
+@itemx --quiet
+Disable confirm mode.
+@item -h
+@itemx --help
+Display a short help summary, and exit.
+@item -n @var{name}
+@itemx --nas @var{name}
+Specify @NAS{} name to zap user from.
+@item -p @var{port}
+@itemx --port @var{port}
+Specify the port number of the session to be zapped. The port number
+can be specified either in its full form, e.g. @code{radzap -p S02}, or in
+its short form, e.g. @code{radzap -p 2}.
+
+@end table

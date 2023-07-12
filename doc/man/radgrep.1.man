@@ -1,0 +1,14 @@
+.\" $Id$
+.so config.so
+.TH radgrep 1 "\*(DA" "GNU Radius"
+.SH NAME
+radgrep - find a user by regular expression
+
+.SH SYNOPSIS
+\fBradgrep\fR
+[\fBradwho-options\fR][\fB-- grep-options\fB] regexp
+
+.SH DESCRIPTION
+.De radgrep
+.SH AUTHORS
+\*(AU

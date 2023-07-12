@@ -1,0 +1,1970 @@
+@c This is part of the Radius manual.
+@c Copyright (C) 2004 Free Software Foundation, Inc.
+@c Written by Sergey Poznyakoff
+@c See file radius.texi for copying conditions.
+@comment *******************************************************************
+@node radtest
+@section radtest
+@pindex radtest
+
+@command{Radtest} is a radius client shell, providing a simple and
+convenient language for sending requests to @RADIUS{} servers and
+analyzing their reply packets.
+
+@menu
+* Invoking radtest::
+* Literal Values::
+* Reserved Keywords::
+* Variables in radtest::
+* Positional Parameters::
+* Expressions in radtest::
+* Function Definitions::
+* Interacting with Radius Servers::
+* Conditional Statements::
+* Loops::
+* Built-in Primitives::
+* Sample Radtest Program::
+@end menu
+
+@node Invoking radtest
+@subsection Invoking radtest
+@UNREVISED{}
+
+@table @option
+@item -a @var{variable}=@var{value}
+@itemx --assign=@var{variable}=@var{value}
+Assign a @var{value} to @var{variable}. @xref{Assignment Options}, for
+a detailed discussion.
+
+@item -f @var{file}
+@itemx --file=@var{file}
+Read input from @var{file}. Stops further processing of the command line.
+
+@item -i
+@itemx --no-interactive
+Disable interactive mode.
+
+@item -n
+@itemx --dry-run
+Check the input file syntax and exit.
+
+@item -q
+@itemx --quick
+Do not read the configuration file.
+@FIXME{}
+
+@item -r @var{number}
+@itemx --retry=@var{number}
+Set number of retries.
+
+@item -s @var{server}
+@itemx --server=@var{server}
+Set radius server parameters.
+
+@item -t @var{number}
+@itemx --timeout=@var{number}
+Set timeout
+
+@item -v
+@itemx --verbose
+Verbose mode
+
+@item -x @var{debugspec}
+@item --debug=@var{debugspec}
+Set debugging level
+
+@item -d @var{dir}
+@itemx --directory @var{dir}
+Specify alternate configuration directory. Default is @file{@value{RADDB}}.
+
+@item -L
+@itemx --license
+Print license and exit.
+
+@item -?
+@itemx --help
+Print short usage summary
+
+@item --usage
+Print even shorter usage summary.
+
+@item -V
+@itemx --version
+Print program version.
+@end table
+
+@node Literal Values
+@subsection Literal Values
+
+There are four basic data types in @command{radtest} language: @code{integer},
+@code{ipaddr}, @code{string} and @code{avlist}.
+
+@menu
+* Numeric Values::      Integers and IP addresses.
+* Strings::             Character Strings.
+* Avlists::             Lists of A/V pairs.
+@end menu
+
+@node Numeric Values
+@subsubsection Numeric Values
+
+@dfn{Integer} means a signed integer value in the range
+-2147483648..2147483647.
+
+@dfn{Ipaddr} is an unsigned integer value suitable for representing
+@sc{ip}v4 addresses. These can be input either as decimal numbers or
+as @IP{}s in usual ``dotted-quad'' notation.
+
+As a convenience measure, @RADIUS{} request code names can be used
+in integer context. The following table lists currently defined
+request names with their integer codes:
+
+@multitable @columnfractions .40 .20
+@item Access-Request @tab 1
+@item Access-Accept  @tab 2 
+@item Access-Reject  @tab 3
+@item Accounting-Request  @tab 4
+@item Accounting-Response @tab 5
+@item Accounting-Status   @tab 6
+@item Password-Request    @tab 7
+@item Password-Ack        @tab 8
+@item Password-Reject     @tab 9
+@item Accounting-Message  @tab 10
+@item Access-Challenge    @tab 11
+@item Status-Server       @tab 12
+@item Status-Client       @tab 13  
+@item Ascend-Terminate-Session @tab 31
+@item Ascend-Event-Request     @tab 33
+@item Ascend-Event-Response    @tab 34
+@item Ascend-Allocate-IP       @tab 51
+@item Ascend-Release-IP        @tab 52
+@end multitable 
+
+@node Strings
+@subsubsection Character Strings
+
+@dfn{String} is an arbitrary string of characters. Any input token
+consisting of letters of Latin alphabet, decimal digits, underscores
+dashes and dots and starting with a Latin alphabet letter or
+underscores is considered a string. To input strings containing other
+letters, surround them by double quotes. The following are valid strings:
+
+@smallexample
+@group
+A-string
+"String, containing white space"
+@end group
+@end smallexample
+
+The double quote character @samp{"} must be preceeded by a backslash
+@samp{\} if it is part of a string:
+
+@smallexample
+"Always quote \" character"
+@end smallexample
+
+Generally speaking, @samp{\} is an @dfn{escape character}, that
+alters the meaning of the immediately following character. If it is
+located at the end of the line, it allows to input newline
+character to strings:
+
+@smallexample
+@group
+"This string contains a \
+newline character."
+@end group
+@end smallexample
+
+Other special escape sequences are:
+
+@table @asis
+@item \a
+Audible bell character (ASCII 7)
+@item \b
+Backspace (ASCII 8)
+@item \e
+Escape character (ASCII 27)
+@item \f
+Form feed (ASCII 12)
+@item \n
+Newline (ASCII 10)
+@item \r
+Carriage return (ASCII 13)
+@item \t
+Horizontal tab (ASCII 9)
+@item \\
+Backslash
+@item \ooo
+(@samp{o} represents an octal digit)
+A character whose ASCII value is represented by the octal number @samp{ooo}.
+@item \xHH
+@itemx \XHH
+(@samp{H} represents a hex digit)
+A character whose ASCII value is represented by the hex number @samp{HH}.
+@end table
+
+If the character following the backslash is not one of those
+specified, the backslash is ignored.
+
+@anchor{STRNUM}An important variant of @code{string} is a @dfn{numeric string},
+or @dfn{STRNUM} for short. A numeric string is a string that
+can be converted to a number, for example @code{"+2"}. This concept
+is used for type conversion between @code{integer} and @code{string}
+values.
+
+Another way to represent strings is using @dfn{here document} syntax.
+Its format is as follows:
+
+@smallexample
+@group
+<<[-]@var{delimiter}
+  @var{text}
+@var{delimiter}
+@end group
+@end smallexample
+
+@noindent
+@var{Delimiter} is any word you choose to delimit the text, @var{text}
+represent the text of the string. If @var{delimiter} is prepended by a
+dash, any leading tabulation characters will be removed from @var{text}. This
+allows for natural indentation of @samp{here document} constructs.
+
+The @samp{here document} construct is especially useful to represent strings
+containing embedded newlines, as shown in the example below:
+
+@smallexample
+@group
+print <<EOT
+usage: foo [OPTIONS] [NAME...]
+OPTIONS are:
+  -h            Print this help list.
+EOT
+@end group
+@end smallexample                                        
+
+@node Avlists
+@subsubsection Lists of A/V pairs
+
+@dfn{Avlist} are whitespace or comma-separated lists of
+@RADIUS{} attribute-value pairs. A syntax for @AVP{} is
+
+@example
+@var{name} @var{op} @var{value}
+@end example
+
+@noindent
+where @var{name} is attribute name, @var{op} is a comparison
+operator (@samp{=}, @samp{!=}, @samp{<}, @samp{<=}, @samp{>},
+@samp{>=}), and @var{value} is any valid @command{radtest} data
+or expression.
+An @AVP{} list must be enclosed in parentheses. This is an
+example of an @AVP{} list consisting of two pairs:
+
+@smallexample
+@group
+( User-Name = "test" NAS-IP-Address = 10.10.10.1 )
+@end group
+@end smallexample
+
+@noindent
+An empty pair list is represented by a pair of parentheses: @code{()}.
+
+@node Reserved Keywords
+@subsection Reserved Keywords
+
+The following keywords are reserved in @command{radtest}:
+
+@smallexample
+@group
+acct, and, auth, begin, break, case, continue, 
+do, else, end, exit, expect, getopt, if,       
+in, input, not, or, print, return, send,     
+set, shift, while    
+@end group
+@end smallexample
+
+The reserved keywords may be used as variable names, provided that
+the following requrements are met:
+
+@itemize @bullet
+@item In assignment, these names are quoted using single quotes.
+
+@smallexample
+'case' = 1
+@end smallexample
+
+@item When dereferencing, the use of curly braces is obligatory:
+
+@smallexample
+$@{case@} + 2
+@end smallexample
+@end itemize
+
+@node Variables in radtest
+@subsection Variables
+
+Variables are means of storing data values at one point of your
+program for using them in another parts of it. Variables can be
+assigned either in the program itself, or from the @command{radtest}
+command line.
+
+@menu
+* Using Variables::
+* Variable Assignments::
+* Dereferencing Variables::
+* Accessing Elements of A/V Pair Lists::
+* Assignment Options::
+* Built-in Variables::
+@end menu
+
+@node Using Variables
+@subsubsection Using Variables
+
+The name of a variable must be a sequence of letters, digits,
+underscores and dashes, but it may not begin with a digit or dash. Notice,
+that in contrast to the majority of programming languages, use of
+dashes (minus signs) is allowed in user names. This is because
+traditionally @RADIUS{} attribute names contain dashes, so
+extending this practice to variable names makes @code{radtest}
+programs more consistent. On the other hand, this means that you
+should be careful when using minus sign as a subtraction
+operator (@pxref{minus-ambiguity}). Case is significant in variable names:
+@code{a} and @code{A} are different variables. 
+
+A name of a variable may coincide with one of @code{radtest} reserved
+keywords. @xref{Reserved Keywords}, for description on how to use such
+variables.
+
+A few variables have special built-in meanings (@pxref{Built-in Variables}). Such
+variables can be assigned and accessed just as any other ones. All
+built-in variables names are entirely upper-case.
+
+Variables are never declared, they spring into existence when
+an assignment is made to them. The type of a variable is determined
+by the type of the value assigned to it. 
+
+@node Variable Assignments
+@subsubsection Variable Assignments
+
+An @dfn{assignment} stores a new value into a variable. It's syntax
+is quite straightforward:
+
+@smallexample
+@var{variable} = @var{expression}
+@end smallexample
+
+@noindent
+As a result of the assignment, the @var{expression} is evaluated and
+its value is assigned to @var{variable}. If @var{variable} did not
+exist before the assignment, it is created. Otherwise, whatever old
+value it had before the assignment is forgotten.
+
+It is important to notice that variables do @emph{not} have
+permanent types. The type of a variable is the type of whatever
+value it currently holds. For example:
+
+@smallexample
+@group
+foo = 1
+print $foo @result{} 1
+foo = "bar"
+print $foo @result{} bar
+foo = ( User-Name = "antonius" NAS-IP-Address = 127.0.0.1 )
+print $foo @result{} ( User-Name = "antonius" NAS-IP-Address = 127.0.0.1 )
+@end group
+@end smallexample
+
+Another important point is that in @command{radtest}, assignment is
+not an expression, as it is in many other programming languages. So
+@code{C} programmers should resist temptation to use assignments in
+expressions. The following is @emph{not} correct:
+
+@smallexample
+x = y = 1
+@end smallexample
+
+Finally, if the variable name coincides with one of @command{radtest}
+keywords, it must be enclosed in single quotes:
+
+@smallexample
+'case' = 1
+@end smallexample
+
+@node Dereferencing Variables
+@subsubsection Dereferencing Variables
+
+@dfn{Dereferencing} a variable means accessing its value. The
+simplest form of dereferencing is by prepending a dollar sign
+to the variable name:
+
+@smallexample
+@group
+foo = 1
+print foo @result{} foo
+print $foo @result{} 1
+@end group
+@end smallexample
+
+@noindent
+Notice, that in the example above, the first @code{print} statement
+understands @code{foo} as a literal string, whereas the second one
+prints the value of the variable.
+
+Dereferencing an undefined variable produces error message:
+
+@smallexample
+print $x @error{} variable `x' used before definition
+@end smallexample
+
+Optionally, the variable name may be surrounded by curly braces.
+Both @code{$foo} and @code{$@{foo@}} are equivalent. The use of
+the latter form is obligatory only when the variable name coincides
+with one of the reserved keywords (@pxref{Reserved Keywords}).
+@anchor{minus-ambiguity}It also can be used to resolve ambiguity between using dash as
+a part of user name and as a subtraction operator:
+
+@smallexample
+@group
+long-name = 2
+$long-name @result{} 2
+$long-name-1 @error{} variable `long-name-1' used before definition
+$@{long-name@}-1 @result{} 1
+$long-name - 1 @result{} 1
+@end group
+@end smallexample
+
+We recommend to always surround @samp{-} with whitespace when it is
+used as arithmetic operator.
+
+The @code{$@{@}} notation also permits some operations similar to
+shell variable substitution.
+
+@table @asis
+@item $@{variable:-text@}
+Use default values. If @var{variable} is unset, return @var{text},
+otherwise return the value of the @var{variable}.
+
+@smallexample
+@group
+$x @error{} variable `x' used before definition
+$@{x:-1@} @result{} 1
+x = 2
+$@{x:-1@} @result{} 2
+@end group
+@end smallexample
+
+@item $@{variable:=text@}
+Assign default values. If @var{variable} is unset, @var{text} is
+assigned to it. The expression always returns the value of the
+variable.
+
+@smallexample
+@group
+$x @error{} variable `x' used before definition
+$@{x:=1@} @result{} 1
+$x @result{} 1
+@end group
+@end smallexample
+
+@item $@{variable:?text@}
+Display error if unset. If @var{variable} is unset, @var{text} is
+written to the standard error (if @var{text} is empty, the default
+diagnostic message is used) and further execution of the program is
+aborted. Otherwise, the value of @var{variable}
+is returned. 
+
+@smallexample
+@group
+$x @error{} variable `x' used before definition
+$@{x:?@} @error{} x: variable unset
+$@{x:?foobar@} @error{} foobar
+@end group
+@end smallexample
+
+@item $@{variable::text@}
+Prompt for the value if unset. If @var{variable} is unset,
+@command{radtest} prints @var{text} (or a default message, if it
+is empty), reads the standard input up to the newline character
+and returns the value read. Otherwise, the value of the variable
+is returned. This notation provides a convenient way for asking
+user to supply default values.
+
+@smallexample
+@group
+$@{x::@} @print{} (<teletype>:1)x?
+$@{x::Enter value of x: @} @print{} Enter value of x: 
+@end group
+@end smallexample
+
+@item $@{variable:&text@}
+Prompt for the value with echo turned off if unset. This is similar
+to the @code{$@{variable::text@}}, with the exception that the input
+value will not be echoed on the screen. This notation provides a
+convenient way for asking user to supply default values for variables
+(such as passwords, shared secrets, etc.) while preventing them from
+being compromised. 
+
+@end table
+
+@node Accessing Elements of A/V Pair Lists
+@subsubsection Accessing Elements of A/V Pair Lists
+
+Elements of an @code{avlist} are accessed as if it were an array,
+i.e.:
+
+@smallexample
+$@var{variable} [ @var{attribute-name} ]
+@end smallexample
+
+If the attribute @var{attribute-name} is of @code{string} data type
+and @var{variable} may contain more than one pair with this attribute,
+adding an asterisk after @var{attribute-name} returns concatenated
+values of all such pairs:
+
+@smallexample
+$@var{variable} [ @var{attribute-name} * ]
+@end smallexample
+
+Examples:
+
+@smallexample
+@group
+x = (NAS-Port-Id = 127.0.0.1 \
+     Reply-Message = "a long"
+     Reply-Message = " string"
+
+$x[NAS-Port-Id] @result{} 127.0.0.1
+$x[Reply-Message] @result{} "a long"
+$x[Reply-Message*] @result{} "a long string"
+@end group
+@end smallexample
+
+@FIXME{How to get @var{n}th instance of an attribute? What gets
+returned if there is no such attribute in the list?}
+
+@node Assignment Options
+@subsubsection Assignment Options
+
+You can set any @command{radtest} variable from the command line.
+There are two ways of doing so.
+
+First, you can use @dfn{variable assignment option} @option{--assign}
+(or @option{-a}). Its syntax is:
+
+@smallexample
+@group
+--assign @var{variable}=@var{text}
+-a @var{variable}=@var{text}
+@end group
+@end smallexample
+
+@noindent
+For example:
+
+@smallexample
+radtest -a foobar=5
+@end smallexample
+
+Another way is useful when you load a @code{radtest} program by
+@option{--file} or @option{-f}. This second way consists in including
+a variable assignment in the form
+
+@smallexample
+@var{variable}=@var{text}
+@end smallexample
+
+@noindent
+in the command line after the script name. For example:
+
+@smallexample
+radtest -f myprog.rad foo=5 addr=127.0.0.1
+@end smallexample
+
+@noindent
+This method is especially useful for executable scripts that are
+run using @code{#!} shell magic. Consider a simple script:
+
+@smallexample
+@group
+#! /usr/local/bin/radtest -f
+print $addr
+@end group
+@end smallexample
+
+@noindent
+The value of @var{addr} can be given to the script from the command
+line as in the example below:
+
+@smallexample
+myprog.rad addr=127.0.0.1
+@end smallexample
+
+@node Built-in Variables
+@subsubsection Built-in Variables
+
+The following variables are predefined:
+
+@table @var
+@item _
+(an underscore character)
+
+Contains the result of last evaluated expression.
+
+@item REPLY_CODE
+Contains the last reply code received from the @RADIUS{} server
+(@code{integer}).
+
+@item REPLY
+Contains the @AVP{}s lastly received from the @RADIUS{} server
+(@code{avlist}).
+
+@item SOURCEIP
+Contains the source @IP{} of the @RADIUS{} client (@code{ipaddr}).
+By default, it equals the @IP{} set via @code{source_ip} statement
+in your @file{client.conf} file (@pxref{client.conf}).
+
+@item INPUT
+The value of the input read by @code{input} statement
+(@pxref{Built-in Primitives,input}).
+
+@item OPTVAR
+The option obtained by the recent call to @code{getopt}
+(@pxref{Built-in Primitives,getopt}).
+
+@item OPTARG
+Argument to the option obtained by the recent call to @code{getopt}.
+
+@item OPTIND
+Index of the next command line argument to be processed by
+@code{getopt}. If the last call to @code{getopt} returned false,
+@code{OPTIND} contains index of the first non-optional argument
+in the command line.
+
+@end table
+
+@node Positional Parameters
+@subsection Positional Parameters
+
+Normally @command{radtest} stops parsing its command line
+when it encounters either first non-optional argument
+(i.e. the one not starting with dash), or an argument consisting
+of two dashes. The rest of the command line starting from the
+first non-optional argument forms @dfn{positional parameters}.
+These parameters are said to form the @dfn{top-level environment}.
+
+Similarly, when invoking a user-defined function (@pxref{Function
+Definitions}), arguments passed to it are said to form the
+@dfn{current environment} of the function. These arguments are
+positional parameters for this function.
+
+Positional parameters are assigned numbers starting from 1. To access
+(@dfn{dereference}) a positional parameter, the syntax @code{$@var{n}}
+is used, where @var{n} is the number of the parameter. Alternative
+forms, such as @code{$@{@var{n}@}} or @code{$@{@var{n}:-text@}},
+can also be used. These work exactly as described in
+@ref{Dereferencing Variables}).
+
+The number of positional parameters can be accessed using a special
+notation @code{$#}.
+
+Several things need to be mentioned:
+
+@itemize @bullet
+@item All top-level positional parameters have @code{string} data
+type, whereas the types of positional parameters in a function
+current environment are determined before inoking the function.
+
+@item Special notion @code{$0} returns the name of the function
+being evaluated. When used in the top-level environment, it returns
+the name of @command{radtest} program as given by @option{--file}
+(@option{-f}) option.
+
+@item Dereferencing non-existing parameter returns empty string. This
+differs from dereferencing non-existing variable, which results in
+error.
+
+@item @code{AWK} programmers should note that assignments
+(@pxref{Assignment Options}) are not included in the top level
+environment (see example below).
+@end itemize
+
+For example, suppose you run: 
+
+@smallexample
+radtest -f script.rad name foo=bar 5
+@end smallexample
+
+Then, the top-level environment of program @file{script.rad} consists
+of the following variables:
+
+@smallexample
+@group
+$0 @result{} script.rad
+$1 @result{} name
+$2 @result{} 5
+@end group
+@end smallexample
+
+@node Expressions in radtest
+@subsection Expressions
+
+An @dfn{expression} evaluates to a value, which can be printed,
+assigned to a variable, used in a conditional statement or passed
+to a function. As in other languages, expressions in @command{radtest}
+include literals, variable and positional parameter dereferences,
+function calls and combinations of these with various operators.
+
+@menu
+* Arithmetic Ops::
+* String Ops::
+* A/V List Ops::
+* Comparison Ops::
+* Boolean Ops::
+* Conversion Between Data Types::
+* Function Calls::
+* Precedence::
+@end menu
+
+@node Arithmetic Ops
+@subsubsection Arithmetic Operations
+
+@command{Radtest} provides the common arithmetic operators, which
+follow normal precedence rules (@pxref{Precedence}), and work as
+you would expect them to. The only notable exception is subtraction
+operator (minus) which can be used as part of a variable or attribute
+name, and therefore expressions like @code{$x-3} are ambiguous. This
+expression can be thought of either as a dereference of the variable
+@code{x-3} (@pxref{Dereferencing Variables}), or as subtraction of the value
+@code{3} from the value of the variable @code{x}. @command{Radtest}
+always resolves this ambiguityin the favor of variable dereference.
+Therefore we advise you to always surround minus sign by whitespace,
+if it is used as a subtraction operator. So, instead of @code{$x-3},
+write @code{$x - 3}. For other methods of solving this ambiguity,
+@xref{minus-ambiguity}.
+
+This table lists the arithmetic operators in order from highest
+precedence to lowest:
+
+@table @code
+@item - @var{x}
+Negation.
+
+@item + @var{x}
+Unary plus. This is equivalent to @code{@var{x}}. @FIXME{Should this
+imply converting @var{x} to integer?}
+
+@item @var{x} * @var{y}
+Multiplication.
+
+@item @var{x} / @var{y}
+Division.
+
+@item @var{x} % @var{y}
+Remainder.
+
+@item @var{x} + @var{y}
+Addition.
+
+@item @var{x} - @var{y}
+Subtraction.
+
+@end table
+
+Unary plus and minus have the same precedence, the multiplication,
+division and remainder all have the same precedence, and addition and
+subtraction have the same precedence.
+
+If @var{x} and @var{y} are of different data types, their
+values are first coerced to a common data type, selected
+using a set of rules (@pxref{Conversion Between Data Types}).
+
+@node String Ops
+@subsubsection String Operations
+
+There is only one string operation: concatenation. It is represented
+by plus sign, e.g.:
+
+@smallexample
+"string" + "ent" @result{} "stringent"
+@end smallexample
+
+@node A/V List Ops
+@subsubsection Operations on A/V Lists
+@UNREVISED{}
+
+The following operations are defined on A/V lists:
+
+@table @code
+@item @var{x} + @var{y}
+@dfn{Addition}. The @AVP{}s from @var{y} are added to @var{x}, honoring
+the respective pairs additivity (@pxref{Attributes,,additivity}).
+For example:
+
+@smallexample
+( User-Name = "foo" ) + ( Password = "bar" )
+@result{} ( User-Name = "foo" Password = "bar" )
+
+( User-Name = "foo" Service-Type = Login-User ) + \
+ ( Service-Type = Framed-User Password = "bar" )
+@result{} ( User-Name = "foo" \
+          Service-Type = Framed-User \
+          Password = "bar" )
+@end smallexample
+
+@item @var{x} - @var{y}
+@dfn{Subtraction}. The result of this operation is an A/V list
+consisting of pairs from @var{x}, which are not found in @var{y}.
+
+@smallexample
+( User-Name = "foo" Service-Type = Login-User ) - \
+( Service-Type = Framed-User )
+@result{} ( User-Name = "foo" )
+@end smallexample
+
+Notice, that only attribute name matters, its value is
+ignored.@FIXME{Is this correct? Is there a better way to put it?
+should we provide an operation that whould compare both attribute
+number and its value?}
+
+@item @var{x} % @var{y}
+@dfn{Intersection}. The result of this operation is an @AVP{} list
+consisting of pairs from @var{x} which are also present in @var{y}.
+
+@smallexample
+( User-Name = "foo" Service-Type = Login-User ) - \
+( Service-Type = Framed-User )
+@result{} ( Service-Type = Login-User )
+@end smallexample
+
+@FIXME{Same as above.}
+@end table
+
+@node Comparison Ops
+@subsubsection Comparison Operations
+
+@dfn{Comparison expressions} compare operands for relationships
+such as equality. They return boolean values, i.e. @code{true}
+or @code{false}. The comparison operations are nonassociative,
+i.e. they cannot be used together as in:
+
+@smallexample
+# @emph{Wrong!}
+1 < $x < 2
+@end smallexample
+
+Use boolean operations (@pxref{Boolean Ops}) to group comparisons together.
+
+Comparison operations can only be used in conditional expressions.
+
+This table lists all comparison operators in order from highest
+precedence to lowest (notice, however, the comment after it):
+
+@table @code
+@item @var{x} = @var{y}
+True if @var{x} is equal to @var{y}. @code{C} and @code{AWK}
+programmers, please note @emph{single} equal sign!
+
+@item @var{x} != @var{y}
+True if @var{x} is not equal to @var{y}.
+
+@item @var{x} < @var{y}
+True if @var{x} is less than @var{y}.
+
+@item @var{x} <= @var{y}
+True if @var{x} is less than or equal to @var{y}.
+
+@item @var{x} > @var{y}
+True if @var{x} is greater than @var{y}.
+
+@item @var{x} >= @var{y}
+True if @var{x} is greater than or equal to @var{y}.
+@end table
+
+Operators @code{=} and @code{!=} have equal precedence. Operators
+@code{<}, @code{<=}, @code{>}, @code{>=} have equal precedence. 
+
+Most operators are defined for all @command{radtest} data types.
+However, only @code{=} and @code{!=} are defined for @code{avlist}s.
+Using any other comparison operator with @code{avlist}s produces
+error.
+
+If @var{x} and @var{y} are of different data types, their
+values are first coerced to a common data type, selected
+using a set of rules (@pxref{Conversion Between Data Types}).
+
+@node Boolean Ops
+@subsubsection Boolean Operations
+
+A @dfn{boolean operation} is a combination of comparison expressions.
+Boolean operations can only be used in conditional expressions.
+
+This table lists all comparison operators in order from highest
+precedence to lowest.
+
+@table @code
+@item not @var{x}
+@itemx ! @var{x}
+True if @var{x} is false.
+
+@item @var{x} and @var{y}
+True if both @var{x} and @var{y} are true. The subexpression @var{y}
+is evaluated only if @var{x} is true.
+
+@item @var{x} or @var{y}
+True if at least one of @var{x} or @var{y} is true. The subexpression @var{y}
+is evaluated only if @var{x} is false.
+@end table
+
+@node Conversion Between Data Types
+@subsubsection Conversion Between Data Types
+@UNREVISED{}
+
+The unary negation operand is always converted to @code{integer} type:
+
+@smallexample
+@group
+-(1 + 1)  @result{} -2
+-(127.0.0.1 + 2) @result{} -2130706435
+- ("1" + "1") @result{} -11
+- "text" @error{} cannot convert string to integer
+@end group
+@end smallexample
+
+@noindent
+The unary @code{not} operand is converted using the following rules:
+
+@enumerate 1
+@item If the operand is @code{integer}, no conversion is performed.
+@item If the operand is @code{STRNUM} (@pxref{STRNUM}) or
+@code{ipaddr}, it is converted to integer.
+@item If the operand is @code{string} (but is not @code{STRNUM}), the
+result of @code{not} is @code{true} only if the operand is an empty
+string.
+@item If the operand is @code{avl}, the result of @code{not} is
+@code{true} if the list is empty.
+@end enumerate
+
+Examples:
+
+@smallexample
+@group
+not 0 @result{} 1
+not 10 @result{} 0
+not "23" @result{} 0
+not "0" @result{} 1
+not "text" @result{} 0
+not "" @result{} 1
+not 127.0.0.1 @result{} 0
+not 0.0.0.0 @result{} 1
+@end group
+@end smallexample
+
+When operands of two different data types are used in a binary
+operation, one of the operands is converted (@dfn{cast}) to another
+operand's type according to the following rules:
+
+@enumerate 1
+@item If one of the operands is literal, @command{radtest} attemtps
+to convert another operand to the literal data type. If this attempt
+fails, it goes on to rule 2.
+@item If one of operands is @code{STRNUM} (@pxref{STRNUM}) and another is of numeric
+data type (i.e. either @code{integer} or @code{ipaddr}), the latter is converted
+to string representation.
+@item If one of the operands is @code{ipaddr} and another is
+@code{integer}, the latter is converted to @code{ipaddr}.
+@item Otherwise, if one of the operands is string, the second operand
+is also converted to string.
+@item Otherwise, the two operands are incompatible. @command{Radtest}
+prints appropriate diagnostics and aborts execution of the current
+statement.
+@end enumerate
+
+@node Function Calls
+@subsubsection Function Calls
+
+A @dfn{function} is a name for a particular sequence of statements. It
+is defined using special definition syntax (@pxref{Function
+Definitions}). Normally a function return some value. The way to
+use this value in an expression is with a @dfn{function call}
+expression, which consists of the function name followed by a
+comma-separated list of @dfn{arguments} in
+parentheses. The arguments are expressions which provide values for
+the function call environment (@pxref{Positional Parameters}. When
+there is more than one argument, they are separated by commas.
+@FIXME{Actually, commas in the argument list are optional. At least,
+now...} If there are no arguments, write just @samp{()} after the
+function name. Here are some examples:
+
+@smallexample
+@group
+foo()             no arguments
+bar(1)            one argument
+bar(1, "string")  two arguments
+@end group
+@end smallexample
+
+@node Precedence
+@subsubsection Operator Precedence (How Operators Nest)
+
+@dfn{Operator precedence} determines the order of executing operators,
+when different operators appear close by in one expression.  
+For example, @code{*} has higher precedence than @code{+}; thus,
+@code{a + b * c} means to multiply @code{b} and @code{c}, and then add
+@code{a} to the product.
+
+You can overrule the precedence of the operators by using
+parentheses.  You can think of the precedence rules as saying where
+the parentheses are assumed to be if you do not write parentheses
+yourself. Thus the above example is equivalent to @code{a + (b * c)}.
+
+When operators of equal precedence are used together, the leftmost
+operator groups first. Thus, @code{a - b + c} groups as
+@code{(a - b) + c}.
+
+This table lists @code{radtest} operators in order from highest
+precedence to the lowest:
+
+@table @code
+@item $
+Dereference.
+
+@item (@dots{})
+Grouping.
+
+@item + - not !
+Unary plus, minus. Unary boolean negation.
+
+@item * / %
+Multiplication, division, modulus.
+
+@item + -
+Addition, subtraction.
+
+@item < <= = != > >=
+Relational operators.
+
+@item and
+Logical @samp{and}.
+
+@item or
+Logical @samp{or}.
+@end table
+
+@node Function Definitions
+@subsection Function Definitions
+
+A @dfn{function} is a name for a particular sequence of statements.
+The syntax for the function definition is:
+
+@smallexample
+@var{name}
+begin
+  @dots{}
+end
+@end smallexample
+
+@noindent
+where @var{name} is function name and @samp{@dots{}} represent a
+non-empty list of valid @command{radtest} statements.
+
+Notice that newline characters are obligatory after @var{name},
+@code{begin} and before the final @code{end} keyword.
+
+If the function accepts arguments, these can be referenced in the
+function body using @code{$@var{n}} notation (@pxref{Positional
+Parameters}). To return the value from the function @code{return}
+statement is used.
+
+For example, here is a function that computes sum of the squares
+of its two arguments:
+
+@smallexample
+@group
+hypo
+begin
+        return $1*$1 + $2*$2
+end
+@end group
+@end smallexample   
+
+@node Interacting with Radius Servers
+@subsection Interacting with Radius Servers
+
+@command{Radtest} provides two commands for interaction with remote
+@RADIUS{} servers.
+
+Command @code{send} sends request to the server specified in
+@file{raddb/client.conf}. Its syntax is:
+
+@smallexample
+send [@var{flags}] @var{port-type} @var{code} [@var{expr-or-pair-list}]
+@end smallexample
+
+Optional @var{flags} can be used for fine-tuning the internals of
+@code{send}. You will seldom need to use these, unless you are
+developing GNU Radius. @xref{Built-in Primitives,send}, for the detailed description of these.
+
+The first obligatory argument, @var{port-type}, specifies which
+@RADIUS{} port to send the request to. Specifying @samp{auth} will
+send the request to the authentication port (@pxref{client.conf,auth-port});
+specifying @samp{acct} will send it to the accounting port
+(@pxref{client.conf,acct-port}).
+
+Argument @var{code} gives the request code. It is either a number or
+a symbolic request code name (@pxref{Numeric Values}).
+
+The last argument, @var{expr-or-pair-list} is either a
+@command{radtest} expression evaluating to @code{avlist} or a list
+of @AVP{}s. These pairs will be included in the request.
+
+Here are several examples:
+
+@smallexample
+# Send a @code{Status-Server} request without attributes.
+send auth Status-Server
+
+# Send an @code{Access-Request} with two attributes
+send auth Access-Request User-Name = "foo" User-Password = "bar"
+
+# Send an Accounting-Request, taking attributes from the variable
+# @var{attr}
+send acct Accounting-Request $attr
+@end smallexample
+
+Command @code{send} stores the reply code into the variable
+@code{REPLY_CODE} and reply pairs into the variable @code{REPLY}
+(@pxref{Built-in Variables}).
+@FIXME{How do I know if @code{send} has failed?}
+
+Another primitive is @code{expect}. @code{Expect} takes at most two
+arguments: a request code (either numeric or symbolic, (@pxref{Numeric Values})) and optional
+list of @AVP{}s (similar to @code{send} @var{expr-or-pair-list}
+argument). @code{Expect} check if these match current
+@code{REPLY_CODE} and @code{REPLY} values and if so, prints
+the string @samp{PASS}. Otherwise, it prints @samp{FAIL}. This
+command is designed primarily for use in GNU Radius testsuite.
+
+@code{Expect} is usually used right after @code{send}, as shown
+in the example below:
+
+@smallexample
+@group
+send auth Access-Request User-Name = "foo" User-Password = "bar"
+expect Access-Accept Reply-Message = "Access allowed"
+@end group
+@end smallexample
+
+@node Conditional Statements
+@subsection Conditional Statements
+@UNREVISED{}
+
+@command{Radtest} provides two kinds of conditional statements:
+@code{if} and @code{case}.
+
+@subheading If statement
+
+An @code{if} statement in its simplest form is:
+
+@smallexample
+if @var{cond} @var{stmt}
+@end smallexample
+
+@noindent
+where @var{cond} is a conditional expression and @var{stmt} is a
+valid @command{radtest} statement. Optional newline may be inserted
+between @var{cond} @var{stmt}.
+
+In this form, @code{if} evaluates the condition and if it yields true,
+executes the statement. For example:
+
+@smallexample
+@group
+if $REPLY[NAS-IP-Address] = 127.0.0.1
+   print "Request from localhost"
+@end group
+@end smallexample
+
+More complex form of this statement allows to select between the two
+statements:
+
+@smallexample
+@group
+if @var{cond} @var{stmt-1} else @var{stmt-2} 
+@end group
+@end smallexample
+
+@noindent
+Here, @var{stmt-1} will be executed if @var{cond} evaluates to true,
+and @var{stmt-2} will be executed if @var{cond} evaluates to false.
+
+Notice, that an optional newline is allowed between @var{cond} and
+@var{stmt-1} and right after @code{else} keyword. However, a newline
+before @code{else} constitutes an error.
+
+If several statements should be executed in a branch of the @code{if}
+statement, use compound statement as in the example below:
+
+@smallexample
+@group
+if $REPLY_CODE != Accounting-Response
+begin
+  print "Accounting failed.\n"
+  exit 1        
+end else
+  print "Accounting succeeded.\n"
+@end group
+@end smallexample
+
+@code{If} statements can be nested to any depth.
+
+@subheading Case statement
+
+@code{Case} statement allows select a statement based on whether
+a @code{string} expression matches given regular expression. The
+syntax of @code{case} statement is:
+
+@smallexample
+@group
+case @var{expr} in
+@var{expr-1} ) @var{stmt-1}
+@var{expr-2} ) @var{stmt-2}
+@dots{}
+@var{expr-n} ) @var{stmt-n}
+end
+@end group
+@end smallexample
+
+@noindent
+where @var{expr} is a control expression, @var{expr-1}, @var{expr-2}
+etc. are expressions evaluating to @emph{extended} POSIX regular
+expressions (for the detailed description of these
+@pxref{Top,,Regular Expression Library,regex,Regular Expression
+Library}).
+
+@code{Case} statement first evaluates @var{expr} and converts it to
+@code{string} data type. Then it evaluates each @var{expr-n} in turn
+and tests if the resulting regular expression matches @var{expr}. If
+so, the statement @var{stmt-n} is executed and the execution of
+@code{case} statement finishes.
+
+The following example illustrates the concept:
+
+@smallexample
+@group
+case $COMMAND in
+"auth.*")       authenticate($LIST, no)
+"acct")         authenticate($LIST, yes)
+".*")           begin
+                  print "Unknown command."
+                  exit 1
+                end
+end
+@end group
+@end smallexample
+
+@code{Bourne shell} programmers should notice that:
+
+@itemize @bullet
+@item @code{Case} statement ends with @code{end}, not @code{esac}.
+@item There is no need to put @code{;;} at the end of each branch,
+@item Boolean operations are not allowed in @var{expr-n}.
+@end itemize
+
+@node Loops
+@subsection Loops
+@UNREVISED
+
+Two looping constructs are provided: @code{while} and
+@code{do...while}.
+
+@subheading While loop
+
+The syntax of a while loop is:
+
+@smallexample
+@group
+while @var{cond}
+  @var{stmt}
+@end group
+@end smallexample 
+
+Newline after @var{cond} is obligatory.
+
+@subheading Do...while loop
+
+@smallexample
+@group
+do
+  @var{stmt}
+while @var{cond}
+@end group
+@end smallexample  
+
+As usual @code{do...while} loop differs from its @code{while}
+counterpart in that its @var{stmt} is executed at least once.
+
+The looping constructs can be nested to any depth.
+
+Two special statements are provided for branching within loop
+constructs. These are @code{break} and @code{continue}.
+
+@code{Break} statement stops the execution of the current
+loop statement and passes control to the statement immediately
+following it
+
+@smallexample
+@group
+while $x < 10
+begin
+  if $x < $y
+     break
+  @dots{}
+  x = $x + 1
+end
+print "OK\n"
+@end group
+@end smallexample
+
+@noindent
+In the example above, execution of @code{break} statement passes
+control to @code{print} statement.
+
+@code{Break} may also take an argument: a literal number representing
+the number of nested loop statements to break from. For example, the
+@code{break} statement in the sample code below will exit from the
+outermost @code{while}:
+
+@smallexample
+@group
+while $y < 10
+begin
+  while $x < 10
+  begin
+    if $x < $y
+       break 2
+    @dots{}
+    x = $x + 1 
+  end
+  @dots{}
+  y = $y + 1 
+end  
+print "OK\n"
+@end group
+@end smallexample
+
+@code{Continue} statement passes control to the condition of the
+current looping construct. When used with a numeric argument, the
+latter specifies the number of the nesting looping construct to
+pass control to (as with @code{break}, the innermost loop is
+considered to have number 1, so @code{continue} is equivalent
+to @code{continue 1}).
+
+@node Built-in Primitives
+@subsection Built-in Primitives
+
+@deffn {Radtest built-in} getopt @var{optstring} [@var{opt} [@var{arg} [@var{ind}]]]
+@code{Getopt} is used to break up command line options for
+subsequent parsing.
+
+The only mandatory argument, @var{optstring} is a list of short
+(one-character) options to be recognized. Each short option character
+in @var{optstring} may be followed by one colon to indicate it has a
+required argument, and by two colons to indicate it has an optional
+argument.
+@FIXME{Document starting @samp{+} and @samp{-} chars.}
+
+Each subsequent invocation of @code{getopt} processes next command
+line argument. @code{Getopt} returns true if the argument is an
+option and returns false otherwise. It stores the retrieved option
+(always with a leading dash) in the variable @var{opt} (@code{OPTVAR}
+by default). If the option has an argument, the latter is stored
+in the variable @var{arg} (@code{OPTARG} by default). Index of the
+next command line argument to be processed is preserved in the
+variable @var{ind} (@code{OPTIND} by default).
+
+The usual way of processing command line options is by invoking
+@code{getopt} in a condition expression of @code{while} loop and
+analyzing its return values within the loop. For example:
+
+@smallexample
+@group
+while getopt "hf:"
+case $OPTVAR in
+"-h")  print "Got -h option\n"
+"-f")  print "Got -f option. Argument is " $OPTARG "\n"
+".*")  begin
+          print "Unknown option: " $OPTVAR "\n"
+          exit 1
+       end
+  end
+end
+@end group
+@end smallexample
+@end deffn
+
+@deffn {Radtest statement} input [@var{expr} @var{name}]
+Evaluates @var{expr} and prints its result on standard output. Then
+reads a line from standard input and assigns it to the variable
+@var{name}.
+
+If @var{expr} is given, @var{name} must also be present.
+
+If @var{name} is not given, variable @var{INPUT} is used by default.
+@end deffn
+
+@deffn {Radtest statement} set @var{options}
+Sets @command{radtest} command line options. @var{Options} should
+be a valid @command{radtest} command line (@pxref{Invoking radtest}).
+@end deffn
+
+@deffn {Radtest statement} shift [@var{expr}]
+Shift positional parameters left by one, so that @code{$2} becomes
+@code{$1}, @code{$3} becomes @code{$2} etc. @code{$#} is decremented.
+@code{$0} is not affected.
+
+If @var{expr} is given, it is evaluated, converted to integer and
+used as shift value. Thus @code{shift 2} shifts all positional
+parameters left by 2.
+@end deffn
+
+@deffn {Radtest statement} return [@var{expr}]
+Returns from the current function (@pxref{Function Definitions}). If
+@var{expr} is present, it is evaluated and the value thus obtained
+becomes the function return value.
+
+It is an error to use @code{return} outside of a function definition.
+@end deffn
+
+@deffn {Radtest statement} break [@var{n}]
+Exit from within a loop.If @var{n} is specified, break from @var{number}
+levels. @var{n} must be >= 1. If @var{n} is greater than
+the number of enclosing loops, an error message is issued.
+
+@xref{Loops}, for the detailed discussion of the subject.
+@end deffn
+
+@deffn {Radtest statement} continue [@var{n}]
+Resume the next iteration of the enclosing loop. If @var{n}
+is specified, resume at the @var{n}th enclosing loop. @var{n} must be
+>= 1. If @var{n} is greater than the number of enclosing loops, an
+error message is issued.
+
+@xref{Loops}, for the detailed discussion of the subject.
+@end deffn
+
+@deffn {Radtest statement} exit [@var{expr}]
+Exit to the shell. If @var{expr} is specified, it is evaluated and
+used as exit code. Otherwise, 0 is returned to the shell.
+@end deffn
+
+@deffn {Radtest statement} print @var{expr-list}
+Evaluate and print expressions. @var{Expr-list} is whitespace or
+comma-separated list of expressions. Each expression is evaluated
+in turn and printed to the standard output.
+@end deffn
+
+@deffn {Radtest statement} send [@var{flags}] @var{port-type} @var{code} @var{expr-or-pair-list}
+Send a request to the @RADIUS{} server and wait for the reply. Stores
+reply code in the variable @code{REPLY_CODE} and reply @AVP{}s in
+the variable @code{REPLY} (@pxref{Interacting with Radius Servers}).
+
+@anchor{send-flags}@var{flags} are a whitespace-separated list of variable
+assignments. Following variables are understood:
+
+@table @code
+@item repeat=@var{n}
+Unconditionally resend the request @var{n} times.
+
+@item id=@var{n}
+Specify the request ID.
+
+@item keepauth=1
+Do not alter request authenticator when resending the request.
+@end table
+
+@table @var
+@item port-type
+Specifies which port to use when sending the request. Use @samp{auth}
+to send the request to the authentication port
+(@pxref{client.conf,auth-port}), and @samp{acct} to send it to the
+accounting port (@pxref{client.conf,acct-port}).
+
+@item code
+@RADIUS{} request code. Either numeric or symbolic (@pxref{Numeric
+Values}).
+
+@item expr-or-pair-list
+Specifies the @AVP{}s to include in the request. This argument is
+either an expression evaluating to @code{avlist}, or an immediate
+@code{avlist} (@pxref{Avlists}). In the latter case, the parentheses
+around the list are optional.
+@end table
+
+@end deffn
+
+@deffn {Radtest statement} expect @var{code} [@var{expr-or-pair-list}]
+Test if @code{REPLY_CODE} matches @var{code} and, optionally, if
+@code{REPLY} matches @var{expr-or-pair-list}. If so, print the
+string @samp{PASS}, otherwise print @samp{FAIL}.
+
+@xref{Interacting with Radius Servers}, for the detailed discussion of
+this statement.
+@end deffn
+
+@node Sample Radtest Program
+@subsection Sample Radtest Program
+
+As an example, let's consider @command{radauth} program
+(@pxref{Radauth}). Its main purpose is to send authentication
+request to the remote server, analyze its reply and if it is
+positive, send an appropriate accounting record, thereby initiating
+user's session. Optionally, the script should also be able to
+send a lone accounting record.
+
+In the discussion below, we will show and explain subsequent
+parts of the script text. For the ease of explanation, each line
+of program text will be prepended by its ordinal line number.
+
+@subheading Parsing command line options
+
+The script begins as follows:
+
+@smallexample
+@group
+  1 #! /usr/bin/radtest -f
+  2 
+  3 while getopt "n:s:P:hv"
+  4 begin
+  5   case $OPTVAR in
+  6   "-n") NASIP = $OPTARG 
+  7   "-s") SID = $OPTARG 
+  8   "-P") PID = $OPTARG 
+  9   "-v") set -v
+@end group
+@end smallexample
+
+@table @asis
+@item 1
+It is a @dfn{pragmatic comment} informing shell that it
+should run @command{radtest} in order to interpret the program.
+
+@item 3
+This line starts option processing loop. @code{Getopt}
+(@pxref{Built-in Primitives,getopt}) in line 3 analyzes each
+subsequent command line argument and if it is an option checks
+whether it matches one of the option letters defined in its
+first argument. The option letter will be returned in @code{OPTVAR}
+variable, its argument (if any) -- in @code{OPTARG} variable.
+
+@item 4 -- 8
+@code{OPTARG} value is analyzed using @code{case} statement. Lines
+6 -- 8 preserve @code{OPTARG} values in appropriate variables for
+later use. @code{NASIP} will be used as the value of
+@attr{NAS-IP-Address} attribute, @attr{SID} is the session id
+(@attr{Acct-Session-Id} attribute), and @attr{PID} is the port
+number (for @attr{NAS-Port-Id} attribute.
+
+@item 9
+This line sets @option{-v} option to the @command{radtest}
+interpreter (@pxref{Invoking radtest}). 
+@end table
+
+@noindent
+The next piece of code handles @option{-h} and erroneous options:
+
+@smallexample
+@group  
+ 10   "-h") begin
+ 11           print <<-EOT
+ 12            usage: radauth [OPTIONS] [COMMAND] login [password]
+ 13            Options are:
+ 14            -v         Print verbose descriptions of what is being done
+ 15            -n IP      Set NAS IP address
+ 16            -s SID     Set session ID
+ 17            -P PORT    Set NAS port number
+ 18            COMMAND is one of:
+ 19            auth       Send only Access-Request (default)
+ 20            acct       Send Access-Request. If successfull, send
+ 21                       accounting start request
+ 22            start      Send accounting start request
+ 23            stop       Send accounting stop request
+ 24            EOT
+ 25           exit 0
+ 26         end
+ 27   ".*") begin
+ 28           print "Unknown option: " $OPTVAR "\n"
+ 29           exit 1
+ 30         end
+ 31   end
+ 32 end
+@end group
+@end smallexample
+
+@table @asis 
+@item 10 -- 26
+Print short description and exit, if the program is given @option{-h}.
+Notice that @samp{here document} syntax is used to print the text
+(@xref{Strings}, for its description). The leading whitespace in
+lines 12 to 24 is composed of tabulation characters (ASCII 9), not
+usual space characters (ASCII 32), as required by @samp{<<-}
+construct.
+
+@item 27 -- 30
+These lines handle unrecognized options.
+
+@item 31
+Closes case statement started on line 5
+ 
+@item 32
+Closes compound statement started on line 4
+@end table
+
+@subheading Checking Command Line Consistency
+
+@smallexample
+@group
+ 33 
+ 34 shift $@{OPTIND@}-1
+ 35 
+ 36 if $# > 3
+ 37 begin
+ 38         print "Wrong number of arguments."
+ 39         print "Try radauth -h for more info"
+ 40         exit 1
+ 41 end
+@end group
+@end smallexample
+
+@table @asis
+@item 34
+@code{OPTIND} keeps the ordinal number of the first non-optional
+argument. This line shifts off all the options processed by
+@code{getopt}, so that the first non-optional argument may be
+addressed by @code{$1} notation. Notice use of curly braces to
+solve @dfn{minus ambiguity} (@pxref{minus-ambiguity}).
+
+@item 36 -- 41
+At this point we may have at most three arguments:
+command, user name, and password. If there are more, display
+the diagnostic message and exit the program.
+@end table 
+
+@noindent
+Next piece of code: 
+
+@smallexample
+@group
+ 42
+ 43 case $1 in
+ 44 "auth|acct|start|stop") begin
+ 45                           COMMAND=$1
+ 46                           shift 1
+ 47                         end
+ 48 ".*")   COMMAND="auth"
+ 49 end
+ 50 
+ 51 LOGIN=$@{1:?User name is not specified. Try radauth -h for more info.@}
+ 52 
+ 53 if $@{NASIP:-@} = ""
+ 54         NASIP=$SOURCEIP
+ 55 
+ 56 LIST = ( User-Name = $LOGIN NAS-IP-Address = $NASIP )
+@end group
+@end smallexample
+
+@table @asis
+@item 43 -- 48
+Check if a command is given. If so, store command name in the variable
+@code{COMMAND} and shift arguments by one, so login becomes argument
+@code{$1}. Otherwise, assume @samp{auth} command.
+
+@item 51
+If the user login name is supplied, store it into @code{LOGIN}
+variable. Otherwise, print diagnostic message and exit.
+
+@item 53 -- 54
+Provide a default value for @code{NASIP} variable from the built-in
+variable @code{SOURCEIP} (@pxref{Built-in Variables})
+
+@item 56
+The variable @code{LIST} will hold the list of A/V pairs to be sent
+to the server. This line initializes it with a list of two @AVP{}s:
+@attr{User-Name} and @attr{NAS-IP-Address}.
+@end table
+
+@subheading Defining Accounting Function
+
+Accounting function will be used to send accounting requests to
+the server. It is supposed to take a single argument: an @code{avlist}
+of @AVP{}s to be sent to the server.
+
+@smallexample
+@group 
+ 57 
+ 58 'acct'
+ 59 begin
+ 60   if $@{SID:-@} = ""
+ 61     input "Enter session ID: " SID
+ 62   if $@{PID:-@} = ""
+ 63     input "Enter NAS port ID: " PID
+ 64   send acct Accounting-Request $1 + \
+            (Acct-Session-Id = $SID NAS-Port-Id = $PID)
+@end group
+@end smallexample
+
+@table @asis
+@item 58 -- 59
+These lines start the function definition. Notice quoting of the
+function name (@samp{acct}): it is necessary because it coincides
+with a reserved keyword (@pxref{Reserved Keywords}).
+
+@item 60 -- 61
+If the value of @code{SID} (session ID) is not supplied, prompt the
+user to input it.
+
+@item 62 -- 63
+If the value of @code{PID} (port ID) is not supplied, prompt the
+user to input it.
+
+@item 64
+Send accounting request. The list of @AVP{}s to send is formed by
+concatenating @attr{Acct-Session-Id} and @attr{NAS-Port-Id} attributes
+to the function's first argument.
+@end table
+
+@noindent
+The final part of @code{acct} function analyzes the reply from the
+server:
+
+@smallexample
+@group            
+ 65   if $REPLY_CODE != Accounting-Response
+ 66   begin
+ 67     print "Accounting failed.\n"
+ 68     exit 1  
+ 69   end
+ 70   print "Accounting OK.\n"
+ 71   exit 0
+ 72 end
+ 73
+@end group
+@end smallexample
+
+@noindent
+Notice, that @code{acct} never returns. Instead it exits with an
+error code indicating success or failure.
+
+@subheading Defining Authentication Function
+
+The purpose of the authentication function @code{auth} is
+to send an @code{Access-Request} to the server and perform
+some actions based on its reply. 
+
+The function will take three arguments:
+
+@table @code
+@item $1
+The list of @AVP{}s to include in the request.
+
+@item $2
+User password.
+
+@item $3
+This argument indicates whether accounting request must be sent
+after successful authentication. String @samp{yes} means to send
+the accounting request, @samp{no} means not to send it.
+@end table
+
+The function is not expected to return. Instead it should exit
+to the shell with an appropriate error code.
+
+@smallexample
+@group 
+ 74 'auth'
+ 75 begin
+ 76   send auth Access-Request $1 + (User-Password = $2)
+@end group
+@end smallexample
+
+@table @asis
+@item 74 -- 75
+Begin the function definition. Notice quoting of the
+function name (@samp{auth}): it is necessary because it coincides
+with a reserved keyword (@pxref{Reserved Keywords}).
+
+@item 76
+Send the initial authentication request. The list of @AVP{}s is
+formed by appending @attr{User-Password} pair to the list given
+by the first argument to the function.
+@end table
+
+@noindent
+The rest of the function analyzes the reply from the server and takes
+appropriate actions. Notice that if the server replies with an
+@code{Access-Challenge} packet, we will have to send subsequent
+authentication requests, so this piece of code is enclosed within
+a @code{while} loop.
+
+First, the function handles @code{Access-Accept} and
+@code{Access-Reject} replies:
+
+@smallexample
+@group 
+ 77   while 1
+ 78   begin
+ 79     if $REPLY_CODE = Access-Accept
+ 80     begin
+ 81       print "Authentication passed. " + $REPLY[Reply-Message*] + "\n"
+ 82       if $@{3:-no@} = no
+ 83         exit 0
+ 84       'acct'($1 + ( Acct-Status-Type = Start ))
+ 85     end else if $REPLY_CODE = Access-Reject
+ 86     begin
+ 87       print "Authentication failed. " + $REPLY[Reply-Message*] + "\n"
+ 88       break
+@end group
+@end smallexample
+
+@table @asis
+@item 77
+Begin an ``endless'' @code{while} loop. It will eventually be exited
+either using @code{break}, or using @code{exit} (see below).
+
+@item 79 -- 84
+Hanlde @code{Access-Accept} replies:
+
+@item 81
+Print the reply message. Notice the use of @samp{*} to print all
+the instances of @attr{Reply-Message} attribute from the reply
+packet (@pxref{Accessing Elements of A/V Pair Lists}).
+
+@item 82 -- 83
+If the third argument is missing or is a string @samp{no}, exit
+indicating success (@pxref{Dereferencing Variables}). 
+
+@item 84
+Otherwise, call @code{acct} function to perform accounting. The
+@AVP{}s included in the accounting request are formed by adding
+@attr{Acct-Status-Type} attribute to the list given by the first
+argument to the function.
+
+@item 85 -- 88
+Handle @code{Access-Reject} replies. Print the reply message and
+break from the loop.
+@end table
+
+@noindent
+Next piece of code deals with @code{Access-Challenge} replies. For
+simplicity we assume that such replies always carry user menus
+(@xref{menus directory}, for the description of these). So, upon
+receiving an @code{Access-Challenge} we should print out the menu,
+read the users selection and send back an @code{Access-Request}
+to the server. This part is the only one that actually continues
+the loop at line 77. 
+
+@smallexample
+@group 
+ 89     end else if $REPLY_CODE = Access-Challenge
+ 90     begin
+ 91       print $REPLY[Reply-Message*]
+ 92       input 
+ 93       send auth Access-Request \
+ 94         (User-Name = $LOGIN User-Password = $INPUT \
+             State = $REPLY[State])
+@end group
+@end smallexample
+
+@table @asis
+@item 91
+Print the menu contents carrieb by @attr{Reply-Message}
+attributes. There may be several instances of the attribute, hence the
+use of @samp{*} to concatenate their values together.
+
+@item 92
+Read the input from the user. The input will be stored in @code{INPUT}
+variable. @xref{Built-in Primitives}, for the description of
+@code{input} statement.
+
+@item 93 -- 94
+Send an @code{Access-Request} packet with three attributes.
+@attr{User-Password} contains the user reply, @attr{State} contains
+the menu state from the server reply packet.
+@end table
+
+@noindent
+Final part of the function:
+ 
+@smallexample
+@group 
+ 95     end else begin
+ 96       print "Authentication failed. Reply code " + $REPLY_CODE + "\n"
+ 97       break
+ 98     end
+ 99   end
+100   exit 1
+101 end
+102
+@end group
+@end smallexample
+
+@table @asis
+@item 95 -- 98
+Handle unknown reply codes.
+
+@item 99
+Closes the while loop started on line 77.
+
+@item 100
+Exit to the shell indicating failure. This statement will be reached
+only if a @code{break} is executed either on line 88 or on line 97.
+
+@item 101
+Closes function definition started on lines 74 -- 75 
+@end table
+
+@subheading Final Part of Radauth Program
+
+The final part selects an action based on the user command and
+executes it. It is equivalent to the @code{main} function in a
+@code{C} program:
+
+@smallexample
+@group
+103 case $@{COMMAND@} in
+104 "auth")   'auth'($LIST, $@{2:&Password: @}, no)
+105 "acct")   'auth'($LIST, $@{2:&Password: @}, yes)
+106 "start")  'acct'($LIST+(Acct-Status-Type = Start))
+107 "stop")   'acct'($LIST+(Acct-Status-Type = Stop))
+108 ".*")       begin
+109               print "Unknown command. Try radauth -h for more info"
+110               exit 1
+111             end
+112 end
+113 
+114 # End of radauth
+@end group
+@end smallexample
+
+@table @asis
+@item 103
+Select an action based on the value of @code{COMMAND} variable.
+
+@item 104 -- 105
+Call @code{auth} function. If the second argument is given in the
+command line, its value is taken as user's password. Otherwise, the
+user is prompted for the password with the string @samp{Password: }.
+The input is read with echo turned off to prevent the password from
+being compromised (the @samp{:&} construct, @pxref{Dereferencing
+Variables}).
+
+@item 106 -- 107
+Call @code{acct} function for @samp{start} and @code{stop} commands.
+
+@item 108 -- 111
+Handle an unknown command verb.
+
+@item 112
+Closes @code{case} statement from line 103.
+@end table
+
+@c End of radtest.texi

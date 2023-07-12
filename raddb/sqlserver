@@ -1,0 +1,161 @@
+# For detailed description, run:
+#       info Radius sqlserver
+
+#########
+## General settings
+##
+
+# The interface statement specifies which SQL interface to use. It is
+# needed only if the package is configured with both --with-mysql and
+# --with-postgres options. 
+interface mysql
+
+server localhost
+port 3306
+login radius
+password guessme
+
+# Specifies whether radiusd should try to keep the connection open.
+# When set to no (the default), radiusd will open the new connection
+# before the transaction and close it right after finishing it.
+keepopen yes
+
+
+# The idle timeout for the connection (seconds). Default is 4 hours.
+# When a connection is idle for more than this amount of time it gets
+# closed. 
+# Note: This setting takes effect only when keepopen is set to
+# yes.
+idle_timeout 14400
+
+
+#########
+## Authentication-relevant settings
+##
+
+# Enable/Disable Mysql authentication: default no
+doauth no
+
+# authentication database name
+auth_db RADIUS
+
+# Query to select the password for the given user. Should return one string.
+auth_query  SELECT password \
+            FROM passwd \
+            WHERE user_name='%u' \
+            AND active='Y'
+
+# This query returns groups the user belongs to
+group_query        SELECT user_group FROM groups WHERE user_name='%u'
+
+## Uncomment the following three queries and comment out the above definition
+## of group_query if you wish to control authentication probes using failure
+## counters. Make sure you read `info --node 'Auth Probing' radius' before
+## doing so.
+
+#group_query       SELECT user_group FROM groups \
+#                    WHERE user_name='%u' \
+#                  UNION \
+#                  SELECT CASE WHEN (SELECT count > 8 FROM authfail \
+#                                                     WHERE user_name='%u')
+#                         THEN '*LOCKED_ACCOUNT*' END
+
+#auth_success_query UPDATE authfail \
+#                   SET count=0,time=now() \
+#                   WHERE user_name='%C{User-Name}'
+
+#auth_failure_query UPDATE authfail \
+#                   SET count=count+1,time=now() \
+#                   WHERE user_name='%C{User-Name}'
+
+# This query returns a list of a/v pairs to be added to user's check pairs.
+check_attr_query  SELECT attr,value,op \
+                  FROM attrib \
+                  WHERE user_name='%u' AND op IS NOT NULL
+
+# This query returns a list of a/v pairs to be included in reply packet.
+# The query is used only if the user is authorized successfully.
+reply_attr_query  SELECT attr,value \
+                  FROM attrib \
+                  WHERE user_name='%u' AND op IS NULL
+
+#########
+# Accounting-relevant settings
+
+# Enable/Disable Mysql accounting: default no
+doacct yes
+
+# accounting database name
+acct_db RADIUS
+
+# Query to be used on session start
+acct_start_query     INSERT INTO calls \
+                     VALUES(%C{Acct-Status-Type},\
+                            '%u',\
+                            '%C{Realm-Name}',\
+                            now(),\
+                            '%C{NAS-IP-Address}',\
+                            %C{NAS-Port-Id},\
+                            '%C{Acct-Session-Id}',\
+                            0,\
+                            0,\
+                            0,\
+                            0,\
+                            '%C{Framed-IP-Address}',\
+                            '%C{Called-Station-Id}',\
+                            '%C{Calling-Station-Id}')
+
+# Query to be used on session end
+acct_stop_query      UPDATE calls \
+                     SET status=%C{Acct-Status-Type},\
+                         acct_session_time=%C{Acct-Session-Time},\
+                         acct_input_octets=%C{Acct-Input-Octets},\
+                         acct_output_octets=%C{Acct-Output-Octets},\
+                         connect_term_reason=%C{Acct-Terminate-Cause} \
+                     WHERE user_name='%C{User-Name}' \
+                       AND status = 1 \
+                       AND acct_session_id='%C{Acct-Session-Id}' 
+
+# Query to be used on receiving a keepalive record
+acct_alive_query     UPDATE calls \
+                     SET acct_session_time=%C{Acct-Session-Time},\
+                         acct_input_octets=%C{Acct-Input-Octets},\
+                         acct_output_octets=%C{Acct-Output-Octets},\
+                         framed_ip_address='%C{Framed-IP-Address}' \
+                     WHERE user_name='%C{User-Name}' \
+                       AND status = 1 \
+                       AND acct_session_id='%C{Acct-Session-Id}'
+
+# Query to be used when a NAS goes down, i.e. when it sends 
+# Accounting-Off packet
+acct_nasdown_query   UPDATE calls \
+                     SET status=2,\
+                        acct_session_time=unix_timestamp(now())-unix_timestamp(event_date_time) \
+                     WHERE status=1 AND nas_ip_address='%C{NAS-IP-Address}'
+#SQL92: acct_session_time=extract('epoch' from age(now(),event_date_time))
+
+# Query to be used when a NAS goes up, i.e. when it sends 
+# Accounting-On packet
+acct_nasup_query   UPDATE calls \
+                   SET status=3,\
+                        acct_session_time=unix_timestamp(now())-unix_timestamp(event_date_time) \
+                   WHERE status=1 AND nas_ip_address='%C{NAS-IP-Address}'
+
+
+# Multiple Login Checking
+
+mlc_user_query     SELECT user_name,nas_ip_address,nas_port_id,acct_session_id \
+	           FROM calls \
+		   WHERE user_name='%C{User-Name}' \
+                   AND status = 1
+
+mlc_realm_query    SELECT user_name,nas_ip_address,nas_port_id,acct_session_id \
+	           FROM calls \
+		   WHERE realm_name='%C{Realm-Name}'	
+
+mlc_stop_query     UPDATE calls \
+                     SET status=4,\
+                         acct_session_time=unix_timestamp(now())-unix_timestamp(event_date_time) \
+                     WHERE user_name='%C{User-Name}' \
+                       AND status = 1 \
+                       AND acct_session_id='%C{Acct-Session-Id}' 

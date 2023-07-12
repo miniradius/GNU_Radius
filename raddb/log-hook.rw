@@ -1,0 +1,96 @@
+/* This file is part of GNU Radius. -*- rewrite -*-
+   Copyright (C) 2003,2007 Free Software Foundation, Inc.
+
+   Written by Sergey Poznyakoff
+
+   GNU Radius is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 3 of the License, or
+   (at your option) any later version.
+
+   GNU Radius is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with GNU Radius; if not, write to the Free Software Foundation,
+   Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA. */
+
+string
+default_log_prefix(integer reqtype, string nas, integer id)
+{
+        string result;
+
+        result = "(" + request_code_string(reqtype) + " "
+                 + nas + " " + (string)id + " "
+                 + "\"" + quote_string(%[User-Name]) + "\"";
+        if (*%[Calling-Station-Id])
+                result = result + " CLID=" + %[Calling-Station-Id];
+        if (*%[Called-Station-Id])
+                result = result + " CSID=" + %[Called-Station-Id];
+        return result + "): ";
+}
+
+/* The following two hooks emulate log files of versions 1.0 and 1.1.
+   To use, add to the logging clause of your raddb/config file the
+   following two lines:
+
+ 	prefix-hook "compat_log_prefix";
+	suffix-hook "compat_log_suffix"; */
+
+/* Convert integer request type to its abbreviation used in versions
+   1.0 - 1.1 */
+string
+old_request_code_string(integer reqtype)
+{
+	if (reqtype == 1)
+		return "AUTHREQ";
+	else if (reqtype == 2)
+		return "AUTHACK";
+	else if (reqtype == 3)
+	        return "AUTHREJ";
+	else if (reqtype == 4)
+		return "ACCTREQ";
+	else if (reqtype == 5)
+		return "ACCTRES";
+	else if (reqtype == 6)
+		return "ACCTSTA";
+	else if (reqtype == 7)
+		return "PASSREQ";
+	else if (reqtype == 8)
+		return "PASSACK";
+	else if (reqtype == 9)
+		return "PASSREJ";
+	else if (reqtype == 10)
+		return "ACCTMSG";
+	else if (reqtype == 11)
+		return "CHALNGE";
+	else if (reqtype == 12)
+		return "SRVSTAT";
+	return (string) reqtype;
+}
+	
+string
+compat_log_prefix(integer reqtype, string nas, integer id)
+{
+	string result;
+
+	result = "(" + old_request_code_string(reqtype) + " "
+                 + nas + " " + (string)id + " " + %[User-Name];
+	if (*%[Acct-Session-Id])
+		result = result + " " + %[Acct-Session-Id];
+	return result + "): ";
+}
+
+string
+compat_log_suffix(integer reqtype, string nas, integer id)
+{
+	string result;
+	if (*%[Calling-Station-Id])
+		result = ", CLID " + %[Calling-Station-Id];
+	else
+		result = ", CLID unknown";	
+	return result;
+}
+	

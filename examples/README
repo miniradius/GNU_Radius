@@ -1,0 +1,47 @@
+This directory contains some possibly useful examples.
+
+* Sample configuration file
+
+config.syntax
+
+* Rewrite modules.
+
+These sources contain rewrite functions for various NAS types. To
+use a file, copy it to a directory which forms part of your Rewrite 
+load-path, add to the `rewrite' block of your raddb/config file the 
+statement `load "filename";', and follow the instructions given in the file.
+
+ File                Purpose
+ascend.rw           Handle MAX Ascend coded port numbers
+c3620.rw            Create a unique NAS-Port-Id for PPPoE/PPTP/L2TP
+                    connections.
+cisco.rw            Handle various anomalies of Cisco AS5300
+comos.rw	    Handle the use of Start/Stop accounting packets 
+		    instead of Acct-Status-Type=Accounting-{On|Off}
+filter.rw	    Sample filter input processor. Used by the testsuite.
+jetstream.rw        Handle various anomalies of Jetstream 8500
+nt.rw               Decode compound usernames sent by some Windows NT
+                    stations
+
+* Sample PAM configuration file
+
+The file pam.conf contains a sample PAM stack for use with pam_radius.so
+authentication module.
+
+* hints-0.96
+
+Mimics GNU Radius 0.96 series way of handling accounting packets.
+
+* radius.php
+
+A simple NAS simulator that uses Sergei Sinkovsky's mod_radius.c PHP
+module. See README (options --with-php and --with-php-moddir) for
+information on how to compile the module and contrib/php/README for
+the description of the module itself.
+
+
+Local Variables:
+mode: outline
+paragraph-separate: "[ 	]*$"
+version-control: never
+End:

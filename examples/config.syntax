@@ -1,0 +1,366 @@
+## -*- radconf -*-
+## This file is intended to be an explanation on configuration syntax
+## issues. It cannot possibly be used as a configuration file.
+option {
+	# Source IP address. Can be omitted if the machine running
+	# radiusd has only one interface.
+	source-ip 127.0.0.1;
+
+	# Maximum number of request in queue
+	max-requests 127;
+
+	# Maximum number of children processes
+	max-processes 128;
+
+	# Child terminates if it does not receive any requests within
+	# this number of seconds:
+	process-idle-timeout 3600;
+
+	# The following two statements set timeout values for the 
+	# master process I/O operations. If the master is not able
+	# to perform the I/O within the corresponding interval
+	# of time, it kills the child it was trying to communicate with
+	# and resumes further operation. The value of zero means no timeout
+	# at all (the default).
+	master-read-timeout 0;
+	master-write-timeout 0;
+
+	# Run with this user privileges.
+	radiusd-user "radius";
+
+	# The following specifies the uid under which external processes
+	# (those triggered by Exec-Program and Exec-Program-Wait 
+	# attributes) should be run. The corresponding gid is determined
+	# from the user's passwd entry. Default is daemon.
+	# NOTE: ignored if radiusd-user is set.
+	exec-program-user "daemon";
+
+	# Specify the logging directory (-l command line option)
+       	log-dir "/var/log";
+
+	# Specify the detailed accounting directory (-a command line option)
+       	acct-dir "/var/acct";
+
+	# Resolve IP addresses to hostnames (default)
+	resolve yes;
+
+	# Set characters that may be used in a username.
+	username-chars "{}";
+};
+
+logging {
+	# This defines output channel `info'. The output will go to a file
+	# named <radlog_dir>/radius.info. 
+	#
+	channel info {
+		file "radius.info";
+		print-pid yes;		# Output pid along with the diagnostics
+		print-cons yes;		# Duplicate output to /dev/console
+		print-level yes;	# Output severity level description
+		print-severity yes;     # Synonim for the above
+		print-milliseconds yes; # Print timestamp with milliseconds
+		print-category yes;     # Print category description
+		prefix-hook "log-prefix"; # Overrides global prefix-hook
+                suffix-hook "log-suffix"; # Overrides global suffix-hook
+	};
+
+	# This defines output channel that sends its info to syslog whith
+	# facility `auth' and priority `notice'
+	channel notice {
+		syslog auth.notice;
+	};
+
+	# Definitions of the logging categories
+	# auth 	-	Authentication info
+	category auth {
+		print-auth yes;		# Output any authentication info
+		print-failed-pass yes;	# Output failed password
+		print-pass no;		# Do not log correct passwords
+	};
+
+	# Send notice logs to another channel
+	category notice {
+		channel notice;
+	};
+	category info {
+		channel info;
+	};
+
+	# Debugging information
+	# Argument to "level" statement is a comma-separated list of
+	# debugging specifiers. Each specifier is:
+	#
+	#	module[=level]
+	#
+	# Module is the source file name. Any non-ambiguous abbreviation
+	# of the file name is also allowed.
+	# Optional level sets the debugging level for that module. Allowed
+	# values for level are 0 to 100. The greater the level value is, the
+	# more detailed debugging info is output. 0 disables debugging.
+	# If level is ommitted, it defaults to 100.
+	category debug {
+		channel info;
+		level radiusd=1,files;
+	};
+};
+
+## This controls the authentication service:
+auth {
+	# default port number
+	port 1645;
+
+	# Listen statement can be used to listen to multiple
+	# interfaces/ports. By default radiusd listens to all
+	# interfaces available. Default port number can be overridden
+	# as shown in the example:
+	listen localhost, 192.168.10.1:1842;
+
+	# To disable authentication altogether use the following syntax:
+	#
+	# listen no;
+
+	forward remote, remote2:1645;
+
+	# Maximum number of AUTH requests in queue
+	max-requests 127;
+
+	# Request time to live
+	time-to-live 25;
+
+	# Number of seconds the request remains
+        # in queue after being processed
+	request-cleanup-delay 10;
+
+	# Store detailed info about every auth request
+	detail yes;
+
+	# Detailed log file name. If it starts with an equal
+	# sign, it is interpreted as Rewrite expression. This expression
+	# is executed and its result is taken as the file name.
+        # Otherwise, usual %C{} substitutions are performed, and
+	# the resulting string is taken as the file name.
+	detail-file-name "=nas_name(%[NAS-IP-Address]) + \"/detail.auth\"";
+	
+	# Strip username prefixes/suffixes
+	strip-names yes;
+
+	# Assume the user is logged in when checkrad returns don't-know answer
+	checkrad-assume-logged yes;
+
+	# Emit warning if user's password expires within the given interval
+	# (seconds).
+	password-expire-warning 1440;
+
+	# User-defined flag that marks in the
+        # dictionary the attributes that will
+        # be used when comparing two authentication
+        # requests. Allowed values are 1 through 9
+	compare-atribute-flag 1;
+
+	# Controls the rule tracing mode. If set to `yes', radiusd will
+	# log which rules were matched when processing each authentication
+	# request (log priority "info")
+	trace-rules no;          
+
+	# Should the server send access-reject message if the access-request
+	# contained a malformed user name?
+	# See also option/username-chars
+	reject-malformed-names no; 
+};
+
+## This controls the accounting service
+acct {
+	# default port number
+	port 1646;
+
+	# Listen statement can be used to listen to multiple
+	# interfaces/ports. By default radiusd listens to all
+	# interfaces available.
+	listen localhost, 192.168.10.1:1843;
+
+	# To disable accounting altogether use the following syntax:
+	#
+	# listen no;
+
+	# Do the system accouting (default). If you disable this,
+	# make sure you provide an alternative method of multiple
+	# login checking (see mlc section below)
+	system yes;
+	
+        # Do the request detail accounting (default)
+	detail yes;
+	# Detailed accounting file name. If it starts with an equal
+	# sign, it is interpreted as Rewrite expression. This expression
+	# is executed and its result is taken as the file name.
+        # Otherwise, usual %C{} substitutions are performed, and
+	# the resulting string is taken as the file name.
+	detail-file-name "=nas_name(%[NAS-IP-Address]) + \"/detail\"";
+	
+	# Maximum number of ACCT requests in queue
+	max-requests 24;
+
+	# Request time to live
+	time-to-live 60;
+
+	# Number of seconds each request remains
+        # in queue after being processed
+        request-cleanup-delay 10;
+
+	# User-defined flag that marks in the dictionary the attributes
+	# that will be used when comparing two accounting requests.
+	# Allowed values are 1 through 9
+	compare-atribute-flag 2;
+
+	# Controls the rule tracing mode. If set to `yes', radiusd will
+	# log which rules were matched when processing each accounting
+	# request (log priority "info")
+	trace-rules no;          
+};
+
+# Multiple Login Check
+mlc {
+	method system;  # Allowed values: system or sql.
+	# Assume the user is logged in when checkrad returns don't-know answer
+	checkrad-assume-logged yes;
+};	
+	
+# DBM handling. Can be one of
+#	no	-	Never to use DBM database
+#	yes	-	Use only DBM database and ignore users
+usedbm no;
+
+# SNMP sub-system configuration
+snmp {
+	# Port number
+	port 4500;
+
+	# Same as in auth and acct.
+	listen localhost:160;
+
+	# To disable listening on SNMP ports, use:
+	#
+	# listen no;
+
+	# Maximum number of SNMP requests in queue
+	max-requests 24;
+
+	# Request time to live
+	time-to-live 10;
+
+	# Number of seconds the request remains in queue after being processed
+        request-cleanup-delay 0;
+
+	# SNMP storage management
+	storage {
+		file "radius.stat";	# Statistics file name
+		perms 0600;		# Permission bits (Notice: usual C
+					# conventions apply!)
+		max-nas-count 512;	# Overall number of NASes 
+		max-port-count 1024;	# Overall number of ports
+					# to be monitored
+	};
+
+	# Server identifier
+	ident "RADIUS server";
+
+	# Communities
+	community public ro;
+	community admin rw;
+
+	# Access control lists
+	network localhost 127.0.0.1 1.2.3.4;
+	network trusted_hosts 1.2.3.0/255.255.255.224;
+	network admin_hosts 1.2.3.1;
+	network any 0.0.0.0/0.0.0.0;
+	acl {
+		allow localhost public;
+		allow trusted_hosts public;
+		allow admin_hosts admin;
+		deny any;
+	};
+};
+
+rewrite {
+	# Set the runtime stack size
+	stack-size 4096;
+
+	# Add the directory to the Rewrite load path
+	load-path "/usr/share/rewrite";
+
+	# Load the given file. 
+	load "file.rw";                  
+};
+
+# Guile interface configuration
+guile {
+	# Enable debug mode
+	debug yes;
+
+	# Perform garbage collection once an hour
+	gc-interval 3600;
+
+	# Evaluate a Scheme expression
+	eval "(set! my-variable \"Text\")";
+		
+	# Add given path to guile's %load-path
+	load-path "/usr/local/libexec/guile";
+
+	# Load given file
+	load "lib.scm";
+
+	# Load Guile module
+	# First argument is the name of the module (without .scm
+	# suffix.
+	# The rest of arguments are optional. If they are present,
+	# then they are given as argument list to the function
+	# <module-name>-init. When converting arguments to
+	# Scheme data types, the following conventions apply:
+	#
+	# Argument       Converted to
+	# "string"       "string"
+	# "#f"           #f
+	# "#t"           #t
+	# "#x34"         #x34
+	# -key           #:key
+	# 345            345
+	# 127.0.0.1      ( #x7f000001 . #xffffffff )
+	# 127.0.0.1/16   ( #x7f000001 . #xffff0000 )
+        # 127.0.0.1:1645 ( #x7f000001 . 1645)
+	#	
+	# The example below is equivalent to calling
+	#
+	# (ttl-init #:dest-ip (cons #x7f000001 #xffffffff) #:dest-port 5000)
+	#	
+	load-module "ttl" -dest-ip 127.0.0.1 -dest-port 5000;
+
+	# Redirect the guile output to the given file.
+	outfile	"guile.out";	
+};
+
+message {
+	account-closed "Sorry, your account is currently closed\r\n";
+        password-expired "Password Has Expired\r\n";
+        password-expire-warning
+              "Password Will Expire in %R{Password-Expire-Days} Days\r\n";
+        access-denied "\r\nAccess denied\r\n";
+        realm-quota "\r\nRealm quota exceeded - access denied\r\n";
+        multiple-login
+"\r\nYou are already logged in %R{Simultaneous-Use} times - access denied\r\n";
+        second-login "\r\nYou are already logged in - access denied\r\n";
+        timespan-violation "You are calling outside your allowed timespan\r\n";
+};
+
+filters {
+	filter ttl_filter {
+		exec-path "/usr/local/libexec/ttl-compute -f -";
+		error-log "ttl.log";
+		auth {
+			input-format "%C{User-Name} ?";
+			wait-reply yes;
+		};
+		acct {
+			input-format "%C{User-Name} %C{Acct-Status-Type}";
+			wait-reply no;
+		};
+	};
+};

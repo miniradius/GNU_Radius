@@ -1,0 +1,6 @@
+# For detailed description, run:
+#       info Radius naslist
+
+# NAS Name		Short Name	Type		Flags
+#----------------	----------	----		---------------
+localhost		local		true

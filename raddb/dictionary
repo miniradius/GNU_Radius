@@ -1,0 +1,21 @@
+#
+# $Id$
+#
+# For detailed description, run:
+#       info Radius dictionary
+
+# Do not remove this!
+$INCLUDE dict/standard
+
+# Uncomment any of these as appropriate:
+
+$INCLUDE dict/compat		# Compatibility issues
+$INCLUDE dict/livingston	# Livingston compatibility
+#$INCLUDE dict/tunnel		# Tunnel attrs. as per RFC 2867
+#$INCLUDE dict/usr		# USR Robotics
+#$INCLUDE dict/ascend		# MAX Ascend
+#$INCLUDE dict/ascend.vs	# MAX Ascend -- vendor-specific
+#$INCLUDE dict/cisco		# Cisco
+#$INCLUDE dict/voip		# Special attributes to be used
+				# with rewriting functions
+

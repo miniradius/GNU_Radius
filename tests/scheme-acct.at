@@ -1,0 +1,45 @@
+# Check for working Scheme accounting. -*- Autotest -*-
+
+# Test suite for GNU Radius.
+# Copyright (C) 2004,2007 Free Software Foundation, Inc.
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3, or (at your option)
+# any later version.
+
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+# 02110-1301 USA.
+
+AT_SETUP([Scheme accounting])
+AT_KEYWORDS([scheme-acct])
+
+RA_PREREQ([USE_SERVER_GUILE],
+ [RA_CHECK([send acct Accounting-Request User-Name = "scheme" \
+	                NAS-IP-Address = 127.0.0.1 \
+                        NAS-Port-Id = 1 \
+                        Acct-Status-Type = Start \
+			Acct-Session-Id = "0001" 
+	    expect Accounting-Response])
+  AT_CHECK([sed '/GNU-Server-Address/d;/GNU-Server-Port/d' $BUILDDIR/raddb/acct/scheme],
+           [0],
+           [User-Name=scheme
+NAS-IP-Address=2130706433
+NAS-Port-Id=1
+Acct-Status-Type=1
+Acct-Session-Id=0001
+Scheme-Acct-Procedure=acct
+Orig-User-Name=scheme
+
+])])
+
+AT_CLEANUP
+
+

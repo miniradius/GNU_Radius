@@ -1,0 +1,17 @@
+.\" $Id$
+.so config.so
+.TH BUILDDBM 8 "\*(DA" "GNU Radius"
+.SH NAME
+builddbm - build a DBM version of Radius users database
+.SH SYNOPSIS
+\fBbuilddbm\fR
+[\fB-d\fR config_dir]
+[input_file]
+.PP
+\fBbuilddbm\fR
+\fB-h\fR
+.SH DESCRIPTION
+.De builddbm
+.SH AUTHORS
+\*(AU
+

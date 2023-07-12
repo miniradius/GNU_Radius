@@ -1,0 +1,139 @@
+2007-06-19  Sergey Poznyakoff  <gray@gnu.org.ua>
+
+	Remove .po from the CVS. We will get them right from the TP site.
+	
+	* po/.cvsignore, po/POTFILES.in: Update
+	* po/LINGUAS,po/Makevars: Remove
+	* ca.po, es.po, fr.po, pl.po, ru.po, uk.po: Remove
+
+2006-11-09  Sergey Poznyakoff  <gray@gnu.org.ua>
+
+	* ca.po, es.po, fr.po, pl.po, ru.po, uk.po: Update translations.
+
+2006-10-16  Sergey Poznyakoff  <gray@gnu.org.ua>
+
+	* vi.po: Vietnamese translation by Clytie Siddall 
+
+2005-01-15  Sergey Poznyakoff 
+
+	* LINGUAS: Added Ukrainian
+	* uk.po: Finished translation for version 1.3 
+
+2004-12-03  Sergey Poznyakoff
+
+	* uk.po: Ukrainian translation. Initial version.
+
+2004-16-11  Sergey Poznyakoff 
+
+	* fr.po: Updated
+	* pl.po: Updated
+	* ru.po: Updated
+
+2004-09-16  Sergey Poznyakoff 
+
+	* LINGUAS: Added Catalan
+	* pl.po: Updated
+	* ru.po: Updated
+
+2004-06-29  Sergey Poznyakoff 
+
+	* fr.po: Updated
+	* pl.po: Updated
+	* ru.po: Updated
+
+2004-06-25  Sergey Poznyakoff
+
+	* pl.po: Updated
+	* ru.po: Updated
+
+2003-12-16  Sergey Poznyakoff
+
+	* ca.po: Updated
+	* es.po: Likewise.
+	* fr.po: Likewise.
+	* pl.po: Likewise.
+	* ru.po: Likewise.
+
+2003-12-15  Sergey Poznyakoff
+
+	* Makevars: Added MSGID_BUGS_ADDRESS
+	* ca.po: Updated
+	* es.po: Likewise.
+	* fr.po: Likewise.
+	* pl.po: Likewise.
+	* ru.po: Likewise.
+
+2003-12-12  Sergey Poznyakoff 
+
+	* fr.po: French translation by Michel Robitaille 
+	<robitail@IRO.UMontreal.CA>
+	* LINGUAS: Added catalan translation (revised by Jordi) and
+	french translation
+
+2003-12-09  Sergey Poznyakoff 
+
+        * pl.po: Official translation
+        * ru.po: Likewise.
+
+2003-12-05  Sergey Poznyakoff
+
+	* pl.po: Updated
+	* ru.po: Updated
+
+2003-12-04  Sergey Poznyakoff
+
+	* pl.po: Updated
+	* ru.po: Updated
+	* es.po: Updated
+	* ca.po: Updated
+
+2003-12-03  Sergey Poznyakoff
+
+	* ca.po: Minor change
+
+2003-11-27  Sergey Poznyakoff 
+
+	* ca.po: Initial version of Catalan localization
+	* es.po: Minor fix
+	
+2003-11-27  Sergey Poznyakoff 
+
+	* pl.po: Updated
+	* ru.po: Updated
+	* es.po: Updated
+
+2003-11-02  Sergey Poznyakoff 
+
+	* POTFILES.in: Updated
+	* pl.po: Updated
+	* ru.po: Updated
+	* es.po: Updated
+
+2003-07-23  Sergey Poznyakoff  
+
+	* ru.po: Official translation
+	* pl.po: Likewise.
+
+2003-07-21  Sergey Poznyakoff
+
+	* POTFILES.in: Updated
+	* pl.po: Updated
+	* ru.po: Updated
+	* es.po: Updated
+
+2003-07-02  Sergey Poznyakoff
+
+	* pl.po: Official translation.
+	* ru.po: Likewise.
+
+2003-06-23  Sergey Poznyakoff 
+
+	* pl.po: Updated for 1.0
+	* ru.po: Updated for 1.0
+	* es.po: Updated for 1.0
+
+
+Local Variables:
+mode: change-log
+version-control: never
+End:

@@ -1,0 +1,15 @@
+# NOTE: This file may be overwritten by radius installation procedure.
+# Please add your customizations to the main dictionary file.
+# Run
+#       info Radius dictionary
+# for detailed description of the format of this file.
+# Please report errors to <bug-gnu-radius@gnu.org>
+
+VENDOR		Livingston	307
+
+#
+# Livingston Vendor-Specific Attributes (requires ComOS 3.8)
+#
+ATTRIBUTE	LE-Terminate-Detail	2	string	Livingston
+ATTRIBUTE	LE-Advice-of-Charge	3	string	Livingston
+
