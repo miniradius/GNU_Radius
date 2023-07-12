@@ -1,0 +1,630 @@
+@c This is part of the Radius manual.
+@c Copyright (C) 2004 Free Software Foundation, Inc.
+@c Written by Sergey Poznyakoff
+@c See file radius.texi for copying conditions.
+@comment *******************************************************************
+@appendix New Configuration Approach (draft)
+@UNREVISED{}
+
+This document presents a draft describing new approach for
+processing @RADIUS{} requests. It is intended as a @dfn{request
+for comments}, and, in the long run, as a guide for GNU Radius
+developers. In its current state it is far from being complete.
+Please check @url{http://www.gnu.org/@/software/@/radius/@/manual} for
+updated versions. Feel free to send your comments and suggestions to
+@email{bug-gnu-radius@@gnu.org}.
+
+@menu
+* Present State::             A brief description of Currently Used Approach
+* Deficiencies::              Deficiencies of Current Operation Model
+                              and Configuration Suite
+* Solution::                  A Proposed Solution
+* New Rewrite::               Changes to Rewrite Language
+* Traditional Configuration:: Support for Traditional Configuration Files.
+* New Configuration::         New Configuration Files
+@end menu
+
+
+@node Present State
+@appendixsec A brief description of Currently Used Approach
+
+When I started to write GNU Radius, back in 1998, I had two major aims.
+The first and primary aim was to create a flexible and robust
+system that would follow the principle of Jon Postel:
+
+@quotation
+Be liberal in what you accept and conservative in what you send.
+@end quotation
+
+This, I believe, is the main principle of any good software for
+Internet.
+
+The second aim was to be backward compatible with the implementations
+that already existed back then. This seemed to be important (and the
+time has proved it was), because it would allow users to easily switch
+from older radius daemon to GNU Radius.
+
+An important part of every complex program is its configuration
+file. Traditional implementations of @RADIUS{} servers (beginning from
+Livingston Radius) used a configuration suite consisting of several
+files, usually located in @file{/etc/raddb} subdirectory. Its main
+components were:
+
+@table @file
+@item dictionary
+A file containing translations of symbolic names of radius attributes
+and attribute values to their integer numbers as specified by
+@RADIUS{} protocol.
+
+@item hints
+This file was intended to separate incoming requests in groups, based
+on the form of their login name. Traditionally such separation
+was performed basing on common @dfn{prefixes} and/or @dfn{suffixes}
+of login names.
+
+@item huntgroups
+The purpose of this file was to separate incoming requests depending
+on their source, i.e. on the @NAS{} that sent them and the port
+number on that @NAS{}. It also served as a sort of simplified
+@dfn{access control list}. 
+
+@item users
+This file contained a users database. It described criteria for
+authentication and @dfn{reply pairs} to be sent back to requesting
+@NAS{}es.
+@end table
+
+Among these files, the first two were used for requests of any kind,
+whereas @file{users} was used only for @code{Access-Request} packets.
+@FIXME-xref{request types}
+
+Though this configuration system suffered from many inconsistencies,
+the @dfn{second aim} required GNU Radius to use this approach.
+
+To compensate for its deficiencies and to fulfill the @dfn{first aim},
+this configuration system was extended, while preserving its main
+functionality. A number of additional @dfn{internal attributes} were
+added, that control @command{radiusd} behavior. A new language was
+created whose main purpose was to modify incoming requests
+(@pxref{Rewrite}). The support for @dfn{GNU's Ubiquitous Intelligent
+Language for Extensions} (@pxref{Guile}) was added, that allowed to
+further extend GNU Radius functionality.
+
+The present operation model@footnote{@xref{Operation}.} of GNU Radius
+and its configuration file system@footnote{@xref{Configuration
+Files}.} emerged as a result of the two development aims described
+above. Since 1998 up to present, GNU Radius users contributed a lot
+of ideas and code to the further development of the system.
+
+However, it became obvious that this system presents
+strong obstacles to the further development. The next section
+addresses its deficiencies.
+
+@node Deficiencies
+@appendixsec Deficiencies of Current Operation Model and Configuration Suite
+
+The main deficiencies are inherited with the traditional configuration
+file suite. The rules for processing each request are split among
+three files, each of which is processed differently, despite of their
+external similarity. The administrator has to keep in mind a set of
+exotic rules when configuring the system@footnote{@file{Hints} is
+processed for each request... Authentication requests first pass
+@file{hints}, then @file{huntgroups}, then @file{users}... Accounting
+requests use only @file{hints} and @file{huntgroups}...
+@file{Huntgroups} entries may also be used (sometimes inadvertently) to
+create @acronym{ACL} rules, etc, etc...}. When matching incoming
+requests with configuration file entries (@dfn{LHS}, @pxref{Matching
+Rule}), some attributes are taken verbatim, whereas others are used
+to control @command{radiusd} behavior and to pass additional data to
+other rules (@pxref{Radius Internal Attributes}). The things become even
+more complicated when @RADIUS{} realms come into play (@pxref{Proxy
+Service}). Some attributes are meaningful only if used in a certain
+part of a certain configuration file rule.
+
+So, while being a lot more flexible than the approach used by
+other @RADIUS{} implementations, the current system is quite
+difficult to maintain.
+
+Another deficiency is little control over actions executed on
+different events. For example, it is often asked how can one
+block a user account after a predefined number of authentication
+failures? Currently this can only be done by writing an external
+authentication procedure (either in Scheme, using Guile, or as
+a standalone executable, using @attr{Exec-Program-Wait}). The
+proper solution would be to have a set of user-defined triggers
+for every @RADIUS{} event (in this case, for authentication failure).
+
+Another commonly asked question is how to make @command{radiusd}
+execute several @acronym{SQL} queries when processing a request.
+While GNU Radius is not supposed to compensate for deficiencies
+of some @acronym{SQL} implementations that do not allow for
+nested queries, such a feature could come quite handy.
+
+@node Solution
+@appendixsec Proposed Solution
+@UNREVISED{}
+
+Processing of incoming requests is controlled by
+@dfn{request-processing program}. Request-processing program is a
+list-like structure, consisting of @dfn{instructions}. 
+
+@menu
+* Instruction::        
+* grad_instr_conditional::
+* grad_instr_call::
+* grad_instr_return::
+* grad_instr_action::
+* grad_instr_reply::
+* grad_instr_proxy::
+* grad_instr_forward::
+@end menu
+
+@node Instruction
+@subsection Request-processing Instruction
+
+@dfn{Request-processing program} consists of @dfn{instructions}. There
+are seven basic instruction types:
+
+@table @code
+@item grad_instr_conditional_t
+This instruction marks a branch point within the program.
+
+@item grad_instr_call_t
+Represents a @dfn{call} of a subprogram
+
+@item grad_instr_action_t
+Invokes a Rewrite @FIXME{or Scheme?} function
+
+@item grad_instr_proxy_t
+Proxies a request to the remote server
+
+@item grad_instr_forward_t
+Forwards a request to the remote server
+
+@item grad_instr_reply_t
+Replies back to the requesting @NAS{}.
+@end table
+
+Consequently, an instruction is defined as a union of the above node
+types:
+
+@deftp Instruction grad_instr_t
+@smallexample
+@group
+enum grad_instr_type
+@{
+  grad_instr_conditional,
+  grad_instr_call,
+  grad_instr_return,
+  grad_instr_action,
+  grad_instr_reply,
+  grad_instr_proxy,
+  grad_instr_forward
+@};
+
+typedef struct grad_instr grad_instr_t;
+
+struct grad_instr
+@{
+  enum grad_instr_type type;
+  grad_instr_t *next;
+  union
+    @{
+      grad_instr_conditional_t cond;
+      grad_instr_call_t call;
+      grad_instr_action_t action;
+      grad_instr_reply_t reply;
+      grad_instr_proxy_t proxy;
+      grad_instr_forward_t forward;
+    @} v;                                                             
+@};
+@end group
+@end smallexample
+
+@code{Type} member contains type of the instruction. The evaluator
+uses @code{type} to determine which part of @code{union v}, holds
+instruction-specific data.
+
+@code{Next} points to the next instruction. The evaluator will
+go to this instruction unless the present one changes the control
+flow.
+
+Finally, @code{v} contains instruction-specific data. These will
+be discussed in the following subsections.
+@end deftp
+
+@node grad_instr_conditional
+@subsection grad_instr_conditional
+@UNREVISED{}
+
+@deftp Instruction grad_instr_conditional_t cond iftrue iffalse
+@smallexample
+@group
+struct grad_instr_conditional
+@{
+  grad_entry_point_t cond;  /* Entry point to the compiled
+                               Rewrite condition */
+  grad_instr_t *iftrue;     /* Points to the ``true'' branch  */
+  grad_instr_t *iffalse;    /* Points to the ``false'' branch  */
+@};
+typedef struct grad_instr_conditional grad_instr_conditional_t;
+@end group
+@end smallexample
+
+Instructions of type @code{grad_instr_conditional_t} indicate branching.
+Upon encountering an @code{grad_instr_conditional_t}, the
+engine executes a Rewrite expression pointed to by @code{cond}.
+If the expression evaluates to @code{true}, execution branches to
+instruction @code{iftrue}. Otherwise, if @code{iffalse} is not @code{NULL},
+execution branches to that instruction. Otherwise, the control flow
+passes to @code{grad_instr_t.next}, as described in the previous section.
+@end deftp
+
+@subheading RPL representation
+
+@deffn {RPL defun} COND @var{expr} @var{if-true} [@var{if-false}]
+
+@table @var
+@item expr
+Textual representation of Rewrite conditional expression or its entry
+point.
+@item if-true
+RPL expression executed if @var{expr} evaluates to @code{t}.
+@item if-true
+Optional RPL expression that is executed if @var{expr} evaluates to
+@code{nil}.
+@end table
+@end deffn
+
+@subheading Example
+
+@code{COND} with two arguments:
+
+@smalllisp
+@group
+(COND "%[User-Name] ~= \"test-.*\""
+      (REPLY Access-Reject ("Reply-Message" . "Test accounts disabled")))
+@end group      
+@end smalllisp
+
+@noindent
+@code{COND} with three arguments:
+
+@smalllisp
+@group
+(COND "%[Hint] == "PPP" && authorize(PAM)"
+      (REPLY Access-Accept
+             ("Service-Type" . "Framed-User")
+             ("Framed-Protocol" . "PPP"))
+      (REPLY Access-Reject
+             ("Reply-Message" . "Access Denied")))
+@end group      
+@end smalllisp
+
+@node grad_instr_call
+@subsection grad_instr_call
+@UNREVISED{}
+
+@deftp Instruction grad_instr_call_t entry
+@smallexample
+@group
+struct grad_instr_call @{
+       grad_instr_t *entry;    
+@};
+typedef struct grad_instr_call grad_instr_call_t;
+@end group
+@end smallexample
+@end deftp
+
+Instructions of type @code{grad_instr_call} instruct the engine to
+@dfn{call} the given subprogram. The engine pushes the current
+instruction @FIXME{definition of current instruction or pc?} to the return
+point stack @FIXME{definition of this?} and branches to instruction
+@code{entry}. Execution of the subprogram ends when the engine
+encounters an instruction of one of the following types:
+@code{grad_instr_return}, @code{grad_instr_reply} or @code{grad_instr_proxy}.
+
+If @code{grad_instr_return} is encountered, the engine pops the
+instruction from the top of the return point stack and makes it
+current instruction, then it branches to the @code{next} node.
+
+If @code{grad_instr_reply} or @code{grad_instr_proxy} is encountered,
+the engine, after executing corresponding actions, finishes executing
+the program.
+
+@subheading RPL representation
+
+@deffn {RPL defun} CALL @var{list}
+@deffnx {RPL defun} CALL @var{defun-name}
+In the first form, the argument @var{list} is the RPL
+subprogram to be executed.
+
+In the second form @var{defun-name} is a name of the RPL subprogram
+defined by @code{defun}.
+@end deffn
+
+@subheading Examples
+
+First form:
+
+@smalllisp
+(CALL (ACTION "myfun(%[User-Name])")
+      (REPLY Access-Reject
+             ("Reply-Message" . "Access Denied")))
+@end smalllisp
+
+@noindent
+Second form:
+
+@smalllisp
+(CALL process_users)
+@end smalllisp
+
+@node grad_instr_return
+@subsection grad_instr_return
+@UNREVISED{}
+
+An instruction of type @code{grad_instr_return} indicates a return point from
+the subprogram. If encountered in a subprogram (i.e. a program entered by
+@code{grad_instr_call} node), it indicates return to the calling
+subprogram (see the previous subsection). Otherwise, if
+@code{grad_instr_return} is encountered within the main trunk, it
+ends evaluating of the program.
+
+Instructions of this type have no data associated with them in union @code{v}.
+
+@subheading RPL representation
+@deffn {RPL defun} RETURN
+@end deffn
+
+@subheading Examples
+
+@smalllisp
+(RETURN)
+@end smalllisp
+
+@node grad_instr_action
+@subsection grad_instr_action
+@UNREVISED{}
+
+@deftp Instruction grad_instr_reply_t expr
+@smallexample
+@group
+struct grad_instr_action @{
+       grad_entry_point_t expr;    /* Entry point to the compiled
+                                      Rewrite expression */
+@};
+typedef struct grad_instr_action grad_instr_reply_t;
+@end group
+@end smallexample
+@end deftp
+
+The machine executes a Rewrite expression with entry point
+@code{expr}. Any return value from the expression is ignored.
+@FIXME{Should the expression receive any arguments? If so,
+what arguments? I'd say it should take at least the
+request being processed and the reply pairs collected so far.}
+
+@subheading RPL representation
+@deffn {RPL defun} ACTION @var{expr}
+@deffnx {RPL defun} ACTION @var{entry-point}
+@FIXME{Description}
+@end deffn
+
+@subheading Examples
+
+@smalllisp
+(ACTION "%[NAS-IP-Address] = request_source_ip()")
+@end smalllisp
+
+@node grad_instr_reply
+@subsection grad_instr_reply
+@UNREVISED{}
+
+@deftp Instruction grad_instr_reply_t return_code
+@smallexample
+@group
+struct grad_instr_reply @{
+       u_char reply_code;         /* Radius request code */
+@};
+typedef struct grad_instr_reply grad_instr_reply_t;
+@end group
+@end smallexample
+@end deftp
+
+@code{grad_instr_reply} instructs @command{radiusd} to send to the
+requesting @NAS{} a reply with code @code{reply_code}. Any reply
+pairs collected while executing the program are attached to
+the reply.
+
+After executing @code{grad_instr_reply} instruction, the engine
+stops executing of the program.
+
+Any execution path will usually end with this instruction.
+
+@subheading RPL representation
+
+@deffn {RPL defun} REPLY @var{reply-code} [@var{attr-list}]
+
+Arguments:
+@table @var
+@item reply-code
+Radius reply code.
+@item attr-list
+List of @AVP{}s to be added to the reply. Each @AVP{} is represented
+as a @code{cons}: @code{(@var{name-or-number} . @var{value})}.
+@end table
+@end deffn
+
+@subheading Example
+
+@smalllisp
+(REPLY Access-Accept
+       ("Service-Type" . "Framed-User")
+       ("Framed-Protocol" . "PPP"))
+@end smalllisp
+
+@node grad_instr_proxy
+@subsection grad_instr_proxy
+@UNREVISED{}
+
+@deftp Instruction grad_instr_proxy_t realm    
+@smallexample
+@group
+struct grad_instr_proxy
+@{
+  grad_realm_t realm;
+@};
+typedef struct grad_instr_proxy grad_instr_proxy_t;
+@end group
+@end smallexample
+@end deftp
+
+This instruction tells radius to proxy the request to the server defined
+in @code{realm}. In other words, the engine executes
+@code{proxy_send}. Further processing of the program is stopped.
+
+@subheading RPL representation
+
+@deffn {RPL defun} PROXY @var{realm-name}
+@var{Realm-name} is name of the realm as defined in
+@file{raddb/realms}. @FIXME{No, no. That's senseless. I must
+get rid of @file{raddb/*}!}
+@end deffn
+
+@subheading Examples
+@FIXME{Fix the above definition, then provide an example}.
+
+@node grad_instr_forward
+@subsection grad_instr_forward
+@UNREVISED{}
+
+@deftp Instruction grad_instr_forward_t server_list
+@smallexample
+@group
+struct grad_instr_forward
+@{
+  grad_list_t server_list; 
+@};
+typedef struct grad_instr_forward grad_instr_forward_t;
+@end group
+@end smallexample
+@end deftp
+
+This node @dfn{forwards} the request to each servers from
+@code{server_list}. Forwarding differs from proxying
+in that the requests are sent to the remote servers @emph{and} processed
+locally. The remote server is not expected to
+reply. @xref{auth,forwarding}, for more information on this subject.
+
+In contrast to @code{grad_instr_proxy}, this instruction type does not
+cause the execution to stop.
+
+Elements of @code{server_list} are of type @code{grad_server_t}.
+
+Currently forwarding is performed by @code{forward_request} function
+(@file{forward.c}), which could be used with little modifications.
+Namely, it will be rewritten to get server list as argument, instead
+of using static variable @code{forward_list}. Consequently, the
+functions responsible for creating and initializing this static
+variable will disappear along with the variable itself. @FIXME{Ok, but
+what shall we do with @code{forward} statement in @file{raddb/config}?
+I should address this issue in the section dedicated to backward
+compatibility}.
+
+@subsection RPL representation
+@deffn {RPL defun} FORWARD @var{server-list}
+@FIXME{What's in @var{server-list}?}
+@end deffn
+
+@node New Rewrite
+@appendixsec Changes to Rewrite Language
+@UNREVISED{}
+
+@node Traditional Configuration
+@appendixsec Support for Traditional Configuration Files.
+@UNREVISED{}
+
+Within the new configuration system, the traditional ``trio''
+@file{hints-huntgroups-users} will be translated to the following
+program:
+
+@smalllisp
+(defprog main
+ (CALL hints)
+ (CALL huntgroups)
+ (COND "request_code() == Access-Request"
+       (CALL users))
+ (REPLY Access-Reject
+        (Reply-Message . "\nAccess denied\n")))
+@end smalllisp
+
+For example, consider the following configuration:
+
+@smallexample
+# raddb/hints:
+DEFAULT Prefix = "PPP" Hint = PPP
+@end smallexample
+
+This will produce the following program:
+
+@smalllisp
+(defprog hints
+ (COND "%[Prefix] == \"PPP\"")
+       (ACTION "%[Hint] = \"PPP\""))
+@end smalllisp
+ 
+
+@smallexample
+#raddb/huntgroups
+DEFAULT NAS-IP-Address = 10.10.4.1      Suffix = "staff"
+DEFAULT NAS-IP-Address = 10.10.4.2      Huntgroup-Name = "second"
+@end smallexample
+
+Will produce
+
+@smalllisp
+(defprog huntgroups
+ (COND "%[NAS-IP-Address] == 10.10.4.1 && !(%[Suffix] == \"staff\")"
+       (REPLY Access-Reject
+              ("Reply-Message" . "Access Denied by Huntgroup")))
+ (COND "%[NAS-IP-Address] == 10.10.4.2"
+       (ACTION "%[Huntgroup-Name] = \"second\"")))
+@end smalllisp
+
+Finally, @file{users}:
+
+@smallexample
+#raddb/users
+DEFAULT Hint = "PPP",
+               Auth-Type = PAM
+        Service-Type = Framed-User,
+               Framed-Protocol = PPP
+
+DEFAULT Huntgroup-Name = "second",
+               Auth-Type = PAM
+        Service-Type = "Authenticate-Only",
+               Reply-Message = "Authentity Confirmed"
+@end smallexample                                              
+
+@noindent
+will produce
+
+@smalllisp
+(defprog users
+ (COND "%[Hint] == "PPP" && authorize(PAM)"
+       (REPLY Access-Accept
+             (Service-Type . Framed-User)
+             (Framed-Protocol . PPP))
+       (REPLY Access-Reject
+             (Reply-Message . "Access Denied")))
+ (COND "%[Huntgroup-Name] == \"second\" && authorize(PAM)"
+       (REPLY Access-Accept
+              (Service-Type . "Authenticate-Only")
+              (Reply-Message . "Authentity Confirmed"))))
+@end smalllisp
+        
+
+@node New Configuration
+@appendixsec New Configuration Files
+@UNREVISED{}

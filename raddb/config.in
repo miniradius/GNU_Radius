@@ -1,0 +1,61 @@
+# For detailed description, run:
+#       info Radius config
+
+option {
+	max-requests 1024;
+	resolve no;
+};
+
+logging {
+	prefix-hook "default_log_prefix";
+	channel default {
+		file "radius.log";
+		print-category yes;
+		print-level yes;
+	};
+	channel info {
+		file "radius.info";
+		print-pid yes;
+	};	
+	channel debug {
+		file "radius.debug";
+	};
+	category auth {
+		print-auth yes;
+		print-failed-pass yes;
+	};
+	category info {
+		channel info;
+	};
+	category =debug {
+		channel debug;
+	};
+	category * {
+		channel default;
+	};
+};
+
+auth {
+	max-requests 127;
+	request-cleanup-delay 2;
+	detail yes;
+	detail-file-name "=nas_name(request_source_ip()) + \"/detail.auth\"";
+	strip-names yes;
+	checkrad-assume-logged yes;
+};
+
+acct {
+	max-requests 127;
+	request-cleanup-delay 2;
+	detail-file-name "=nas_name(request_source_ip()) + \"/detail\"";
+};
+
+rewrite {
+	load "checknas.rw";
+	load "log-hook.rw";
+	load "nas-ip.rw";
+};
+
+@SNMP_CONFIG@snmp {
+@SNMP_CONFIG@	listen no;
+@SNMP_CONFIG@};	

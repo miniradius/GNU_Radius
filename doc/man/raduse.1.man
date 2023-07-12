@@ -1,0 +1,12 @@
+.\" $Id$
+.so config.so
+.TH raduse 1 "\*(DA" "GNU Radius"
+.SH NAME
+raduse 
+.SH WARNING
+This progam has been removed from GNU Radius package.
+
+.De program_name
+.SH AUTHORS
+\*(AU
+

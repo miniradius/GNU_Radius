@@ -1,0 +1,676 @@
+@c This is part of the Radius manual.
+@c Copyright (C) 1999,2000,2001,2002,2003,2004 Free Software Foundation, Inc.
+@c Written by Sergey Poznyakoff
+@c See file radius.texi for copying conditions.
+@comment *******************************************************************
+@node Authentication, Accounting, Request Comparison, Top
+@chapter Authentication
+
+An @dfn{Authentication Type} specifies which credentials the user
+is required to supply in order to be authenticated and where the
+user's authentication data are stored. It is defined by the value
+of @attr{Auth-Type} attribute in @LHS{} of a @file{users} entry.
+
+@menu
+* Accept Auth::                   Accept unconditionally.
+* Reject Auth::                   Reject unconditionally.
+* Local Password Auth::           Authenticate using plaintext password.
+* Encrypted Password Auth::       Authenticate using MD5 encrypted password.
+* System Auth::                   Authenticate using system account.
+* SQL Auth::                      Authenticate using SQL.
+* PAM Auth::                      Authenticate using PAM.
+* Custom Auth::                   Defining Custom Authentication Types.
+* Multiple Login Checking::       Checking for Simultaneous Logins.
+* Auth Probing::                  Controlling Authentication Probes 
+
+@end menu
+
+@comment *L2****************************************************************
+@node Accept Auth
+@section Accept Authentication Type
+@cindex Accept Authentication Type
+@cindex Guest accounts, setting up
+@exindex Guest accounts, setting up
+
+@dfn{Accept} is the simplest authentication type. Users with this
+authentication type will be authenticated successfully without checking
+any credentials. Actually this means that only username
+is required for authentication.
+
+This authentication type is used for each @file{users} entry, whose
+@LHS{} contains
+
+@smallexample
+Auth-Type = Accept
+@end smallexample
+@noindent
+
+This authentication type can be used for guest accounts, e.g. the
+following profile in @file{users}:
+
+@smallexample
+@group
+guest   Auth-Type = Accept,
+                Simultaneous-Use = 10
+        Service-Type = Framed-User,
+                Framed-Protocol = PPP
+@end group
+@end smallexample
+
+@noindent
+allows up to 10 simultaneous guest PPP accounts. To log in using such
+guest account it is sufficient to use username @samp{guest} and any
+password.
+
+@comment *L2****************************************************************
+@node Reject Auth
+@section Reject Authentication Type
+@cindex Reject Authentication Type
+@cindex Disabling user accounts
+
+The @dfn{Reject} authentication type causes the request to be rejected
+unconditionally. It can be used to disable a user account (For another
+method of disabling user accounts, @pxref{access.deny file}).
+
+This authentication type is used for each @file{users} entry, whose
+@LHS{} contains
+
+@smallexample
+Auth-Type = Reject
+@end smallexample
+
+@comment *L2****************************************************************
+@node Local Password Auth
+@section Local Password Authentication Type
+@cindex Local Password Auth
+@cindex CHAP
+
+The @dfn{Local Password} authentication type allows to keep plaintext
+user passwords. Although the use of this authentication type is strongly
+discouraged for security reasons, this is the only
+authentication type that can be used with @acronym{CHAP} authentication.
+
+There are two ways of using this authentication type
+
+@subheading Specifying Passwords in users File.
+To keep the plaintext passwords in @file{users} file, the profile
+entry must follow this pattern:
+
+@smallexample
+@group
+@var{user-name}  Auth-Type = Local,
+                     User-Password = @var{plaintext}
+@end group
+@end smallexample
+
+The @var{plaintext} is the user's plaintext password. Obviously,
+@var{user-name} may not be @code{DEFAULT} nor @code{BEGIN}.
+
+@subheading Specifying Passwords in SQL Database.
+
+@smallexample
+@group
+@var{user-name}   Auth-Type = Local,
+                      Password-Location = SQL
+@end group
+@end smallexample
+
+When the user is authenticated using such profile, its password
+is retrieved from the authentication database using @code{auth_query}.
+The configuration of @acronym{SQL} authentication is described in
+detail in @ref{Authentication Server Parameters}.
+
+@comment *L2****************************************************************
+@node Encrypted Password Auth
+@section Encrypted Password Authentication Type
+@cindex Encrypted Password Authentication Type
+
+The @dfn{Encrypted Password} type allows to keep user's passwords
+encrypted via @acronym{DES} or @acronym{MD5} algorithm. There are
+two ways of using this authentication type.
+
+@subheading Specifying Passwords in users File.
+
+@smallexample
+@var{user-name}  Auth-Type = Crypt-Local,
+                     User-Password = @var{crypt-pass}
+@end smallexample
+@noindent
+
+The @attr{Crypt-Password} is a shortcut for the above notation:
+
+@smallexample
+@var{user-name}  Crypt-Password = @var{crypt-pass}
+@end smallexample
+
+@subheading Specifying Passwords in SQL Database.
+
+@smallexample
+@group
+@var{user-name}   Auth-Type = Crypt-Local,
+                      Password-Location = SQL
+@end group
+@end smallexample
+
+Using this profile, the user's password is retrieved from the
+authentication database using @code{auth_query}.
+The configuration of @acronym{SQL} authentication is described in
+detail on @ref{Authentication Server Parameters}.
+
+The shortcut for this notation is @code{Auth-Type = SQL}.
+
+In any case, the passwords used with this authentication type
+must be either @acronym{DES} or @acronym{MD5} hashed.
+
+@comment *L2****************************************************************
+@node System Auth
+@section System Authentication Type
+@cindex System Authentication Type
+
+The @dfn{System} authentication type requires that the user
+have a valid system account on the machine where the radius
+server is running. The use of this type is triggered by setting
+
+@smallexample
+Auth-Type = System
+@end smallexample
+@noindent
+
+in the @LHS{} of a @file{users} entry.
+
+@comment *L2****************************************************************
+@node SQL Auth
+@section SQL Authentication Type
+@cindex SQL Authentication Type
+
+Setting @code{Auth-Type = SQL} or @code{Auth-Type = Mysql}
+in the @LHS{} of a @file{users} entry is a synonym for
+
+@smallexample
+Auth-Type = Crypt-Local, Password-Location = SQL
+@end smallexample
+@noindent
+
+and is provided as a shortcut and for backward compatibility with
+previous versions of GNU Radius.
+
+For description of @acronym{SQL} authentication, see @ref{Encrypted
+Password Auth}. The configuration of @acronym{SQL} subsystem
+is described in @ref{sqlserver file}.
+
+@comment *L2****************************************************************
+@node PAM Auth
+@section PAM Authentication Type
+@cindex PAM Authentication Type
+
+@dfn{PAM} authentication type indicates that a user should be authenticated
+using @acronym{PAM} (Pluggable Authentication Module) framework. The
+simplest way of usage is:
+
+@smallexample
+Auth-Type = PAM
+@end smallexample
+@noindent
+
+Any user whose @file{users} profile contains the above, will be
+authenticated via @acronym{PAM}, using service name @samp{radius}.
+If you wish to use another service name, set it using @attr{Auth-Data}
+attribute, e.g.:
+
+@smallexample
+Auth-Type = PAM,
+    Auth-Data = @var{pam-service}
+@end smallexample
+
+@comment *L2****************************************************************
+@node Custom Auth
+@section Defining Custom Authentication Types
+@cindex Custom Authentication Types
+
+The are three ways to define custom authentication types:
+
+@enumerate 1
+@item Write a @acronym{PAM} module.
+@item Use a Guile procedure.
+@item Use an external program
+@end enumerate
+
+You can write a @acronym{PAM} module implementing the new authentication
+type. Then, specifying @code{Auth-Type = PAM} allows to apply
+it (@pxref{PAM Auth}).
+
+Alternatively, you may write a Scheme procedure implementing the new
+authentication type. To apply it, use @attr{Scheme-Procedure} attribute
+in @RHS{}. The @code{Auth-Type = Accept} can be used in @LHS{} if
+the whole authentication burden is to be passed to the Scheme procedure.
+For example, if one wrote a procedure @code{my-auth}, to apply it to
+all users, one will place the following profile in his @file{users}
+file:
+
+@smallexample
+@group
+DEFAULT  Auth-Type = Accept
+         Scheme-Procedure = "my-auth"
+@end group
+@end smallexample
+
+For a discussion of how to write Scheme authentication procedures,
+@xref{Authentication with Scheme}.
+
+The third way to implement your own authentication method is using
+an external program. This is less effective than the methods described
+above, but may be necessary sometimes. To invoke the program, use
+the following statement in the @RHS{} of @file{users} entry:
+
+@smallexample
+Exec-Program-Wait = "@var{progname} @var{args}"
+@end smallexample
+@noindent
+
+The @var{progname} must be the full path to the program, @var{args} ---
+any arguments it needs. The usual substitutions may be used in
+@var{args} to pass any request attributes to the program
+(@pxref{Macro Substitution}).
+
+For a detailed description of @attr{Exec-Program-Wait} attribute and
+an example of its use, see @ref{Exec-Program-Wait}.
+
+@comment *L2****************************************************************
+@node Multiple Login Checking
+@section Multiple Login Checking
+@cindex Multiple Login Checking
+@cindex Simultaneous logins, checking for
+
+The number of sessions a user can have open simultaneously can be
+restricted by setting @attr{Simultaneous-Use} attribute in the user's
+profile @LHS{} (@pxref{Simultaneous-Use}). By default the number
+of simultaneous sessions is unlimited.
+
+When a user with limited number of simultaneous logins authenticates
+himself, Radius counts the number of the sessions that are already
+opened by this user. If this number is equal to the value of
+@attr{Simultaneous-Use} attribute the authentication request is
+rejected.
+
+This process is run in several stages. First, Radius retrieves the
+information about currently opened sessions from one of its accounting
+databases. Then, it verifies whether all these sessions are still
+active. This pass is necessary since an open entry might be a result
+of missing @code{Stop} request. Finally, the server counts the
+sessions and compares their count with the value of
+@attr{Simultaneous-Use} attribute.
+
+The following subsections address each stage in detail.
+
+@menu
+* Retrieving Session Data::
+* Verifying Active Sessions::
+@end menu
+
+@node Retrieving Session Data
+@subsection Retrieving Session Data
+
+Radius retrieves the list of sessions currently opened by the user
+either from the system database (@pxref{System Accounting}), or from
+the @acronym{SQL} database (@pxref{SQL Accounting}). The system administrator
+determines which method to use.
+
+By default, system accounting database is used. Its advantages are
+simplicity and ease of handling. It has, however, a serious
+deficiency: the information is kept in the local files. If you run
+several radius servers, each of them has no easy way of knowing about
+the sessions initiated by other servers.
+
+This problem is easy to solve if you run @dfn{SQL accounting}
+(@pxref{SQL Accounting}). In this case, each radius server stores the data in
+your @acronym{SQL} database and can easily retrieve them from there.
+
+To enable use of @acronym{SQL} database for multiple login checking, do the
+following:
+
+In your @file{raddb/config} file set:
+
+@smallexample
+mlc @{
+    method sql;
+@};
+@end smallexample
+
+In your @file{raddb/sqlserver} file, specify the queries for
+retrieving the information about open sessions and, optionally, a
+query to close an existing open record.
+
+There are two queries for retrieving the information:
+@code{mlc_user_query} returns the list of sessions opened by the user,
+@code{mlc_realm_query} returns the list of sessions opened for the
+given realm. Each of them should return a list of 4-element
+tuples@footnote{This interface is likely to change in future versions}:
+
+@smallexample
+@var{user-name}, @var{nas-ip-address}, @var{nas-port-id}, @var{acct-session-id}
+@end smallexample
+
+Here is an example of @code{mlc_user_query} and @code{mlc_realm_query}:
+
+@smallexample     
+mlc_user_query SELECT user_name,nas_ip_address,\
+                      nas_port_id,acct_session_id \
+               FROM calls \
+               WHERE user_name='%C@{User-Name@}' \
+               AND status = 1
+
+mlc_realm_query SELECT user_name,nas_ip_address,\
+                       nas_port_id,acct_session_id \
+                FROM calls \
+                WHERE realm_name='%C@{Realm-Name@}'     
+@end smallexample
+
+Apart from these two queries you may also wish to provide a query for
+closing a hung record. By default, @command{radiusd} will use
+@code{acct_stop_query}. If you wish to override it, supply a query
+named @code{mlc_stop_query}, for example:
+
+@smallexample
+mlc_stop_query UPDATE calls \
+               SET status=4,\
+                acct_session_time=unix_timestamp(now())-\
+                                  unix_timestamp(event_date_time) \
+               WHERE user_name='%C@{User-Name@}' \
+                 AND status = 1 \
+                 AND acct_session_id='%C@{Acct-Session-Id@}' 
+@end smallexample
+
+@xref{Queries}, for detailed information on how to write these queries.
+
+@node Verifying Active Sessions
+@subsection Verifying Active Sessions
+
+Whatever database @command{radiusd} uses, an open entry in it does not
+necessary mean that the corresponding session is still being
+active. So, after retrieving the information about user sessions, 
+Radius verifies on corresponding @NAS{}es whether these are actually
+active.
+
+For each entry in the session list, if its @NAS{} acknowledges the
+session, the session count is incremented. Otherwise, such entry is
+marked as closed in the database and is not counted.
+
+There may also be cases when the @NAS{} is unreachable due to some
+reasons. In such cases the Radius behavior is determined by the value
+of @code{checkrad-assume-logged} in @file{config} file
+@ref{auth,,auth statement (raddb/config)}. If the value is @code{yes},
+Radius assumes the session is still active and increases the session
+count, otherwise it proceeds as if the @NAS{} returned negative reply.
+
+To query a @NAS{}, Radius first looks up its type and additional parameters
+in @file{naslist} file (@pxref{naslist file}). There are two
+predefined @NAS{} types that cause Radius to act immediately without
+querying tne @NAS{}: the special type @samp{true} forces Radius to act
+as if the @NAS{} returned 1, the type @samp{false} forces it to act
+as if the @NAS{} returned 0. If the type is neither of this predefined types,
+Radius uses it as a look up key into the @file{nastypes} file
+(@pxref{nastypes file}) and tries to retrieve an entry which has
+matching type. If such entry does not exist, Radius issues the error
+message and acts accordingly to the value of configuration variable
+@code{checkrad-assume-logged}. Otherwise, Radius determines the query
+method to use from the second field of this entry, and constructs method
+arguments by appending arguments from the @file{naslist} entry to
+those of @code{nastypes} entry. Note, that the former take precedence over the
+latter, and can thus be used to override default values specified
+in @file{nastypes}.
+
+Having determined the query method and its argument, Radius queries
+@NAS{} and analyzes its output by invoking a user-supplied
+Rewrite function. The function to use
+is specified by the @code{function=} argument to the method. It is
+called each time a line of output is received from the @NAS{} (for
+finger queries) or a variable is received (for SNMP queries). The
+process continues until the function returns 1 or the last line
+of output is read or a timeout occurs whichever comes first.
+
+If the user-function returns 1 it is taken to mean the user's session is
+now active at the @NAS{}, otherwise, if it replies 0 or if the end of
+output is reached, it is taken to mean the user's session is not active.
+
+The syntax conventions for user-supplied functions are described in
+detail in @ref{Login Verification Functions}.
+
+@comment *L2****************************************************************
+@node Auth Probing
+@section Controlling Authentication Probes
+@cindex Controlling Authentication Probes
+@cindex authentication probes
+
+@dfn{Authentication probe} is an attempt of a user to use other user's
+account, by guessing his password. The obvious indication of an
+authentication probe is appearence of several consecutive
+authentication failures for the same user. Of course, if the intruder
+is given sufficient number of such probes he will sooner or later
+succeed in finding the actual password. The conventional method
+to prevent this from occurring is to keep @dfn{failure counters} for
+each user and to lock the account when its failure counter reaches a
+predefined limit. Notice that a legitimate user may fail (sometimes
+even several times in sequence) in entering his password, so two
+important points should always be observed. First, failure counters
+record the number of consecutive authentication failures and they are
+reset after each successive authentication. Secondly, the maximum number
+of allowed consecutive failures should be set sufficiently high.
+
+The version @value{VERSION} offers two ways for controlling 
+authentication probes: using external programs and using special
+@acronym{SQL} queries.
+
+To control authentication probes using external programs, use the
+combination of @attr{Exec-Program-Wait} and
+@attr{Auth-Failure-Trigger}. The program specified by
+@attr{Auth-Failure-Trigger} is executed each time an authentication
+attempt failed. When both attributes are used together, the program
+invoked by @attr{Auth-Failure-Trigger} can update the failure
+counter, and the one invoked by @attr{Exec-Program-Wait} can compare
+the counter value with the predefined limit and reject authentication
+when both values become equal. Such approach is most useful in
+conjunction with @code{BEGIN} profile.
+
+Let's suppose the program @file{/sbin/check_failure} accepts a user name
+and returns 1 if the failure counter for this user has reached maximum
+allowed value. Otherwise it returns 0 and clears the counter. Another program,
+@file{/sbin/count_failure} increases failure counter value for the
+given user name. Assuming our basic authentication type is @samp{PAM},
+the @file{raddb/users} file will look as follows:
+
+@smallexample
+@group
+BEGIN   NULL
+        Exec-Program-Wait = "/sbin/check_failure  %C@{User-Name@}",
+        Auth-Failure-Trigger = "/sbin/count_failure %C@{User-Name@}",
+                Fall-Through = Yes
+
+DEFAULT Auth-Type = PAM
+        Service-Type = Framed-User,
+                Framed-Protocol = PPP
+
+[@dots{} Other profiles @dots{}]                
+@end group
+@end smallexample
+
+The @code{BEGIN} profile will be executed before any other profile.
+It will add to the @RHS{} @attr{Exec-Program-Wait} and
+@attr{Auth-Failure-Trigger} attributes and then @command{radiusd} will
+proceed to finding a matching profile (due to @attr{Fall-Through}
+attribute). When such profile is found, the user will be authenticated
+according to the method set up by the profile's @attr{Auth-Type}
+attribute. If authentication fails, @file{/sbin/count_failure}
+will be called and the user name passed to it as the argument. Otherwise,
+@file{/sbin/check_failure} will be invoked. 
+
+To complete the example, here are working versions of both programs.
+Failure counters for each user name are kept in separate file in 
+@file{/var/log/radius/fails} directory. Both programs are written
+in @command{bash}.
+
+@subheading The /sbin/count_failure program
+
+@smallexample
+@group
+#! /bin/bash
+
+test $# -eq 1 || exit 1
+
+MAXFAIL=8
+REGDIR=/var/log/radius/fails
+
+if [ -r "$REGDIR/$1" ]; then
+  read COUNT < "$REGDIR/$1"
+  COUNT=$((COUNT+1))
+else
+  COUNT=1
+fi
+echo $COUNT > "$REGDIR/$1"      
+# End of /sbin/count_failure
+@end group
+@end smallexample
+
+@subheading The /sbin/check_failure program
+
+@smallexample
+@group
+#! /bin/bash
+
+test $# -eq 1 || exit 1
+
+MAXFAIL=8
+REGDIR=/var/log/radius/fails
+
+if [ -r "$REGDIR/$1" ]; then
+  read COUNT < "$REGDIR/$1"
+  if [ $COUNT -ge $MAXFAIL ]; then
+    echo "Reply-Message=\"Too many login failures. Your account is locked\""
+    exit 1
+  else
+    rm "$REGDIR/$1"
+  fi
+fi
+exit 0
+
+# End of check_failure
+@end group
+@end smallexample
+
+
+Another way of controlling authentication probes is by using
+@acronym{SQL} database to store failure counters. Two queries are
+provided for this purpose in @file{raddb/sqlserver} file:
+@code{auth_success_query} is executed upon each successful
+authentication, and @code{auth_failure_query} is executed upon
+each authentication failure. Both queries are not expected to return
+any values. One obvious purpose of @code{auth_failure_query} would be to
+update failure counters and that of @code{auth_success_query} would be
+to clear them. The @code{auth_query} or @code{group_query} should then
+be modified to take into account the number of authentication
+failures.
+
+The default @acronym{SQL} configuration GNU Radius is shipped with
+provides a working example of using these queries. Let's consider this
+example.
+
+First, we create a special table for keeping authentication failure
+counters for each user:
+
+@smallexample
+@group
+CREATE TABLE authfail (
+  # User name this entry refers to
+  user_name           varchar(32) binary default '' not null,
+  # Number of successive authentication failures for this user
+  count               int,
+  # Timestamp when this entry was last updated
+  time                datetime DEFAULT '1970-01-01 00:00:00' NOT NULL,
+  # Create a unique index on user_name
+  UNIQUE uname (user_name)
+);
+@end group
+@end smallexample
+
+The query @code{auth_fail_query} will increment the value of
+@code{count} column for the user in question:
+
+@smallexample
+@group
+auth_failure_query UPDATE authfail \
+                   SET count=count+1,time=now() \
+                   WHERE user_name='%C@{User-Name@}'
+@end group
+@end smallexample
+
+The query @code{auth_success_query} will clear @code{count}:
+
+@smallexample
+@group
+auth_success_query UPDATE authfail \
+                   SET count=0,time=now() \
+                   WHERE user_name='%C@{User-Name@}'
+@end group
+@end smallexample
+
+Now, the question is: how to use this counter in authentication? The
+answer is quite simple. First, let's create a special group for all the
+users whose authentication failure counter has reached its maximum
+value. Let this group be called @samp{*LOCKED_ACCOUNT*}. We'll add the
+following entry to @file{raddb/users}:
+
+@smallexample
+@group
+DEFAULT Group = "*LOCKED_ACCOUNT*",
+                Auth-Type = Reject
+        Reply-Message = "Your account is currently locked.\n\
+Please, contact your system administrator\n"
+@end group
+@end smallexample
+
+@noindent
+which will reject all such users with an appropriate reply message.
+
+The only thing left now is to rewrite @code{group_query} so that it
+returns @samp{*LOCKED_ACCOUNT*} when @code{authfail.count} reaches its
+maximum value. Let's say this maximum value is 8. Then the following
+query will do the job:
+
+
+@smallexample
+@group
+group_query       SELECT user_group FROM groups \
+                  WHERE user_name='%u' \
+                  UNION \
+                  SELECT CASE WHEN (SELECT count > 8 FROM authfail \
+                                                 WHERE user_name='%u')
+                         THEN '*LOCKED_ACCOUNT*' END
+@end group
+@end smallexample
+
+The default configuration comes with these queries commented out. It
+is up to you to uncomment them if you wish to use @acronym{SQL}-based
+control over authentication failures.
+
+Notice the following important points when using this approach:
+
+@enumerate 1
+@item Your @acronym{SQL} server must support @code{UNION}. Earlier
+versions of @code{MySQL} lacked this support, so if you run
+@code{MySQL} make sure you run a reasonably new version (at least
+4.0.18).
+
+@item Both @code{auth_failure_query} and @code{auth_success_query}
+assume the database already contains an entry for each user. So,
+when adding a new user to the database, make sure to insert
+an appropriate record into @code{authfails} table, e.g.
+
+@smallexample
+INSERT INTO authfail VALUES('new-user',0,now());
+@end smallexample
+@end enumerate
+
+
+
+
+                
+

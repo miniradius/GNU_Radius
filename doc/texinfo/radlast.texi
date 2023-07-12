@@ -1,0 +1,103 @@
+@c This is part of the Radius manual.
+@c Copyright (C) 1999,2000,2001,2002,2003 Free Software Foundation, Inc.
+@c Written by Sergey Poznyakoff
+@c See file radius.texi for copying conditions.
+@comment *******************************************************************
+@node Radlast, Radzap, Radwho, Utility Programs
+@section @command{radlast}
+@pindex radlast
+
+The @command{radlast} utility lists sessions of specified users, @NAS{}es,
+@NAS{} ports, and hosts, in reverse time order. By default, each line of output
+contains the login name, the @NAS{} short name and port number from where the
+session was conducted, the host IP or name, the start and stop
+times for the session, and the duration of the session. If the session
+is still continuing, @command{radlast} will so indicate.
+
+When the @option{-l} option is specified, @command{radlast} produces long
+output. It includes following fields:
+
+@itemize @bullet
+@item Login name
+@item @NAS{} short name
+@item Port number
+@item Connection protocol
+@item Port type
+@item Session @sc{id}
+@item Caller @sc{id}
+@item Framed IP address
+@item Session Start Time
+@item Session Stop Time
+@item Duration of the Session
+@end itemize
+
+
+@menu
+* Options: radlast options.      Command line options.
+@end menu
+
+@comment *******************************************************************
+@node radlast options
+@subsection @command{radlast} Command Line Options
+@pindex @command{radlast}, options
+
+Use following command line options to control the behavior of the
+@command{radlast} utility:
+
+@table @option
+@item -@var{number}
+@itemx -c @var{number}
+@itemx --count @var{number}
+When given this option, @command{radlast} will output at most this many
+lines of information. 
+
+@item -f
+@itemx --file @var{name}
+Read the specified file instead of the default @file{/var/log/radwtmp}.
+
+@item -h @var{hostname}
+@itemx --host @var{hostname}
+Report the logins from given host. Host can be either a name or a
+dotted-quad Internet address.
+
+@item -n @var{shortname}
+@itemx --nas @var{shortname}
+Report the logins from the given @NAS{}.
+
+@item -l
+@itemx --long-format
+Long output format. Report all the information stored in
+@file{radwtmp} file.
+
+@item -p @var{number}
+@itemx --port @var{number}
+Report the logins on a given port. The port may be specified either fully or
+abbreviated, e.g. @code{radlast -p S03} or @code{radlast -p 3}.
+
+@item -s
+@itemx --show-seconds
+Report the duration of the login session in seconds instead of the
+default days, hours, and minutes.
+
+@item -t
+The same as @option{-p}. This flag is provided for compatibility with
+@command{last(1)}.
+
+@item -w
+@itemx --wide
+Widen the duration field to show seconds as well as the default days,
+hours and minutes.
+
+@end table
+
+If multiple arguments are given, the logical @sc{or} operation between them
+is assumed, i.e., the information selected by each argument
+is printed. This, however, does not apply to the @option{-c}
+option. That option is
+always combined with the rest of command line by logical @sc{and}.
+
+The pseudo-user @samp{~reboot} logs in on every reboot of the network access
+server.
+
+If @command{radlast} is interrupted, it indicates to what date the search
+had progressed.

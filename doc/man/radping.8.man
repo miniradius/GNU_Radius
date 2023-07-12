@@ -1,0 +1,14 @@
+.\" $Id$
+.so config.so
+.TH radping 8 "\*(DA" "GNU Radius"
+.SH NAME
+radping - send ICMP ECHO_REQUEST packets to a dial-up host.
+
+.SH SYNOPSIS
+\fBradping\fR username
+
+.SH DESCRIPTION
+.De radping
+.SH AUTHORS
+\*(AU
+

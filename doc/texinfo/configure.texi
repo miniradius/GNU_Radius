@@ -1,0 +1,3221 @@
+@c This is part of the Radius manual.
+@c Copyright (C) 1999,2000,2001,2002,2003,2004 Free Software Foundation, Inc.
+@c Written by Sergey Poznyakoff
+@c See file radius.texi for copying conditions.
+@comment *******************************************************************
+@node Configuration Files, Request Comparison, Invocation, Top
+@chapter Radius Configuration Files
+@cindex Radiusd configuration files
+@cindex Configuration files (radiusd)
+
+At startup, GNU Radius obtains the information vital for its
+functioning from a number of configuration files. These are normally
+found in @value{RADDB} directory, which is defined at configuration
+time, although their location can be specified at runtime. In the
+discussion below we will refer to this directory by @file{raddb}.
+@xref{Naming Conventions}.
+
+Each configuration file is responsible for a certain part of the
+GNU Radius functionality. The following table lists all configuration
+files along with a brief description of their purposes.
+
+@table @file
+@item config
+Determines the runtime defaults for @command{radiusd}, such
+as the IP address and ports to listen on, the sizes of the request
+queues, configuration of the SNMP subsystem, fine-tuning of the
+extension languages, etc.
+
+@item clients
+Lists the shared secret belonging to each @NAS{}. It is
+crucial for the normal request processing that each @NAS{} have an
+entry in this file. The requests from @NAS{}es that are not listed
+in @file{clients} will be ignored, as well as those from the @NAS{}es
+that have a wrong value for the shared secret configured in this file.
+
+@item naslist
+Defines the types for the known @NAS{}es. Its information is
+used mainly when performing multiple login checking
+(@pxref{Multiple Login Checking}).
+
+@item nastypes
+Declares the known @NAS{} types. The symbolic type names,
+declared in this file can be used in @file{naslist}.
+
+@item dictionary
+Defines the symbolic names for radius attributes and attribute
+values. Only the names declared in this file may be used in the files
+@file{users}, @file{hints} and @file{huntgroups}.
+
+@item huntgroups
+Contains special rules that process the incoming requests
+basing on the @NAS{} IP and port number they come from. These can also
+be used as a kind of @dfn{access control list}.
+
+@item hints
+Defines the matching rules that modify the incoming
+request depending on the user name and its credentials.
+
+@item users
+Contains the individual users' profiles.
+
+@item realms
+Defines the Radius realms and the servers that are
+responsible for them.
+
+@item access.deny
+A list of usernames that should not be allowed access via Radius.
+
+@item sqlserver
+Contains the configuration for the @sc{sql} system. This includes the
+type of @sc{sql} interface used, the IP and port number of the server
+and the definition of the @sc{sql} requests used by @command{radiusd}.
+
+@item rewrite
+Contains the source code of functions in Rewrite extension language.
+
+@item menus
+A subdirectory containing the authentication menus. 
+@end table
+
+The rest of this chapter describes each of these files in detail.
+
+@menu
+* config file::         Run-time configuration options.
+* dictionary file::     Radius dictionary.
+* clients file::        Clients lists the @NAS{}es that are allowed to
+                        communicate with radius.
+* naslist file::        The naslist file keeps general information about
+                        the @NAS{}es.
+* nastypes file::       Information about how to query the @NAS{}es about
+                        active user sessions.
+* hints file::          Important user information that is common for the
+                        users whose names match some pattern.
+* huntgroups file::     Group users by the @NAS{} (and, possibly, a port
+                        number) they come from.
+* realms file::         Communication with remote radius servers
+* users file::          User profile.
+* access.deny file::    List of users which are denied access.
+* sqlserver file::      SQL server configuration.
+* rewrite file::        Rewrite functions allow to change the input
+                        packets.
+* menus directory::     Menus allow user to select the type of
+                        service.
+* Macro Substitution::  Macros which are expanded by the actual
+                        attribute values.      
+@end menu
+
+@comment *L2****************************************************************
+@node config file
+@section Run-Time Configuration Options --- @file{raddb/config}
+@cindex Radiusd configuration
+@cindex @file{raddb/config} file
+
+At startup @command{radiusd} obtains its configuration values from three
+places. The basic configuration is kept in the executable module
+itself.  These values are overridden by those obtained from
+@file{raddb/config} file. Finally, the options obtained from the
+command line override the first two sets of options.
+
+When re-reading of the configuration is initiated either by
+@code{SIGHUP} signal or by SNMP channel any changes in the config file
+take precedence over command line arguments, since @file{raddb/config} is
+the only way to change configuration of the running program.
+
+This chapter discusses the @file{raddb/config} file in detail.
+
+The @file{raddb/config} consists of statements and comments.
+Statements end with a semicolon. Many statements contain a block
+of sub-statements which also terminate with a semicolon.
+
+Comments can be written in shell, C, or C++ constructs, i.e. any
+of the following represent a valid comment:
+
+@smallexample
+# A shell comment
+/* A C-style
+ * multi-line comment
+ */
+// A C++-style comment
+@end smallexample
+
+These are the basic statements:
+@menu
+* option::      @code{Option} block: set the global program options.
+* logging::     Fine-tune the logging.
+* auth::        Configure authentication service.
+* acct::        Configure accounting service.
+* usedbm::      Enable the DBM feature.
+* snmp::        Configure SNMP service.
+* rewrite::     Configure Rewrite interface.
+* guile::       Configure Guile interface.
+* message::     Configure server reply messages.
+* filters::     Configure authentication and accounting filters.
+* mlc::         Configure multiple login checking.
+@end menu
+
+@comment **L3***************************************************************
+@node option
+@subsection @code{option} block
+@cindex Run-time options (radiusd)
+@kwindex option
+@kwindex source-ip
+@kwindex max-requests
+@kwindex max-processes
+@kwindex process-idle-timeout
+@kwindex master-read-timeout
+@kwindex master-write-timeout
+@kwindex radiusd-user
+@kwindex exec-program-user 
+@kwindex username-chars
+@kwindex log-dir
+@kwindex acct-dir
+@kwindex resolve
+
+@subheading Syntax:
+
+@smallexample
+option @{
+        source-ip @var{number} ; 
+        max-requests @var{number} ; 
+        radiusd-user @var{string} ; 
+        exec-program-user @var{string} ; 
+        username-chars @var{string} ; 
+        log-dir @var{string} ; 
+        acct-dir @var{string} ; 
+        resolve @var{bool} ; 
+        max-processes @var{number} ; 
+        process-idle-timeout @var{number} ; 
+        master-read-timeout @var{number} ; 
+        master-write-timeout @var{number} ; 
+@} ;
+@end smallexample
+
+@subheading Usage
+
+The @code{option} block defines the global options to be used by @command{radiusd}.
+
+@subheading Boolean statements
+
+@table @code
+
+@item resolve
+Determines whether radius should resolve the IP addresses for diagnostic
+output. Specifying @code{resolve no} speeds up the server and reduces
+the network traffic.
+
+@end table
+
+@subheading Numeric statements
+
+@table @code
+
+@item source-ip
+Sets the source @IP{}. When this statement is not present, the
+@IP{} of the first available network interface on the machine
+will be used as source.
+
+@item max-requests
+Sets the maximum number of the requests in queue.
+
+@item max-processes
+Sets the maximum number of child processes. The default value is
+16. If you plan to raise this value, make sure you have enough
+file descriptors available, as each child occupies four descriptors
+for its input/output channels.
+
+@item process-idle-timeout
+Sets the maximum idle time for child processes. A child terminates
+if it does not receive any requests from the main process within this
+number of seconds. By default, this parameter is 3600 seconds
+(one hour).
+
+@item master-read-timeout
+@itemx master-write-timeout
+These two values set the timeout values for the interprocess input/output
+operations in the main server process. More specifically,
+@code{master-read-timeout} sets the maximum number of seconds the main
+process will wait for the answer from the subprocess, and
+@code{master-write-timeout} sets the maximum number of seconds the main
+process will wait for the subprocess's comunication channel to become
+ready for input. By default, no timeouts are imposed.
+
+@end table
+
+@subheading String statements
+@table @code
+@item radiusd-user
+Instructs @command{radiusd} to drop root privileges and to switch to
+the real user and group IDs of the given user after becoming 
+daemon. Notice the following implications of this statement:
+
+@enumerate 1
+@item All configuration files must be readable for this user.
+@item Authentication type @code{System} (@pxref{System Auth}) requires
+root privileges, so it cannot be used with @code{radiusd-user}. Any
+@file{raddb/users} profiles using this authentication type will be
+discarded.
+@item Authentication type @code{PAM} (@pxref{PAM Auth}) may require root
+provileges. It is reported to always require root privileges on some
+systems (notably on Solaris).
+@item @code{exec-program-user} statement (see below) is ignored when
+used with @code{radiusd-user}.
+@end enumerate
+
+@item exec-program-user
+Sets the privileges for the programs executed as a result of
+@attr{Exec-Program} and @attr{Exec-Program-Wait}. The real user
+and group ids will be retrieved from the @file{/etc/passwd} entry
+for the given user.
+
+@item username-chars
+Determines characters that are valid within a username. The alphanumeric
+characters are always allowed in a username, it is not necessary to
+specify them in this statement. By default the following characters
+are allowed in a username: @samp{.-_!@@#$%^&\/"}. The
+@code{username-chars} statement overrides this default, thus setting:
+
+@smallexample
+username-chars ":"
+@end smallexample
+
+@noindent
+will restrict the set of allowed characters to the alphanumeric
+characters and colon. If you wish to expand the default character
+set, you will have to explicitly specify it in the
+@code{username-chars} argument, as shown in the example below:
+
+@smallexample
+username-chars ".-_!@@#$%^&\\/\":"
+@end smallexample
+
+@noindent
+(Notice the use of escape character @samp{\}).
+
+@item log-dir
+Specifies the logging directory.
+
+@item acct-dir 
+Specifies the accounting directory.
+
+@end table
+
+@comment **L3***************************************************************
+@node logging
+@subsection @code{logging} block
+@cindex Logging, @file{config} statement
+@kwindex logging
+
+@subheading Syntax:
+
+@smallexample
+logging @{
+        prefix-hook @var{string} ; 
+        suffix-hook @var{string} ; 
+        category category_spec @{
+                channel channel_name ; 
+                print-auth @var{bool} ; 
+                print-pass @var{bool} ; 
+                print-failed-pass @var{bool} ; 
+                level @var{debug_level} ; 
+        @} ; 
+        channel channel_name @{
+                file @var{string} ;
+                syslog @var{facility} . @var{priority} [@var{tag}] ;
+                print-pid @var{bool} ; 
+                print-category @var{bool} ; 
+                print-cons @var{bool} ; 
+                print-level @var{bool} ; 
+                print-priority @var{bool} ; 
+                print-tid @var{bool}; 
+                print-milliseconds @var{bool}; 
+                prefix-hook @var{string} ; 
+                suffix-hook @var{string} ; 
+        @}; 
+@} ;
+
+@end smallexample
+
+@subheading Usage
+
+The @code{logging} statement describes the course followed by
+@command{radiusd}'s logging information.
+
+The parts of this statement are discussed below.
+
+@menu
+* hooks::            Logging hooks
+* category::         @code{category} statement.
+* channel::          @code{channel} statement.
+* logging example::  Example of the @code{logging} statement.
+@end menu
+
+@comment **L4***************************************************************
+@node hooks
+@subsubsection Logging hooks
+@cindex Logging hook
+@kwindex prefix-hook
+@kwindex suffix-hook
+
+Most diagnostic messages displayed by @command{radiusd} describe
+some events that occured while processig a certain incoming request.
+By default they contain only a short summary of the event.
+@dfn{Logging hooks} are means of controlling actual amount of
+information displayed in such messages. They allow you to add to the
+message being displayed any relevant information from the incoming
+request that caused the message to appear.
+
+A @dfn{hook} is a special Rewrite function that takes three arguments
+and returns a string. There are two kinds of logging hooks: @dfn{prefix}
+and @dfn{suffix}. Return value from the prefix hook function will
+be displayed before the actual log message, that of the suffix hook
+function will be displayed after the message.
+
+Furthermore, there may be @dfn{global} and @dfn{channel-specific
+hooks}. Global hooks apply to all categories, unless overridden by
+category-specific hooks. Global prefix hook is enabled by
+@code{prefix-hook} statement appearing in the @code{logging} block.
+Global suffix hook is enabled by @code{suffix-hook} statement.
+Both statements take as their argument the name of corresponding
+Rewrite function.
+
+For detailed information about writing logging hooks,
+@xref{Logging Hook Functions}.
+
+@comment **L4***************************************************************
+@node category
+@subsubsection @code{category} statement
+@cindex Logging category
+@kwindex category
+@kwindex channel
+@kwindex print-auth
+@kwindex print-pass
+@kwindex print-failed-pass
+@kwindex level
+
+Each line of logging information generated by @command{radiusd} has an
+associated @dfn{category}.  The @code{logging} statement allows each
+category of output to be controlled independently of the others.
+The logging category is defined by @dfn{category name} and a
+@dfn{severity}. @dfn{category name} determines what part of radiusd
+daemon is allowed to send its logging information to this channel.
+It can be any of @code{main}, @code{auth}, @code{acct}, @code{proxy},
+@code{snmp}. @dfn{priority} determines the minimum priority of
+the messages displayed by this channel. The priorities in ascending
+order are: @code{debug}, @code{info}, @code{notice}, @code{warn},   
+@code{err}, @code{crit}, @code{alert}, @code{emerg}.
+
+The full category specification, denoted by the @code{category_spec}
+in the above section, can take any of the following three forms:
+
+@table @asis
+@item category_name
+Print the messages of given category.
+@item priority
+Print messages of all categories, abridged by given priority. If the
+priority is prefixed with @samp{=}, only messages with given priority
+will be displayed. If it is prefixed with @samp{!}, the messages with
+priority other than the specified will be displayed. Otherwise, the
+messages with priorities equal to or greater than the specified will
+be displayed.
+@item category_name . priority
+Print the messages of given category, abridged by given priority. The
+priority may be prefixed with either @samp{=} or @samp{!} as described
+above. The dot (@samp{.}) separates the priority from the category
+name, it may be surrounded by any amount of whitespace.
+@end table
+
+Additional category options valid for @code{auth} category are:
+@table @code
+@item print-auth
+Log individual authentications.
+@item print-pass
+Include passwords for successful authentications. It is @emph{very}
+insecure, since all users' passwords will be echoed in the logfile.
+This option is provided only for debugging purposes.
+@item print-failed-pass
+Include passwords for failed authentications.
+@end table
+
+@comment **L4***************************************************************
+@node channel
+@subsubsection @code{channel} statement
+@cindex Logging channel
+@kwindex channel
+@kwindex file
+@kwindex syslog
+@kwindex print-pid
+@kwindex print-category
+@kwindex print-cons
+@kwindex print-level
+@kwindex print-priority
+@kwindex print-tid
+@kwindex print-milliseconds
+@kwindex prefix-hook
+@kwindex suffix-hook
+
+Channels represent methods for recording logging information.  Each
+channel has a unique name, and any categories which specify that name in
+a @code{channel} statement will use that channel.
+
+@command{radiusd} can write logging information to files or send it to
+syslog.  The @code{file} statement sends the channel's output to the
+named file (@pxref{Naming Conventions}).  The @code{syslog} statement
+sends the channel's output to syslog with the specified facility and
+severity.  Its optional last argument allows to alter default syslog
+tag.
+
+Channel options modify the data flowing through the channel:
+
+@table @code
+@item print-pid
+Add the process @sc{id} of the process generating the logging information.
+@item print-cons
+Also send the logging information to the system console.
+@item print-category
+Add the category name to the logging information.
+@item print-priority
+@itemx print-level
+Add the priority name to the logging information.
+@item print-milliseconds
+Print timestamp with milliseconds.
+@item prefix-hook
+Declares the name of Rewrite function used as logging prefix hook for that
+channel (@pxref{hooks}). This overrides any global prefix hook.
+@item suffix-hook
+Declares the name of Rewrite function used as logging suffix hook for that
+channel (@pxref{hooks}). This overrides any global suffix hook.
+@end table
+
+@comment **L4***************************************************************
+@node logging example
+@subsubsection Example of the @code{logging} statement
+@exindex @command{logging} statement
+
+@smallexample
+logging @{
+        channel default @{
+                file "radius.log";
+                print-category yes;
+                print-priority yes;
+        @};
+        channel info @{
+                file "radius.info";
+                print-pid yes;
+                print-cons yes;
+                print-priority yes;
+        @};
+        channel notice @{
+                syslog auth.notice;
+        @};
+
+        category auth @{
+                print-auth yes;
+                print-failed-pass yes;
+        @};
+        category notice @{
+                channel notice;
+        @};
+        category info @{
+                channel info;
+        @};
+        category debug @{
+                channel info;
+                level radiusd=1,files;
+        @};
+
+        category *.!debug @{
+                channel default;
+        @};
+@};
+@end smallexample
+
+@comment **L3***************************************************************
+@node auth
+@subsection @code{auth} statement
+@cindex Authentication service parameters
+@cindex Customizing authentication server
+@kwindex auth 
+@kwindex listen
+@kwindex port
+@kwindex max-requests 
+@kwindex time-to-live 
+@kwindex request-cleanup-delay
+@kwindex detail
+@kwindex strip-names
+@kwindex checkrad-assume-logged
+@kwindex password-expire-warning
+@kwindex compare-atribute-flag
+@subheading Syntax:
+
+@smallexample
+auth @{
+        listen ( @var{addr-list} | no ); 
+        forward @var{addr-list}; 
+        port @var{number} ; 
+        max-requests @var{number} ; 
+        time-to-live @var{number} ; 
+        request-cleanup-delay @var{number} ; 
+        detail @var{bool} ; 
+        strip-names @var{bool} ; 
+        checkrad-assume-logged @var{bool} ; 
+        password-expire-warning @var{number} ; 
+        compare-atribute-flag @var{character} ; 
+        trace-rules @var{bool} ; 
+        reject-malformed-names @var{bool} ; 
+@} ;
+@end smallexample
+
+@subheading Usage:
+The @code{auth} statement configures the parameters of the authentication
+service.
+
+@subheading @code{listen} statement
+
+This statement determines on which addresses radiusd will listen for incoming
+authentication requests. Its argument is a comma-separated list of items
+in the form @var{ip}:@var{port-number}. @var{ip} can be either an IP
+address in familiar ``dotted-quad'' notation or a
+hostname. :@var{port-number} part may be omitted, in which case the
+default authentication port is assumed.
+
+If the @code{listen} statement is omitted, radiusd will accept incoming
+requests from any interface on the machine.
+
+The special value @code{no} disables listening for authentication
+requests.
+
+The following example configures radius to listen for the incoming
+requests on the default authentication port on the address 10.10.10.1
+and on port 1645 on address 10.10.11.2.
+
+@smallexample
+listen 10.10.10.1, 10.10.11.2:1645;
+@end smallexample
+
+@subheading @code{forward} statement
+
+This statement enables @dfn{forwarding} of the requests to the given
+set of servers. Forwarding is an experimental feature of GNU Radius,
+it differs from proxying in that the requests are sent to the remote
+server (or servers) @emph{and} processed locally. The remote server
+is not expected to reply.
+
+This mode is intended primarily for debugging purposes. It could also
+be useful in some very complex and unusual configurations. 
+
+@subheading Numeric statements
+
+@table @code
+@item port
+Sets the number of which @sc{udp} port to listen on for the
+authentication requests.
+
+@item max-requests
+Sets the maximum number of authentication requests in the queue. Any
+surplus requests will be discarded.
+
+@item time-to-live
+Sets the request time-to-live in seconds. The time-to-live is the time
+to wait for the completion of the request. If the request job isn't
+completed within this interval of time it is cleared, the corresponding
+child process killed and the request removed from the queue.
+
+@item request-cleanup-delay
+Sets the request cleanup delay in seconds, i.e. determines how long will
+the completed authentication request reside in the queue.
+
+@item password-expire-warning
+Sets the time interval for password expiration warning. If user's
+password expires within given number of seconds, radiusd will send
+a warning along with authentication-acknowledge response. Default
+is 0.
+@end table
+
+@subheading Boolean statements
+
+@table @code
+
+@item detail
+When set to true, @command{radiusd} will produce the detailed log of each
+received packet in the file @file{radacct/@var{nasname}/detail.auth}. The
+format of such log files is identical to the format of detailed
+accounting files (@pxref{Detailed Request Accounting}).
+
+@item strip-names
+Determines whether @command{radiusd} should strip any prefixes/suffixes
+off the username before logging.
+
+@item checkrad-assume-logged
+@xref{mlc}, for the description of this setting. It is accepted in
+@code{auth} for compatibility with previous versions of GNU Radius.  
+
+@item trace-rules
+Enables tracing of the configuration rules that were matched during
+processing of each received authentication request. @xref{Rule
+Tracing}, for detailed information about this mode.
+
+@item reject-malformed-names
+Enables sending access-reject replies for the access-accept requests
+that contain an invalid value in @attr{User-Name} attribute. By default
+such requests are discarded without answering. See the description of
+@code{username-chars} (@pxref{option,username-chars,Option statement}).
+
+@end table
+
+@subheading Character statement
+
+@table @code
+@item compare-attribute-flag
+The argument to this statement is a character from @samp{1} through
+@samp{9}. This statement modifies the request comparison method for
+authentication requests. @xref{Extended Comparison}, for a detailed
+description of its usage.
+
+@end table
+
+
+@comment **L3***************************************************************
+@node acct
+@subsection @code{acct} statement
+@cindex Accounting service parameters
+@cindex Customizing accounting service
+@kwindex acct statement 
+@kwindex listen
+@kwindex port 
+@kwindex max-requests 
+@kwindex time-to-live 
+@kwindex request-cleanup-delay
+@kwindex detail
+@kwindex compare-atribute-flag
+
+@subheading Syntax:
+@smallexample
+acct @{
+        listen ( @var{addr-list} | no ); 
+        forward @var{addr-list} ; 
+        port @var{number} ; 
+        detail @var{bool}; 
+        system @var{bool};
+        max-requests @var{number} ; 
+        time-to-live @var{number} ; 
+        request-cleanup-delay @var{number} ; 
+        compare-atribute-flag @var{character} ; 
+        trace-rules @var{bool} ; 
+@} ;
+@end smallexample
+
+@subheading Usage:
+
+The @code{acct} statement configures the parameters of the accounting
+service.
+
+@subheading @code{listen} statement
+
+This statement determines on which addresses radiusd will listen for incoming
+accounting requests. Its argument is a comma-separated list of items
+in the form @var{ip}:@var{port-number}. @var{ip} can be either an IP
+address in familiar ``dotted-quad'' notation or a
+hostname. :@var{port-number} part may be omitted, in which case the
+default accounting port is assumed.
+
+If the @code{listen} statement is omitted, radiusd will accept incoming
+requests from any interface on the machine.
+
+The special value @code{no} disables listening for accounting
+requests.
+
+The following example configures radius to listen for the incoming
+requests on the default accounting port on the address 10.10.10.1
+and on port 1646 on address 10.10.11.2.
+
+@smallexample
+listen 10.10.10.1, 10.10.11.2:1646;
+@end smallexample
+
+@subheading @code{forward} statement
+
+This statement enables @dfn{forwarding} of the requests to the given
+set of servers. Forwarding is an experimental feature of GNU Radius,
+it differs from proxying in that the requests are sent to the remote
+server (or servers) @emph{and} processed locally. The remote server
+is not expected to reply.
+
+This mode is intended primarily for debugging purposes. It could also
+be useful in some very complex and unusual configurations. 
+
+@subheading Numeric statements
+
+@table @code
+@item port 
+Sets the number of which port to listen for the authentication requests.
+
+@item max-requests 
+Sets the maximum number of accounting requests in the queue. Any
+surplus requests will be discarded.
+
+@item time-to-live
+Sets the request time-to-live in seconds. The time-to-live is the time
+to wait for the completion of the request. If the request job isn't
+completed within this interval of time it is cleared, the corresponding
+child process killed and the request removed from the queue.
+
+@item request-cleanup-delay 
+Sets the request cleanup delay in seconds, i.e. determines how long will
+the completed account request reside in the queue.
+
+@end table
+
+@subheading Boolean statements
+
+@table @code
+@item detail
+When set to @code{no}, disables detailed accounting
+(@pxref{Detailed Request Accounting}). 
+
+@item system
+When set to @code{no}, disables system accounting (@pxref{System
+Accounting}). Notice, that this will disable simultaneous use checking
+as well, unless you supply an alternative @sc{mlc} method (currently
+@sc{sql}, @xref{Multiple Login Checking}, for the detailed discussion
+of this). 
+
+@item trace-rules
+Enables tracing of the configuration rules that were matched during
+processing of each received accounting request. @xref{Rule
+Tracing}, for detailed information about this mode.
+@end table
+
+@subheading Character statement
+
+@table @code
+@item compare-attribute-flag
+The argument to this statement is a character from @samp{1} through
+@samp{9}. This statement modifies the request comparison method for
+authentication requests. @xref{Extended Comparison}, for a detailed
+description of its usage.
+
+@end table
+
+@comment **L3***************************************************************
+@node usedbm
+@subsection @code{usedbm} statement
+@cindex DBM: enabling
+@cindex Enabling DBM
+@kwindex usedbm 
+
+@subheading Syntax:
+@smallexample
+usedbm ( yes | no ) ;
+@end smallexample
+
+@subheading Usage
+The @code{usedbm} statement determines whether the DBM support should
+be enabled.
+
+@table @code
+@item no
+Do not use DBM support at all.
+
+@item yes
+Use only the DBM database and ignore @file{raddb/users}.
+
+@end table
+
+@comment **L3***************************************************************
+@node snmp
+@subsection @code{snmp} statement 
+@cindex SNMP service parameters
+@cindex Customizing SNMP server
+@kwindex snmp
+@kwindex port 
+@kwindex max-requests
+@kwindex time-to-live
+@kwindex request-cleanup-delay
+@kwindex ident
+@kwindex community
+@kwindex network
+@kwindex acl
+@kwindex allow
+@kwindex deny
+@kwindex storage
+@kwindex file
+@kwindex perms
+@kwindex max-nas-count
+@kwindex max-port-count
+
+@subheading Syntax:
+@smallexample
+snmp @{
+        port @var{portno} ; 
+        listen ( @var{addr-list} | no ); 
+        max-requests @var{number} ; 
+        time-to-live @var{number} ; 
+        request-cleanup-delay @var{number} ; 
+        ident @var{string} ; 
+        community @var{name} ( rw | ro ) ; 
+        network @var{name} @var{network} [ @var{network} ... ] ; 
+        acl @{
+                allow @var{network_name} @var{community_name} ; 
+                deny @var{network_name} ; 
+        @} ; 
+        storage @{
+                file @var{filename} ; 
+                perms @var{number} ; 
+                max-nas-count @var{number} ; 
+                max-port-count @var{number} ; 
+        @} ; 
+@};
+@end smallexample
+
+@subheading Usage
+The @code{snmp} statement configures the SNMP service.
+
+@subheading @code{listen} statement
+
+The @code{listen} statement determines on which addresses radiusd will
+listen for incoming SNMP requests. The argument is a comma-separated
+list of items in the form @var{ip}:@var{port-number}. The @var{ip} can
+be either an IP address in familiar ``dotted-quad'' notation or a
+hostname. The :@var{port-number} part may be omitted, in which case the
+default SNMP port (161) is used.
+
+If the @code{listen} statement is omitted, radiusd will accept incoming
+requests from any interface on the machine.
+
+The special value @code{no} disables listening for SNMP requests.
+
+The following example configures radius to listen for the incoming
+SNMP requests on the default SNMP port on the address 10.10.10.1
+and on port 4500 on address 10.10.11.2.
+
+@smallexample
+listen 10.10.10.1, 10.10.11.2:4500;
+@end smallexample
+
+
+@subheading Numeric statements
+
+@table @code
+@item port
+Sets the number of which port to listen for the SNMP requests.
+
+@item max-requests
+Sets the maximum number of SNMP requests in the queue. Any
+surplus requests will be discarded.
+
+@item time-to-live
+Sets the request time-to-live in seconds. The time-to-live is the time
+to wait for the completion of the request. If the request job isn't
+completed within this interval of time it is cleared, the corresponding
+child process killed and the request removed from the queue.
+
+@item request-cleanup-delay 
+Sets the request cleanup delay in seconds, i.e. determines how long will
+the completed SNMP request reside in the queue.
+
+@end table
+
+@subheading String statements
+
+@table @code
+@item ident
+Sets the SNMP server identification string.
+@end table
+
+@subheading Community and network definitions
+
+@table @code
+@item community @var{name} ( rw | ro )
+Defines the community @var{name} as read-write (@code{rw}) or read-only
+(@code{ro}).
+
+@item network @var{name} @var{network} [ @var{network} ... ]
+Groups several networks or hosts under one logical network name.
+
+@end table
+
+@subheading Access-Control List definitions
+
+@table @code
+@item allow @var{network_name} @var{community_name}
+allow hosts from the group @var{network_name} access to community
+@var{community_name}.
+
+@item deny @var{NETWORK_NAME}
+Deny access to SNMP service from any host in the group @var{network_name}.
+@end table
+
+@subheading Storage control
+
+GNU Radius stores the SNMP monitoring data in an area of shared
+memory mapped to an external file. This allows all subprocesses
+to share this information and to accumulate the statistics across
+invocations of the daemon.
+
+The @code{storage} statement controls the usage of the storage for
+the SNMP data.
+
+@table @code
+@item file
+Sets the file name for the SNMP storage file. Unless the filename
+begins with a @samp{/} it is taken as relative to the current
+logging directory.
+
+@item perms
+Sets the access permissions for the storage file. @emph{Notice}, that
+this statement does not interpret its argument as octal by default, so
+be sure to prefix it with @samp{0} to use an octal value.
+
+@item max-nas-count
+Sets maximum number of NASes the storage file is able to handle. Default
+is 512. Raise this number if you see the following message in your log
+file:
+
+@cartouche
+@example
+reached SNMP storage limit for the number of
+monitored NASes: increase max-nas-count
+@end example
+@end cartouche
+
+@item max-port-count
+Sets maximum number of ports the storage file is able to handle. Default
+is 1024. Raise this number if you see the following message in your log
+file:
+
+@cartouche
+@example
+reached SNMP storage limit for the number of
+monitored ports: increase max-port-count
+@end example
+@end cartouche
+
+@end table
+
+@comment **L3***************************************************************
+@node rewrite
+@subsection @code{rewrite} statement.
+@cindex Rewrite language settings
+@kwindex rewrite
+@UNREVISED{}
+
+@subheading Syntax:
+@smallexample
+rewrite @{
+        stack-size @var{number} ; 
+        load-path @var{string} ; 
+        load @var{string} ; 
+@};
+@end smallexample
+
+@subheading Numeric statements
+
+@table @code
+@item stack-size
+Configures runtime stack size for Rewrite. The @var{number} is the
+size of stack in words. The default value is 4096.
+@end table
+
+@subheading String statements
+@table @code
+@item load-path
+Add specified pathname to the list of directories searched for
+rewrite files. 
+@item load
+Loads the specified source file on startup. Unless @var{string} is an
+absolute pathname, it will be searched in directories set up by
+@code{load-path} statement.
+@end table 
+
+@subheading Loading
+
+The default load path is @code{@file{RADDB}:@file{DATADIR}/rewrite}. @FIXME{
+Describe the loading process in detail. Also, some kind of
+autoloading is necessary for Rewrite.}
+
+@comment **L3***************************************************************
+@node guile
+@subsection @code{guile} statement
+@cindex Guile interface configuration
+@cindex Customizing Radiusd Guile interface
+@kwindex guile 
+@kwindex debug
+@kwindex load-path
+@kwindex load-module
+@kwindex load
+@kwindex gc-interval
+@kwindex outfile
+@kwindex eval
+@UNREVISED{}
+
+The @code{guile} statement allows to configure server interface with
+Guile. 
+
+@subheading Syntax
+
+@smallexample
+guile @{
+        debug @var{bool} ; 
+        load-path @var{string} ; 
+        load @var{string} ; 
+        load-module @var{string} [ @var{string} ... ] ; 
+        eval @var{expression} [ @var{expression} ... ] ; 
+        gc-interval @var{number} ; 
+        outfile @var{string} ; 
+@};
+@end smallexample
+
+@subheading Usage
+
+@subheading Boolean statements
+
+@table @code
+@item debug
+When set to yes, enables debugging evaluator and backtraces on Guile
+scripts.
+@end table
+
+@subheading Numeric statements
+
+@table @code
+@item gc-interval
+Configures the forced garbage collections. By default the invocation
+of the garbage collector is run by the internal Guile mechanism.
+However, you may force Radius to trigger the garbage collection
+at fixed time intervals. The @code{gc-interval} statement sets
+such interval in seconds.
+
+For more information about Guile memory management system in general
+and garbage collections in particular, see @ref{Memory Management,,Memory Management and Garbage Collection,guile,The Guile Reference Manual}.
+
+@end table
+
+@subheading String statements
+@table @code
+@item eval
+Evaluates its argument as @code{Scheme} expression.
+
+@item load-path
+Adds specified pathname to @code{%load-path} variable.
+
+@item load
+Loads the specified source file on startup.
+
+@item load-module
+Loads the specified Scheme module on startup. This statement takes an
+arbitrary number of arguments. The first argument specifies the name
+of the module to load, the rest of arguments is passed to the
+@dfn{module initialization} funtion. Module initialization function
+is a function named @samp{@var{module}-init}, where @var{module} is
+the module name. Arguments are converted using usual @code{Guile}
+rules, except that the ones starting with a dash (@samp{-}) are
+converted to keyword arguments.  @FIXME{Describe the
+loading sequence in more detail. Why are modules preferred over plain
+SCM programs, etc.}
+
+@item outfile
+Redirects the standard output and standard error streams of the @code{Guile}
+functions to the given file. Unless the filename starts with @samp{/},
+it is taken relative to the current logging directory.
+@end table
+
+@xref{Guile}, for a detailed description of Guile extensions interface.
+
+@comment **L3***************************************************************
+@node message
+@subsection @code{message} statement
+@cindex Messages: configuring
+@cindex Customizing reply messages
+@kwindex message
+@kwindex account-closed 
+@kwindex password-expired
+@kwindex password-expire-warning 
+@kwindex access-denied 
+@kwindex realm-quota 
+@kwindex multiple-login 
+@kwindex second-login 
+@kwindex timespan-violation 
+
+The @code{message} statement allows to set up the messages that are
+returned to the user with authentication-response packets.
+
+@subheading Syntax
+
+@smallexample
+message @{
+        account-closed @var{string} ; 
+        password-expired @var{string} ; 
+        password-expire-warning @var{string} ; 
+        access-denied @var{string} ; 
+        realm-quota @var{string} ; 
+        multiple-login @var{string} ; 
+        second-login @var{string} ; 
+        timespan-violation @var{string} ; 
+@};
+@end smallexample
+
+All variables in @code{message} block take a string argument. In
+@var{string} you can use the usual C backslash notation to represent
+non-printable characters. The use of %C@{@} and %R@{@} sequences
+is also allowed (@pxref{Macro Substitution}).
+
+@subheading String statements
+@table @code
+@item account-closed
+This message will be returned to the user whose account is
+administratively closed.
+@item password-expired
+This message will be returned to the user whose password has expired.
+@item password-expire-warning
+This is a warning message that will be returned along with an
+authentication-acknowledge packet for the user whose password will
+expire in less than @var{n} seconds. The value of @var{n} is set by
+@code{password-expire-warning} variable in @code{auth} block.
+@xref{auth}. In this string, you can use the %R@{Password-Expire-Days@}
+substitution, to represent the actual number of @emph{days} left
+to the expiration date. The default is
+
+@smallexample
+Password Will Expire in %R@{Password-Expire-Days@} Days\r\n
+@end smallexample
+@item access-denied
+This message is returned to the user who supplies an incorrect password or
+a not-existent user-name as his authentication credentials.
+@item realm-quota
+This message is returned when the user is trying to log in using a
+realm, and number of users that are currently logged in from this realm
+reaches maximum value. For a description of realms, see @ref{Realms}.
+@item multiple-login
+This message is returned to the user, who has logged in more than
+allowed number of times. For description of how to set the maximum
+number of concurrent logins, see @ref{Simultaneous-Use}.
+@item second-login
+This is a special case of @code{multiple-login}, which is used when
+the user's login limit is 1.
+@item timespan-violation
+This message is returned to the user who is trying to login outside of
+allowed time interval. For description of how to limit user's login
+time, see @ref{Login-Time}.
+@end table
+
+@comment **L3***************************************************************
+@node filters
+@subsection @code{filters} statement
+@kwindex filters
+@kwindex filter
+@kwindex auth
+@kwindex acct
+@kwindex common
+@kwindex input-format
+@kwindex wait-reply
+
+The @code{filters} statement configures user-defined external filters.
+@xref{Filters}, for the detailed discussion of external filters.
+
+@subheading Syntax
+
+@smallexample
+filters @{
+        filter @var{ident} @{
+                exec-path @var{path} ;
+                error-log @var{filename} ;
+                common @var{bool} [@var{max-wait}];
+                auth @{
+                        input-format @var{fmt} ;
+                        wait-reply @var{bool} ;
+                @};
+                acct @{
+                        input-format @var{fmt} ;
+                        wait-reply @var{bool} ;
+                @};
+        @};
+        @dots{}
+@};
+@end smallexample                        
+
+@noindent
+Each @code{filter} directive defines a new filter. The @var{ident}
+argument declares the name of the filter. This string must be
+used in @attr{Exec-Program-Wait} or @attr{Acct-Ext-Program} attributes
+to trigger invocation of this filter (@pxref{Exec-Program-Wait}).
+
+@subheading Usage
+
+@table @asis
+@item exec-path @var{path}
+Absolute path to the filter program.
+
+@item error-log @var{filename}
+Redirect error output from the filter program to @var{filename}. If the
+@var{filename} does not start with a slash, it is taken relative to
+the current logging directory (@pxref{option,log-dir}).
+
+@item auth
+@itemx acct
+
+These compound statements define authentication and accounting
+parts of this filter. Any one of them may be missing. The two
+statements allowed within @code{auth} and @code{acct} blocks are:
+
+@table @asis
+@item input-format @var{fmt}
+Format of the input line for this filter. Usually this string
+uses %C@{@} notations (@pxref{Macro Substitution}).
+
+You can also use the return value from a @code{rewrite} function as
+input line to the filter. To do so, declare:
+
+@smallexample
+        input-format "=my_func()";
+@end smallexample
+
+@noindent
+where @var{my_func} is the name of the rewrite function to invoke. The
+function must return string value.
+
+@item wait-reply @var{bool}
+If the filter prints a single line of output for each input line, set
+this to @code{yes}. Otherwise, if the filter produces no output, use
+@code{wait-reply no}.
+@end table
+
+@end table
+
+@comment **L3***************************************************************
+@node mlc
+@subsection @code{mlc} statement
+@kwindex mlc
+@kwindex sql
+@kwindex system
+
+@subheading Syntax
+
+@smallexample
+mlc @{
+        method (system|sql);  
+        checkrad-assume-logged @var{bool};
+@};
+@end smallexample
+
+@subheading Usage
+
+@code{Mlc} statement configures multiple login checking subsystem
+(@pxref{Multiple Login Checking}).
+
+@table @asis
+@item method
+Sets the method of retrieving information about the currently open
+sessions. Currently two methods are implemented. Setting @code{method}
+to @code{system} will use system accounting database (@pxref{System
+Accounting}). This is the default method. Setting it to @code{sql}
+will use @sc{sql} database.
+
+@item checkrad-assume-logged
+@command{radiusd} consults the value of this variable when the @NAS{}
+does not responds to checkrad queries (@pxref{Multiple Login Checking}).
+If this variable is set to @code{yes}, the daemon will proceed as if
+the @NAS{} returned ``yes'', i.e. it will assume the user is logged in.
+Otherwise @command{radiusd} assumes the user @emph{is not} logged in.
+
+@end table
+
+@comment *L2****************************************************************
+@node dictionary file
+@section Dictionary of Attributes --- @file{raddb/dictionary}
+@cindex Radius dictionary
+@cindex @file{dictionary} file
+
+The dictionary file @file{raddb/dictionary} defines the symbolic names
+for radius attributes and their values (@pxref{Attributes}). The file consists
+of a series of statements, each statement occupies one line.
+
+In the detailed discussion below we use the following meta-syntactic
+characters:
+
+@table @var
+@item number
+Denotes a decimal, octal or hexagesimal number. Usual C conventions are
+honored, i.e. if @var{number} starts with @samp{0x} or @samp{0X} it is
+read as a hex number, if it starts with @samp{0} it is read as an
+octal number, otherwise it is read as a decimal one.
+@item type
+Denotes an attribute type. These are valid attribute types:
+
+@table @code
+@item string
+A string type. 
+@item integer
+An integer type.
+@item ipaddr
+@IP{} in a dotted-quad form.
+@item date
+A date in the format: "MON DD CCYY", where MON is the usual three-character
+abbreviation, DD is day of month (1-31), CCYY is the year, including the
+century.
+@end table
+@end table
+
+@menu
+* Comment::             Introducing a comment line.
+* $INCLUDE::            Include a file.
+* VENDOR::              Define a vendor-id.
+* ATTRIBUTE::           Define an attribute translation.
+* BEGIN::               Blocks of vendor-specific attributes
+* ALIAS::               Define alternative name for an attribute.
+* PROPERTY::            Define attribute properties.
+* VALUE::               Define a value translation.
+@end menu
+
+@comment **L3***************************************************************
+@node Comment
+@subsection Comments
+Comments are introduced by a pound sign (@samp{#}). Everything starting from
+the first occurrence of @samp{#} up to the end of line is ignored.
+
+@comment **L3***************************************************************
+@node $INCLUDE
+@subsection $INCLUDE Statement
+@kwindex $INCLUDE (dictionary)
+
+@subheading Syntax
+@smallexample
+$INCLUDE @file{filename}
+@end smallexample
+
+@subheading Usage
+The @code{$INCLUDE} statement causes the contents of the file @file{filename}
+to be read in and processed. The file is looked up in the Radius database
+directory, unless its name starts with a slash. 
+
+@comment **L3***************************************************************
+@node VENDOR
+@subsection VENDOR Statement
+@kwindex VENDOR
+
+@subheading Syntax
+@smallexample
+VENDOR  @var{vendor-name} @var{vendor-id}
+@end smallexample 
+
+@subheading Usage
+A @code{VENDOR} statement defines the symbolic name @var{vendor-name}
+for vendor identifier @var{vendor-id}.
+This name can subsequently be used in @code{ATTRIBUTE} statements
+to define Vendor-Specific attribute translations. @xref{Vendor-Specific}.
+
+@subheading Example
+@smallexample
+VENDOR  Livingston  307
+@end smallexample
+
+@comment **L3***************************************************************
+@node ATTRIBUTE
+@subsection ATTRIBUTE statement
+@kwindex ATTRIBUTE 
+@subheading Syntax
+@smallexample
+ATTRIBUTE  @var{name}  @var{number}  @var{type} [@var{vendor}] [@var{flags}]
+@end smallexample
+
+@subheading Usage
+The @code{ATTRIBUTE} statement defines the internal representation of
+an attribute: its symbolic name, data type and syntactical usage.
+Its parts have the following meaning:
+
+@table @var
+@item name
+The attribute name.
+@item number
+The attribute @acronym{ID} (number).
+@item type
+The attribute type. 
+@item vendor
+Vendor name for vendor-specific attributes. For usual attributes this
+field is empty or contains a dash (@samp{-}). The latter usage is
+for compatibility with previos version of GNU Radius
+@item flags
+Flags, defining attribute properties (@pxref{Attributes}).
+@end table
+
+The @dfn{attribute property flags} consist of a sequence of letters,
+whose meaning is determined by the following rules:
+@footnote{The @var{flags} are optional for compatibility with previous
+versions of GNU Radius. If they are omitted, the default is @samp{[LRLRLR]+}}
+
+@enumerate 1
+@item
+The attribute usage is described by three pairs of symbols, enclosed
+in square brackets. Each pair describes how the attribute can be
+used in each of three configuration files. The first pair corresponds
+to @file{raddb/users}, the second one corresponds to @file{raddb/hints},
+and the third one corresponds to @file{raddb/huntgroups}. Within each
+pair, the letter @samp{L} in first position means that the attribute
+is allowed in @LHS{} of a rule. The letter @samp{R} in second position
+means that the attribute is allowed in @RHS{} of a rule. The absence of
+any of these letters is indicated by dash (@samp{-}). Thus, the
+following usage specification:
+
+@smallexample
+        [L--RLR]
+@end smallexample
+@noindent
+
+means that the attribute may be used in @LHS{} of a rule in @file{raddb/users},
+in @RHS{} of a rule in @file{raddb/hints}, and in both sides of a rule
+in @file{raddb/huntgroups}.
+@item
+The attribute additivity is described by one of the following letters:
+@table @asis
+@item =
+Additivity = Replace
+@item +
+Additivity = Append
+@item N
+Additivity = None
+@end table
+@item
+The presence of letter @samp{P} in property flags raises the propagation
+bit.
+@item
+Letter @samp{l} (lower-case ell) enables logging the given attribute
+in detail file (@pxref{Detailed Request Accounting}). This is meaningful
+only for internal attributes, i.e. the ones whose decimal value is
+greater than 255 (@pxref{Radius Internal Attributes}). By default such
+attributes do not appear in detailed logs. The flag @samp{l} reverts
+this behavior.
+@item 
+Letter @samp{E} marks attributes encrypted as described in RFC 2138.
+Currently these are User-Password and CHAP-Password. 
+@item 
+Letter @samp{T} marks attribute encrypted according to RFC 2868.
+@item
+The characters from @samp{1} to @samp{9} denote nine user-defined flags
+(@pxref{Extended Comparison}).
+@end enumerate
+
+@subheading Example
+
+@smallexample
+ATTRIBUTE  Service-Type  6 integer - [LR-RLR]=P 
+@end smallexample
+
+This statement declares that the attribute number 6 will be referred
+to by the symbolic name @samp{Service-Type}. The attribute is of
+integer data type and it may be used  in any part of matching rules,
+except in @LHS{} of a @file{raddb/hints} rule. The
+additivity of @attr{Service-Type} is set to @samp{Replace}. The
+attribute will be propagated through the proxy chain.
+
+@comment **L3***************************************************************
+@node BEGIN
+@subsection Blocks of Vendor-Specific Attributes
+@kwindex BEGIN
+@kwindex END
+@kwindex BEGIN-VENDOR
+@kwindex END-VENDOR
+
+@subheading Syntax
+@smallexample
+@group
+BEGIN VENDOR @var{vendor-name} [@var{vendor-id}]
+@dots{}
+END 
+@end group
+@end smallexample
+
+@subheading Usage
+The @code{BEGIN} keyword marks start of the block of definitions of
+vendor-specific attributes. The block is terminated by @code{END}
+keyword, optionally followed by an arbitrary number of words,
+which are regarded as a comment. The block may contain any valid
+dictionary declarations, except other blocks: nesting of declaration
+blocks is not allowed.
+
+If @var{vendor-id} is absent, the value of vendor ID is looked
+up in the internal table of vendors; therefore, it must be
+defined before @code{BEGIN} statement (@pxref{VENDOR}).
+
+@code{BEGIN---END} block alters the handling of @code{ATTRIBUTE}
+statements within it. If @code{ATTRIBUTE} statement does not
+contain an explicit vendor-id specification, the value of 
+@var{vendor-id} is used instead.
+
+For compatibility with FreeRadius an alternative syntax is also
+supported:
+
+@smallexample
+@group
+BEGIN-VENDOR @var{vendor-name}
+@dots{}
+END-VENDOR @var{vendor-name}
+@end group
+@end smallexample
+
+@noindent
+Such compatibility blocks must appear only ater the declaration of
+@var{vendor-name} (@pxref{VENDOR}).
+
+@subheading Example
+
+The following is the usual way of definig vendor-specific attributes:
+
+@smallexample
+@group
+VENDOR          Livingston      307
+
+ATTRIBUTE       LE-Terminate-Detail     2       string  Livingston
+ATTRIBUTE       LE-Advice-of-Charge     3       string  Livingston
+@end group
+@end smallexample
+
+@noindent
+The following two examples show the alternative ways:
+ 
+@smallexample
+@group
+VENDOR Livingston 307
+BEGIN VENDOR Livingston
+ATTRIBUTE       LE-Terminate-Detail     2       string  
+ATTRIBUTE       LE-Advice-of-Charge     3       string
+END
+@end group
+@end smallexample
+
+@smallexample
+@group
+BEGIN VENDOR Livingston 307
+ATTRIBUTE       LE-Terminate-Detail     2       string  
+ATTRIBUTE       LE-Advice-of-Charge     3       string
+END
+@end group
+@end smallexample
+
+@noindent
+These three examples are completely equivalent to each other.
+
+@comment **L3***************************************************************
+@node ALIAS
+@subsection ALIAS statement
+@kwindex ALIAS
+@subheading Syntax
+@smallexample
+ALIAS @var{name}  @var{alt-name}
+@end smallexample
+
+@subheading Usage
+The @code{ALIAS} statement defines an altenative name @var{alt-name}
+for attribute @var{name}. The latter should already be defined,
+otherwise an error occurs.
+
+@subheading Example
+
+@smallexample
+ALIAS User-Password Password
+@end smallexample
+
+@comment **L3***************************************************************
+@node PROPERTY
+@subsection PROPERTY statement
+@kwindex PROPERTY
+@subheading Syntax
+@smallexample
+PROPERTY  @var{name}  @var{flags}
+PROPERTY  @var{name}  +@var{flags} [-@var{flags} ...]
+@end smallexample
+
+@subheading Usage
+The @code{PROPERTY} statement redefines property flags for attribute
+@var{name}. The attribute must be defined, otherwise an error occurs.
+The @code{PROPERTY} statement has two forms. In first form, it takes
+a single argument, representing new property flags for the attribute.
+In its second form it takes any number of arguments, each of them
+preceeded by @samp{+} sign, inidicating addition of properties, or
+by @samp{-} sign, indicating removal of these.
+
+@xref{ATTRIBUTE}, for the discussion of attribute property flags.
+
+@subheading Example
+
+The following example defines that the attribute @attr{User-Password}
+may be used only on left-hand side of a @file{raddb/users} entry, and
+that it is transmitted in encrypted form.
+
+@smallexample
+PROPERTY  User-Password [L-----]E
+@end smallexample
+
+@noindent
+Next example illustrates adding and removing attribute properties:
+
+@smallexample
+PROPERTY  My-Attrib     +P -=
+@end smallexample
+
+@noindent
+it adds propagation bit (@samp{P}) and removes @samp{replace}
+additivity from @attr{My-Attrib} attribute.
+
+
+@comment **L3***************************************************************
+@node VALUE
+@subsection VALUE Statement
+@kwindex VALUE 
+
+@subheading Syntax
+@smallexample
+VALUE   Attribute-Translation       Value-Translation       @var{number}
+@end smallexample
+
+@subheading Usage
+The @code{VALUE} statement assigns a translation string to a given
+value of an integer attribute. @code{Attribute-Translation} specifies
+the attribute and the @code{Value-Translation} specifies the name
+assigned to the value @var{number} of this attribute.
+
+@subheading Example
+
+The following assigns the translation string @samp{Login-User} to
+the value 1 of the attribute @samp{Service-Type}.
+
+@smallexample
+VALUE  Service-Type  Login-User  1
+@end smallexample
+
+@comment *L2****************************************************************
+@node clients file
+@section Clients List --- @file{raddb/clients}
+@cindex @file{clients} file
+@cindex @file{raddb/clients} file
+
+The @file{raddb/clients} lists @NAS{}es which are allowed to make
+authentication requests. As usual, the @samp{#} character introduces a
+comment. Each record in the file consists of two fields, separated
+by whitespace. The fields are:
+
+@table @asis
+@item NAS name
+Specifies a hostname or @IP{} of the @NAS{}.
+@item Key
+Lists the encryption key shared between the server and this @NAS{}.
+@end table
+
+If the set of @NAS{}es share the same encryption key, there are two
+ways to list it in @file{raddb/clients}. First, if these @NAS{}es
+lie in a single network, you can specify this network address in
+@code{NAS name} field, e.g.:
+
+@smallexample
+10.10.10.0/27   seCRet
+@end smallexample
+
+Notice also that specifying full netmask after the @samp{/} character is
+also allowed, so that the above example could also be written as follows:
+
+@smallexample
+10.10.10.0/255.255.255.224   seCRet
+@end smallexample
+
+Otherwise, the keyword DEFAULT may be used as @code{NAS name}. This
+notation will match any @IP{}, so it should be used with caution.
+
+@menu
+* Example: clients example.     An example of clients file.
+@end menu
+
+@comment **L3***************************************************************
+@node clients example
+@subsection Example of @file{clients} file
+@exindex @file{clients} file
+
+@smallexample
+# This is a list of clients which are allowed to make authentication 
+# requests.
+# Each record consists of two fields:
+#       i.  Valid hostname.
+#       ii. The shared encryption key for this hostname. 
+#
+#Client Name            Key
+#----------------       -------------------
+myhost.dom.ain          guessme         
+merlin                  emrys           
+11.10.10.10             secRet
+@end smallexample
+
+@comment *L2****************************************************************
+@node  naslist file
+@section NAS List --- @file{raddb/naslist}
+@cindex @file{naslist} file
+@cindex @file{raddb/naslist} file
+@cindex MAX Ascend, broken passwords
+
+The @file{raddb/naslist} file contains a list of @NAS{}es known to the Radius
+server. Each record in the file consist of the following four fields,
+the first two being mandatory, the last two being optional:
+
+@table @asis
+@item NAS name
+Specifies either a hostname or @IP{} for a single @NAS{} or a CIDR net block
+address for a set of @NAS{}es. The word @samp{DEFAULT} may
+be used in this field to match any @NAS{}. @footnote{Logins from DEFAULT @NAS{}es are not reflected in SNMP variables.}
+
+@item Short Name
+This field defines a short name under which this @NAS{} will be listed
+in logfiles. The short name is also used as a name of the subdirectory
+where the detailed logs are stored.
+
+@item Type
+Specifies the type of this @NAS{}. Using this value @command{radiusd}
+determines the way to query @NAS{} about the presence of a given user on it
+(@pxref{Multiple Login Checking}).
+The two special types: @samp{true} and @samp{false}, can be used to
+disable @NAS{} querying. When the type field contains @samp{true},
+@command{radiusd} assumes the user is logged in to the @NAS{}, when it
+contains @samp{false}, @command{radiusd} assumes the user @emph{is not}
+logged in. Otherwise, the type
+is used as a link to @file{nastypes} entry (@pxref{nastypes file}).
+
+If this field is not present @samp{true} is assumed.
+
+@item Arguments
+Additional arguments describing the @NAS{}. Multiple arguments
+must be separated by commas. No intervening whitespace is allowed in
+this field.
+@end table
+
+There are two groups of nas arguments: @dfn{nas-specific} arguments and
+@dfn{nas-querying} arguments. @dfn{Nas-specific} arguments are used to
+modify a behavior of @command{radiusd} when sending or receiving the
+information to or from a particular @NAS{}.
+
+@dfn{Nas-querying} arguments control the way @command{radiusd} queries
+a @NAS{} for confirmation of a user's session (@pxref{Multiple Login Checking}). These arguments override the ones specified in 
+@file{nastypes} and can thus be used to override the default
+values.
+
+The @dfn{nas-specific} arguments currently implemented are:
+
+@table @asis
+@item broken_pass
+This is a boolean argument that controls the encryption of user
+passwords, longer than 16 octets. By default, @command{radiusd} uses
+method specified by @sc{rfc 2865}. However some @NAS{}es, most notably
+@sc{max a}scend series, implement a broken method of encoding long
+passwords. This flag instructs @command{radiusd} to use broken method
+of password encryption for the given @NAS{}.
+
+@item compare-auth-flag=@var{flag}
+Instructs radius to use attributes marked with a given user-defined flag
+when comparing authentication requests. It overrides
+@code{compare-attribute-flag} (@pxref{auth}) for this particular @NAS{}.
+@xref{Extended Comparison}, for a detailed description of its usage.
+
+@item compare-acct-flag=@var{flag}
+Instructs radius to use attributes marked with a given user-defined flag
+when comparing accounting requests. It overrides
+@code{compare-attribute-flag} (@pxref{acct}) for this particular @NAS{}.
+@xref{Extended Comparison}, for a detailed description of its usage.
+@end table
+
+@xref{Checking Duplicates}, for general description of request
+comparison methods.
+
+For the list of nas-querying arguments,
+@xref{nastypes file,,Full list of allowed arguments}.
+
+@menu
+* Example: naslist example.     Example of @file{naslist} file.
+@end menu
+
+@comment **L3***************************************************************
+@node naslist example
+@subsection Example of @file{naslist} file
+@exindex @file{naslist} file
+
+@smallexample
+# raddb/naslist: contains a list of Network Access Servers 
+#
+# Each record consists of following fields:
+#
+#       i.      A valid hostname or IP address for the client.
+#       ii.     The short name to use in the logfiles for this NAS.
+#       iii.    Type of device. Valid values are `true', `false' and
+#               those defined in raddb/nastypes file.
+
+# NAS Name              Short Name      Type
+#----------------       ----------      ----
+myhost.dom.ain          myhost          unix
+merlin                  merlin          max 
+11.10.10.10             arthur          livingston
+@end smallexample
+
+@comment *L2****************************************************************
+@node nastypes file
+@section NAS Types --- @file{raddb/nastypes}
+@cindex @file{nastypes} file
+
+The @file{raddb/nastypes} file describes the ways to
+query @NAS{}es about active user sessions.
+
+@menu
+* Syntax: nastypes syntax.      Syntax described.
+* Example: nastypes example.    Example of nastypes file.
+* Predefined NAS Types::        @NAS{} types defined in standard nastypes file.
+@end menu
+
+@comment **L3***************************************************************
+@node nastypes syntax
+@subsection Syntax of @file{raddb/nastypes}
+@cindex @file{nastypes} file, syntax of
+@cindex Syntax of @file{nastypes}
+@UNREVISED{}
+
+@heading Syntax
+Each record consists of three fields separated by any amount of
+whitespace. The fields are:
+
+@table @asis
+@item Type
+Type of the @NAS{} which is described in this record.
+@item Method
+Method to use to query a @NAS{} of given type.
+@item Arguments
+Arguments to pass to this method. Each argument is a pair
+@var{arg}=@var{value}, where @var{arg} is its name and @var{value} is
+a value assigned to it. The list of predefined argument names follows.
+Note, that no intervening whitespace is allowed in this
+field.
+@end table
+
+@heading Methods
+
+Version @value{VERSION} of GNU Radius supports following querying methods:
+finger, snmp, external and guile. @FIXME{Describe these fully}.
+
+@heading Arguments
+
+In the discussion below @var{n} means numeric and @var{s} string value.
+
+The following arguments are predefined:
+
+@subheading Common for all methods
+
+@table @asis
+@item function=@var{s}
+Specifies the check function to use with this method
+(@pxref{Login Verification Functions}).
+This argument must be present. For description of how this function is
+applied, see @ref{Multiple Login Checking}.
+@item port=@var{n}
+Use port number @var{n} instead of the default for the given method.
+@end table
+
+@subheading Method snmp
+
+@table @asis
+
+@item password=@var{s}
+Use community @var{s} instead of the default. This argument must be
+present.
+@item retries=@var{n}
+Retry @var{n} times before giving up.
+@item timeout=@var{n}
+Timeout @var{n} seconds on each retry.
+@end table
+
+@subheading Method finger
+
+@table @asis
+@item timeout=@var{n}
+Give up if the @NAS{} does not respond within @var{n} seconds.
+@item notcp
+@itemx tcp=0
+Disable the use of T/TCP for hosts with a broken TCP implementation.
+@item arg=@var{subst}
+Send @var{subst} to finger, instead of username. @var{subst} must be
+one of @dfn{macro variables}, described below.
+@end table
+
+@subheading Macro variables
+
+The following macro-variables are recognized and substituted when
+encountered in the @var{value} pair of an argument:
+@FIXME{Describe new syntax for extendable strings. Notice, that the
+use of old meta-characters is deprecated.}
+
+@table @samp
+@item %u
+Expands to username.
+@item %s
+Expands to session id.
+@item %d
+Expands to session id converted to decimal representation.
+@item %p
+Expands to port number.
+@item %P
+Expands to port number + 1.
+@end table
+
+@comment **L3***************************************************************
+@node nastypes example
+@subsection Example of nastypes file.
+@exindex @file{nastypes} file
+
+Note, that in the following example the long lines are
+broken into several lines for readability.
+
+@smallexample
+# Type     Method          Args
+# ----     ------          ----
+unix       finger       function=check_unix
+max-f      finger       function=check_max_finger
+max        snmp         oid=.1.3.6.1.4.1.529.12.3.1.4.%d,
+                        function=check_snmp_u
+as5300-f   finger       function=check_as5300_finger
+as5300     snmp         oid=.1.3.6.1.4.1.9.9.150.1.1.3.1.2.%d,
+                        function=check_snmp_u
+livingston snmp         oid=.1.3.6.1.4.1.307.3.2.1.1.1.5.%P,
+                        function=check_snmp_s
+@end smallexample
+
+@comment **L3***************************************************************
+@node Predefined NAS Types
+@subsection Standard @NAS{} types
+@cindex NAS types, standard
+
+The @file{nastypes} shipped with version @value{VERSION} of GNU Radius
+defines following @NAS{} types:
+
+@table @asis
+@item unix --- UNIX boxes running Finger
+This type suits for @sc{unix} boxes running finger service able to return information
+about dial-up users active on them. To enable finger checking of a unix
+host add following to your @file{naslist} file:
+@smallexample
+@group
+#Hostname       Shortname   Type
+#--------       ---------   ----
+nas.name        T           unix
+@end group
+@end smallexample
+
+@item max-f --- MAX Ascend with Finger
+Use this type if you have MAX Ascend terminal server that answers finger
+queries. The @file{naslist} entry for such @NAS{} will look like:
+
+@smallexample
+@group
+#Hostname       Shortname   Type  Flags
+#--------       ---------   ----  -----
+nas.name        T           max-f broken_pass
+@end group
+@end smallexample
+
+Note the use of @code{broken_pass} flag. It is needed
+for most MAX Ascend servers (@pxref{naslist file}).
+
+@item max --- MAX Ascend, answering SNMP
+Use this type if you have MAX Ascend terminal server that answers SNMP
+queries. The @file{naslist} entry for such @NAS{} will look like:
+
+@smallexample
+@group
+#Hostname       Shortname   Type  Flags
+#--------       ---------   ----  -----
+nas.name        T           max-f broken_pass,community=@var{comm}
+@end group
+@end smallexample
+
+@noindent
+Replace @var{comm} with your actual SNMP community name.
+
+@item as5300-f --- Cisco AS5300 running finger
+@item as5300   --- Cisco AS5300 answering SNMP
+@item livingston --- Livingston Portmaster
+Type @code{livingston} queries portmaster using SNMP.
+@end table
+
+@comment *L2****************************************************************
+@node hints file
+@section Request Processing Hints --- @file{raddb/hints} 
+@cindex Hints
+@cindex @file{hints} file
+@cindex @file{raddb/hints} file
+
+The @file{raddb/hints} file is used to modify the contents of the incoming
+request depending on the username. For a detailed description of this,
+@xref{Hints}.
+
+The file contains data in @dfn{Matching Rule} format (@pxref{Matching
+Rule}). 
+
+Notice, that versions of GNU Radius up to 1.0 allowed to use only
+a subset of attributes in the check list of a @file{hints} entry,
+namely: 
+
+@itemize @bullet
+@item @attr{Suffix}
+@item @attr{Prefix}
+@item @attr{Group}
+@item @attr{User-ID}
+@end itemize
+
+@noindent
+This requirement has been removed in version 1.0.
+
+@menu
+* Example: hints example.       An example of @file{hints} file.
+@end menu
+
+@comment **L3***************************************************************
+@node hints example
+@subsection Example of @file{hints} file
+@exindex @file{hints} file
+
+@smallexample
+## If the username starts with `U', append the UUCP hint 
+DEFAULT         Prefix = "U", Strip-User-Name = No
+                Hint = "UUCP"
+## If the username ends with `.slip', append the SLIP service data
+## and remove the suffix from the user name.
+DEFAULT         Suffix = ".slip",
+                   Strip-User-Name = Yes
+                Hint = "SLIP",
+                   Service-Type = Framed-User,
+                   Framed-Protocol = SLIP
+@end smallexample
+
+@comment *L2****************************************************************
+@node huntgroups file
+@section Huntgroups --- @file{raddb/huntgroups}
+@cindex Huntgroups
+@cindex @file{huntgroups} file
+@cindex @file{raddb/huntgroups} file
+
+The @file{raddb/huntgroups} contains the definitions of the
+huntgroups. For a detailed description of huntgroup concept,
+@xref{Huntgroups}.
+
+The file contains data in @dfn{Matching Rule} format (@pxref{Matching Rule}). 
+
+@menu
+* Example: huntgroups example.   An example of the @file{huntgroups} file.
+@end menu
+
+@comment **L3***************************************************************
+@node huntgroups example
+@subsection Example of @file{huntgroups} file.
+@exindex @file{huntgroups} file
+
+@smallexample
+## This defines the packet rewriting function for the server 11.10.10.11
+DEFAULT NAS-IP-Address = 11.10.10.11, Rewrite-Function = "max_fixup"
+        NULL
+@end smallexample
+
+@comment *L2****************************************************************
+@node realms file
+@section List of Proxy Realms --- @file{raddb/realms}
+@cindex @file{realms} file
+@cindex @file{raddb/realms} file
+@cindex @samp{NOREALM}, special realm name
+
+The @file{raddb/realms} file lists remote Radius servers that are allowed to
+communicate with the local Radius server (@pxref{Proxying}).
+
+Each record consists of up to three fields, separated by whitespace.
+Two of them are mandatory. The fields are:
+
+@table @asis
+@item Realm name
+Specifies the name of the realm being defined, i.e. part of the login
+name after the @samp{@@} symbol. There are three special forms of this
+field.
+
+The name @samp{NOREALM} defines the empty realm, i.e. lines
+marked with this name will match user names without any realm suffix.
+
+The name @samp{DEFAULT} defines the default realm
+(@pxref{Realms}). The lines with this realm name will match any user
+name, not matched by any other line in @file{raddb/realms}.
+
+@item Remote server list
+
+A comma-separated list of remote servers to which the requests for this realm
+should be forwarded. Each item in the list is:
+
+@smallexample
+@var{servername}[:@var{auth-port}[:@var{acct-port}]]
+@end smallexample
+@noindent
+
+Optional @var{auth-port} and @var{acct-port} are the authentication and
+accounting port numbers. If @var{acct-port} is omitted, it is computed
+as @var{auth-port} + 1. If @var{auth-port} is omitted, the default
+authentication port number is used.
+
+The servers from this list are tried in turn until any of them replies
+or the list is exhausted, whichever occurs first. The timeout value and
+number of retries for each server are set via @code{timeout} and
+@code{retry} flags (see below).
+
+There may be cases where you would wish a particular realm to be
+served by the server itself. It is tempting to write
+
+@smallexample
+# @emph{Wrong!}
+realm.name      localhost
+@end smallexample
+
+@noindent
+however, this will not work. The special form of the server list is
+provided for this case. It is the word @samp{LOCAL}. The correct
+configuration line for the above case will thus be:
+
+@smallexample
+# Use this to declare a locally handled realm
+realm.nam       LOCAL
+@end smallexample
+
+@item Flags (optional)
+@end table
+
+The flags meaningful in @file{raddb/realms} are
+
+@table @asis
+@item ignorecase
+Boolean value. When set, enables case-insensitive comparison of
+realm names. For example, if a realm were defined as
+
+@smallexample
+myrealm.net     remote.server.net:1812  ignorecase
+@end smallexample
+
+@noindent
+then user name @samp{user@@MyREAlm.NeT} will match this definition.
+
+@item strip
+Boolean value. Controls whether the realm name should be stripped off
+the username before forwarding the request to the remote server. Setting
+@code{strip} enables stripping, setting @code{nostrip} disables
+it. Default is to always strip user names.
+
+@item quota=@var{num}
+Set maximum number of concurrent logins allowed from this realm to
+the given value (@var{num}).
+
+@item timeout
+Number of seconds to wait for reply from the remote server before
+retransmitting the request.
+
+@item retries
+Number of attempts to connect a server. If the server does not
+respond after the last attempt, the next server from the list
+is tried. 
+
+@item auth
+Proxy only authentication requests.
+
+@item acct
+Proxy only accounting requests.
+@end table
+
+@menu
+* Example: realms example.      An example of @file{realms} file.
+@end menu
+
+@comment **L3***************************************************************
+@node realms example
+@subsection Example of @file{realms} file
+@exindex @file{realms} file
+
+@subheading Example 1.
+
+@smallexample
+@group
+# Realm                 Remote server[:port]            flags
+#----------------       ---------------------           --------
+that.net                radius.that.net                 nostrip
+dom.ain                 server.dom.ain:3000             strip,quota=20
+remote.net              srv1.remote.net,srv2.remote.net 
+@end group
+@end smallexample
+
+@subheading Example 2.
+
+@smallexample
+@group
+# Realm                 Remote server[:port]            flags
+#----------------       ---------------------           --------
+NOREALM                 radius.server.net               
+that.net                radius.that.net                 nostrip
+dom.ain                 server.dom.ain:3000             strip,quota=20
+@end group
+@end smallexample
+
+@comment *L2****************************************************************
+@node users file
+@section User Profiles --- @file{raddb/users}
+@cindex @file{users} file
+@cindex @file{raddb/users} file
+
+File @file{raddb/users} contains the list of @dfn{User Profiles}.
+@xref{User Profiles}, for a description of its purpose.
+
+@menu
+* Example: users example.       An example of @file{users} file.
+@end menu
+
+@comment **L3***************************************************************
+@node users example
+@subsection Example of @file{users} file
+@exindex @file{users} file
+
+@smallexample
+@group
+## The following entry is matched when the user appends ``.ppp'' to his
+## username when logging in.
+## The suffix is removed from the user name, then the password is
+## looked up in the SQL database.
+## Users may log in at any time. They get PPP service.
+DEFAULT Suffix = ".ppp",
+                Auth-Type = SQL,
+                Login-Time = "Al",
+                Simultaneous-Use = 1,
+                Strip-User-Name = Yes
+        Service-Type = Framed-User,
+                Framed-Protocol = PPP
+@end group
+
+@group
+## This is for SLIP users.
+## This entry is matched when the auth request matches ``SLIP'' hint
+DEFAULT Hint = "SLIP",
+                Auth-Type = Mysql
+        Service-Type = Framed-User
+                Framed-Protocol = SLIP
+@end group
+
+@group
+## The following authenticates users using system passwd files.
+## The users are allowed to log in from 7:55 to 23:05 on any weekday,
+## except the weekend, and from 07:55 to 12:00 on Sunday.
+## Only one login is allowed per user.
+## The program telauth is used to further check the authentication
+## information and provide the reply pairs
+## Note the use of backslashes to split a long line.
+DEFAULT Auth-Type = System,
+                Login-Time = "Wk0755-2305,Su0755-1200",
+                Simultaneous-Use = 1
+        Exec-Program-Wait = "/usr/local/sbin/telauth \
+                             %C@{User-Name@} \
+                             %C@{Calling-Station-Id@} \
+                             %C@{NAS-IP-Address@} \
+                             %C@{NAS-Port-Id@}"
+@end group
+
+@group
+## This particular user is authenticated via PAM. He is presented a
+## choice from @file{raddb/menus/menu1} file.
+gray    Auth-Type = Pam
+        Menu = menu1
+@end group
+@end smallexample
+
+@comment *L2****************************************************************
+@node access.deny file
+@section List of Blocked Users --- @file{raddb/access.deny} 
+@cindex @file{access.deny} file
+@cindex @file{raddb/access.deny} file
+
+The @file{raddb/access.deny} file contains a list of user names which are
+not allowed to log in via Radius. Each user name is listed on a
+separate line. As usual, the @samp{#} character introduces an end-of-line
+comment.
+
+@comment *L2****************************************************************
+@node sqlserver file
+@section SQL Configuration --- @file{raddb/sqlserver} 
+@cindex @file{sqlserver} file.
+@cindex @file{raddb/sqlserver} file.
+
+The @file{raddb/sqlserver} file configures the connection to @sc{sql} server.
+
+The file uses simple line-oriented @samp{@var{keyword} --- @var{value}}
+format. Comments are introduced by @samp{#} character.
+
+The @file{sqlserver} statements can logically be subdivided into
+following groups: @dfn{SQL Client Parameters}, configuring the
+connection between @sc{sql} client and the server, @dfn{Authentication
+Server Parameters}, @dfn{Authorization Parameters}, and
+@dfn{Accounting server parameters}.
+
+@menu
+* SQL Client Parameters::
+* Authentication Server Parameters::
+* Authorization Parameters::
+* Accounting server parameters::
+@end menu
+
+@comment **L3***************************************************************
+@node SQL Client Parameters
+@subsection SQL Client Parameters
+
+These parameters configure various aspects of connection between
+@sc{sql} client and the server.
+
+@table @code
+@item interface @var{iface-type}
+Specifies the @sc{sql} interface to use. Currently supported values
+for @var{iface-type} are @code{mysql} and @code{postgres}. Depending
+on this, the default communication port number is set: it is 3306 for
+@code{interface mysql} and 5432 for @code{interface postgres}. Use of
+this statement is only meaningful when the package was configured with
+both @option{--with-mysql} and @option{--with-postgres} option.
+@item server @var{string}
+Specifies the hostname or @IP{} of the @sc{sql} server.
+@item port @var{number}
+Sets the @sc{sql} communication port number. It can be omitted if your
+server uses the default port.
+@item login @var{string}
+Sets the @sc{sql} user login name.
+@item password @var{password}
+Sets the @sc{sql} user password.
+@item keepopen @var{bool}
+Specify whether @command{radiusd} should try to keep the connection open.
+When set to no (the default), @command{radiusd} will open new connection
+before the transaction and close it right after finishing it.
+We recommend setting @code{keepopen} to @code{yes} for heavily loaded
+servers, since opening the new connection can take a substantial amount
+of time and slow down the operation considerably.
+@item idle_timeout @var{number}
+Set idle timeout in seconds for an open @sc{sql} connection.
+The connection is closed if it remains inactive longer that this amount
+of time.
+@end table
+
+@comment **L3***************************************************************
+@node Authentication Server Parameters
+@subsection Authentication Server Parameters
+@kwindex doauth
+@kwindex auth_db
+@kwindex auth_query
+@kwindex group_query
+@kwindex auth_success_query
+@kwindex auth_failure_query
+@UNREVISED{}
+
+These parameters configure the @sc{sql} authentication. The general
+syntax is:
+
+@table @code
+@item doauth @var{bool}
+When set to @code{yes}, enables authentication via @sc{sql}. All @code{auth_}
+keywords are ignored if @code{doauth} is set to @code{no}.
+
+@item auth_db @var{string}
+Specifies the name of the database containing authentication information.
+
+@item auth_query @var{string}
+Specifies the @sc{sql} query to be used to obtain user's password from the
+database. The query should return exactly one string value --- the
+password.
+
+@item group_query @var{string}
+Specifies the query that retrieves the list of user groups the user
+belongs to. This query is used when @attr{Group} or @attr{Group-Name}
+attribute appears in the @LHS{} of a user's or hint's profile.
+
+@item auth_success_query @var{string}
+This query is executed when an authentication
+succeeds. @xref{Auth Probing}, for the detailed
+discussion of its purpose.
+
+@item auth_failure_query @var{string}
+This query is executed upon an authentication
+failure. @xref{Auth Probing}, for the detailed
+discussion of its purpose.
+
+@end table
+
+@subheading Example of Authentication Server Parameters
+
+Let's suppose the authentication information is kept in the tables
+@code{passwd} and @code{groups}.
+
+The @code{passwd} table contains user passwords. A user is allowed
+to have different passwords for different services. The table structure
+is:
+
+@smallexample
+@group
+CREATE TABLE passwd (
+  user_name           varchar(32) binary default '' not null,
+  service             char(16) default 'Framed-PPP' not null,
+  password            char(64) 
+);
+@end group
+@end smallexample
+
+@noindent
+Additionally, the table @code{groups} contains information about
+user groups a particular user belongs to. Its structure is:
+
+@smallexample
+@group
+CREATE TABLE groups (
+  user_name           char(32) binary default '' not null,
+  user_group          char(32) 
+);
+@end group
+@end smallexample
+
+@noindent
+The queries used to retrieve the information from these tables will
+then look like:
+
+@smallexample
+@group
+auth_query  SELECT password
+            FROM passwd
+            WHERE user_name = '%C@{User-Name@}'
+            AND service = '%C@{Auth-Data@}'
+
+group_query SELECT user_group
+            FROM groups
+            WHERE user_name = '%C@{User-Name@}'
+@end group
+@end smallexample
+
+It is supposed, that the information about the particular service a
+user is wishing to obtain, will be kept in @attr{Auth-Data} attribute
+in @LHS{} of a user's profile.
+
+@comment **L3***************************************************************
+@node Authorization Parameters
+@subsection Authorization Parameters
+
+These parameters define queries used to retrieve the authorization
+information from the @sc{sql} database. All the queries refer to
+the authentication database.
+
+@table @code
+@item check_attr_query @var{string}
+This query must return a list of triplets:
+
+@smallexample
+@var{attr-name}, @var{attr-value}, @var{opcode}
+@end smallexample
+
+@noindent
+The query is executed before comparing the request with the profile
+entry. The values returned by the query are added to @LHS{} of the
+entry. @var{opcode} here means one of valid operation codes:
+@samp{=}, @samp{!=}, @samp{<}, @samp{>}, @samp{<=},
+@samp{>=}.
+
+@item reply_attr_query @var{string}
+This query must return pairs:
+
+@smallexample
+@var{attr-name}, @var{attr-value}
+@end smallexample
+
+@noindent
+The query is executed after a successful match, the values it
+returns are added to the @RHS{} list of the matched entry, and are
+therefore returned to the @NAS{} in the reply packet.
+@end table
+
+@subheading Example of Authorization Parameters
+
+Suppose your attribute information is stored in a @sc{sql} table of
+the following structure:
+
+@smallexample
+@group
+CREATE TABLE attrib (
+  user_name varchar(32) default '' not null,
+  attr      char(32) default '' not null,
+  value     char(128),
+  op enum("=", "!=", "<", ">", "<=", ">=") default null
+);
+@end group
+@end smallexample
+
+@noindent
+Each row of the table contains the attribute-value pair for a given
+user. If @code{op} field is @code{NULL}, the row describes @RHS{}
+(reply) pair. Otherwise, it describes a @LHS{} (check) pair. The
+authorization queries for this table will look as follows:
+
+@smallexample
+@group
+check_attr_query  SELECT attr,value,op \
+                  FROM attrib \
+                  WHERE user_name='%u' \
+                  AND op IS NOT NULL
+
+reply_attr_query  SELECT attr,value \
+                  FROM attrib \
+                  WHERE user_name='%u' \
+                  AND op IS NULL
+@end group
+@end smallexample
+
+@noindent
+Now, let's suppose the @file{raddb/users} contains only one entry:
+
+@smallexample
+@group
+DEFAULT Auth-Type = SQL
+        Service-Type = Framed-User   
+@end group
+@end smallexample
+
+@noindent
+And the @code{attrib} table contains following rows:
+
+@multitable @columnfractions .20 .30 .25 .10
+@item user_name @tab attr @tab value @tab op
+@item @code{jsmith} @tab @code{NAS-IP-Address} @tab @code{10.10.10.1} @tab
+@code{=}
+@item @code{jsmith} @tab @code{NAS-Port-Id} @tab @code{20} @tab @code{<=}
+@item @code{jsmith} @tab @code{Framed-Protocol} @tab @code{PPP} @tab @code{NULL}
+@item @code{jsmith} @tab @code{Framed-IP-Address} @tab @code{10.10.10.11} @tab @code{NULL}
+@end multitable
+
+@noindent
+Then, when the user @code{jsmith} is trying to authenticate, the
+following happens:
+
+@enumerate 1
+@item
+Radius finds the matching entry (@code{DEFAULT}) in the
+@file{raddb/users}.
+@item
+It queries the database using the @code{check_attr_query}. The
+triplets it returns are then added to the @LHS{} of the profile
+entry. Thus, the @LHS{} will contain:
+
+@smallexample
+@group
+Auth-Type = SQL,
+NAS-IP-Address = 10.10.10.1,
+NAS-Port-Id <= 20
+@end group
+@end smallexample
+@item
+Radius compares the incoming request with the @LHS{} pairs thus
+obtained. If the comparison fails, it rejects the authentication.
+Note that the @attr{Auth-Type} attributes itself
+triggers execution of @code{auth_query}, described in the previous
+section.
+@item
+After a successful authentication, Radius queries the database,
+using @code{reply_attr_query}, and adds its return to the list
+of @RHS{} pairs. The @RHS{} pairs will then be:
+
+@smallexample
+@group
+Service-Type = Framed-User,
+Framed-Protocol = PPP,
+Framed-IP-Address = 10.10.10.11
+@end group
+@end smallexample
+
+This list is returned to the @NAS{} along with the authentication
+accept packet.
+@end enumerate
+
+Thus, this configuration allows the user @code{jsmith} to use only
+@NAS{} 10.10.10.1, ports from 1 to 20 inclusive. If the user meets
+these conditions, he is allowed to use @sc{ppp} service, and is
+assigned @IP{} @code{10.10.10.11}.
+
+
+@comment **L3***************************************************************
+@node Accounting server parameters
+@subsection Accounting Parameters
+
+To perform the @sc{sql} accounting @command{radiusd} needs to know the
+database where it is to store the accounting information. This
+information is supplied by the following statements:
+
+@table @code
+@item doacct @var{bool}
+When set to @code{yes} enables @sc{sql} accounting. All @code{acct_}
+keywords are ignored if @code{doacct} is set to @code{no}.
+@item acct_db @var{string}
+Specifies the name of the database where the accounting information is
+to be stored.
+@end table
+
+Further, @command{radiusd} needs to know which information it is
+to store into the database and when. Each of five accounting request
+types (@pxref{Accounting Requests}) has a @sc{sql} query associated with
+it. Thus, when radius receives an accounting request, it determines
+the query to use by the value of @attr{Acct-Status-Type} attribute.
+
+Following statements define the accounting queries:
+
+@table @code
+@item acct_start_query @var{string}
+Specifies the @sc{sql} query to be used when @dfn{Session Start Packet}
+is received. Typically, this would be some @code{INSERT} statement
+(@pxref{Queries}).
+@item acct_stop_query @var{string}
+Specifies the @sc{sql} query to be used when @dfn{Session Stop Packet}
+is received. Typically, this would be some @code{UPDATE} statement.
+@item acct_stop_query @var{string}
+Specifies the @sc{sql} query to be executed upon arrival of a
+@dfn{Keepalive Packet}. Typically, this would be some @code{UPDATE} statement.
+@item acct_nasup_query @var{string}
+Specifies the @sc{sql} query to be used upon arrival of an
+@dfn{Accounting Off Packet}.
+@item acct_nasdown_query @var{string}
+Specifies the @sc{sql} query to be used when a @NAS{} sends
+@dfn{Accounting On Packet}.
+@end table
+
+None of these queries should return any values.
+
+Three queries are designed for use by multiple login checking
+mechanism (@pxref{Multiple Login Checking}):
+
+@table @code
+@item mlc_user_query @var{string}
+A query retrieving a list of sessions currently opened by the given user.
+@item mlc_realm_query @var{string}
+A query to retrieve a list of sessions currently open for the given realm.
+@item mlc_stop_query @var{string}
+A query to mark given record as @dfn{hung}.
+@end table
+
+@menu
+* Queries::                     Writing SQL accounting query templates.
+@end menu
+
+@comment ***L4**************************************************************
+@node Queries
+@subsubsection Writing SQL Accounting Query Templates
+@cindex SQL accounting query templates
+@cindex Writing SQL accounting query templates
+@cindex SQL accounting query templates, writing of
+
+Let's suppose you have an accounting table of the following structure:
+
+@smallexample
+@group
+CREATE TABLE calls (
+  status              int(3),
+  user_name           char(32),
+  event_date_time     datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
+  nas_ip_address      char(17),
+  nas_port_id         int(6),
+  acct_session_id     char(16) DEFAULT '' NOT NULL,
+  acct_session_time   int(11),
+  acct_input_octets   int(11),
+  acct_output_octets  int(11),
+  connect_term_reason int(4),
+  framed_ip_address   char(17),
+  called_station_id   char(32),
+  calling_station_id  char(32)
+);
+@end group
+@end smallexample
+
+On receiving the @dfn{Session Start Packet} we would insert a record into this
+table with @code{status} set to 1. At this point the columns
+@code{acct_session_time}, @code{acct_input_octets},
+@code{acct_output_octets} as well as @code{connect_term_reason} are
+unknown, so we will set them to 0:
+
+@smallexample
+@group
+# Query to be used on session start
+acct_start_query     INSERT INTO calls \
+                     VALUES(%C@{Acct-Status-Type@},\
+                            '%u',\
+                            '%G',\
+                            '%C@{NAS-IP-Address@}',\
+                            %C@{NAS-Port-Id@},\
+                            '%C@{Acct-Session-Id@}',\
+                            0,\
+                            0,\
+                            0,\
+                            0,\
+                            '%C@{Framed-IP-Address@}',\
+                            '%C@{Called-Station-Id@}',\
+                            '%C@{Calling-Station-Id@}')
+@end group
+@end smallexample
+
+Then, when the @dfn{Session Stop Packet} request arrives we will look up
+the record having @code{status} = 1, @code{user_name} matching the
+value of @attr{User-Name} attribute, and @code{acct_session_id} matching
+that of @attr{Acct-Session-Id} attribute. Once the record is found,
+we will update it, setting
+
+@smallexample
+@group
+status = 2
+acct_session_time = value of Acct-Session-Time attribute
+acct_input_octets = value of Acct-Input-Octets attribute
+acct_output_octets = value of Acct-Output-Octets attribute
+connect_term_reason = value of Acct-Terminate-Cause attribute
+@end group
+@end smallexample
+
+@noindent
+Thus, every record with @code{status} = 1 will represent the active
+session and every record with @code{status} = 2 will represent
+the finished and correctly closed record. The constructed
+@code{acct_stop_query} is then:
+
+@smallexample
+@group
+# Query to be used on session end
+acct_stop_query      UPDATE calls \
+                     SET status=%C@{Acct-Status-Type@},\
+                         acct_session_time=%C@{Acct-Session-Time@},\
+                         acct_input_octets=%C@{Acct-Input-Octets@},\
+                         acct_output_octets=%C@{Acct-Output-Octets@},\
+                         connect_term_reason=%C@{Acct-Terminate-Cause@} \
+                     WHERE user_name='%C@{User-Name@}' \
+                     AND status = 1 \
+                     AND acct_session_id='%C@{Acct-Session-Id@}' 
+@end group
+@end smallexample
+
+Upon receiving a @dfn{Keepalive Packet} we will update the information
+stored with @code{acct_start_query}:
+
+@smallexample
+@group
+acct_alive_query  UPDATE calls \
+                  SET acct_session_time=%C@{Acct-Session-Time@},\
+                      acct_input_octets=%C@{Acct-Input-Octets@},\
+                      acct_output_octets=%C@{Acct-Output-Octets@},\
+                      framed_ip_address=%C@{Framed-IP-Address@} \
+                  WHERE user_name='%C@{User-Name@}' \
+                  AND status = 1 \
+                  AND acct_session_id='%C@{Acct-Session-Id@}'
+@end group
+@end smallexample
+
+Further, there may be times when it is necessary to bring some @NAS{}
+down. To correctly close the currently active sessions on this @NAS{}
+we will define a @code{acct_nasdown_query} so that it would
+set @code{status} column to 2 and update @code{acct_session_time}
+in all records having @code{status} = 1 and 
+@code{nas_ip_address} equal to @IP{} of the @NAS{}. Thus, all
+sessions on a given @NAS{} will be closed correctly when it brought
+down. The @code{acct_session_time} can be computed as difference
+between the current time and the time stored in @code{event_date_time}
+column:
+
+@smallexample
+@group
+# Query to be used when a NAS goes down, i.e. when it sends 
+# Accounting-Off packet
+acct_nasdown_query UPDATE calls \
+                   SET status=2,\
+                       acct_session_time=unix_timestamp(now())-\
+                               unix_timestamp(event_date_time) \
+                   WHERE status=1 \
+                   AND nas_ip_address='%C@{NAS-IP-Address@}'
+@end group
+@end smallexample
+
+We have not covered only one case: when a @NAS{} crashes, e.g. due to
+a power failure. In this case it does not have a time to send
+@code{Accounting-Off} request and all its records remain open. But when
+the power supply is restored, the @NAS{} will send an
+@dfn{Accounting On packet}, so we define a @code{acct_nasup_query} to 
+set @code{status} column to 3 and update @code{acct_session_time}
+in all open records belonging to this @NAS{}. Thus we will know that
+each record having @code{status} = 3 represents a crashed session.
+The query constructed will be:
+
+@smallexample
+@group
+# Query to be used when a NAS goes up, i.e. when it sends 
+# Accounting-On packet
+acct_nasup_query   UPDATE calls \
+                   SET status=3,\
+                       acct_session_time=unix_timestamp(now())-\
+                               unix_timestamp(event_date_time) \
+                   WHERE status=1 \
+                   AND nas_ip_address='%C@{NAS-IP-Address@}'
+@end group
+@end smallexample
+
+If you plan to use SQL database for multiple login checking
+(@pxref{Multiple Login Checking}), you will have to supply at least
+two additional queries for retrieving the information about currently
+active sessions for a given user and realm (@pxref{Retrieving Session
+Data}). Each of these queries must return a list consisting of
+5-element tuples:
+
+@smallexample
+@var{user-name}, @var{nas-ip-address}, @var{nas-port-id}, @var{acct-session-id}
+@end smallexample
+
+For example, in our setup these queries will be:
+
+@smallexample     
+mlc_user_query SELECT user_name,nas_ip_address,\
+                      nas_port_id,acct_session_id \
+               FROM calls \
+               WHERE user_name='%C@{User-Name@}' \
+               AND status = 1
+
+mlc_realm_query SELECT user_name,nas_ip_address,\
+                       nas_port_id,acct_session_id \
+                FROM calls \
+                WHERE realm_name='%C@{Realm-Name@}'     
+@end smallexample
+
+While performing multiple login checking @command{radiusd} will
+eventually need to close @dfn{hung} records, i.e. such records that are
+marked as open in the database (@code{status=1}, in our setup), but
+are actually not active (@xref{Verifying Active Sessions}, for the
+description of why it may be necessary). It will by default use
+@code{acct_stop_query} for that, but it has a drawback that hung
+records will be marked as if they were closed correctly. This may not
+be suitable for accounting purposes. The special query
+@code{mlc_stop_query} is provided to override
+@code{acct_stop_query}. If we mark hung records with @code{status=4},
+then the @code{mlc_stop_query} will look as follows:
+
+@smallexample
+mlc_stop_query UPDATE calls \
+               SET status=4,\
+                acct_session_time=unix_timestamp(now())-\
+                                  unix_timestamp(event_date_time) \
+               WHERE user_name='%C@{User-Name@}' \
+                 AND status = 1 \
+                 AND acct_session_id='%C@{Acct-Session-Id@}' 
+@end smallexample
+
+@comment *L2****************************************************************
+@node rewrite file
+@section Rewrite functions --- @file{raddb/rewrite}
+@cindex @file{rewrite}, configuration file
+@cindex @file{raddb/rewrite}, configuration file
+
+The file @file{raddb/rewrite} contains definitions of Rewrite extension
+functions. For information regarding Rewrite extension language
+@xref{Rewrite}.
+
+@comment *L2****************************************************************
+@node menus directory
+@section Login Menus --- @file{raddb/menus}
+@cindex @file{menus}, configuration subdirectory
+@cindex @file{raddb/menus}, configuration subdirectory
+
+The menus is a way to allow user the choice between various services
+he could be provided. The menu functionality is enabled when Radius
+is compiled with @option{--enable-livingston-menus} option.
+
+A user is presented a menu after it is authenticated if the @RHS{}
+of his profile record consists of a single @AVP{} in the form:
+
+@smallexample
+Menu = <menu-name>
+@end smallexample
+
+@noindent
+
+The menu files are stored in directory @file{raddb/menus}.
+
+@menu
+* Syntax: menu syntax.          A menu file syntax.
+* Example: menu example.        An example of menu files.
+@end menu
+
+@comment ***L3**************************************************************
+@node menu syntax
+@subsection A menu file syntax.
+@cindex  menu, syntax
+
+A menu file is a text file containing a menu declaration and any number
+of choice descriptions. The menus can be nested to an arbitrary depth.
+
+A comment is introduced by a @samp{#} character. All characters from
+this one up to the end of line are discarded.
+
+The menu declaration is contained between the words @samp{menu} and
+@samp{end}. Each of these must be the only word on a line and must
+start in column 1. 
+
+Choice descriptions follow the menu declaration. Each description
+starts with a line containing choice identifier. A choice identifier
+is an arbitrary word identifying this choice, or a word @samp{DEFAULT}.
+It is followed by comma-separated list of @AVP{}s which will be
+returned to the server when a user selects this choice.
+
+@comment ***L3**************************************************************
+@node menu example
+@subsection An example of menu files
+@exindex @file{menus} file
+
+@heading Single-Level Menu
+
+Suppose the following file is stored under @file{raddb/menus/menu1}:
+
+@smallexample
+menu
+        *** Welcome EEE user! ***
+Please select an option:
+
+        1. Start CSLIP session
+        2. Start PPP session
+        3. Quit
+
+        Option:
+end
+# CSLIP choice
+# Framed-IP-Address of 255.255.255.254 indicates that the NAS should
+# select an address for the user from its own IP pool.
+1
+        Service-Type = Framed-User,
+        Framed-Protocol = SLIP,
+        Framed-IP-Address = 255.255.255.254,
+        Termination-Menu = "menu1"
+# PPP choice
+2
+        Service-Type = Framed-User,
+        Framed-Protocol = PPP,
+        Framed-IP-Address = 255.255.255.254,
+        Termination-Menu = "menu1"
+# A special menu EXIT means abort the session
+3
+        Menu = "EXIT"
+# Return to this menu if no valid choice have been entered 
+DEFAULT
+        Menu = "menu1"
+@end smallexample
+
+Now, suppose the @file{raddb/users} contains the following
+profile entry:
+
+@smallexample
+DEFAULT Auth-Type = System
+        Menu = "menu1"
+@end smallexample
+
+@noindent
+and user @samp{jsmith} has a valid system account and tries to log in
+from some @NAS{}. Upon authenticating the user, the Radius server sees that
+his reply pairs contain the @attr{Menu} attribute. Radius then sends
+Access-Challenge packet to the @NAS{} with the text of the menu in it.
+The @samp{jsmith} then sees on his terminal:
+
+@smallexample
+        *** Welcome EEE user! ***
+Please select an option:
+
+        1. Start CSLIP session
+        2. Start PPP session
+        3. Quit
+
+        Option:
+@end smallexample
+        
+He then enters @samp{2}. The @NAS{} sends the Access-Request packet to the
+server, which sees that user wishes to use option 2 and replies to the
+@NAS{} with an Access-Accept packet containing the following attributes:
+
+@smallexample
+        Service-Type = Framed-User,
+        Framed-Protocol = PPP,
+        Framed-IP-Address = 255.255.255.254,
+        Termination-Menu = "menu1"
+@end smallexample
+
+@noindent
+The @attr{Termination-Menu} in this list makes sure the same process
+will continue when @samp{jsmith} logs out, i.e. he will be presented
+the same menu again until he enters choice @samp{3} which will
+disconnect him.
+
+
+@heading Nested menus
+
+In this example, the @samp{other} choice refers to the menu above.
+
+@smallexample
+menu
+        *** Welcome here! ***
+Please enter an option:
+        ppp     ---     Start PPP session
+        telnet  ---     Begin guest login session
+        other   ---     Select other option
+
+        Enter your choice:
+end
+ppp
+        Service-Type = Framed-User,
+        Framed-Protocol = PPP
+telnet
+        Service-Type = Login-User,
+        Login-IP-Host = 10.11.11.7,
+        Login-Service = Telnet,
+        Login-TCP-Port = 23
+other
+        Menu = "menu1"
+DEFAULT
+        menu = "menu2"
+@end smallexample
+
+@comment *L2****************************************************************
+@node Macro Substitution
+@section Macro Substitution
+
+Some statements in the configuration files need to use the actual
+values of the attributes supplied with the request. These are:
+
+@itemize @bullet
+@item @attr{Exec-Program} and @attr{Exec-Program-Wait} assignments in @file{users} database
+@item @sc{sql} query templates in @file{sqlserver}
+@end itemize
+
+In these statements the following macros are replaced by the value
+of corresponding attributes:
+
+@table @code
+@item %Cnum
+(num is a decimal number). This variable is replaced by the value of
+attribute number `num'. The attribute is looked up in the incoming request
+pairlist.
+@item %C@{attr-name@}
+This is replaced by the value of attribute named `attr-name'. The
+attribute is looked up in the incoming request pairlist.
+@item %Rnum
+(num is a decimal number). This variable is replaced by the value of
+attribute number `num'. The attribute is looked up in the reply
+pairlist.
+@item %R@{attr-name@}
+This is replaced by the value of attribute named `attr-name'. The
+attribute is looked up in the reply pairlist.
+@item %D
+This is replaced by current date/time (localtime).
+@item %G
+This is replaced by current date/time in GMT.
+@end table
+
+The exact substitution procedure varies depending on the type
+of the attribute referenced by macro. If the attribute is of
+string or date type, @radiusd{} first checks if the resulting
+substitution should be quoted. It does so by looking at the character
+immediately preceeding @samp{%}. If it is a single or double quote,
+then @radiusd{} assumes the macro must be quoted and replaces it
+by an appropriately modified attribute value. The purpose of the
+modification is to ensure that no characters within the expanded
+string would conflict with the quoting characters. In particular,
+@radiusd{} searches the attribute value for any of the
+characters @samp{\}, @samp{'}, @samp{"} and prepends
+a @samp{\} to any occurrence of these. For example, suppose that
+attribute @attr{NAS-Identifier} has the value @samp{A "new" host}.
+Then:
+
+@smallexample
+@group
+nasid=%C@{NAS-Identifier@} @expansion{} nasid=A "new" host
+nasid="%C@{NAS-Identifier@}" @expansion{} nasid="A \"new\" host"
+nasid=%\C@{NAS-Identifier@} @expansion{} nasid=A \"new\" host
+@end group
+@end smallexample
+
+The last example illustrates the use of backslash character to force
+string quoting in the absense of explicit quotation marks.
+
+If an integer attribute reference is quoted, @radiusd{} looks
+up the string translation of its value in the dictionary
+(@pxref{VALUE}) and uses this string as a replacement. If no
+translation is found, the numeric value is used. The following
+example assumes that the value of @attr{Acct-Terminate-Cause}
+attribute is 10:
+
+@smallexample
+@group
+reason=%C@{Acct-Terminate-Cause@} @expansion{} reason=10
+reason='%C@{Acct-Terminate-Cause@}' @expansion{} reason='NAS-Request'
+reason=%\C@{Acct-Terminate-Cause@} @expansion{} reason=NAS-Request
+@end group
+@end smallexample
+
+Again, a backslash after percent sign can be used to force
+dictionary lookup.
+
+@FIXME{The quoting rules are not flexible enough. For example,
+a string 'isn\'t it a string' may be produced, but backslash escape
+within a singly quoted string is useless in most implementations (e.g.
+in shell or SQL). Besides, quoting unconditionally replaces
+unprintable characters with their octal values, where the notion
+of ``unprintable'' is determined by the current locale. Is it always
+the right thing to do?}
+
+The ``@samp{@{@}} form'' allows to specify default value for the
+substitution. The default value will be used when no such attribute
+is encountered in the pairlist. The syntax for specifying the default
+value resembles that of shell environment variables. 
+
+The substitution @code{%C@{@var{attr-name}:-@var{defval}@}} is expanded
+to the value of @var{attr-name} attribute, if it is present in the
+request pairlist, and to @var{defval} otherwise. For example:
+
+@smallexample
+        %C@{Acct-Session-Time:-0@}
+@end smallexample
+
+@noindent
+will return the value of Acct-Session-Time attribute or 0 if it
+doesn't exist in the request pairlist.
+
+@FIXME{Should the quoting rules apply for @var{defval} as well? I'd
+say they should...}
+
+The substitution @code{%C@{@var{attr-name}:=@var{defval}@}} is expanded
+to the value of @var{attr-name} attribute. If this attribute is not
+present in the request pairlist, it will be created and assigned the
+value @var{defval}. E.g.:
+
+@smallexample
+        %C@{Acct-Session-Time:=0@}
+@end smallexample
+
+The substitution @code{%C@{@var{attr-name}:?@var{message}@}} is expanded
+to the value of @var{attr-name} attribute, if it is present. Otherwise
+the diagnostic message ``@var{attr-name}: @var{message}'' is issued to
+the log error channel, and string ``@var{message}'' is returned.
+
+The substitution @code{%C@{@var{attr-name}:+@var{retval}@}} is expanded
+to empty string if the attribute @var{attr-name} is present in the
+referenced pairlist. Otherwise it is expanded to @var{retval}.
+
+You can also use the following shortcuts:
+
+@table @code
+@item %p
+Port number
+@item %n
+@NAS{} @IP{}
+@item %f
+Framed @IP{}
+@item %u
+User name
+@item %c
+Callback-Number
+@item %i
+Calling-Station-Id
+@item %t
+MTU
+@item %a
+Protocol (SLIP/PPP)
+@item %s
+Speed (Connect-Info attribute)
+@end table
+

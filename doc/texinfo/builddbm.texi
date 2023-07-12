@@ -1,0 +1,41 @@
+@c This is part of the Radius manual.
+@c Copyright (C) 1999,2000,2001,2002,2003 Free Software Foundation, Inc.
+@c Written by Sergey Poznyakoff
+@c See file radius.texi for copying conditions.
+@comment *******************************************************************
+@node Builddbm, Radscm, Radctl, Utility Programs
+@section @command{builddbm}
+@pindex buildbm
+
+@subheading Usage
+@command{builddbm} converts the plaintext Radius users database into
+DBM files. Some versions of the Radius daemon have used this to
+speed up the access to the users database.
+However, with GNU Radius things go the other way around.
+The server reads the entire plaintext database, converts it into internal
+form, and stores into a hash table, which provides for fast
+access. Actually, using a DBM version of the users database slows
+down the access unless the machine that runs the Radius daemon is
+short of address space for the daemon to store the users database.
+
+@subheading Syntax
+When used without arguments, the @command{builddbm} utility attempts to
+convert the file @file{raddb/users} to @file{raddb/users.db} or to
+the pair
+@file{raddb/users.pag}, @file{raddb/users.dir}, depending on the
+version of the DBM library used.
+
+If used with one argument, that argument is taken as the name of the
+plaintext database file to operate upon.
+
+Use the following command line options to modify the operation of
+@command{buildbm}:
+
+@table @option
+@item -d @var{dir}
+Specifies alternate directory for the Radius configuration
+files. This defaults to @file{@value{RADDB}}.
+
+@item -h
+Outputs short usage summary and exits with 0 exit code.
+@end table

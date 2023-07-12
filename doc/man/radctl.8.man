@@ -1,0 +1,14 @@
+.\" $Id$
+.so config.so
+.TH radctl 8 "\*(DA" "GNU Radius"
+.SH NAME
+radctl - Radius daemon control interface
+.SH SYNOPSIS
+\fBradctl\fR [-s] command 
+.br
+\fBradctl\fR \fB-h\fR
+
+.SH DESCRIPTION
+.De radctl
+.SH AUTHORS
+\*(AU

@@ -1,0 +1,12 @@
+Authors of GNU Radius.
+
+Sergey Poznyakoff	<gray@farlep.net>
+
+Poul-Henning Kamp 	<phk@login.dknet.dk> wrote radlib/md5crypt.c
+
+WEB-RADACT is written by 
+	Oswaldo E. Aguirre M. 	<oaguirre@reacciun.ve>
+	Francisco J. Obispo S.	<fobispo@reacciun.ve>
+
+sql/odbc.c is written by
+	Vlad Lungu		<vlad@rls.roknet.ro>

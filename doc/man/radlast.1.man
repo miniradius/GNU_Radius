@@ -1,0 +1,21 @@
+.\" $Id$
+.so config.so
+.TH radlast 1 "\*(DA" "GNU Radius"
+.SH NAME
+radlast - report last logins from Radius database.
+.SH SYNOPSIS
+\fBradlast\fR
+[\fB-f\fR file]
+[\fB-h\fR host]
+[\fB-n\fR nas]
+[\fB-l\fR]
+[\fB-p\fR port]
+[\fB-s\fR]
+[\fB-t\fR port]
+[\fB-w\fR]
+[\fB-#\fR]
+[user ...]
+.SH DESCRIPTION
+.De radlast
+.SH AUTHORS
+\*(AU
