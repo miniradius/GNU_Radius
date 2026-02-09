@@ -1,5 +1,5 @@
 # This file is part of GNU Radius.
-# Copyright (C) 2000,2001,2003,2008 Free Software Foundation, Inc.
+# Copyright (C) 2000-2025 Free Software Foundation, Inc.
 #
 # Written by Sergey Poznyakoff
 #
@@ -46,4 +46,3 @@ nastypes: $(RADDB)/nastypes
 CLEANFILES=$(ALLTARGETS) config dictionary client.conf users hints acct.bin acct.scm realms ports
 
 distclean-local:; -rm -rf radiusd.pid log acct dict
-

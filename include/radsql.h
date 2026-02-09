@@ -1,21 +1,20 @@
 /* This file is part of GNU Radius.
-   Copyright (C) 2000,2001,2002,2003,2007,2008 Free Software Foundation, Inc.
+   Copyright (C) 2000-2025 Free Software Foundation, Inc.
 
    Written by Sergey Poznyakoff
-  
+
    GNU Radius is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
    the Free Software Foundation; either version 3 of the License, or
    (at your option) any later version.
-  
+
    GNU Radius is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
-  
+
    You should have received a copy of the GNU General Public License
-   along with GNU Radius; if not, write to the Free Software Foundation, 
-   Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
+   along with GNU Radius.  If not, see <http://www.gnu.org/licenses/>. */
 
 #ifndef _gnu_radsql_h
 #define _gnu_radsql_h
@@ -24,7 +23,7 @@
 # define DECL_SQL_DISPATCH_TAB(mod) \
   SQL_DISPATCH_TAB GRAD_DL_EXPORT(mod,dispatch_tab)
 #else
-# define __s_cat2__(a,b) a ## b 
+# define __s_cat2__(a,b) a ## b
 # define DECL_SQL_DISPATCH_TAB(mod) \
   SQL_DISPATCH_TAB __s_cat2__(mod,_dispatch_tab)
 #endif
@@ -42,12 +41,12 @@ enum radius_sql_query {
 	auth_query,
 	group_query,
 	acct_start_query,
-        acct_stop_query,
-        acct_nasup_query,
-        acct_nasdown_query,
-        acct_keepalive_query,
-        check_attr_query,
-        reply_attr_query,
+	acct_stop_query,
+	acct_nasup_query,
+	acct_nasdown_query,
+	acct_keepalive_query,
+	check_attr_query,
+	reply_attr_query,
 	mlc_user_query,
 	mlc_realm_query,
 	mlc_stop_query,
@@ -57,17 +56,17 @@ enum radius_sql_query {
 };
 
 typedef struct {
-        int      interface;
-        char     *server;
-        int      port;
-        char     *login;
-        char     *password;
-        char     *acct_db;
-        char     *auth_db;
+	int      interface;
+	char     *server;
+	int      port;
+	char     *login;
+	char     *password;
+	char     *acct_db;
+	char     *auth_db;
 	char     *query[num_radius_sql_query];
-        int      keepopen;
-        time_t   idle_timeout;
-        int      active[SQL_NSERVICE];
+	int      keepopen;
+	time_t   idle_timeout;
+	int      active[SQL_NSERVICE];
 } SQL_cfg;
 
 typedef struct {
@@ -80,20 +79,20 @@ typedef struct {
 struct sql_connection {
 	SQL_cfg *cfg;
 	int    interface;        /* One of SQLT_ values */
-        int    type;             /* One of SQL_ values */
-        int    connected;        /* Connected to the database? */
-        int    destroy_on_close; /* Should the connection be closed upon
+	int    type;             /* One of SQL_ values */
+	int    connected;        /* Connected to the database? */
+	int    destroy_on_close; /* Should the connection be closed upon
 				    the end of a transaction */
-        time_t last_used;        /* Time it was lastly used */
-        void   *data;            /* connection-specific data */
-	
+	time_t last_used;        /* Time it was lastly used */
+	void   *data;            /* connection-specific data */
+
 	SQL_RESULT *cache[SQL_CACHE_SIZE];
 	size_t head;
 	size_t tail;
 };
 
 /* Dispatcher routines */
-void disp_init();
+void disp_init(void);
 int disp_sql_interface_index(char *name);
 int disp_sql_reconnect(int interface, int conn_type, struct sql_connection *conn);
 void disp_sql_disconnect(struct sql_connection *conn);
@@ -108,17 +107,17 @@ int disp_sql_num_tuples(struct sql_connection *conn, void *data, size_t *np);
 int disp_sql_num_columns(struct sql_connection *conn, void *data, size_t *np);
 
 typedef struct {
-        char *name;
-        int port;
-        int (*reconnect)(int type, struct sql_connection *);
-        void (*disconnect)(struct sql_connection *conn, int drop);
-        int (*query)(struct sql_connection *, const char *query,
+	char *name;
+	int port;
+	int (*reconnect)(int type, struct sql_connection *);
+	void (*disconnect)(struct sql_connection *conn, int drop);
+	int (*query)(struct sql_connection *, const char *query,
 		     int *report_cnt);
-        char *(*getpwd)(struct sql_connection *, const char *query);
-        void *(*exec_query)(struct sql_connection *conn, const char *query);
-        char *(*column)(void *data, size_t ncol);
-        int  (*next_tuple)(struct sql_connection *conn, void *data);
-        void (*free)(struct sql_connection *conn, void *data);
+	char *(*getpwd)(struct sql_connection *, const char *query);
+	void *(*exec_query)(struct sql_connection *conn, const char *query);
+	char *(*column)(void *data, size_t ncol);
+	int  (*next_tuple)(struct sql_connection *conn, void *data);
+	void (*free)(struct sql_connection *conn, void *data);
 	int (*n_tuples)(struct sql_connection *conn, void *data, size_t *np);
 	int (*n_columns)(struct sql_connection *conn, void *data, size_t *np);
 } SQL_DISPATCH_TAB;

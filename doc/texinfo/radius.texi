@@ -1,8 +1,7 @@
 \input texinfo @c -*-texinfo-*-
-@smallbook
 @c %**start of header
 @setfilename radius.info
-@settitle GNU radius
+@settitle GNU Radius Reference Manual
 @c %**end of header
 @setchapternewpage odd
 
@@ -24,7 +23,6 @@
 @include version.texi
 @include config.texi
 @include rendition.texi
-@settitle GNU Radius Reference Manual
 
 @copying
 This manual documents GNU Radius (version @value{VERSION}, @value{UPDATED}).
@@ -39,20 +37,15 @@ This manual documents GNU Radius (version @value{VERSION}, @value{UPDATED}).
 @item Boston, MA 02110-1301 USA  @tab Fax: 617-542-2652
 @end multitable
 @sp 2
-Copyright @copyright{} 1999, 2000, 2001, 2002, 2003 Free Software
-Foundation
+Copyright @copyright{} 1999-2025 Free Software Foundation
 @sp 1
 @quotation
 Permission is granted to copy, distribute and/or modify this document
-under the terms of the GNU Free Documentation License, Version 1.2 or
+under the terms of the GNU Free Documentation License, Version 1.3 or
 any later version published by the Free Software Foundation; with no
-Invariant Sections, with the Front-Cover texts being ``A GNU Manual'',
-and with the Back-Cover Texts as in (a) below.  A copy of the license
-is included in the section entitled ``GNU Free Documentation License''.
-
-(a) The FSF's Back-Cover Text is: ``You have freedom to copy and modify
-this GNU Manual, like GNU software.  Copies published by the Free
-Software Foundation raise funds for GNU development.''
+Invariant Sections, no Front-Cover, and no Back-Cover texts.
+A copy of the license is included in the section entitled ``GNU Free
+Documentation License.''
 @end quotation
 @end copying
 
@@ -84,21 +77,24 @@ Software Foundation raise funds for GNU development.''
 @page
 @vskip 0pt plus 1filll
 @insertcopying
-@sp2
+@sp 2
 Cover art by Etienne Suvasa.  Cover design by Jonathan Richard.
 @end titlepage
 
-@node Top, Intro, , (dir)
+@page
+@summarycontents
+@page
+@contents
 
-@ifinfo
+@ifnottex
+@node Top
 @top The GNU Radius
 
 GNU Radius is a suite of programs for performing user authentication
 and accounting using @RADIUS{} protocol.
 
 This Info file documents the version @value{VERSION} of the package.
-
-@end ifinfo
+@end ifnottex
 
 @comment *******************************************************************
 @menu
@@ -133,21 +129,51 @@ Obtaining GNU Radius
 
 What Next?
 
-* GNU configuration::   New configuration 
+* GNU configuration::   New configuration
 
 Appendices
 
 * Copying This Manual:: The GNU Free Documentation License.
 
 Indices
-* Index::               
+* Index::
 
 Here are some other nodes which are really inferiors of the ones
 already listed, mentioned here so you can get to them in one step:
 
+@detailmenu
  --- The Detailed Node Listing ---
 
-Radius Configuration
+Introduction to Radius
+
+* Overview::
+
+How Radius Operates
+
+* Attributes::                  Attributes.
+* Requests::                    @RADIUS{} requests.
+* Matching Rule::               Rules for request processing.
+* Request processing::          How GNU Radius processes incoming requests.
+
+@RADIUS{} Requests
+
+* Authentication Requests::
+* Accounting Requests::
+
+Processing Requests
+
+* Checking Duplicates::
+* Proxying::
+* Hints::
+* Huntgroups::
+* User Profiles::
+
+Proxying
+
+* Proxy Service::
+* Realms::
+
+Radius Configuration Files
 
 * config file::         Run-time configuration options.
 * dictionary file::     Radius dictionary.
@@ -169,11 +195,367 @@ Radius Configuration
                         packets.
 * menus directory::     Menus allow user to select the type of
                         service.
+* Macro Substitution::  Macros which are expanded by the actual
+                        attribute values.
 
-Client configuration
+Run-Time Configuration Options --- @file{raddb/config}
 
-* client.conf::         Main client configuration file.
-                        
+* option::      @code{Option} block: set the global program options.
+* logging::     Fine-tune the logging.
+* auth::        Configure authentication service.
+* acct::        Configure accounting service.
+* usedbm::      Enable the DBM feature.
+* snmp::        Configure SNMP service.
+* rewrite::     Configure Rewrite interface.
+* guile::       Configure Guile interface.
+* message::     Configure server reply messages.
+* filters::     Configure authentication and accounting filters.
+* mlc::         Configure multiple login checking.
+
+Usage
+
+* hooks::            Logging hooks
+* category::         @code{category} statement.
+* channel::          @code{channel} statement.
+* logging example::  Example of the @code{logging} statement.
+
+Dictionary of Attributes --- @file{raddb/dictionary}
+
+* Comment::             Introducing a comment line.
+* $INCLUDE::            Include a file.
+* VENDOR::              Define a vendor-id.
+* ATTRIBUTE::           Define an attribute translation.
+* BEGIN::               Blocks of vendor-specific attributes
+* ALIAS::               Define alternative name for an attribute.
+* PROPERTY::            Define attribute properties.
+* VALUE::               Define a value translation.
+
+Clients List --- @file{raddb/clients}
+
+* Example: clients example.     An example of clients file.
+
+NAS List --- @file{raddb/naslist}
+
+* Example: naslist example.     Example of @file{naslist} file.
+
+NAS Types --- @file{raddb/nastypes}
+
+* Syntax: nastypes syntax.      Syntax described.
+* Example: nastypes example.    Example of nastypes file.
+* Predefined NAS Types::        @NAS{} types defined in standard nastypes file.
+
+Request Processing Hints --- @file{raddb/hints}
+
+* Example: hints example.       An example of @file{hints} file.
+
+Huntgroups --- @file{raddb/huntgroups}
+
+* Example: huntgroups example.   An example of the @file{huntgroups} file.
+
+List of Proxy Realms --- @file{raddb/realms}
+
+* Example: realms example.      An example of @file{realms} file.
+
+User Profiles --- @file{raddb/users}
+
+* Example: users example.       An example of @file{users} file.
+
+SQL Configuration --- @file{raddb/sqlserver}
+
+* SQL Client Parameters::
+* Authentication Server Parameters::
+* Authorization Parameters::
+* Accounting server parameters::
+
+Accounting Parameters
+
+* Queries::                     Writing SQL accounting query templates.
+
+Login Menus --- @file{raddb/menus}
+
+* Syntax: menu syntax.          A menu file syntax.
+* Example: menu example.        An example of menu files.
+
+Request Comparison Methods
+
+* Extended Comparison::
+* Request Queue::
+
+Extended Comparison
+
+* Example: Extended Comparison Example.
+* Comparable Attributes::        List of attributes that can be declared
+                                 comparable.
+
+Authentication
+
+* Accept Auth::                   Accept unconditionally.
+* Reject Auth::                   Reject unconditionally.
+* Local Password Auth::           Authenticate using plaintext password.
+* Encrypted Password Auth::       Authenticate using MD5 encrypted password.
+* System Auth::                   Authenticate using system account.
+* SQL Auth::                      Authenticate using SQL.
+* PAM Auth::                      Authenticate using PAM.
+* Custom Auth::                   Defining Custom Authentication Types.
+* Multiple Login Checking::       Checking for Simultaneous Logins.
+* Auth Probing::                  Controlling Authentication Probes
+
+
+Multiple Login Checking
+
+* Retrieving Session Data::
+* Verifying Active Sessions::
+
+Accounting
+
+* System Accounting::                   UNIX style utmp/wtmp accounting.
+* Detailed Request Accounting::         Detailed requests.
+* SQL Accounting::                      Accounting to SQL server.
+* Custom Acct::                         Defining Custom Accounting Types.
+
+Problem Tracking
+
+* Rule Tracing::       Tracing rules.
+* Debugging::          Enabling full debugging information.
+* Test Mode::          Running radius in test mode.
+
+Extensions
+
+* Filters::         Using external filter programs.
+* Rewrite::         The built-in extension language.
+* Guile::           Using Scheme.
+
+Filters
+
+* Getting Acquainted with Filters::
+* Declaring the Filter::
+* Invoking the Filter from a User Profile::
+* Adding Reply Attributes::
+* Accounting Filters::
+* Invoking Accounting Filter::
+
+Rewrite
+
+* Syntax Overview::
+* Quick Start::
+* Interaction with Radius::
+* Rewriting Incoming Requests::
+* Login Verification Functions::
+* Attribute Creation Functions::
+* Logging Hook Functions::
+* Full Syntax Description::
+
+Rewriting Incoming Requests
+
+* Example: Rewrite Examples.
+
+Login Verification Functions
+
+* Example: Examples of Login Verification Functions
+
+Full Syntax Description
+
+* Data types::
+* Symbols::
+* Identifiers::
+* Expressions::
+* Type coercion::
+* Assignments::
+* Declarations::
+* Statements::
+* Function calls::
+* Delete statement::
+* Regular Expressions::
+* Built-in Functions::
+
+Guile
+
+* Data Representation::
+* Authentication with Scheme::
+* Accounting with Scheme::
+* Radius-Specific Functions::
+
+Utility Programs
+
+* Radwho::              Show who is logged in by radius now.
+* Radlast::             Show the history of logins by radius.
+
+Maintenance commands
+* Radzap::              Modify the login records.
+* Radgrep::             Quickly find the login record.
+* Radping::             Ping the remote machine by the username.
+* Radauth::             Check if a user can be authenticated.
+* Radctl::              Radctl monitor.
+* Builddbm::            Create DBM version of the @file{raddb/users} file.
+
+Guile interface
+* Radscm::              A Guile interface to radius functions.
+
+@command{radwho}
+
+* Options: radwho options.      Command line options.
+* Format Strings::
+* Predefined Formats::
+
+@command{radlast}
+
+* Options: radlast options.      Command line options.
+
+Client Package
+
+* clientconf::    Configuration file is common for all client utilities.
+* radtest::       Radius client shell.
+* radsession::    Send arbitrary requests to Radius server.
+* nas.scm::       A @NAS{} implementation for GNU/Linux machines.
+* pam_radius.so:: A PAM module for authentication via Radius.
+
+radtest
+
+* Invoking radtest::
+* Literal Values::
+* Reserved Keywords::
+* Variables in radtest::
+* Positional Parameters::
+* Expressions in radtest::
+* Function Definitions::
+* Interacting with Radius Servers::
+* Conditional Statements::
+* Loops::
+* Built-in Primitives::
+* Sample Radtest Program::
+
+Literal Values
+
+* Numeric Values::      Integers and IP addresses.
+* Strings::             Character Strings.
+* Avlists::             Lists of A/V pairs.
+
+Variables
+
+* Using Variables::
+* Variable Assignments::
+* Dereferencing Variables::
+* Accessing Elements of A/V Pair Lists::
+* Assignment Options::
+* Built-in Variables::
+
+Expressions
+
+* Arithmetic Ops::
+* String Ops::
+* A/V List Ops::
+* Comparison Ops::
+* Boolean Ops::
+* Conversion Between Data Types::
+* Function Calls::
+* Precedence::
+
+Attribute List
+
+* Authentication Attributes::
+* Accounting Attributes::
+* Radius Internal Attributes::
+
+Authentication Attributes
+
+* CHAP-Password::
+* Callback-Id::
+* Callback-Number::
+* Called-Station-Id::
+* Calling-Station-Id::
+* Class::
+* Framed-Compression::
+* Framed-IP-Address::
+* Framed-IP-Netmask::
+* Framed-MTU::
+* Framed-Protocol::
+* Framed-Route::
+* Framed-Routing::
+* Idle-Timeout::
+* NAS-IP-Address::
+* NAS-Identifier::
+* NAS-Port-Id::
+* NAS-Port-Type::
+* Reply-Message::
+* Service-Type::
+* Session-Timeout::
+* State::
+* Termination-Action::
+* User-Name::
+* User-Password::
+* Vendor-Specific::
+
+Accounting Attributes
+
+* Acct-Authentic::
+* Acct-Delay-Time::
+* Acct-Input-Octets::
+* Acct-Input-Packets::
+* Acct-Output-Octets::
+* Acct-Output-Packets::
+* Acct-Session-Id::
+* Acct-Session-Time::
+* Acct-Status-Type::
+* Acct-Terminate-Cause::
+
+Radius Internal Attributes
+
+* Acct-Ext-Program::
+* Acct-Type::
+* Auth-Data::
+* Auth-Failure-Trigger::
+* Auth-Type::
+* Crypt-Password::
+* Exec-Program-Wait::
+* Exec-Program::
+* Fall-Through::
+* Group::
+* Hint::
+* Huntgroup-Name::
+* Log-Mode-Mask::
+* Login-Time::
+* Match-Profile::
+* Menu::
+* Pam-Auth::
+* Prefix::
+* Proxy-Replied::
+* Realm-Name::
+* Replace-User-Name::
+* Rewrite-Function::
+* Scheme-Acct-Procedure::
+* Scheme-Procedure::
+* Simultaneous-Use::
+* Strip-User-Name::
+* Suffix::
+* Termination-Menu::
+
+@attr{Exec-Program-Wait}
+
+* Running External Program::
+* Using External Filter::
+
+New Configuration Approach (draft)
+
+* Present State::             A brief description of Currently Used Approach
+* Deficiencies::              Deficiencies of Current Operation Model
+                              and Configuration Suite
+* Solution::                  A Proposed Solution
+* New Rewrite::               Changes to Rewrite Language
+* Traditional Configuration:: Support for Traditional Configuration Files.
+* New Configuration::         New Configuration Files
+
+Proposed Solution
+
+* Instruction::
+* grad_instr_conditional::
+* grad_instr_call::
+* grad_instr_return::
+* grad_instr_action::
+* grad_instr_reply::
+* grad_instr_proxy::
+* grad_instr_forward::
+
+@end detailmenu
 @end menu
 
 @comment *******************************************************************
@@ -195,7 +577,7 @@ Client configuration
 @include bugs.texi
 
 @comment *******************************************************************
-@node Distrib, Glossary, Top, Top
+@node Distrib
 @unnumbered How to Obtain Radius
 
 GNU Radius is @dfn{free software}; this means that everyone is free to
@@ -215,7 +597,7 @@ distribution version of GNU Radius by anonymous FTP. It is available at
 @url{ftp://ftp.gnu.org/pub/gnu/radius}
 
 @comment *******************************************************************
-@node Glossary, Acknowledgements, Distrib, Top
+@node Glossary
 @unnumbered Radius Glossary
 
 Throughout this document the following terms are used:
@@ -234,7 +616,7 @@ designed to provide access to the network.  For example, it can be a
 computer connected to the network and equipped with several modems.
 Such a
 @NAS{} will allow a user connecting to one of its modems to access the
-network. 
+network.
 
 @cindex Service
 @item Service
@@ -255,7 +637,7 @@ The session identifier: a string of characters uniquely identifying the session.
 @cindex Attribute
 @cindex Attribute-Value pair
 @item @AVP{}
-Attribute-value pair: see @ref{Attributes}. 
+Attribute-value pair: see @ref{Attributes}.
 
 @cindex Dial-in user
 @cindex Dial-up user
@@ -275,7 +657,7 @@ provided and parameters of these services.
 @end table
 
 @comment *******************************************************************
-@node Acknowledgements, GNU configuration, Glossary, Top
+@node Acknowledgements
 @unnumbered Acknowledgements
 
 I would like to acknowledge Oswaldo Aguirre and Francisco
@@ -301,14 +683,14 @@ And of course, thanks to Richard M. Stallman for founding the FSF and
 starting the GNU project.
 
 @comment *******************************************************************
-@node GNU configuration, Copying This Manual, Acknowledgements, Top
+@node GNU configuration
 @include gradient.texi
 
 @comment *******************************************************************
-@node Copying This Manual, Index, GNU configuration, Top
+@node Copying This Manual
 @include fdl.texi
 
-@node Index, , Copying This Manual, Top
+@node Index
 @unnumbered Index
 @printindex cp
 @page

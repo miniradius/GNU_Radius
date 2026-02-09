@@ -1,23 +1,22 @@
 /* This file is part of GNU Radius.
-   Copyright (C) 2004,2005,2007 Free Software Foundation, Inc.
+   Copyright (C) 2004-2025 Free Software Foundation, Inc.
 
    Written by Sergey Poznyakoff
-  
+
    GNU Radius is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
    the Free Software Foundation; either version 3 of the License, or
    (at your option) any later version.
-  
+
    GNU Radius is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
-  
-   You should have received a copy of the GNU General Public License
-   along with GNU Radius; if not, write to the Free Software Foundation,
-   Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
-#if defined(HAVE_CONFIG_H)        
+   You should have received a copy of the GNU General Public License
+   along with GNU Radius.  If not, see <http://www.gnu.org/licenses/>. */
+
+#if defined(HAVE_CONFIG_H)
 # include <config.h>
 #endif
 
@@ -31,9 +30,10 @@
 #include <sys/stat.h>
 #include <time.h>
 #include <setjmp.h>
+#include <errno.h>
 
 #include <common.h>
-#include <radius/radargp.h>
+#include <radcli.h>
 #include <radtest.h>
 #include <radius/argcv.h>
 
@@ -42,7 +42,7 @@ static int break_level;     /* Break (continue) from that many loops */
 static int continue_loop;   /* 1 if we are continuing */
 static radtest_variable_t function_result; /* Result of the last executed
 					      function */
-static grad_list_t *curenv; /* Current environment */ 
+static grad_list_t *curenv; /* Current environment */
 
 /* Forward declarations */
 static void rt_eval_stmt_list(grad_list_t *list);
@@ -60,7 +60,7 @@ runtime_error(grad_locus_t *locus, const char *fmt, ...)
 	va_list ap;
 
 	if (locus)
-		fprintf(stderr, "%s:%d: ",
+		fprintf(stderr, "%s:%zu: ",
 			locus->file, locus->line);
 	va_start(ap, fmt);
 	vfprintf(stderr, fmt, ap);
@@ -75,9 +75,9 @@ var_asgn(radtest_variable_t *var, radtest_variable_t *result)
 	var->type = result->type;
 
 	switch (result->type) {
-        case rtv_undefined:
-        case rtv_integer:
-        case rtv_ipaddress:
+	case rtv_undefined:
+	case rtv_integer:
+	case rtv_ipaddress:
 		var->datum = result->datum;
 		break;
 
@@ -87,19 +87,19 @@ var_asgn(radtest_variable_t *var, radtest_variable_t *result)
 		       result->datum.bstring.length);
 		var->datum.bstring.length = result->datum.bstring.length;
 		break;
-		
-        case rtv_string:
+
+	case rtv_string:
 		/* FIXME: memory leak */
 		var->datum.string = grad_estrdup(result->datum.string);
 		break;
-		
+
 	case rtv_avl:
 		var->datum.avl = result->datum.avl;
 		break;
-		
-        case rtv_pairlist:
+
+	case rtv_pairlist:
 		grad_insist_fail("rtv_pairlist in assignment");
-		
+
 	default:
 		grad_insist_fail("invalid data type in assignment");
 	}
@@ -164,8 +164,8 @@ radtest_env_to_argv(grad_list_t *env, grad_locus_t *locus,
 	*pargc = argc;
 	*pargv = argv;
 }
-		
-	
+
+
 
 /* Main entry point */
 
@@ -186,55 +186,55 @@ radtest_eval(radtest_node_t *stmt, grad_list_t *env)
 	case radtest_op_add:                        \
 		result->datum.number = a + b;       \
 		break;                              \
-		                                    \
+						    \
 	case radtest_op_sub:                        \
 		result->datum.number = a - b;       \
 		break;                              \
-                                                    \
+						    \
 	case radtest_op_mul:                        \
 		result->datum.number = a * b;       \
 		break;                              \
-		                                    \
+						    \
 	case radtest_op_div:                        \
-                if (b == 0)                         \
-                   runtime_error(locus, _("division by zero")); \
-          	result->datum.number = a / b;       \
+		if (b == 0)                         \
+		   runtime_error(locus, _("division by zero")); \
+		result->datum.number = a / b;       \
 		break;                              \
-		                                    \
+						    \
 	case radtest_op_mod:                        \
-                if (b == 0)                         \
-                   runtime_error(locus, _("division by zero")); \
+		if (b == 0)                         \
+		   runtime_error(locus, _("division by zero")); \
 		result->datum.number = a % b;       \
 		break;                              \
-		                                    \
+						    \
 	case radtest_op_and:                        \
 		result->datum.number = a & b;       \
 		break;                              \
-		                                    \
+						    \
 	case radtest_op_or:                         \
 		result->datum.number = a | b;       \
 		break;                              \
-		                                    \
+						    \
 	case radtest_op_eq:                         \
 		result->datum.number = a == b;      \
 		break;                              \
-		                                    \
+						    \
 	case radtest_op_ne:                         \
 		result->datum.number = a != b;      \
 		break;                              \
-                                                    \
+						    \
 	case radtest_op_lt:                         \
 		result->datum.number = a < b;       \
 		break;                              \
-		                                    \
+						    \
 	case radtest_op_le:                         \
 		result->datum.number = a <= b;      \
 		break;                              \
-		                                    \
+						    \
 	case radtest_op_gt:                         \
 		result->datum.number = a > b;       \
 		break;                              \
-		                                    \
+						    \
 	case radtest_op_ge:                         \
 		result->datum.number = a >= b;      \
 		break;                              \
@@ -251,7 +251,7 @@ rt_eval_bin_int(grad_locus_t *locus,
 static void
 rt_eval_bin_uint(grad_locus_t *locus,
 		 radtest_variable_t *result, radtest_binop_t op,
-		 grad_uint32_t a, grad_uint32_t b)
+		 uint32_t a, uint32_t b)
 {
 	result->type = rtv_ipaddress;
 	RT_EVAL(locus, result, op, a, b);
@@ -316,12 +316,12 @@ rt_eval_bin_str(grad_locus_t *locus,
 		result->type = rtv_integer;
 		result->datum.number = strcmp(a, b) == 0;
 		break;
-		
+
 	case radtest_op_ne:
 		result->type = rtv_integer;
 		result->datum.number = strcmp(a, b) != 0;
 		break;
-		
+
 	case radtest_op_lt:
 		result->type = rtv_integer;
 		result->datum.number = strcmp(a, b) < 0;
@@ -341,7 +341,7 @@ rt_eval_bin_str(grad_locus_t *locus,
 		result->type = rtv_integer;
 		result->datum.number = strcmp(a, b) >= 0;
 		break;
-		
+
 	default:
 		bin_type_error(locus, op);
 	}
@@ -351,13 +351,13 @@ static int
 _found_p(void *data, grad_avp_t *pair)
 {
 	return grad_avl_find(data, pair->attribute) != NULL;
-}				
+}
 
 static int
 _not_found_p(void *data, grad_avp_t *pair)
 {
 	return grad_avl_find(data, pair->attribute) == NULL;
-}				
+}
 
 void
 rt_eval_bin_avl(grad_locus_t *locus,
@@ -372,7 +372,7 @@ rt_eval_bin_avl(grad_locus_t *locus,
 		result->type = rtv_avl;
 		result->datum.avl = a;
 		break;
-		
+
 	case radtest_op_sub:
 		result->type = rtv_avl;
 		result->datum.avl = NULL;
@@ -381,7 +381,7 @@ rt_eval_bin_avl(grad_locus_t *locus,
 				    _not_found_p,
 				    b);
 		break;
-		
+
 	case radtest_op_mod:
 		/* Return the intersection of A and B */
 		result->type = rtv_avl;
@@ -391,12 +391,12 @@ rt_eval_bin_avl(grad_locus_t *locus,
 				    _found_p,
 				    b);
 		break;
-		
+
 	case radtest_op_eq:
 		result->type = rtv_integer;
 		result->datum.number = compare_lists(a, b) == 0;
 		break;
-		
+
 	case radtest_op_ne:
 		result->type = rtv_integer;
 		result->datum.number = compare_lists(a, b) != 0;
@@ -414,7 +414,8 @@ rt_eval_deref(radtest_node_t *node, radtest_variable_t *result)
 	size_t n;
 	radtest_variable_t *var;
 	char *p;
-		
+	char buf[BUFSIZ];
+
 	var = (radtest_variable_t*) grad_sym_lookup(vartab,
 						    node->v.deref.name);
 	if (var && var->type != rtv_undefined) {
@@ -426,24 +427,24 @@ rt_eval_deref(radtest_node_t *node, radtest_variable_t *result)
 
 	p = node->v.deref.repl;
 	if (p) switch (*p++) {
-        case '=':
+	case '=':
 		if (!var)
 			var = (radtest_variable_t*)
 				grad_sym_install(vartab, node->v.deref.name);
-                var->type = parse_datum(p, &var->datum);
+		var->type = parse_datum(p, &var->datum);
 		radtest_var_copy(result, var);
-                break;
-                
-        case '-':
-                switch (result->type = parse_datum(p, &datum)) {
-                case rtv_undefined:
-                        runtime_error(&node->locus,
+		break;
+
+	case '-':
+		switch (result->type = parse_datum(p, &datum)) {
+		case rtv_undefined:
+			runtime_error(&node->locus,
 				      _("variable `%s' used before definition"),
 				      node->v.deref.name);
-                        break;
-                        
-                case rtv_integer:
-                case rtv_ipaddress:
+			break;
+
+		case rtv_integer:
+		case rtv_ipaddress:
 		case rtv_string:
 			result->datum = datum;
 			break;
@@ -453,47 +454,58 @@ rt_eval_deref(radtest_node_t *node, radtest_variable_t *result)
 				      _("%s:%d: unknown data type"),
 				      __FILE__, __LINE__);
 		}
-                break;
-		
-        case '?':
-                if (*p) 
-                        fprintf(stderr, "%s\n", p);
-                else
-                        fprintf(stderr, "%s: variable unset\n",
+		break;
+
+	case '?':
+		if (*p)
+			fprintf(stderr, "%s\n", p);
+		else
+			fprintf(stderr, "%s: variable unset\n",
 				node->v.deref.name);
-                exit(1);
-                                
-        case ':':
-                if (*p)
-                        printf("%s", p);
-                else
-                        printf("(%s:%lu)%s? ",
-                               node->locus.file,
-                               (unsigned long)node->locus.line,
-                               node->v.deref.name);
-                p = NULL;
-                n = 0;
-                getline(&p, &n, stdin);
+		exit(1);
+
+	case ':':
+		if (*p)
+			printf("%s", p);
+		else
+			printf("(%s:%lu)%s? ",
+			       node->locus.file,
+			       (unsigned long)node->locus.line,
+			       node->v.deref.name);
+		if (!fgets(buf, sizeof(buf), stdin)) {
+			runtime_error(&node->locus,
+				      _("read error: %s"),
+				      strerror(errno));
+		}
+		n = strlen(buf);
+		if (n == 0)
+			runtime_error(&node->locus, "EOF");
+		else if (buf[n-1] == '\n')
+			buf[n-1] = 0;
+		else
+			runtime_error(&node->locus, "%s",
+				      _("input line too long"));
+		result->type = rtv_string;
+		radtest_start_string(buf);
+		result->datum.string = radtest_end_string();
+		break;
+
+	case '&':
+		if (!*p) {
+			snprintf(buf, sizeof(buf), "(%s:%lu)%s? ",
+				 node->locus.file,
+				 node->locus.line,
+				 node->v.deref.name);
+			p = buf;
+		}
+		p = getpass(p);
+		if (!p)
+			exit(0);
 		result->type = rtv_string;
 		radtest_start_string(p);
-                result->datum.string = radtest_end_string();
-		free(p);
-                break;
-                
-        case '&':
-                if (!*p)
-                        asprintf(&p, "(%s:%lu)%s? ",
-                                 node->locus.file,
-                                 node->locus.line,
-                                 node->v.deref.name);
-                p = getpass(p);
-                if (!p)
-                        exit(0);
-		result->type = rtv_string;
-		radtest_start_string(p);
-                result->datum.string = radtest_end_string();
-                break;
-        }
+		result->datum.string = radtest_end_string();
+		break;
+	}
 	if (result->type == rtv_undefined)
 		runtime_error(&node->locus,
 			      _("variable `%s' used before definition"),
@@ -507,74 +519,88 @@ rt_eval_parm(radtest_node_t *node, radtest_variable_t *result)
 	char *p;
 	size_t n;
 	radtest_variable_t *var;
-	
+	char buf[BUFSIZ];
+
 	var = radtest_env_get(curenv, num);
 	if (var) {
 		rt_eval_variable(&node->locus, result, var);
 		return;
 	}
-        
-        if (!node->v.parm.repl) {
+
+	if (!node->v.parm.repl) {
 		radtest_start_string("");
 		result->type = rtv_string;
 		result->datum.string = radtest_end_string();
-                return;
-        }
-        p = node->v.parm.repl;
-	
-        switch (*p++) {
-        case '=':
+		return;
+	}
+	p = node->v.parm.repl;
+
+	switch (*p++) {
+	case '=':
 		radtest_start_string(p);
 		var->type = rtv_string;
 		var->datum.string = radtest_end_string();
 		radtest_env_add(curenv, var);
 		radtest_var_copy(result, var);
-                break;
-                
-        case '-':
+		break;
+
+	case '-':
 		radtest_start_string(p);
 		result->type = rtv_string;
 		result->datum.string = p;
-                break;
-                
-        case '?':
-                if (*p) 
-                        fprintf(stderr, "%s\n", p);
-                else
-                        fprintf(stderr, "parameter %d unset\n", num);
-                exit(1);
-                                
-        case ':':
-                if (*p)
-                        printf("%s", p);
-                else
-                        printf("(%s:%lu)%d? ",
-                               node->locus.file,
-                               (unsigned long) node->locus.line,
-                               num);
-                p = NULL;
-                n = 0;
-                getline(&p, &n, stdin);
+		break;
+
+	case '?':
+		if (*p)
+			fprintf(stderr, "%s\n", p);
+		else
+			fprintf(stderr, "parameter %d unset\n", num);
+		exit(1);
+
+	case ':':
+		if (*p)
+			printf("%s", p);
+		else
+			printf("(%s:%lu)%d? ",
+			       node->locus.file,
+			       (unsigned long) node->locus.line,
+			       num);
+
+		if (!fgets(buf, sizeof(buf), stdin)) {
+			runtime_error(&node->locus,
+				      _("read error: %s"),
+				      strerror(errno));
+		}
+		n = strlen(buf);
+		if (n == 0)
+			runtime_error(&node->locus, "EOF");
+		else if (buf[n-1] == '\n')
+			buf[n-1] = 0;
+		else
+			runtime_error(&node->locus, "%s",
+				      _("input line too long"));
+
+		radtest_start_string(buf);
+		result->type = rtv_string;
+		result->datum.string = radtest_end_string();
+		break;
+
+	case '&':
+		if (!*p) {
+			snprintf(buf, sizeof(buf), "(%s:%lu)%d? ",
+				 node->locus.file,
+				 (unsigned long) node->locus.line,
+				 num);
+			p = buf;
+		}
+		p = getpass(p);
+		if (!p)
+			exit(0);
 		radtest_start_string(p);
 		result->type = rtv_string;
 		result->datum.string = radtest_end_string();
-                free(p);
-                break;
-                
-        case '&':
-                if (!*p)
-                        asprintf(&p, "(%s:%lu)%d? ",
-                                 node->locus.file,
-                                 (unsigned long) node->locus.line,
-                                 num);
-                p = getpass(p);
-                if (!p)
-                        exit(0);
-		radtest_start_string(p);
-		result->type = rtv_string;
-		result->datum.string = radtest_end_string();
-                break;
-        }
+		break;
+	}
 }
 
 static void
@@ -584,24 +610,24 @@ rt_eval_pairlist(grad_locus_t *locus,
 	grad_avp_t *plist = NULL;
 	radtest_pair_t *p;
 	grad_iterator_t *itr = grad_iterator_create(var->datum.list);
-	
+
 	for (p = grad_iterator_first(itr); p; p = grad_iterator_next(itr)) {
 		radtest_variable_t val;
 		grad_avp_t *pair = NULL;
-		grad_uint32_t n;
+		uint32_t n;
 		char buf[64];
-		
+
 		rt_eval_expr(p->node, &val);
 		switch (val.type) {
 		default:
 			grad_insist_fail("invalid data type in "
 					 "rt_eval_pairlist");
-			
+
 		case rtv_pairlist:
 		case rtv_avl:
 			runtime_error(locus, _("invalid data type"));
 			break;
-			
+
 		case rtv_integer:
 			switch (p->attr->type) {
 			case GRAD_TYPE_STRING:
@@ -611,7 +637,7 @@ rt_eval_pairlist(grad_locus_t *locus,
 				pair = grad_avp_create_string(p->attr->value,
 							      buf);
 				break;
-				
+
 			case GRAD_TYPE_INTEGER:
 			case GRAD_TYPE_IPADDR:
 				pair = grad_avp_create_integer(p->attr->value,
@@ -619,7 +645,7 @@ rt_eval_pairlist(grad_locus_t *locus,
 				break;
 			}
 			break;
-			
+
 		case rtv_ipaddress:
 			switch (p->attr->type) {
 			case GRAD_TYPE_STRING:
@@ -629,7 +655,7 @@ rt_eval_pairlist(grad_locus_t *locus,
 				pair = grad_avp_create_string(p->attr->value,
 							      buf);
 				break;
-				
+
 			case GRAD_TYPE_INTEGER:
 			case GRAD_TYPE_IPADDR:
 				pair = grad_avp_create_integer(p->attr->value,
@@ -643,7 +669,7 @@ rt_eval_pairlist(grad_locus_t *locus,
 			case GRAD_TYPE_STRING:
 				pair = grad_avp_create_binary(p->attr->value,
 							      val.datum.bstring.length,
-							      val.datum.bstring.ptr);
+							      (u_char*)val.datum.bstring.ptr);
 				break;
 
 			default:
@@ -651,7 +677,7 @@ rt_eval_pairlist(grad_locus_t *locus,
 				runtime_error(locus, _("invalid data type"));
 			}
 			break;
-			
+
 		case rtv_string:
 			switch (p->attr->type) {
 			case GRAD_TYPE_STRING:
@@ -659,7 +685,7 @@ rt_eval_pairlist(grad_locus_t *locus,
 				pair = grad_avp_create_string(p->attr->value,
 							      val.datum.string);
 				break;
-				
+
 			case GRAD_TYPE_INTEGER:
 			{
 				grad_dict_value_t *dv =
@@ -673,7 +699,7 @@ rt_eval_pairlist(grad_locus_t *locus,
 				}
 			}
 			/*FALLTHROUGH*/
-					
+
 			case GRAD_TYPE_IPADDR:
 				/*FIXME: error checking*/
 				n = strtoul(val.datum.string, NULL, 0);
@@ -692,7 +718,7 @@ rt_eval_pairlist(grad_locus_t *locus,
 	result->type = rtv_avl;
 	result->datum.avl = plist;
 }
-	
+
 static void
 rt_eval_variable(grad_locus_t *locus,
 		 radtest_variable_t *result, radtest_variable_t *var)
@@ -706,7 +732,7 @@ rt_eval_variable(grad_locus_t *locus,
 		result->type = var->type;
 		result->datum.avl = grad_avl_dup(var->datum.avl);
 		break;
-		
+
 	default:
 		*result = *var;
 	}
@@ -719,12 +745,12 @@ rt_eval_call(radtest_node_t *stmt, radtest_variable_t *result)
 	grad_iterator_t *itr;
 	radtest_node_t *expr;
 	radtest_variable_t *var;
-	
+
 	env = grad_list_create();
 	var = radtest_var_alloc(rtv_string);
 	var->datum.string = stmt->v.call.fun->name;
 	radtest_env_add(env, var);
-	
+
 	itr = grad_iterator_create(stmt->v.call.args);
 	for (expr = grad_iterator_first(itr);
 	     expr;
@@ -742,7 +768,7 @@ rt_eval_call(radtest_node_t *stmt, radtest_variable_t *result)
 	rt_eval_stmt_list(stmt->v.call.fun->body);
 
 	grad_list_destroy(&env, NULL, NULL);
-	
+
 	curenv = tmp;
 	if (result)
 		*result = function_result;
@@ -817,7 +843,7 @@ static int
 int_to_str(radtest_variable_t *var)
 {
 	static char buf[64];
-	
+
 	snprintf(buf, sizeof buf, "%ld", var->datum.number);
 	radtest_start_string(buf);
 	var->datum.string = radtest_end_string();
@@ -838,7 +864,7 @@ static int
 str_to_int(radtest_variable_t *var)
 {
 	long v;
-	
+
 	if (isdigit(var->datum.string[0])) {
 		char *p;
 		v = strtol(var->datum.string, &p, 0);
@@ -861,7 +887,7 @@ str_to_ip(radtest_variable_t *var)
 }
 
 typecast_proc_t typecast_proc[][RTV_MAX] = {
-        /* undefined   integer   ipaddress     string    bstring  pairlist  avl */
+	/* undefined   integer   ipaddress     string    bstring  pairlist  avl */
 /* und */ { tc_error,  tc_error,  tc_error,   tc_error,  tc_error, tc_error, tc_error },
 /* int */ { tc_error,      NULL, int_to_ip, int_to_str,  tc_error, tc_error, tc_error },
 /* ip  */ { tc_error, ip_to_int,      NULL,  ip_to_str,  tc_error, tc_error, tc_error },
@@ -889,19 +915,19 @@ static char *
 cast_to_string(grad_locus_t *locus, radtest_variable_t const *var)
 {
 	static char buf[64];
-	
+
 	switch (var->type) {
 	case rtv_string:
 		return var->datum.string;
-		
+
 	case rtv_integer:
 		snprintf(buf, sizeof buf, "%ld", var->datum.number);
 		break;
-			
+
 	case rtv_ipaddress:
 		grad_ip_iptostr(var->datum.ipaddr, buf);
 		break;
-		
+
 	default:
 		typecast_error(locus, var->type, rtv_string);
 	}
@@ -914,10 +940,10 @@ cast_to_boolean(grad_locus_t *locus, radtest_variable_t const *var)
 	switch (var->type) {
 	case rtv_string:
 		return var->datum.string[0];
-		
+
 	case rtv_integer:
 		return var->datum.number;
-			
+
 	case rtv_ipaddress:
 		return var->datum.ipaddr != 0;
 		break;
@@ -925,7 +951,7 @@ cast_to_boolean(grad_locus_t *locus, radtest_variable_t const *var)
 	case rtv_avl:
 		return var->datum.avl != NULL;
 		break;
-		
+
 	default:
 		typecast_error(locus, var->type, rtv_string);
 	}
@@ -966,12 +992,12 @@ rt_eval_expr(radtest_node_t *node, radtest_variable_t *result)
 		result->type = rtv_undefined;
 		return;
 	}
-	
+
 	switch (node->type) {
 	case radtest_node_value:
 		rt_eval_variable(&node->locus, result, node->v.var);
 		break;
-		
+
 	case radtest_node_bin:
 		rt_eval_expr(node->v.bin.left, &left);
 
@@ -981,12 +1007,12 @@ rt_eval_expr(radtest_node_t *node, radtest_variable_t *result)
 			result->type = rtv_integer;
 			result->datum.number = node->v.bin.op == radtest_op_or;
 			if (cast_to_boolean(&node->locus, &left)
-			    == result->datum.number) 
+			    == result->datum.number)
 				break;
 		}
-		
+
 		rt_eval_expr(node->v.bin.right, &right);
-		
+
 		if (left.type != right.type) {
 			if (node->v.bin.left->type == radtest_node_value
 			    && try_typecast(&right, left.type) == 0)
@@ -1015,7 +1041,7 @@ rt_eval_expr(radtest_node_t *node, radtest_variable_t *result)
 		switch (left.type) {
 		case rtv_undefined:
 			grad_insist_fail("bad datatype");
-			
+
 		case rtv_integer:
 			rt_eval_bin_int(&node->locus,
 					result,
@@ -1031,15 +1057,16 @@ rt_eval_expr(radtest_node_t *node, radtest_variable_t *result)
 					 left.datum.number,
 					 right.datum.ipaddr);
 			break;
-			
+
 		case rtv_string:
+		case rtv_bstring:
 			rt_eval_bin_str(&node->locus,
 					result,
 					node->v.bin.op,
 					left.datum.string,
 					right.datum.string);
 			break;
-				
+
 		case rtv_pairlist:
 			grad_insist_fail("a value cannot evaluate to "
 					 "rtv_pairlist");
@@ -1053,7 +1080,7 @@ rt_eval_expr(radtest_node_t *node, radtest_variable_t *result)
 			break;
 		}
 		break;
-		
+
 	case radtest_node_unary:
 		rt_eval_expr(node->v.unary.operand, &left);
 		switch (node->v.unary.op) {
@@ -1062,7 +1089,7 @@ rt_eval_expr(radtest_node_t *node, radtest_variable_t *result)
 			result->type = rtv_integer;
 			result->datum.number = - left.datum.number;
 			break;
-			
+
 		case radtest_op_not:
 			switch (left.type) {
 			case rtv_string:
@@ -1074,20 +1101,20 @@ rt_eval_expr(radtest_node_t *node, radtest_variable_t *result)
 						left.datum.string[0] == 0;
 					break;
 				}
-						
+
 			case rtv_integer:
 				result->datum.number = ! left.datum.number;
 				break;
-				
+
 			case rtv_ipaddress:
 				typecast(&node->locus, &left, rtv_integer);
 				result->datum.number = ! left.datum.number;
 				break;
-				
+
 			case rtv_avl:
 				result->datum.number = left.datum.avl == NULL;
 				break;
-					
+
 			default:
 				unary_type_error(&node->locus,
 						 node->v.unary.op);
@@ -1095,19 +1122,19 @@ rt_eval_expr(radtest_node_t *node, radtest_variable_t *result)
 			result->type = rtv_integer;
 		}
 		break;
-			
+
 	case radtest_node_deref:
 		rt_eval_deref(node, result);
 		break;
-		
+
 	case radtest_node_parm:
 		rt_eval_parm(node, result);
 		break;
-		
+
 	case radtest_node_attr:
 	{
 		grad_avp_t *p;
-		
+
 		rt_eval_expr(node->v.attr.node, &left);
 		if (left.type != rtv_avl)
 			runtime_error(&node->locus, _("not a pair list"));
@@ -1119,14 +1146,14 @@ rt_eval_expr(radtest_node_t *node, radtest_variable_t *result)
 				size_t len = 1;
 				for (p = left.datum.avl; p; p = p->next) {
 					if (p->attribute ==
-					          node->v.attr.dict->value)
+						  node->v.attr.dict->value)
 						len += p->avp_strlength;
 				}
 				result->datum.string = grad_emalloc(len);
 				result->datum.string[0] = 0;
 				for (p = left.datum.avl; p; p = p->next) {
 					if (p->attribute ==
-					          node->v.attr.dict->value)
+						  node->v.attr.dict->value)
 						strcat(result->datum.string,
 						       p->avp_strvalue);
 				}
@@ -1134,17 +1161,17 @@ rt_eval_expr(radtest_node_t *node, radtest_variable_t *result)
 				result->datum.string = p ?
 					p->avp_strvalue : "";
 			break;
-			
-		case GRAD_TYPE_DATE:    
+
+		case GRAD_TYPE_DATE:
 			result->type = rtv_string;
 			result->datum.string = p ? p->avp_strvalue : "";
 			break;
-			
+
 		case GRAD_TYPE_INTEGER:
 			result->type = rtv_integer;
 			result->datum.number = p ? p->avp_lvalue : 0;
 			break;
-			
+
 		case GRAD_TYPE_IPADDR:
 			result->type = rtv_ipaddress;
 			result->datum.number = p ? p->avp_lvalue : 0;
@@ -1152,7 +1179,7 @@ rt_eval_expr(radtest_node_t *node, radtest_variable_t *result)
 		}
 		break;
 	}
-	
+
 	case radtest_node_getopt:
 	{
 		char buf[3];
@@ -1171,18 +1198,18 @@ rt_eval_expr(radtest_node_t *node, radtest_variable_t *result)
 		result->type = rtv_integer;
 		result->datum.number = node->v.gopt.last != EOF;
 
-		if (node->v.gopt.last == EOF) 
+		if (node->v.gopt.last == EOF)
 			grad_argcv_free(node->v.gopt.argc, node->v.gopt.argv);
 
 		node->v.gopt.var->type = rtv_string;
-		grad_free(node->v.gopt.var->datum.string);
+		free(node->v.gopt.var->datum.string);
 		sprintf(buf, "-%c",
 			node->v.gopt.last == EOF ? '-'
 			   : (node->v.gopt.last == '?' ? optopt
-			        : node->v.gopt.last));
+				: node->v.gopt.last));
 		node->v.gopt.var->datum.string = grad_estrdup(buf);
 
-		grad_free(node->v.gopt.arg->datum.string);
+		free(node->v.gopt.arg->datum.string);
 		if (!optarg)
 			node->v.gopt.arg->type = rtv_undefined;
 		else {
@@ -1199,15 +1226,15 @@ rt_eval_expr(radtest_node_t *node, radtest_variable_t *result)
 		result->type = rtv_integer;
 		result->datum.number = grad_list_count(curenv) - 1;
 		break;
-	
+
 	case radtest_node_call:
 		rt_eval_call(node, result);
 		break;
-		
+
 	default:
 		grad_insist_fail("Unexpected node type");
 	}
-	
+
 	var_asgn(grad_sym_lookup_or_install(vartab, "_", 1), result);
 }
 
@@ -1231,9 +1258,9 @@ rt_asgn(radtest_node_t *node)
 {
 	radtest_variable_t *var;
 	radtest_variable_t result;
-	
+
 	rt_eval_expr(node->v.asgn.expr, &result);
-	
+
 	var = (radtest_variable_t*)
 		grad_sym_lookup_or_install(vartab, node->v.asgn.name, 1);
 
@@ -1255,7 +1282,7 @@ rt_send(radtest_node_t *node)
 					"(expected A/V list)"));
 		avl = val.datum.avl;
 	}
-	
+
 	radtest_send(send->port_type, send->code, avl, send->cntl);
 	grad_symtab_free(&send->cntl);
 	grad_avl_free(avl);
@@ -1270,7 +1297,7 @@ rt_expect(radtest_node_t *node)
 		printf(_("expect %s\n"), grad_request_code_to_name(exp->code));
 		printf(_("got    %s\n"), grad_request_code_to_name(reply_code));
 	}
-	if (reply_code != exp->code) 
+	if (reply_code != exp->code)
 		pass = 0;
 
 	if (exp->expr) {
@@ -1297,7 +1324,7 @@ rt_exit(radtest_node_t *expr)
 		case rtv_integer:
 			code = result.datum.number;
 			break;
-			
+
 		case rtv_string:
 			/* FIXME: No error checking */
 			code = strtoul(result.datum.string, NULL, 0);
@@ -1319,16 +1346,16 @@ rt_true_p(radtest_variable_t *var)
 	switch (var->type) {
 	case rtv_integer:
 		return var->datum.number;
-		
+
 	case rtv_ipaddress:
 		return var->datum.ipaddr != 0;
-		
+
 	case rtv_string:
 		return var->datum.string[0];
-		
+
 	case rtv_pairlist:
 		return grad_list_count(var->datum.list) > 0;
-		
+
 	case rtv_avl:
 		return var->datum.avl != NULL;
 
@@ -1343,7 +1370,7 @@ rt_eval_loop(radtest_node_t *stmt)
 {
 	radtest_node_loop_t *loop = &stmt->v.loop;
 	int restart;
-	
+
 	if (loop->first_pass)
 		rt_eval(loop->body);
 
@@ -1368,8 +1395,8 @@ rt_eval_loop(radtest_node_t *stmt)
 static void
 rt_eval_input(radtest_node_t *stmt)
 {
-	char *p = NULL;
-	size_t n = 0;
+	char buf[BUFSIZ];
+	size_t n;
 	radtest_variable_t *var;
 
 	if (stmt->v.input.expr) {
@@ -1378,13 +1405,25 @@ rt_eval_input(radtest_node_t *stmt)
 		printf("%s", cast_to_string(&stmt->locus, &result));
 	}
 	fflush(stdout);
-		
-	getline(&p, &n, stdin);
+
+	if (!fgets(buf, sizeof(buf), stdin)) {
+		runtime_error(&stmt->locus,
+			      _("read error: %s"),
+			      strerror(errno));
+	}
+	n = strlen(buf);
+	if (n == 0)
+		runtime_error(&stmt->locus, "EOF");
+	else if (buf[n-1] == '\n')
+		buf[n-1] = 0;
+	else
+		runtime_error(&stmt->locus, "%s", _("input line too long"));
+
 	var = stmt->v.input.var;
 
 	switch (var->type) {
 	case rtv_string:
-		grad_free(var->datum.string);
+		free(var->datum.string);
 		break;
 
 	case rtv_avl:
@@ -1394,13 +1433,9 @@ rt_eval_input(radtest_node_t *stmt)
 	default:
 		break;
 	}
-	
+
 	var->type = rtv_string;
-	n = strlen(p);
-	if (n > 1 && p[n-1] == '\n')
-		p[n-1] = 0;
-	var->datum.string = grad_estrdup(p);
-	free(p);
+	var->datum.string = grad_estrdup(buf);
 }
 
 static void
@@ -1410,12 +1445,12 @@ rt_eval_case(radtest_node_t *stmt)
 	char *sample;
 	grad_iterator_t *itr;
 	radtest_case_branch_t *bp;
-	
+
 	rt_eval_expr(stmt->v.branch.expr, &result);
 	sample = cast_to_string(&stmt->locus, &result);
 	radtest_start_string(sample);
 	sample = radtest_end_string();
-	
+
 	itr = grad_iterator_create(stmt->v.branch.branchlist);
 	for (bp = grad_iterator_first(itr);
 	     bp;
@@ -1423,11 +1458,11 @@ rt_eval_case(radtest_node_t *stmt)
 		char *p;
 		regex_t rx;
 		int rc;
-		
+
 		rt_eval_expr(bp->cond, &result);
 		p = cast_to_string(&bp->cond->locus, &result);
 
-                /* FIXME: configurable flags */
+		/* FIXME: configurable flags */
 		rc = regcomp(&rx, p, REG_EXTENDED);
 
 		if (rc) {
@@ -1453,36 +1488,36 @@ rt_eval(radtest_node_t *stmt)
 
 	if (!stmt)
 		return;
-	
-	if (break_level) 
+
+	if (break_level)
 		return;
-	
+
 	switch (stmt->type) {
-		
+
 	case radtest_node_stmt:
 		rt_eval_stmt_list(stmt->v.list);
 		break;
-		
+
 	case radtest_node_print:
 		rt_print(stmt->v.list);
 		break;
-		
+
 	case radtest_node_asgn:
 		rt_asgn(stmt);
 		break;
-		
+
 	case radtest_node_send:
 		rt_send(stmt);
 		break;
-		
+
 	case radtest_node_expect:
 		rt_expect(stmt);
 		break;
-		
+
 	case radtest_node_exit:
 		rt_exit(stmt->v.expr);
 		break;
-		
+
 	case radtest_node_continue:
 		break_level = stmt->v.level;
 		continue_loop = 1;
@@ -1492,11 +1527,11 @@ rt_eval(radtest_node_t *stmt)
 		break_level = stmt->v.level;
 		continue_loop = 0;
 		break;
-		
+
 	case radtest_node_loop:
 		rt_eval_loop(stmt);
 		break;
-		
+
 	case radtest_node_cond:
 		rt_eval_expr(stmt->v.cond.cond, &result);
 		rt_eval(rt_true_p(&result) ?
@@ -1544,7 +1579,7 @@ rt_eval(radtest_node_t *stmt)
 		rt_eval_expr(stmt->v.expr, &function_result);
 		break_level = 1;
 		break;
-		
+
 	default:
 		grad_insist_fail("Unexpected instruction code");
 	}
@@ -1588,22 +1623,38 @@ free_mem(void *item, void *data)
 	struct memory_chunk *p = item;
 	if (p->destructor)
 		p->destructor(p->ptr);
-	grad_free(p);
+	free(p);
 	return 0;
 }
 
 void
-radtest_free_mem()
+radtest_free_mem(void)
 {
 	grad_list_destroy(&memory_pool, free_mem, NULL);
 	radtest_free_strings();
 }
 
 void
-radtest_fix_mem()
+radtest_fix_mem(void)
 {
 	memory_pool = NULL;
 	radtest_fix_strings();
+}
+
+static void
+argv_free(void *ptr)
+{
+	char **argv = ptr;
+	int i;
+	for (i = 0; argv[i]; i++)
+		free(argv[i]);
+	free(argv);
+}
+
+void
+radtest_register_argv(char **argv)
+{
+	register_chunk(argv, argv_free);
 }
 
 
@@ -1613,7 +1664,7 @@ radtest_node_alloc(radtest_node_type type)
 	radtest_node_t *node = grad_emalloc(sizeof(*node));
 	node->type = type;
 	node->locus = source_locus;
-	register_chunk(node, grad_free);
+	register_chunk(node, free);
 	return node;
 }
 
@@ -1633,7 +1684,7 @@ _free_var(void *item)
 	default:
 		break;
 	}
-	grad_free(var);
+	free(var);
 }
 
 radtest_variable_t *
@@ -1650,7 +1701,7 @@ void
 radtest_var_copy (radtest_variable_t *dst, radtest_variable_t *src)
 {
 	dst->type = src->type;
-	dst->datum = src->datum; 
+	dst->datum = src->datum;
 }
 
 radtest_variable_t *
@@ -1662,18 +1713,17 @@ radtest_var_dup(radtest_variable_t *src)
 }
 
 radtest_case_branch_t *
-radtest_branch_alloc()
+radtest_branch_alloc(void)
 {
 	radtest_case_branch_t *p = grad_emalloc(sizeof(*p));
-	register_chunk(p, grad_free);
+	register_chunk(p, free);
 	return p;
 }
 
 radtest_pair_t *
-radtest_pair_alloc()
+radtest_pair_alloc(void)
 {
 	radtest_pair_t *p = grad_emalloc(sizeof(*p));
-	register_chunk(p, grad_free);
+	register_chunk(p, free);
 	return p;
 }
-

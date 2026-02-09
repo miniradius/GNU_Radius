@@ -1,9 +1,9 @@
 @c This is part of the Radius manual.
-@c Copyright (C) 1999,2000,2001,2002,2003 Free Software Foundation, Inc.
+@c Copyright (C) 1999-2025 Free Software Foundation, Inc.
 @c Written by Sergey Poznyakoff
 @c See file radius.texi for copying conditions.
 @comment *******************************************************************
-@node Bugs, News, , Top
+@node Bugs
 @chapter Reporting Bugs
 
 It is possible you will encounter a bug in one of the Radius programs. If this
@@ -27,10 +27,10 @@ Send your report to @email{bug-gnu-radius@@gnu.org}. Allow us a couple of
 days to answer.
 
 @comment *******************************************************************
-@node News, , Bugs, Top
+@node News
 @chapter Where to Get Information about GNU Radius
 
-The two places to look for news regarding GNU Radius are 
+The two places to look for news regarding GNU Radius are
 the Radius homepage at @url{http://www.gnu.org/software/radius}
 and the Radius project page at @url{http://savannah.gnu.org/projects/radius}.
 
@@ -55,4 +55,3 @@ The list is not moderated; postings are allowed for anybody.
 To subscribe to the list, visit
 @url{http://mail.gnu.org/mailman/listinfo/bug-gnu-radius}.
 @end table
-

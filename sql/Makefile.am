@@ -1,5 +1,5 @@
 # This file is part of GNU Radius.
-# Copyright (C) 2000,2001,2004 Free Software Foundation, Inc.
+# Copyright (C) 2000, 2001, 2004, 2010, 2013 Free Software Foundation, Inc.
 #
 # Written by Sergey Poznyakoff
 #
@@ -19,7 +19,7 @@ EXTRA_DIST=\
  odbc.c 
 DISTCLEANFILES = modlist.h
 
-INCLUDES=@RADIUS_INCLUDE_PATH@
+AM_CPPFLAGS=@RADIUS_INCLUDE_PATH@
 libsql_la_SOURCES=disp.c
 libsql_la_LIBADD=@SQL_LTLIBOBJS@
 

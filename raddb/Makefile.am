@@ -1,5 +1,5 @@
 # This file is part of GNU Radius.
-# Copyright (C) 2001,2003,2007 Free Software Foundation, Inc.
+# Copyright (C) 2001-2025 Free Software Foundation, Inc.
 #
 # Written by Sergey Poznyakoff
 #
@@ -14,12 +14,10 @@
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with GNU Radius; if not, write to the Free Software Foundation,
-# Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
-#
+# along with GNU Radius.  If not, see <http://www.gnu.org/licenses/>.
 
 raddbdir=$(sysconfdir)/raddb
-raddb_subdirs=dict 
+raddb_subdirs=dict
 
 rewritedir=$(pkgdatadir)/$(VERSION)/rewrite
 
@@ -44,14 +42,14 @@ raddb_files_644=\
  naslist\
  nastypes\
  realms\
- sqlserver 
+ sqlserver
 
-raddb_files_600 = clients client.conf users 
+raddb_files_600 = clients client.conf users
 raddb_files=$(raddb_files_600) $(raddb_files_644)
 
 rewrite_DATA = checknas.rw log-hook.rw nas-ip.rw
 
-EXTRA_DIST=$(raddb_files) $(dictionaries) client.conf.in config.in $(rewrite_DATA) 
+EXTRA_DIST=$(raddb_files) $(dictionaries) client.conf.in config.in $(rewrite_DATA)
 DISTCLEANFILES=client.conf
 
 update-dictionary:
@@ -59,18 +57,18 @@ update-dictionary:
 		echo "Backup dicionary file found. It seems you have already run make install-dictionary"; \
 	else\
 		$(AWK) -f $(top_srcdir)/scripts/update-dict.awk\
-                    $(DESTDIR)$(raddbdir)/dictionary\
-                    $(top_srcdir)/raddb/dictionary\
-                    $(top_srcdir)/raddb/dict/standard > $@-t; \
+		    $(DESTDIR)$(raddbdir)/dictionary\
+		    $(top_srcdir)/raddb/dictionary\
+		    $(top_srcdir)/raddb/dict/standard > $@-t; \
 		if test -s $@-t; then \
 		    mv $(DESTDIR)$(raddbdir)/dictionary \
-                      $(DESTDIR)$(raddbdir)/dictionary.grad.1.0; \
+		      $(DESTDIR)$(raddbdir)/dictionary.grad.1.0; \
 		    mv $@-t $(DESTDIR)$(raddbdir)/dictionary;\
-	        fi; \
+		fi; \
 	fi; \
-        for file in $(dictionaries); do \
+	for file in $(dictionaries); do \
 		${INSTALL} -m 644 $(top_srcdir)/raddb/$$file $(DESTDIR)$(raddbdir)/$$file; \
-        done; 
+	done;
 
 install-data-local:
 	@if [ ! -d $(DESTDIR)$(raddbdir) ]; then \
@@ -93,8 +91,7 @@ install-data-local:
 		for file in $(raddb_files_600); do \
 			${INSTALL} -m 600 $(top_srcdir)/raddb/$$file $(DESTDIR)$(raddbdir)/$$file; \
 		done; \
-	        for file in $(dictionaries); do \
-		        ${INSTALL} -m 644 $(top_srcdir)/raddb/$$file $(DESTDIR)$(raddbdir)/$$file; \
-	        done;\
+		for file in $(dictionaries); do \
+			${INSTALL} -m 644 $(top_srcdir)/raddb/$$file $(DESTDIR)$(raddbdir)/$$file; \
+		done;\
 	fi
-

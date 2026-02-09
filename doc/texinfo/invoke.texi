@@ -1,5 +1,5 @@
 @c This is part of the Radius manual.
-@c Copyright (C) 1999,2000,2001,2002,2003 Free Software Foundation, Inc.
+@c Copyright (C) 1999-2025 Free Software Foundation, Inc.
 @c Written by Sergey Poznyakoff
 @c See file radius.texi for copying conditions.
 @comment *******************************************************************
@@ -39,11 +39,11 @@ Config file equivalent: @code{auth @{ detail yes; @};}.
 
 @c ** -a option (radiusd)
 @c ** --acct-directory (radiusd)
-@item -a DIR
-@itemx --acct-directory DIR
+@item -a @var{dir}
+@itemx --acct-directory=@var{dir}
 Specify accounting directory.
 
-Config file equivalent: @code{option @{ acct-dir DIR; @};}.
+Config file equivalent: @code{option @{ acct-dir @var{dir}; @};}.
 
 @c ** -b option (radiusd)
 @c ** --dbm option (radiusd)
@@ -55,8 +55,8 @@ Config file equivalent: @code{usedbm yes;}.
 
 @c ** -d (radiusd)
 @c ** --config-directory option (radiusd)
-@item -d DIR
-@itemx --config-directory DIR
+@item -d @var{dir}
+@itemx --config-directory=@var{dir}
 @itemx --directory D
 Specify alternate configuration directory. Default is @file{@value{RADDB}}.
 
@@ -68,50 +68,44 @@ Stay in foreground. We recommend to use it for debugging purposes only.
 
 @c ** -i option (radiusd)
 @c ** --ip-address
-@item -i IP
-@itemx --ip-address
+@item -i @var{ip}
+@itemx --ip-address=@var{ip}
 Specifies the @IP{} @command{radiusd} will listen on.
 If this option is not specified, the program will listen on all
 IP addresses, assigned to the machine it runs on.
 
-Config file equivalent: @code{option @{ source-ip IP; @};}.
+Config file equivalent: @code{option @{ source-ip @var{ip}; @};}.
 
 Note that @code{listen} statement in @file{raddb/config}
 provides a better control over @IP{}es to listen on (@pxref{auth}, and
-@pxref{acct}). 
-
-@c ** -L option (radiusd)
-@c ** --license option (radiusd)
-@item -L
-@itemx --license
-Display GNU General Public License and exit.
+@pxref{acct}).
 
 @c ** -l option (radiusd)
 @c ** --logging-directory option (radiusd)
-@item -l DIR
-@itemx --logging-directory DIR
+@item -l @var{dir}
+@itemx --logging-directory @var{dir}
 Specify alternate logging directory.
 
-Config file equivalent: @code{option @{ log-dir DIR; @};}.
+Config file equivalent: @code{option @{ log-dir @var{dir}; @};}.
 
 @c ** -mb option (radiusd)
 @c ** --mode b (radiusd)
 @item -mb
-@itemx --mode b
+@itemx --mode=b
 ``Builddbm'' mode. Builds a DBM version of a plaintext users database.
 @ref{Builddbm}.
 
 @c ** -mc option (radiusd)
 @c ** --mode c (radiusd)
 @item -mc
-@itemx --mode c
+@itemx --mode=c
 Check configuration files and exit. All errors are reported via usual
 log channels.
 
 @c ** -mt option (radiusd)
 @c ** --mode t (radiusd)
 @item -mt
-@itemx --mode t
+@itemx --mode=t
 Test mode. In this mode @command{radiusd} starts an interactive interpreter
 which allows to test various aspects of its configuration.
 
@@ -133,15 +127,16 @@ Config file equivalent: @code{option @{ resolve no @};}.
 
 @c ** -p option (radiusd)
 @c ** --port option (radiusd)
-@item -p PORTNO
-@itemx --port PORTNO
-Listen the @sc{udp} port PORTNO. The accounting port is computed as @var{PORTNO} + 1.
+@item -p @var{portno}
+@itemx --port @var{portno}
+Listen the @sc{udp} port @var{portno}. The accounting port is computed
+as @var{portno} + 1.
 
 @c ** -P (radiusd)
 @c ** --pid-file-dir (radiusd)
-@item -P DIR
-@itemx --pid-file-dir DIR
-Specifies the alternate path for the pidfile. 
+@item -P @var{dir}
+@itemx --pid-file-dir=@var{dir}
+Specifies the alternate path for the pidfile.
 
 @c ** -S option (radiusd)
 @c ** --log-stripped-names option (radiusd)
@@ -167,27 +162,28 @@ Display program version and compilation options.
 
 @c ** -x option (radiusd)
 @c ** --debug option (radiusd)
-@item -x DEBUG_LEVEL
-@itemx --debug DEBUG_LEVEL
-Set debugging level. @var{DEBUG_LEVEL} is a comma-separated list of
+@item -x @var{debug_level}
+@itemx --debug @var{debug_level}
+Set debugging level. Argument is a comma-separated list of
 assignments in the forms
 
-@smallexample
-MODULE
-MODULE = LEVEL
-@end smallexample
+@example
+@var{module}
+@var{module} = @var{level}
+@end example
 
-where @var{MODULE} is the module name or any non-ambiguous assignment
-thereof, LEVEL is the debugging level in the range 0-100. @ref{Debugging}
+where @var{module} is the module name or any non-ambiguous assignment
+thereof, and @var{level} is the debugging level in the range
+0-100. @ref{Debugging}
 
 Config file equivalent:
-@smallexample
+@example
 logging @{
         category debug @{
-                level DEBUG_LEVEL;
+                level @var{debug_level};
         @};
 @};
-@end smallexample
+@end example
 
 @c ** -y option (radiusd)
 @c ** --log-auth option (radiusd)
@@ -206,13 +202,13 @@ option. It is @emph{very} insecure, since all users' passwords will be
 echoed in the logfile. This option is provided only for debugging purposes.
 
 Config file equivalent:
-@smallexample
+@example
 logging @{
         category auth @{
                 print-pass yes;
         @};
 @};
-@end smallexample
+@end example
 
 @end table
 

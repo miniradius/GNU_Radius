@@ -1,6 +1,6 @@
 # -*- radconf -*-
 # This file is part of GNU Radius test suite.
-# Copyright (C) 2000,2001,2003,2007,2008 Free Software Foundation, Inc.
+# Copyright (C) 2000-2025 Free Software Foundation, Inc.
 #
 # Written by Sergey Poznyakoff
 #
@@ -15,8 +15,7 @@
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with GNU Radius; if not, write to the Free Software Foundation,
-# Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+# along with GNU Radius.  If not, see <http://www.gnu.org/licenses/>. */
 
 option {
 	max-requests 1024;
@@ -56,22 +55,22 @@ auth {
 	detail yes;
 	strip-names yes;
 	checkrad-assume-logged yes;
-        trace-rules yes;
+	trace-rules yes;
 };
 
 acct {
 	max-requests 127;
 	request-cleanup-delay 2;
-        trace-rules yes;
+	trace-rules yes;
 };
 
 filters {
 	filter filter {
 		exec-path "@BUILDDIR@/raddb/filter";
-	        auth {
+		auth {
 			input-format "AUTH %C{User-Name} %C{User-Password}";
 			wait-reply yes;
-	        };
+		};
 		acct {
 			input-format "ACCT%C{Acct-Status-Type} %C{User-Name}";
 			wait-reply yes;
@@ -80,10 +79,10 @@ filters {
 
 	filter filter_rw {
 		exec-path "@BUILDDIR@/raddb/filter";
-	        auth {
+		auth {
 			input-format "=filter_rw()";
 			wait-reply yes;
-	        };
+		};
 		acct {
 			input-format "=filter_rw()";
 			wait-reply yes;
@@ -94,14 +93,14 @@ filters {
 rewrite {
 	load-path "@SOURCEDIR@/../examples";
 	load "ascend.rw";
-        load "cisco.rw";
-        load "jetstream.rw";
-        load "nt.rw";
-        load "filter.rw";
+	load "cisco.rw";
+	load "jetstream.rw";
+	load "nt.rw";
+	load "filter.rw";
 	load-path "@SOURCEDIR@/../raddb";
 	load "log-hook.rw";
 };
-                
+
 @GUILE@guile {
 @GUILE@        debug yes;
 @GUILE@        load-path "@BUILDDIR@/raddb";
@@ -112,6 +111,6 @@ rewrite {
 @SNMP@snmp {
 @SNMP@         storage {
 @SNMP@			file "@BUILDDIR@/raddb/log/radius.stat";
-@SNMP@			perms 0600;		
+@SNMP@			perms 0600;
 @SNMP@	       };
-@SNMP@};		
+@SNMP@};

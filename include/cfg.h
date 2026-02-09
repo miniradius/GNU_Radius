@@ -1,21 +1,20 @@
 /* This file is part of GNU Radius.
-   Copyright (C) 2002,2003,2007 Free Software Foundation, Inc.
+   Copyright (C) 2002-2025 Free Software Foundation, Inc.
 
    Written by Sergey Poznyakoff
-  
+
    GNU Radius is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
    the Free Software Foundation; either version 3 of the License, or
    (at your option) any later version.
-  
+
    GNU Radius is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
-  
+
    You should have received a copy of the GNU General Public License
-   along with GNU Radius; if not, write to the Free Software Foundation, 
-   Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
+   along with GNU Radius.  If not, see <http://www.gnu.org/licenses/>. */
 
 #ifndef _cfg_h_included
 #define _cfg_h_included
@@ -24,12 +23,12 @@
 #define CS_BLOCK 1
 
 typedef struct {
-	grad_uint32_t ipaddr;
-	grad_uint32_t netmask;
+	uint32_t ipaddr;
+	uint32_t netmask;
 } cfg_network_t;
 
 typedef struct {
-	grad_uint32_t ipaddr;
+	uint32_t ipaddr;
 	int port;
 } cfg_host_t;
 
@@ -45,16 +44,16 @@ typedef struct {
 #define CFG_SIZE_T   9
 
 typedef struct {
-        int type;
-        union {
+	int type;
+	union {
 		char *string;
-                grad_uint32_t ipaddr;
-                size_t number;
-                int bool;
+		uint32_t ipaddr;
+		size_t number;
+		int boolean;
 		cfg_network_t network;
 		char ch;
 		cfg_host_t host;
-        } v;
+	} v;
 } cfg_value_t;
 
 

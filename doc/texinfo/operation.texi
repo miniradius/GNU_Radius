@@ -1,8 +1,8 @@
 @c This is part of the GNU Radius manual.
-@c Copyright (C) 2003 Free Software Foundation
+@c Copyright (C) 2003-2025 Free Software Foundation, Inc.
 @c See file radius.texi for copying conditions.
 @comment *******************************************************************
-@node Operation, Invocation, Naming Conventions, Top
+@node Operation
 @chapter How Radius Operates
 @cindex @sc{nas}
 @cindex Network Access Server
@@ -10,7 +10,7 @@
 The main purpose of GNU Radius is to centralize authentication of
 users coming from various network stations, pursuant to the @RADIUS{}
 specification. Its primary usage is for dial-in users, though it can
-be used for any kind of network connection.  
+be used for any kind of network connection.
 
 @menu
 * Attributes::                  Attributes.
@@ -106,7 +106,7 @@ Each request contains the following fields:
 @table @samp
 
 @item Code
-The code field identifies the type of the request. 
+The code field identifies the type of the request.
 
 @item Identifier
 The number in the range 0--255 used to match the request with the reply.
@@ -120,7 +120,7 @@ The 16-byte hash value used to authenticate the packet.
 @item Attributes
 
 The list of attribute-value pairs carrying actual information about the
-request. 
+request.
 
 @end table
 
@@ -651,6 +651,3 @@ the authentication result is sent back to the @NAS{} along with the
 
 User profiles are defined in the @file{raddb/users} file
 (@pxref{users file}).
-
-
-

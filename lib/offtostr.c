@@ -1,3 +1,4 @@
+#include <config.h>
 #include <stdio.h>
 #define numtostr grad_offtostr
 #define inttype off_t

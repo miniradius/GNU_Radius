@@ -1,5 +1,5 @@
 @c This is part of the Radius manual.
-@c Copyright (C) 2004 Free Software Foundation, Inc.
+@c Copyright (C) 2004-2025 Free Software Foundation, Inc.
 @c Written by Sergey Poznyakoff
 @c See file radius.texi for copying conditions.
 @comment *******************************************************************
@@ -74,12 +74,8 @@ Verbose mode
 Set debugging level
 
 @item -d @var{dir}
-@itemx --directory @var{dir}
+@itemx --directory=@var{dir}
 Specify alternate configuration directory. Default is @file{@value{RADDB}}.
-
-@item -L
-@itemx --license
-Print license and exit.
 
 @item -?
 @itemx --help
@@ -121,7 +117,7 @@ request names with their integer codes:
 
 @multitable @columnfractions .40 .20
 @item Access-Request @tab 1
-@item Access-Accept  @tab 2 
+@item Access-Accept  @tab 2
 @item Access-Reject  @tab 3
 @item Accounting-Request  @tab 4
 @item Accounting-Response @tab 5
@@ -132,13 +128,13 @@ request names with their integer codes:
 @item Accounting-Message  @tab 10
 @item Access-Challenge    @tab 11
 @item Status-Server       @tab 12
-@item Status-Client       @tab 13  
+@item Status-Client       @tab 13
 @item Ascend-Terminate-Session @tab 31
 @item Ascend-Event-Request     @tab 33
 @item Ascend-Event-Response    @tab 34
 @item Ascend-Allocate-IP       @tab 51
 @item Ascend-Release-IP        @tab 52
-@end multitable 
+@end multitable
 
 @node Strings
 @subsubsection Character Strings
@@ -149,31 +145,31 @@ dashes and dots and starting with a Latin alphabet letter or
 underscores is considered a string. To input strings containing other
 letters, surround them by double quotes. The following are valid strings:
 
-@smallexample
+@example
 @group
 A-string
 "String, containing white space"
 @end group
-@end smallexample
+@end example
 
-The double quote character @samp{"} must be preceeded by a backslash
+The double quote character @samp{"} must be preceded by a backslash
 @samp{\} if it is part of a string:
 
-@smallexample
+@example
 "Always quote \" character"
-@end smallexample
+@end example
 
 Generally speaking, @samp{\} is an @dfn{escape character}, that
 alters the meaning of the immediately following character. If it is
 located at the end of the line, it allows to input newline
 character to strings:
 
-@smallexample
+@example
 @group
 "This string contains a \
 newline character."
 @end group
-@end smallexample
+@end example
 
 Other special escape sequences are:
 
@@ -215,13 +211,13 @@ values.
 Another way to represent strings is using @dfn{here document} syntax.
 Its format is as follows:
 
-@smallexample
+@example
 @group
 <<[-]@var{delimiter}
   @var{text}
 @var{delimiter}
 @end group
-@end smallexample
+@end example
 
 @noindent
 @var{Delimiter} is any word you choose to delimit the text, @var{text}
@@ -232,7 +228,7 @@ allows for natural indentation of @samp{here document} constructs.
 The @samp{here document} construct is especially useful to represent strings
 containing embedded newlines, as shown in the example below:
 
-@smallexample
+@example
 @group
 print <<EOT
 usage: foo [OPTIONS] [NAME...]
@@ -240,7 +236,7 @@ OPTIONS are:
   -h            Print this help list.
 EOT
 @end group
-@end smallexample                                        
+@end example
 
 @node Avlists
 @subsubsection Lists of A/V pairs
@@ -260,11 +256,11 @@ or expression.
 An @AVP{} list must be enclosed in parentheses. This is an
 example of an @AVP{} list consisting of two pairs:
 
-@smallexample
+@example
 @group
 ( User-Name = "test" NAS-IP-Address = 10.10.10.1 )
 @end group
-@end smallexample
+@end example
 
 @noindent
 An empty pair list is represented by a pair of parentheses: @code{()}.
@@ -274,30 +270,30 @@ An empty pair list is represented by a pair of parentheses: @code{()}.
 
 The following keywords are reserved in @command{radtest}:
 
-@smallexample
+@example
 @group
-acct, and, auth, begin, break, case, continue, 
-do, else, end, exit, expect, getopt, if,       
-in, input, not, or, print, return, send,     
-set, shift, while    
+acct, and, auth, begin, break, case, continue,
+do, else, end, exit, expect, getopt, if,
+in, input, not, or, print, return, send,
+set, shift, while
 @end group
-@end smallexample
+@end example
 
 The reserved keywords may be used as variable names, provided that
-the following requrements are met:
+the following requirements are met:
 
 @itemize @bullet
 @item In assignment, these names are quoted using single quotes.
 
-@smallexample
+@example
 'case' = 1
-@end smallexample
+@end example
 
 @item When dereferencing, the use of curly braces is obligatory:
 
-@smallexample
+@example
 $@{case@} + 2
-@end smallexample
+@end example
 @end itemize
 
 @node Variables in radtest
@@ -329,7 +325,7 @@ extending this practice to variable names makes @code{radtest}
 programs more consistent. On the other hand, this means that you
 should be careful when using minus sign as a subtraction
 operator (@pxref{minus-ambiguity}). Case is significant in variable names:
-@code{a} and @code{A} are different variables. 
+@code{a} and @code{A} are different variables.
 
 A name of a variable may coincide with one of @code{radtest} reserved
 keywords. @xref{Reserved Keywords}, for description on how to use such
@@ -341,7 +337,7 @@ built-in variables names are entirely upper-case.
 
 Variables are never declared, they spring into existence when
 an assignment is made to them. The type of a variable is determined
-by the type of the value assigned to it. 
+by the type of the value assigned to it.
 
 @node Variable Assignments
 @subsubsection Variable Assignments
@@ -349,9 +345,9 @@ by the type of the value assigned to it.
 An @dfn{assignment} stores a new value into a variable. It's syntax
 is quite straightforward:
 
-@smallexample
+@example
 @var{variable} = @var{expression}
-@end smallexample
+@end example
 
 @noindent
 As a result of the assignment, the @var{expression} is evaluated and
@@ -363,7 +359,7 @@ It is important to notice that variables do @emph{not} have
 permanent types. The type of a variable is the type of whatever
 value it currently holds. For example:
 
-@smallexample
+@example
 @group
 foo = 1
 print $foo @result{} 1
@@ -372,23 +368,23 @@ print $foo @result{} bar
 foo = ( User-Name = "antonius" NAS-IP-Address = 127.0.0.1 )
 print $foo @result{} ( User-Name = "antonius" NAS-IP-Address = 127.0.0.1 )
 @end group
-@end smallexample
+@end example
 
 Another important point is that in @command{radtest}, assignment is
 not an expression, as it is in many other programming languages. So
 @code{C} programmers should resist temptation to use assignments in
 expressions. The following is @emph{not} correct:
 
-@smallexample
+@example
 x = y = 1
-@end smallexample
+@end example
 
 Finally, if the variable name coincides with one of @command{radtest}
 keywords, it must be enclosed in single quotes:
 
-@smallexample
+@example
 'case' = 1
-@end smallexample
+@end example
 
 @node Dereferencing Variables
 @subsubsection Dereferencing Variables
@@ -397,13 +393,13 @@ keywords, it must be enclosed in single quotes:
 simplest form of dereferencing is by prepending a dollar sign
 to the variable name:
 
-@smallexample
+@example
 @group
 foo = 1
 print foo @result{} foo
 print $foo @result{} 1
 @end group
-@end smallexample
+@end example
 
 @noindent
 Notice, that in the example above, the first @code{print} statement
@@ -412,9 +408,9 @@ prints the value of the variable.
 
 Dereferencing an undefined variable produces error message:
 
-@smallexample
+@example
 print $x @error{} variable `x' used before definition
-@end smallexample
+@end example
 
 Optionally, the variable name may be surrounded by curly braces.
 Both @code{$foo} and @code{$@{foo@}} are equivalent. The use of
@@ -423,7 +419,7 @@ with one of the reserved keywords (@pxref{Reserved Keywords}).
 @anchor{minus-ambiguity}It also can be used to resolve ambiguity between using dash as
 a part of user name and as a subtraction operator:
 
-@smallexample
+@example
 @group
 long-name = 2
 $long-name @result{} 2
@@ -431,7 +427,7 @@ $long-name-1 @error{} variable `long-name-1' used before definition
 $@{long-name@}-1 @result{} 1
 $long-name - 1 @result{} 1
 @end group
-@end smallexample
+@end example
 
 We recommend to always surround @samp{-} with whitespace when it is
 used as arithmetic operator.
@@ -444,42 +440,42 @@ shell variable substitution.
 Use default values. If @var{variable} is unset, return @var{text},
 otherwise return the value of the @var{variable}.
 
-@smallexample
+@example
 @group
 $x @error{} variable `x' used before definition
 $@{x:-1@} @result{} 1
 x = 2
 $@{x:-1@} @result{} 2
 @end group
-@end smallexample
+@end example
 
 @item $@{variable:=text@}
 Assign default values. If @var{variable} is unset, @var{text} is
 assigned to it. The expression always returns the value of the
 variable.
 
-@smallexample
+@example
 @group
 $x @error{} variable `x' used before definition
 $@{x:=1@} @result{} 1
 $x @result{} 1
 @end group
-@end smallexample
+@end example
 
 @item $@{variable:?text@}
 Display error if unset. If @var{variable} is unset, @var{text} is
 written to the standard error (if @var{text} is empty, the default
 diagnostic message is used) and further execution of the program is
 aborted. Otherwise, the value of @var{variable}
-is returned. 
+is returned.
 
-@smallexample
+@example
 @group
 $x @error{} variable `x' used before definition
 $@{x:?@} @error{} x: variable unset
 $@{x:?foobar@} @error{} foobar
 @end group
-@end smallexample
+@end example
 
 @item $@{variable::text@}
 Prompt for the value if unset. If @var{variable} is unset,
@@ -489,12 +485,12 @@ and returns the value read. Otherwise, the value of the variable
 is returned. This notation provides a convenient way for asking
 user to supply default values.
 
-@smallexample
+@example
 @group
 $@{x::@} @print{} (<teletype>:1)x?
-$@{x::Enter value of x: @} @print{} Enter value of x: 
+$@{x::Enter value of x: @} @print{} Enter value of x:
 @end group
-@end smallexample
+@end example
 
 @item $@{variable:&text@}
 Prompt for the value with echo turned off if unset. This is similar
@@ -502,7 +498,7 @@ to the @code{$@{variable::text@}}, with the exception that the input
 value will not be echoed on the screen. This notation provides a
 convenient way for asking user to supply default values for variables
 (such as passwords, shared secrets, etc.) while preventing them from
-being compromised. 
+being compromised.
 
 @end table
 
@@ -512,22 +508,22 @@ being compromised.
 Elements of an @code{avlist} are accessed as if it were an array,
 i.e.:
 
-@smallexample
+@example
 $@var{variable} [ @var{attribute-name} ]
-@end smallexample
+@end example
 
 If the attribute @var{attribute-name} is of @code{string} data type
 and @var{variable} may contain more than one pair with this attribute,
 adding an asterisk after @var{attribute-name} returns concatenated
 values of all such pairs:
 
-@smallexample
+@example
 $@var{variable} [ @var{attribute-name} * ]
-@end smallexample
+@end example
 
 Examples:
 
-@smallexample
+@example
 @group
 x = (NAS-Port-Id = 127.0.0.1 \
      Reply-Message = "a long"
@@ -537,7 +533,7 @@ $x[NAS-Port-Id] @result{} 127.0.0.1
 $x[Reply-Message] @result{} "a long"
 $x[Reply-Message*] @result{} "a long string"
 @end group
-@end smallexample
+@end example
 
 @FIXME{How to get @var{n}th instance of an attribute? What gets
 returned if there is no such attribute in the list?}
@@ -551,53 +547,53 @@ There are two ways of doing so.
 First, you can use @dfn{variable assignment option} @option{--assign}
 (or @option{-a}). Its syntax is:
 
-@smallexample
+@example
 @group
 --assign @var{variable}=@var{text}
 -a @var{variable}=@var{text}
 @end group
-@end smallexample
+@end example
 
 @noindent
 For example:
 
-@smallexample
+@example
 radtest -a foobar=5
-@end smallexample
+@end example
 
 Another way is useful when you load a @code{radtest} program by
 @option{--file} or @option{-f}. This second way consists in including
 a variable assignment in the form
 
-@smallexample
+@example
 @var{variable}=@var{text}
-@end smallexample
+@end example
 
 @noindent
 in the command line after the script name. For example:
 
-@smallexample
+@example
 radtest -f myprog.rad foo=5 addr=127.0.0.1
-@end smallexample
+@end example
 
 @noindent
 This method is especially useful for executable scripts that are
 run using @code{#!} shell magic. Consider a simple script:
 
-@smallexample
+@example
 @group
 #! /usr/local/bin/radtest -f
 print $addr
 @end group
-@end smallexample
+@end example
 
 @noindent
 The value of @var{addr} can be given to the script from the command
 line as in the example below:
 
-@smallexample
+@example
 myprog.rad addr=127.0.0.1
-@end smallexample
+@end example
 
 @node Built-in Variables
 @subsubsection Built-in Variables
@@ -621,7 +617,7 @@ Contains the @AVP{}s lastly received from the @RADIUS{} server
 @item SOURCEIP
 Contains the source @IP{} of the @RADIUS{} client (@code{ipaddr}).
 By default, it equals the @IP{} set via @code{source_ip} statement
-in your @file{client.conf} file (@pxref{client.conf}).
+in your @file{client.conf} file (@pxref{clientconf}).
 
 @item INPUT
 The value of the input read by @code{input} statement
@@ -672,7 +668,7 @@ Several things need to be mentioned:
 @itemize @bullet
 @item All top-level positional parameters have @code{string} data
 type, whereas the types of positional parameters in a function
-current environment are determined before inoking the function.
+current environment are determined before invoking the function.
 
 @item Special notion @code{$0} returns the name of the function
 being evaluated. When used in the top-level environment, it returns
@@ -688,22 +684,22 @@ error.
 environment (see example below).
 @end itemize
 
-For example, suppose you run: 
+For example, suppose you run:
 
-@smallexample
+@example
 radtest -f script.rad name foo=bar 5
-@end smallexample
+@end example
 
 Then, the top-level environment of program @file{script.rad} consists
 of the following variables:
 
-@smallexample
+@example
 @group
 $0 @result{} script.rad
 $1 @result{} name
 $2 @result{} 5
 @end group
-@end smallexample
+@end example
 
 @node Expressions in radtest
 @subsection Expressions
@@ -736,7 +732,7 @@ name, and therefore expressions like @code{$x-3} are ambiguous. This
 expression can be thought of either as a dereference of the variable
 @code{x-3} (@pxref{Dereferencing Variables}), or as subtraction of the value
 @code{3} from the value of the variable @code{x}. @command{Radtest}
-always resolves this ambiguityin the favor of variable dereference.
+always resolves this ambiguity in the favor of variable dereference.
 Therefore we advise you to always surround minus sign by whitespace,
 if it is used as a subtraction operator. So, instead of @code{$x-3},
 write @code{$x - 3}. For other methods of solving this ambiguity,
@@ -750,8 +746,8 @@ precedence to lowest:
 Negation.
 
 @item + @var{x}
-Unary plus. This is equivalent to @code{@var{x}}. @FIXME{Should this
-imply converting @var{x} to integer?}
+Unary plus. This is equivalent to @code{@var{x}}.
+@FIXME{Should this imply converting @var{x} to integer?}
 
 @item @var{x} * @var{y}
 Multiplication.
@@ -784,9 +780,9 @@ using a set of rules (@pxref{Conversion Between Data Types}).
 There is only one string operation: concatenation. It is represented
 by plus sign, e.g.:
 
-@smallexample
+@example
 "string" + "ent" @result{} "stringent"
-@end smallexample
+@end example
 
 @node A/V List Ops
 @subsubsection Operations on A/V Lists
@@ -800,7 +796,7 @@ The following operations are defined on A/V lists:
 the respective pairs additivity (@pxref{Attributes,,additivity}).
 For example:
 
-@smallexample
+@example
 ( User-Name = "foo" ) + ( Password = "bar" )
 @result{} ( User-Name = "foo" Password = "bar" )
 
@@ -809,32 +805,33 @@ For example:
 @result{} ( User-Name = "foo" \
           Service-Type = Framed-User \
           Password = "bar" )
-@end smallexample
+@end example
 
 @item @var{x} - @var{y}
 @dfn{Subtraction}. The result of this operation is an A/V list
 consisting of pairs from @var{x}, which are not found in @var{y}.
 
-@smallexample
+@example
 ( User-Name = "foo" Service-Type = Login-User ) - \
 ( Service-Type = Framed-User )
 @result{} ( User-Name = "foo" )
-@end smallexample
+@end example
 
 Notice, that only attribute name matters, its value is
-ignored.@FIXME{Is this correct? Is there a better way to put it?
-should we provide an operation that whould compare both attribute
+ignored.
+@FIXME{Is this correct? Is there a better way to put it?
+should we provide an operation that would compare both attribute
 number and its value?}
 
 @item @var{x} % @var{y}
 @dfn{Intersection}. The result of this operation is an @AVP{} list
 consisting of pairs from @var{x} which are also present in @var{y}.
 
-@smallexample
+@example
 ( User-Name = "foo" Service-Type = Login-User ) - \
 ( Service-Type = Framed-User )
 @result{} ( Service-Type = Login-User )
-@end smallexample
+@end example
 
 @FIXME{Same as above.}
 @end table
@@ -847,10 +844,10 @@ such as equality. They return boolean values, i.e. @code{true}
 or @code{false}. The comparison operations are nonassociative,
 i.e. they cannot be used together as in:
 
-@smallexample
+@example
 # @emph{Wrong!}
 1 < $x < 2
-@end smallexample
+@end example
 
 Use boolean operations (@pxref{Boolean Ops}) to group comparisons together.
 
@@ -881,7 +878,7 @@ True if @var{x} is greater than or equal to @var{y}.
 @end table
 
 Operators @code{=} and @code{!=} have equal precedence. Operators
-@code{<}, @code{<=}, @code{>}, @code{>=} have equal precedence. 
+@code{<}, @code{<=}, @code{>}, @code{>=} have equal precedence.
 
 Most operators are defined for all @command{radtest} data types.
 However, only @code{=} and @code{!=} are defined for @code{avlist}s.
@@ -921,14 +918,14 @@ is evaluated only if @var{x} is false.
 
 The unary negation operand is always converted to @code{integer} type:
 
-@smallexample
+@example
 @group
 -(1 + 1)  @result{} -2
 -(127.0.0.1 + 2) @result{} -2130706435
 - ("1" + "1") @result{} -11
 - "text" @error{} cannot convert string to integer
 @end group
-@end smallexample
+@end example
 
 @noindent
 The unary @code{not} operand is converted using the following rules:
@@ -946,7 +943,7 @@ string.
 
 Examples:
 
-@smallexample
+@example
 @group
 not 0 @result{} 1
 not 10 @result{} 0
@@ -957,14 +954,14 @@ not "" @result{} 1
 not 127.0.0.1 @result{} 0
 not 0.0.0.0 @result{} 1
 @end group
-@end smallexample
+@end example
 
 When operands of two different data types are used in a binary
 operation, one of the operands is converted (@dfn{cast}) to another
 operand's type according to the following rules:
 
 @enumerate 1
-@item If one of the operands is literal, @command{radtest} attemtps
+@item If one of the operands is literal, @command{radtest} attempts
 to convert another operand to the literal data type. If this attempt
 fails, it goes on to rule 2.
 @item If one of operands is @code{STRNUM} (@pxref{STRNUM}) and another is of numeric
@@ -995,19 +992,19 @@ there is more than one argument, they are separated by commas.
 now...} If there are no arguments, write just @samp{()} after the
 function name. Here are some examples:
 
-@smallexample
+@example
 @group
 foo()             no arguments
 bar(1)            one argument
 bar(1, "string")  two arguments
 @end group
-@end smallexample
+@end example
 
 @node Precedence
 @subsubsection Operator Precedence (How Operators Nest)
 
 @dfn{Operator precedence} determines the order of executing operators,
-when different operators appear close by in one expression.  
+when different operators appear close by in one expression.
 For example, @code{*} has higher precedence than @code{+}; thus,
 @code{a + b * c} means to multiply @code{b} and @code{c}, and then add
 @code{a} to the product.
@@ -1056,12 +1053,12 @@ Logical @samp{or}.
 A @dfn{function} is a name for a particular sequence of statements.
 The syntax for the function definition is:
 
-@smallexample
+@example
 @var{name}
 begin
   @dots{}
 end
-@end smallexample
+@end example
 
 @noindent
 where @var{name} is function name and @samp{@dots{}} represent a
@@ -1078,14 +1075,14 @@ statement is used.
 For example, here is a function that computes sum of the squares
 of its two arguments:
 
-@smallexample
+@example
 @group
 hypo
 begin
         return $1*$1 + $2*$2
 end
 @end group
-@end smallexample   
+@end example
 
 @node Interacting with Radius Servers
 @subsection Interacting with Radius Servers
@@ -1096,9 +1093,9 @@ end
 Command @code{send} sends request to the server specified in
 @file{raddb/client.conf}. Its syntax is:
 
-@smallexample
+@example
 send [@var{flags}] @var{port-type} @var{code} [@var{expr-or-pair-list}]
-@end smallexample
+@end example
 
 Optional @var{flags} can be used for fine-tuning the internals of
 @code{send}. You will seldom need to use these, unless you are
@@ -1106,9 +1103,9 @@ developing GNU Radius. @xref{Built-in Primitives,send}, for the detailed descrip
 
 The first obligatory argument, @var{port-type}, specifies which
 @RADIUS{} port to send the request to. Specifying @samp{auth} will
-send the request to the authentication port (@pxref{client.conf,auth-port});
+send the request to the authentication port (@pxref{clientconf,auth-port});
 specifying @samp{acct} will send it to the accounting port
-(@pxref{client.conf,acct-port}).
+(@pxref{clientconf,acct-port}).
 
 Argument @var{code} gives the request code. It is either a number or
 a symbolic request code name (@pxref{Numeric Values}).
@@ -1119,7 +1116,7 @@ of @AVP{}s. These pairs will be included in the request.
 
 Here are several examples:
 
-@smallexample
+@example
 # Send a @code{Status-Server} request without attributes.
 send auth Status-Server
 
@@ -1129,7 +1126,7 @@ send auth Access-Request User-Name = "foo" User-Password = "bar"
 # Send an Accounting-Request, taking attributes from the variable
 # @var{attr}
 send acct Accounting-Request $attr
-@end smallexample
+@end example
 
 Command @code{send} stores the reply code into the variable
 @code{REPLY_CODE} and reply pairs into the variable @code{REPLY}
@@ -1147,12 +1144,12 @@ command is designed primarily for use in GNU Radius testsuite.
 @code{Expect} is usually used right after @code{send}, as shown
 in the example below:
 
-@smallexample
+@example
 @group
 send auth Access-Request User-Name = "foo" User-Password = "bar"
 expect Access-Accept Reply-Message = "Access allowed"
 @end group
-@end smallexample
+@end example
 
 @node Conditional Statements
 @subsection Conditional Statements
@@ -1165,9 +1162,9 @@ expect Access-Accept Reply-Message = "Access allowed"
 
 An @code{if} statement in its simplest form is:
 
-@smallexample
+@example
 if @var{cond} @var{stmt}
-@end smallexample
+@end example
 
 @noindent
 where @var{cond} is a conditional expression and @var{stmt} is a
@@ -1177,21 +1174,21 @@ between @var{cond} @var{stmt}.
 In this form, @code{if} evaluates the condition and if it yields true,
 executes the statement. For example:
 
-@smallexample
+@example
 @group
 if $REPLY[NAS-IP-Address] = 127.0.0.1
    print "Request from localhost"
 @end group
-@end smallexample
+@end example
 
 More complex form of this statement allows to select between the two
 statements:
 
-@smallexample
+@example
 @group
-if @var{cond} @var{stmt-1} else @var{stmt-2} 
+if @var{cond} @var{stmt-1} else @var{stmt-2}
 @end group
-@end smallexample
+@end example
 
 @noindent
 Here, @var{stmt-1} will be executed if @var{cond} evaluates to true,
@@ -1204,16 +1201,16 @@ before @code{else} constitutes an error.
 If several statements should be executed in a branch of the @code{if}
 statement, use compound statement as in the example below:
 
-@smallexample
+@example
 @group
 if $REPLY_CODE != Accounting-Response
 begin
   print "Accounting failed.\n"
-  exit 1        
+  exit 1
 end else
   print "Accounting succeeded.\n"
 @end group
-@end smallexample
+@end example
 
 @code{If} statements can be nested to any depth.
 
@@ -1223,7 +1220,7 @@ end else
 a @code{string} expression matches given regular expression. The
 syntax of @code{case} statement is:
 
-@smallexample
+@example
 @group
 case @var{expr} in
 @var{expr-1} ) @var{stmt-1}
@@ -1232,7 +1229,7 @@ case @var{expr} in
 @var{expr-n} ) @var{stmt-n}
 end
 @end group
-@end smallexample
+@end example
 
 @noindent
 where @var{expr} is a control expression, @var{expr-1}, @var{expr-2}
@@ -1249,7 +1246,7 @@ so, the statement @var{stmt-n} is executed and the execution of
 
 The following example illustrates the concept:
 
-@smallexample
+@example
 @group
 case $COMMAND in
 "auth.*")       authenticate($LIST, no)
@@ -1260,7 +1257,7 @@ case $COMMAND in
                 end
 end
 @end group
-@end smallexample
+@end example
 
 @code{Bourne shell} programmers should notice that:
 
@@ -1281,24 +1278,24 @@ Two looping constructs are provided: @code{while} and
 
 The syntax of a while loop is:
 
-@smallexample
+@example
 @group
 while @var{cond}
   @var{stmt}
 @end group
-@end smallexample 
+@end example
 
 Newline after @var{cond} is obligatory.
 
 @subheading Do...while loop
 
-@smallexample
+@example
 @group
 do
   @var{stmt}
 while @var{cond}
 @end group
-@end smallexample  
+@end example
 
 As usual @code{do...while} loop differs from its @code{while}
 counterpart in that its @var{stmt} is executed at least once.
@@ -1312,7 +1309,7 @@ constructs. These are @code{break} and @code{continue}.
 loop statement and passes control to the statement immediately
 following it
 
-@smallexample
+@example
 @group
 while $x < 10
 begin
@@ -1323,7 +1320,7 @@ begin
 end
 print "OK\n"
 @end group
-@end smallexample
+@end example
 
 @noindent
 In the example above, execution of @code{break} statement passes
@@ -1334,7 +1331,7 @@ the number of nested loop statements to break from. For example, the
 @code{break} statement in the sample code below will exit from the
 outermost @code{while}:
 
-@smallexample
+@example
 @group
 while $y < 10
 begin
@@ -1343,14 +1340,14 @@ begin
     if $x < $y
        break 2
     @dots{}
-    x = $x + 1 
+    x = $x + 1
   end
   @dots{}
-  y = $y + 1 
-end  
+  y = $y + 1
+end
 print "OK\n"
 @end group
-@end smallexample
+@end example
 
 @code{Continue} statement passes control to the condition of the
 current looping construct. When used with a numeric argument, the
@@ -1386,7 +1383,7 @@ The usual way of processing command line options is by invoking
 @code{getopt} in a condition expression of @code{while} loop and
 analyzing its return values within the loop. For example:
 
-@smallexample
+@example
 @group
 while getopt "hf:"
 case $OPTVAR in
@@ -1399,7 +1396,7 @@ case $OPTVAR in
   end
 end
 @end group
-@end smallexample
+@end example
 @end deffn
 
 @deffn {Radtest statement} input [@var{expr} @var{name}]
@@ -1479,15 +1476,15 @@ Unconditionally resend the request @var{n} times.
 Specify the request ID.
 
 @item keepauth=1
-Do not alter request authenticator when resending the request.
+Do not alter request authenticator when re-sending the request.
 @end table
 
 @table @var
 @item port-type
 Specifies which port to use when sending the request. Use @samp{auth}
 to send the request to the authentication port
-(@pxref{client.conf,auth-port}), and @samp{acct} to send it to the
-accounting port (@pxref{client.conf,acct-port}).
+(@pxref{clientconf,auth-port}), and @samp{acct} to send it to the
+accounting port (@pxref{clientconf,acct-port}).
 
 @item code
 @RADIUS{} request code. Either numeric or symbolic (@pxref{Numeric
@@ -1529,19 +1526,19 @@ of program text will be prepended by its ordinal line number.
 
 The script begins as follows:
 
-@smallexample
+@example
 @group
   1 #! /usr/bin/radtest -f
-  2 
+  2
   3 while getopt "n:s:P:hv"
   4 begin
   5   case $OPTVAR in
-  6   "-n") NASIP = $OPTARG 
-  7   "-s") SID = $OPTARG 
-  8   "-P") PID = $OPTARG 
+  6   "-n") NASIP = $OPTARG
+  7   "-s") SID = $OPTARG
+  8   "-P") PID = $OPTARG
   9   "-v") set -v
 @end group
-@end smallexample
+@end example
 
 @table @asis
 @item 1
@@ -1566,14 +1563,14 @@ number (for @attr{NAS-Port-Id} attribute.
 
 @item 9
 This line sets @option{-v} option to the @command{radtest}
-interpreter (@pxref{Invoking radtest}). 
+interpreter (@pxref{Invoking radtest}).
 @end table
 
 @noindent
 The next piece of code handles @option{-h} and erroneous options:
 
-@smallexample
-@group  
+@example
+@group
  10   "-h") begin
  11           print <<-EOT
  12            usage: radauth [OPTIONS] [COMMAND] login [password]
@@ -1598,9 +1595,9 @@ The next piece of code handles @option{-h} and erroneous options:
  31   end
  32 end
 @end group
-@end smallexample
+@end example
 
-@table @asis 
+@table @asis
 @item 10 -- 26
 Print short description and exit, if the program is given @option{-h}.
 Notice that @samp{here document} syntax is used to print the text
@@ -1614,18 +1611,18 @@ These lines handle unrecognized options.
 
 @item 31
 Closes case statement started on line 5
- 
+
 @item 32
 Closes compound statement started on line 4
 @end table
 
 @subheading Checking Command Line Consistency
 
-@smallexample
+@example
 @group
- 33 
+ 33
  34 shift $@{OPTIND@}-1
- 35 
+ 35
  36 if $# > 3
  37 begin
  38         print "Wrong number of arguments."
@@ -1633,7 +1630,7 @@ Closes compound statement started on line 4
  40         exit 1
  41 end
 @end group
-@end smallexample
+@end example
 
 @table @asis
 @item 34
@@ -1647,12 +1644,12 @@ solve @dfn{minus ambiguity} (@pxref{minus-ambiguity}).
 At this point we may have at most three arguments:
 command, user name, and password. If there are more, display
 the diagnostic message and exit the program.
-@end table 
+@end table
 
 @noindent
-Next piece of code: 
+Next piece of code:
 
-@smallexample
+@example
 @group
  42
  43 case $1 in
@@ -1662,15 +1659,15 @@ Next piece of code:
  47                         end
  48 ".*")   COMMAND="auth"
  49 end
- 50 
+ 50
  51 LOGIN=$@{1:?User name is not specified. Try radauth -h for more info.@}
- 52 
+ 52
  53 if $@{NASIP:-@} = ""
  54         NASIP=$SOURCEIP
- 55 
+ 55
  56 LIST = ( User-Name = $LOGIN NAS-IP-Address = $NASIP )
 @end group
-@end smallexample
+@end example
 
 @table @asis
 @item 43 -- 48
@@ -1698,9 +1695,9 @@ Accounting function will be used to send accounting requests to
 the server. It is supposed to take a single argument: an @code{avlist}
 of @AVP{}s to be sent to the server.
 
-@smallexample
-@group 
- 57 
+@example
+@group
+ 57
  58 'acct'
  59 begin
  60   if $@{SID:-@} = ""
@@ -1710,7 +1707,7 @@ of @AVP{}s to be sent to the server.
  64   send acct Accounting-Request $1 + \
             (Acct-Session-Id = $SID NAS-Port-Id = $PID)
 @end group
-@end smallexample
+@end example
 
 @table @asis
 @item 58 -- 59
@@ -1736,19 +1733,19 @@ to the function's first argument.
 The final part of @code{acct} function analyzes the reply from the
 server:
 
-@smallexample
-@group            
+@example
+@group
  65   if $REPLY_CODE != Accounting-Response
  66   begin
  67     print "Accounting failed.\n"
- 68     exit 1  
+ 68     exit 1
  69   end
  70   print "Accounting OK.\n"
  71   exit 0
  72 end
  73
 @end group
-@end smallexample
+@end example
 
 @noindent
 Notice, that @code{acct} never returns. Instead it exits with an
@@ -1758,7 +1755,7 @@ error code indicating success or failure.
 
 The purpose of the authentication function @code{auth} is
 to send an @code{Access-Request} to the server and perform
-some actions based on its reply. 
+some actions based on its reply.
 
 The function will take three arguments:
 
@@ -1778,13 +1775,13 @@ the accounting request, @samp{no} means not to send it.
 The function is not expected to return. Instead it should exit
 to the shell with an appropriate error code.
 
-@smallexample
-@group 
+@example
+@group
  74 'auth'
  75 begin
  76   send auth Access-Request $1 + (User-Password = $2)
 @end group
-@end smallexample
+@end example
 
 @table @asis
 @item 74 -- 75
@@ -1808,8 +1805,8 @@ a @code{while} loop.
 First, the function handles @code{Access-Accept} and
 @code{Access-Reject} replies:
 
-@smallexample
-@group 
+@example
+@group
  77   while 1
  78   begin
  79     if $REPLY_CODE = Access-Accept
@@ -1823,7 +1820,7 @@ First, the function handles @code{Access-Accept} and
  87       print "Authentication failed. " + $REPLY[Reply-Message*] + "\n"
  88       break
 @end group
-@end smallexample
+@end example
 
 @table @asis
 @item 77
@@ -1831,7 +1828,7 @@ Begin an ``endless'' @code{while} loop. It will eventually be exited
 either using @code{break}, or using @code{exit} (see below).
 
 @item 79 -- 84
-Hanlde @code{Access-Accept} replies:
+Handle @code{Access-Accept} replies:
 
 @item 81
 Print the reply message. Notice the use of @samp{*} to print all
@@ -1840,7 +1837,7 @@ packet (@pxref{Accessing Elements of A/V Pair Lists}).
 
 @item 82 -- 83
 If the third argument is missing or is a string @samp{no}, exit
-indicating success (@pxref{Dereferencing Variables}). 
+indicating success (@pxref{Dereferencing Variables}).
 
 @item 84
 Otherwise, call @code{acct} function to perform accounting. The
@@ -1860,23 +1857,23 @@ simplicity we assume that such replies always carry user menus
 receiving an @code{Access-Challenge} we should print out the menu,
 read the users selection and send back an @code{Access-Request}
 to the server. This part is the only one that actually continues
-the loop at line 77. 
+the loop at line 77.
 
-@smallexample
-@group 
+@example
+@group
  89     end else if $REPLY_CODE = Access-Challenge
  90     begin
  91       print $REPLY[Reply-Message*]
- 92       input 
+ 92       input
  93       send auth Access-Request \
  94         (User-Name = $LOGIN User-Password = $INPUT \
              State = $REPLY[State])
 @end group
-@end smallexample
+@end example
 
 @table @asis
 @item 91
-Print the menu contents carrieb by @attr{Reply-Message}
+Print the menu contents carried by @attr{Reply-Message}
 attributes. There may be several instances of the attribute, hence the
 use of @samp{*} to concatenate their values together.
 
@@ -1893,9 +1890,9 @@ the menu state from the server reply packet.
 
 @noindent
 Final part of the function:
- 
-@smallexample
-@group 
+
+@example
+@group
  95     end else begin
  96       print "Authentication failed. Reply code " + $REPLY_CODE + "\n"
  97       break
@@ -1905,7 +1902,7 @@ Final part of the function:
 101 end
 102
 @end group
-@end smallexample
+@end example
 
 @table @asis
 @item 95 -- 98
@@ -1919,7 +1916,7 @@ Exit to the shell indicating failure. This statement will be reached
 only if a @code{break} is executed either on line 88 or on line 97.
 
 @item 101
-Closes function definition started on lines 74 -- 75 
+Closes function definition started on lines 74 -- 75
 @end table
 
 @subheading Final Part of Radauth Program
@@ -1928,7 +1925,7 @@ The final part selects an action based on the user command and
 executes it. It is equivalent to the @code{main} function in a
 @code{C} program:
 
-@smallexample
+@example
 @group
 103 case $@{COMMAND@} in
 104 "auth")   'auth'($LIST, $@{2:&Password: @}, no)
@@ -1940,10 +1937,10 @@ executes it. It is equivalent to the @code{main} function in a
 110               exit 1
 111             end
 112 end
-113 
+113
 114 # End of radauth
 @end group
-@end smallexample
+@end example
 
 @table @asis
 @item 103

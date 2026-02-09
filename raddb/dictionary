@@ -18,4 +18,3 @@ $INCLUDE dict/livingston	# Livingston compatibility
 #$INCLUDE dict/cisco		# Cisco
 #$INCLUDE dict/voip		# Special attributes to be used
 				# with rewriting functions
-

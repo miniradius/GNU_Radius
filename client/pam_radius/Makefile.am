@@ -1,5 +1,6 @@
 # This file is part of GNU Radius.
-# Copyright (C) 2000,2001,2002,2003,2004,2007 Free Software Foundation, Inc.
+# Copyright (C) 2000, 2001, 2002, 2003, 2004, 2007, 2010, 2013 Free Software
+# Foundation, Inc.
 #
 # Written by Sergey Poznyakoff
 #
@@ -14,16 +15,14 @@
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with GNU Radius; if not, write to the Free Software Foundation,
-# Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+# along with GNU Radius.  If not, see <http://www.gnu.org/licenses/>.
 
 pamdir=@PAMDIR@
 pam_LTLIBRARIES = @BUILD_PAM_RADIUS_LA@
 EXTRA_LTLIBRARIES = pam_radius.la
 pam_radius_la_SOURCES = pam_radius.c
 pam_radius_la_LIBADD = -lpam @LIBGNURADIUS@ @LTLIBINTL@
-INCLUDES = @RADIUS_INCLUDE_PATH@ 
-AM_CPPFLAGS=@PATHFLAGS@
+AM_CPPFLAGS=@RADIUS_INCLUDE_PATH@ @PATHFLAGS@
 
 pam_radius_la_LDFLAGS = -module -avoid-version -no-undefined -rpath $(pamdir) \
  -Wl,-Bsymbolic

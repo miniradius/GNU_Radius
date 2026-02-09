@@ -1,15 +1,18 @@
-GNU Radius NEWS -- history of user-visible changes. 2008-12-17
-Copyright (C) 2002,2003,2004,2005,2006,2007,2008 Free Software Foundation, Inc.
+GNU Radius NEWS -- history of user-visible changes. 2025-12-11
+Copyright (C) 2002-2025 Free Software Foundation, Inc.
 See the end of file for copying conditions.
 
 Please send radius bug reports to <bug-gnu-radius@gnu.org>
 
-Version 1.6.1, 2008-12-17 
+Version 1.7, 2025-12-11
 
-* Fix compilation with GCC 4.3.0 and later.
+* Support for Guile 3.x.
 
 * Improve testsuite.
 
+* Improve docs.
+
+* Various bugfixes.
 
 Version 1.6, 2008-12-06
 
@@ -29,7 +32,7 @@ tag to use, e.g.:
 Holds IP address of the RADIUS server that recieved the
 request. Notice, that the value of this attribute is "0.0.0.0" if
 there are no `listen' statement in your `raddb/config'.
-    
+
 ** GNU-Server-Port
 
 Holds UDP port number of the RADIUS server that recieved the request.
@@ -40,16 +43,16 @@ GNU Radius is installed from configure.ac scripts.
 * Guile support requires Gule version 1.8 or later.
 
 * Bugfixes
-** Pass NAS-IP-Address to mlc_stop_query	
-	
+** Pass NAS-IP-Address to mlc_stop_query
+
 
 Version 1.5 - Sergey Poznyakoff, 2007-06-29:
 
 * GPLv3
 
-This release is licensed under the GNU General Public License version 3. 
+This release is licensed under the GNU General Public License version 3.
 
-* The libgnuradius library uses its own namespace. 
+* The libgnuradius library uses its own namespace.
 
 * Wildcard matching in raddb/hints considerably improved.
 
@@ -62,10 +65,10 @@ grouping.
 * Fix handling of max-port-count statement.
 
 Previous version (1.4) did not change the size of the statistics file
-(radiusd.stat) when max-port-count changes. 
+(radiusd.stat) when max-port-count changes.
 
 
-Version 1.4:
+Version 1.4, 2006-11-24
 
 * Hints are evaluated before verifying the user name validity.
 
@@ -82,9 +85,9 @@ Exec-Program-Wait pairs.
 ** Explicit assignments in naslist flags were incorrectly parsed.
 ** Rewrite functions correctly handle strings, containing nul characters.
 ** Fix format string vulnerability in sqllog (IDEF1590)
- 
+
 ^L
-Version 1.3:
+Version 1.3, 2004-11-20
 
 * Important compatibility note.
 
@@ -99,11 +102,11 @@ wish to add the following rule to the very beginning of your
 'raddb/hints':
 
   DEFAULT Rewrite-Function = restore_nas_ip
-          Fall-Through = Yes
+	  Fall-Through = Yes
 
 If you chose to do so, add the following statement to the "rewrite"
 section of 'raddb/config':
-	  
+
 	load "nas-ip.rw";
 
 * radiusd
@@ -122,7 +125,7 @@ related declarations in BEGIN VENDOR statement:
 
 An alternative form BEGIN-VENDOR ... END-VENDOR is supported for
 compatibility with FreeRadius
- 
+
 *** Specifying - (dash) for non-VSA attributes that have syntax flags
 specifications is no longer obligatory.
 
@@ -145,7 +148,7 @@ authentication type. If such module is found, it is invoked to handle
 the authentication.
 
 ** System accounting can be turned off by specifying `system no;' in
-`acct' section of raddb/config. 
+`acct' section of raddb/config.
 
 ** New configuration statement 'load-module' allows to load arbitrary
 Scheme modules.
@@ -163,7 +166,7 @@ a Scheme expression to be run upon an authentication failure. It can
 update failure counts that subsequently will be used by
 Exec-Program-Wait or Scheme-Procedure.
 
-*** New keywords auth_success_query and auth_failure_query set 
+*** New keywords auth_success_query and auth_failure_query set
 SQL queries to be executed upon authentication success and failure,
 respectively. These may maintain failure counts, that can be
 used by group_query to control the authentication.
@@ -215,11 +218,11 @@ powerful scripting language useful for writing RADIUS client applications.
  passcvt            Converts system password database to Radius SQL
 		    table on systems with shadow password file (e.g.
 		    GNU/Linux)
- passwd_to_db 	    Converts system password database to Radius SQL
-		    table on Free-BSD	     
+ passwd_to_db	    Converts system password database to Radius SQL
+		    table on Free-BSD
  radsend	    Simplified interface to radtest utility
 
-See README files in corresponding directories. 
+See README files in corresponding directories.
 
 * Testsuite rewritten in autotest. This allows to run it on almost
 any platform.
@@ -228,7 +231,7 @@ any platform.
 
 ** Allow to omit port numbers in `listen' statements (raddb/config), as
 described in the documentation.
-    
+
 ** Fixed several inconsistencies in parsing Ascend-Data-Filter and
 Ascend-Call-Filter attributes.
 
@@ -243,7 +246,7 @@ enabling forwarding of authentication requests, instead of accounting
 ones.
 
 
-Version 1.2:
+Version 1.2, 2003-12-08
 
 * Important notes for upgrading from earlier versions of GNU Radius
 
@@ -252,9 +255,9 @@ Version 1.2:
 This version does a very strict semantic checking on the dictionary
 files. Old dictionaries may produce lots of warnings and
 errors, therefore you are advised to upgrade them. To do so,
-run `make update-dictionary'. It will update your main 
+run `make update-dictionary'. It will update your main
 (raddb/dictionary) and secondary dictionaries (raddb/dict/*),
-preserving any changes you did to the former. 
+preserving any changes you did to the former.
 
 Notice, that, starting from this version, the default main dictionary
 file will not contain any attribute declarations, instead it will
@@ -278,8 +281,8 @@ are installed in ${prefix}/share/radius/1.2/rewrite. We strongly
 advise you to add the following statement to your raddb/config:
 
 rewrite {
-        load "checknas.rw";
-        load "log-hook.rw";
+	load "checknas.rw";
+	load "log-hook.rw";
 };
 
 You may then remove the old raddb/rewrite file, *unless* you have
@@ -303,14 +306,14 @@ for the detailed description). To revert to logfile format used in
 versions 1.0-1.1, add the following two statements to your raddb/config,
 right after `logging {' line:
 
-       	prefix-hook "compat_log_prefix";
+	prefix-hook "compat_log_prefix";
 	suffix-hook "compat_log_suffix";
 
 ** Using Guile extensions
 
 If you are using Guile extensions, notice that the default location
 for Radius scheme modules is now ${prefix}/share/radius/1.2/scheme.
-	
+
 * New features:
 
 ** Support for Status-Server request.
@@ -325,7 +328,7 @@ file raddb/rewrite.
 
 DEFAULT	     Auth-Type = SQL
 	     Framed-IP-Address =
-	           "=10.10.10.1 + %[NAS-Port-Id]/16 + %[NAS-Port-Id]"
+		   "=10.10.10.1 + %[NAS-Port-Id]/16 + %[NAS-Port-Id]"
 
 ** Test shell mode considerably improved.
 
@@ -389,7 +392,7 @@ examples of the `forward' statements.
 
 *** trace-rules {yes|no}
 
-Enables tracing of configuration rules matched while processing 
+Enables tracing of configuration rules matched while processing
 requests. The statement may be used in `auth' and `acct' blocks.
 The example of information appearing in trace mode:
 
@@ -401,7 +404,7 @@ from server `foo' for user `bar' with ID 170, the following rules
 lead to the decision on whether to accept or reject the requests:
 
 file hints      line 34
-file huntgroups line 72 
+file huntgroups line 72
 file users      line 3
 file users      line 22
 file users      line 157
@@ -433,13 +436,13 @@ prefix hooks that generate text to be displayed before the diagnostics
 message, and suffix hooks that produce text to be displayed after it.
 There are two kinds of such hooks: global ones, that will affect any
 logging messages that deal with incoming requests, and category-specific
-ones, which affect only messages pertaining to the given category. 
+ones, which affect only messages pertaining to the given category.
 
 The logging-hook rewrite function should take three arguments and return
 a string. See examples/config.syntax and raddb/log-hook.rw for an example.
 
 ** File raddb/rewrite is no longer installed. The Rewrite sources are
-installed under $prefix/share/radius/1.2/rewrite. 
+installed under $prefix/share/radius/1.2/rewrite.
 
 ** Dictionary
 
@@ -451,7 +454,7 @@ defines an alternative name for an attribute. PROPERTY redefines
 the attribute properties.
 
 Flag 'E' marks attributes encrypted as per RFC 2138. Currently
-these are User-Password and CHAP-Password. 
+these are User-Password and CHAP-Password.
 
 Flag 'T' marks attribute encrypted as per RFC 2868.
 
@@ -479,7 +482,7 @@ attribute and the one set using	Session-Timeout attribute.
 file.
 
 
-Version 1.1:
+Version 1.1, 2003-07-21
 
 * Bugfixes:
 
@@ -501,7 +504,7 @@ useful mainly for username-chars statement.
 ** Test shell significantly improved.
 
 
-Version 1.0:
+Version 1.0, 2003-06-23
 
 This version uses a different approach to simultaneous handling of the
 requests. Instead of spawning a child each time a request arrives, the
@@ -514,7 +517,7 @@ the duplicate requests arrive.
 
 ** Support for Guile version 1.6 and newer.
 
-** Multiple remote servers may be defined in a radius realm. 
+** Multiple remote servers may be defined in a radius realm.
 
 ** New IP allocation strategy.
 
@@ -542,7 +545,7 @@ Whenever possible, radius displays in its logs the additional
 information about the request that triggered the log entry.
 For example:
 
-Jun 23 12:59:58 [10653]: Auth.warning: (AUTHREQ nas-6 224 user): 
+Jun 23 12:59:58 [10653]: Auth.warning: (AUTHREQ nas-6 224 user):
 Multiple logins: [user] max. 1, CLID unknown
 
 Here "AUTHREQ" means that the request was of Authentication-Request type,
@@ -581,7 +584,7 @@ Previous versions have used the GNU radius private subtree for this purpose
 Specifying --enable-snmp=compat enables support of this subtree along with
 the official GNU subtree.
 
-* Changes in raddb/config 
+* Changes in raddb/config
 
 ** New keywords (see example/config.syntax)
 
@@ -666,10 +669,9 @@ same holds for the number of connections to the accounting database.
 * Testsuite completely rewritten.
 
 
-=============================================================================
-Changes in Radius 0.96.4
+Version 0.96.4, 2002-08-19
 
-* The syntax of the "rewrite" language is extended. It 
+* The syntax of the "rewrite" language is extended. It
   supports addressing multiple attributes in a request and
   deleting arbitrary attributes.
 
@@ -695,8 +697,7 @@ Changes in Radius 0.96.4
 * Fixed bug in handling Expiration attribute
 
 
-=============================================================================
-Changes in Radius 0.96.3
+Version 0.96.3, 2002-06-05
 
 * Radiusd now automatically determines whether CHAP authentication
   type should be used.
@@ -709,8 +710,7 @@ Changes in Radius 0.96.3
   this feature.
 
 
-=============================================================================
-Changes in Radius 0.96.2
+Version 0.96.2, 2002-03-23
 
 This release fixes some bugs found in 0.96. These are:
 
@@ -742,8 +742,7 @@ work with non-gnu versions of sed.
 The install procedure no longer overwrites the existing dictionaries.
 
 
-=============================================================================
-Changes in Radius 0.96
+Version 0.96, 2001-12-28
 
 * The format of raddb/config has changed a little.
 
@@ -792,7 +791,7 @@ flags column of the naslist file, e.g.:
 my_ascend		my_ascend	max		broken_pass
 
 
-* raddb/(naslist,nastypes): `arg' variable for method finger 
+* raddb/(naslist,nastypes): `arg' variable for method finger
 
 The variable allows for specifying the finger query string. It
 defaults to %u, i.e. user name.
@@ -804,7 +803,7 @@ NAS, not explicitely defined in the file. E.g.:
 
 # NAS Name		Short Name	Type		  Flags
 #----------------	----------	----		---------------
-DEFAULT			other		
+DEFAULT			other
 
 Logins from the DEFAULT NASes are not reported by raduse, neither
 are they reflected in SNMP variables.
@@ -841,13 +840,13 @@ The default values are used when the referenced attribute does not
 exist. The syntax is similar to that of shell environment variables:
 
   %{Acct-Session-Time:-0}   -- return the value of Acct-Session-Time
-                               attribute or 0 if it doesn't exist
+			       attribute or 0 if it doesn't exist
   %{Acct-Session-Time:=0}   -- return the value of Acct-Session-Time.
-                               If it doesn't exist, create it and assign
+			       If it doesn't exist, create it and assign
 			       0 to it.
   %{User-Name:?not defined} -- return the value of User-Name. If it is
-                               not present, issue diagnostic message
-                               saying "User-Name: not defined" and
+			       not present, issue diagnostic message
+			       saying "User-Name: not defined" and
 			       return string "not defined".
 
 * The value of a reply pair can be computed at authentication time.
@@ -867,7 +866,7 @@ In short, the syntax for evaluated pairs is:
 	ATTR-NAME = "=FUNC-NAME(ARGS)"
 
 where ATTR-NAME is the attribute name,
-      FUNC-NAME is the name of the function, declared in raddb/rewrite 
+      FUNC-NAME is the name of the function, declared in raddb/rewrite
       ARGS is a comma-separated list of arguments. Usual %C substitutions
       may be used as arguments. ARGS can be empty.
 
@@ -889,7 +888,7 @@ is in texinfo documentation (Configuration files/config file/guile).
 The Guile functions can be called on authentication or accounting
 using the following special reply-pairs:
 
-1. Scheme-Procedure. 
+1. Scheme-Procedure.
 This attribute can be used in reply-pairs of raddb/users entry.
 Its value is the name of Guile function to be called on
 authentication. The function defininition should look like:
@@ -924,7 +923,7 @@ The function should return #t on success and #f on failure.
 
 An A/V list is represented as a scheme list of conses in the form
 
-        ( ATTR-NAME-OR-NUMBER . ATTR-VALUE )
+	( ATTR-NAME-OR-NUMBER . ATTR-VALUE )
 
 ** Changes to SQL subsystem
 
@@ -955,7 +954,7 @@ To create the default radius database:
  Alternately, you can create text files, describing the database structure
  by running `make mysql.struct' or `make pgsql.struct'
 
-*** Check and reply pairs for user's profile can be retrieved from the 
+*** Check and reply pairs for user's profile can be retrieved from the
     SQL database.
 
 To do so, use `check_attr_query' and `reply_attr_query' statements in
@@ -978,14 +977,14 @@ CREATE TABLE attrib (
 the queries will look like:
 
 reply_attr_query  select attr,value \
-                  from attrib \
-                  where user_name='%u' \
-                  and op is null
+		  from attrib \
+		  where user_name='%u' \
+		  and op is null
 
 check_attr_query  select attr,value,op \
-                  from attrib \
-                  where user_name='%u' \
-                  and op is not null
+		  from attrib \
+		  where user_name='%u' \
+		  and op is not null
 
 *** raddb/sqlserver: query_buffer_size clause is obsolete.
 
@@ -1019,16 +1018,16 @@ The module understands following command line options:
   audit             -  Enable audit information
   debug[=LEVEL]     -  Enable debugging information
   use_authtok       -  Use authentication token passed from the previous module
-                       in stack.
+		       in stack.
   confdir=PATH      -  Use PATH as a configuration directory
-                       (defaults to $sysconfdir/etc/raddb).
+		       (defaults to $sysconfdir/etc/raddb).
   service_type=STR  -  Add Service-Type=STR to the auth packet. STR should
-                       be a valid value, described in dictionary file.
+		       be a valid value, described in dictionary file.
 
 The default configuration file, $sysconfdir/raddb/client.conf, is installed
 by make install.
 
-* Support for computable session timeout 
+* Support for computable session timeout
 
 This is a framework for computing the session timeout in real time.
 To use it, Radius must be compiled with Guile support. raddb/config
@@ -1041,8 +1040,7 @@ guile {
 See the source file radscm/ttl.scm for the description of the module.
 
 
-=============================================================================
-NEWS for version 0.95
+Version 0.95, 2001-05-03
 
 I. Changes to radiusd
 ----------------------
@@ -1087,8 +1085,7 @@ huntgroups and config are provided. The installation instructions
 are in file elisp/README.
 
 
-=============================================================================
-NEWS for version 0.93
+Version 0.93, 2001-01-26
 
 * Changes to radiusd
 
@@ -1099,7 +1096,7 @@ users coming from a certain realm.
 case there are several network interfaces on the machine running radiusd.
 
 The checkrad program is now gone. Its functionality is integrated in
-the daemon itself. 
+the daemon itself.
 
 * Changes to configuration files
 
@@ -1174,7 +1171,7 @@ from the third and fourth columns of raddb/naslist file. Two special
 NAS types are predefined. These are `true' and `false' types. Each of
 them means that no querying should be done. Type `true' means that the
 session is always deemed active, `false' means the session is always
-deemed inactive. For any other type its method and arguments are looked 
+deemed inactive. For any other type its method and arguments are looked
 up in raddb/nastypes database. Each record in the database consists of
 three fields: type, method and argument list. When the matching record
 is found, radiusd appends NAS specific arguments to the method argument
@@ -1219,7 +1216,7 @@ function check_unix can be defined as:
 	{
 		return field(str, 1) == name &&
 		       (integer) field(str, 3) == pid &&
-	               field(str, 7) == sid;
+		       field(str, 7) == sid;
 	}
 
 
@@ -1250,8 +1247,7 @@ NEWS for version 0.93
 	./configure --enable-mysql=postgres
 
 
-=============================================================================
-NEWS for version 0.92.1
+Version 0.92.1, 2000-12-21
 
 The major differences between this implementation of radius and
 another existing ones are:
@@ -1268,10 +1264,10 @@ All queries are completely configurable.
 4.	Support for NASes that don't honor RFC.
 
 Some NASes have peculiarities in sending Radius packets. These can
-be overridden by using special rewriting language which allows to 
-modify the contents of a packet on the fly. 
+be overridden by using special rewriting language which allows to
+modify the contents of a packet on the fly.
 
-5. 	Configurable support for VSA pairs.
+5.	Configurable support for VSA pairs.
 
 Vendor specific attributes can be added to dictionaries and Radius can
 be told the ways of handling them without recompiling.
@@ -1280,7 +1276,7 @@ be told the ways of handling them without recompiling.
 =========================================================================
 Copyright information:
 
-Copyright (C) 2002,2003,2004,2005,2006,2007,2008 Free Software Foundation, Inc.
+Copyright (C) 2002-2025 Free Software Foundation, Inc.
 
    Permission is granted to anyone to make or distribute verbatim copies
    of this document as received, in any medium, provided that the

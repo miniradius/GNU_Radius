@@ -1,6 +1,6 @@
 ;;;; -*- scheme -*-
 ;;;; This file is part of GNU Radius.
-;;;; Copyright (C) 2004, 2007 Free Software Foundation, Inc.
+;;;; Copyright (C) 2004, 2007, 2010, 2013 Free Software Foundation, Inc.
 ;;;;
 ;;;; Written by Sergey Poznyakoff
 ;;;;
@@ -15,39 +15,27 @@
 ;;;; GNU General Public License for more details.
 ;;;;
 ;;;; You should have received a copy of the GNU General Public License
-;;;; along with GNU Radius; if not, write to the Free Software
-;;;; Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+;;;; along with GNU Radius.  If not, see <http://www.gnu.org/licenses/>. 
 ;;;;
 changequote([,])dnl
 undefine([define])
 
 (define-module (gnuradius)
+  :use-module (ice-9 documentation)
   :use-module (ice-9 [format]))
+
+(let ((docfile "SITEDIR/guile-procedures.txt"))
+  (if (not (member docfile documentation-files))
+      (set! documentation-files (append documentation-files
+					(list docfile)))))
 
 (let ((lib-path "LIBDIR/"))
   (load-extension (string-append
 		   lib-path "libguile-gnuradius-v-VERSION") "radscm_init"))
 
-;; Exports go here
-(export %raddb-path
-	grad-package
-	grad-version
-	grad-package-string)
-
-(export sha1-calc)
-
-;; Includes go here
-include(BUILDDIR/rscm_avl.inc)
-include(BUILDDIR/rscm_dict.inc)
-include(BUILDDIR/rscm_syslog.inc)
-include(BUILDDIR/rscm_utmp.inc)
-include(BUILDDIR/rscm_hash.inc)
-include(BUILDDIR/rscm_lib.inc)
-include(BUILDDIR/radscm.inc)
-
 ;; Code
 
-(define (sha1-calc . rest)
+(define-public (sha1-calc . rest)
   (sha1-calc-list rest))
 
 ;; Ports

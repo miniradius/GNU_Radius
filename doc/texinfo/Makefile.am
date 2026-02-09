@@ -1,6 +1,6 @@
 # This file is part of GNU Radius.
-# Copyright (C) 2000,2001,2002,2003,2004,2005,
-# 2007 Free Software Foundation, Inc.
+# Copyright (C) 2000, 2001, 2002, 2003, 2004, 2005, 2007, 2010, 2013 Free
+# Software Foundation, Inc.
 #
 # Written by Sergey Poznyakoff
 #
@@ -15,8 +15,7 @@
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with GNU Radius; if not, write to the Free Software Foundation,
-# Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+# along with GNU Radius.  If not, see <http://www.gnu.org/licenses/>.
 
 info_TEXINFOS=radius.texi
 radius_TEXINFOS=acct.texi\
@@ -61,15 +60,20 @@ RENDITION = DISTRIB
 
 MAKEINFOFLAGS=-D$(RENDITION)
 
-GENDOCS=gendocs.sh
+GENDOCS=$(srcdir)/gendocs.sh
 
-TEXI2DVI=texi2dvi -t '@set $(RENDITION)' -E
+TEXI2DVI=texi2dvi -E
+TEXI2HTML=$(MAKEINFO) --html
 
 # Make sure you set TEXINPUTS.
 # TEXINPUTS=/usr/share/texmf/pdftex/plain/misc/ is ok for most distributions
+.PHONY: manual
 manual:
-	TEXINPUTS=$(srcdir):$(top_srcdir)/scripts:$(TEXINPUTS) \
-	 MAKEINFO="$(MAKEINFO) $(MAKEINFOFLAGS)" \
-	 TEXI2DVI="$(TEXI2DVI) -t @finalout" \
+	rm -rf manual
+	RENDITION="PUBLISH" \
+	 TEXINPUTS=$(srcdir):$(top_srcdir)/scripts:$(TEXINPUTS) \
+	 MAKEINFO="$(MAKEINFO) $(AM_MAKEINFOFLAGS) -D$$RENDITION" \
+	 TEXI2DVI="$(TEXI2DVI) -t '@set $$RENDITION' -t @finalout" \
+         TEXI2HTML="$(TEXI2HTML) -D$$RENDITION" \
 	$(GENDOCS) $(PACKAGE) '$(PACKAGE_NAME) manual'
 

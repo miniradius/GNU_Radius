@@ -1,23 +1,20 @@
 /* This file is part of GNU Radius.
-   Copyright (C) 2000,2001,2002,2003,2004,2007,
-   2008 Free Software Foundation, Inc.
+   Copyright (C) 2000-2025 Free Software Foundation, Inc.
 
    Written by Sergey Poznyakoff
-  
+
    GNU Radius is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
    the Free Software Foundation; either version 3 of the License, or
    (at your option) any later version.
-  
+
    GNU Radius is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
-  
-   You should have received a copy of the GNU General Public
-   License along with GNU Radius; if not, write to the Free
-   Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-   Boston, MA 02110-1301 USA. */
+
+   You should have received a copy of the GNU General Public License
+   along with GNU Radius.  If not, see <http://www.gnu.org/licenses/>. */
 
 /* debug.c      Debugging module. */
 
@@ -36,25 +33,25 @@
 int grad_source_info_option = 1;
 
 static grad_keyword_t auth_codes_abbr[] = {
-        { "Access-Request", RT_ACCESS_REQUEST }, 
-        { "Access-Accept", RT_ACCESS_ACCEPT },     
-        { "Access-Reject", RT_ACCESS_REJECT },  
-        { "Accounting-Request", RT_ACCOUNTING_REQUEST },     
-        { "Accounting-Response", RT_ACCOUNTING_RESPONSE },    
-        { "Accounting-Status", RT_ACCOUNTING_STATUS },      
-        { "Password-Request", RT_PASSWORD_REQUEST },       
-	{ "Password-Ack", RT_PASSWORD_ACK },           
-        { "Password-Reject", RT_PASSWORD_REJECT },        
-        { "Accounting-Message", RT_ACCOUNTING_MESSAGE },     
-        { "Access-Challenge", RT_ACCESS_CHALLENGE },
+	{ "Access-Request", RT_ACCESS_REQUEST },
+	{ "Access-Accept", RT_ACCESS_ACCEPT },
+	{ "Access-Reject", RT_ACCESS_REJECT },
+	{ "Accounting-Request", RT_ACCOUNTING_REQUEST },
+	{ "Accounting-Response", RT_ACCOUNTING_RESPONSE },
+	{ "Accounting-Status", RT_ACCOUNTING_STATUS },
+	{ "Password-Request", RT_PASSWORD_REQUEST },
+	{ "Password-Ack", RT_PASSWORD_ACK },
+	{ "Password-Reject", RT_PASSWORD_REJECT },
+	{ "Accounting-Message", RT_ACCOUNTING_MESSAGE },
+	{ "Access-Challenge", RT_ACCESS_CHALLENGE },
 	{ "Status-Server", RT_STATUS_SERVER },
 	{ "Status-Client", RT_STATUS_CLIENT },
-        { "Ascend-Terminate-Session",   RT_ASCEND_TERMINATE_SESSION },
+	{ "Ascend-Terminate-Session",   RT_ASCEND_TERMINATE_SESSION },
 	{ "Ascend-Event-Request", RT_ASCEND_EVENT_REQUEST },
 	{ "Ascend-Event-Response", RT_ASCEND_EVENT_RESPONSE },
-        { "Ascend-Allocate-IP", RT_ASCEND_ALLOCATE_IP },
-        { "Ascend-Release-IP", RT_ASCEND_RELEASE_IP },
-        { NULL }
+	{ "Ascend-Allocate-IP", RT_ASCEND_ALLOCATE_IP },
+	{ "Ascend-Release-IP", RT_ASCEND_RELEASE_IP },
+	{ NULL }
 };
 
 struct auth_code_iterator {
@@ -68,8 +65,8 @@ grad_next_matching_code_name(void *data)
 {
 	struct auth_code_iterator *itr = data;
 	const char *str;
-	
-	while (str = auth_codes_abbr[itr->index].name) {
+
+	while ((str = auth_codes_abbr[itr->index].name) != NULL) {
 		itr->index++;
 		if (strlen(str) >= itr->len
 		    && strncmp(str, itr->text, itr->len) == 0)
@@ -92,10 +89,10 @@ grad_first_matching_code_name(const char *name, void **ptr)
 const char *
 grad_request_code_to_name(int code)
 {
-        grad_keyword_t *p;
-        for (p = auth_codes_abbr; p->name; p++)
-                if (p->tok == code)
-                        return p->name;
+	grad_keyword_t *p;
+	for (p = auth_codes_abbr; p->name; p++)
+		if (p->tok == code)
+			return p->name;
 	return "Unknown";
 }
 
@@ -138,7 +135,7 @@ debug_mod_cmp(const void *item, const void *data)
 static int
 free_debug_module(void *item, void *data)
 {
-	grad_free(item);
+	free(item);
 	return 0;
 }
 
@@ -146,9 +143,9 @@ int
 grad_set_module_debug_level(char *name, int level)
 {
 	struct debug_module *lp;
-	
-        if (level == -1)
-                level = GRAD_MAX_DEBUG_LEVEL;
+
+	if (level == -1)
+		level = GRAD_MAX_DEBUG_LEVEL;
 
 	if (!_grad_debug_list)
 		_grad_debug_list = grad_list_create();
@@ -162,34 +159,33 @@ grad_set_module_debug_level(char *name, int level)
 
 	if (lp->level < level)
 		lp->level = level;
-        return 0;
+	return 0;
 }
 
 void
 grad_set_debug_levels(char *str)
 {
-        char *tok, *p, *save;
-        int  level;
+	char *tok, *p, *save;
+	int  level;
 
-        for (tok = strtok_r(str, ",", &save); tok; 
-             tok = strtok_r(NULL, ",", &save)) {
-                p = strchr(tok, '=');
-                if (p) {
-                        *p++ = 0;
-                        level  = atoi(p);
-                } else {
-                        level  = GRAD_MAX_DEBUG_LEVEL;
-                }
+	for (tok = strtok_r(str, ",", &save); tok;
+	     tok = strtok_r(NULL, ",", &save)) {
+		p = strchr(tok, '=');
+		if (p) {
+			*p++ = 0;
+			level  = atoi(p);
+		} else {
+			level  = GRAD_MAX_DEBUG_LEVEL;
+		}
 		grad_set_module_debug_level(tok, level);
-        }
+	}
 }
 
 void
-grad_clear_debug()
+grad_clear_debug(void)
 {
 	grad_list_destroy(&_grad_debug_list, free_debug_module, NULL);
 }
-
 
 int
 grad_debug_p(char *name, int level)
@@ -208,18 +204,18 @@ grad_debug_p(char *name, int level)
 int
 grad_set_module_debug_level(char *name, int level)
 {
-        grad_log(GRAD_LOG_ERR, _("compiled without debugging support"));
+	grad_log(GRAD_LOG_ERR, _("compiled without debugging support"));
 }
 
 /*ARGSUSED*/
 void
 grad_set_debug_levels(char *str)
 {
-        grad_log(GRAD_LOG_ERR, _("compiled without debugging support"));
+	grad_log(GRAD_LOG_ERR, _("compiled without debugging support"));
 }
 
 void
-grad_clear_debug()
+grad_clear_debug(void)
 {
 }
 

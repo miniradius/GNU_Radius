@@ -1,35 +1,34 @@
-%x STRING HEREDOC
-%{
+%top{
 /* This file is part of GNU Radius.
-   Copyright (C) 2000,2001,2002,2003,2004,2005,
-   2007,2008 Free Software Foundation, Inc.
+   Copyright (C) 2000-2025 Free Software Foundation, Inc.
 
    Written by Sergey Poznyakoff
- 
+
    GNU Radius is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
    the Free Software Foundation; either version 3 of the License, or
    (at your option) any later version.
- 
+
    GNU Radius is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
- 
-   You should have received a copy of the GNU General Public License
-   along with GNU Radius; if not, write to the Free Software Foundation,
-   Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
-#if defined(HAVE_CONFIG_H)        
+   You should have received a copy of the GNU General Public License
+   along with GNU Radius.  If not, see <http://www.gnu.org/licenses/>. */
+
+#if defined(HAVE_CONFIG_H)
 # include <config.h>
 #endif
+}
+%{
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/time.h>
 #include <sys/file.h>
 #include <sys/stat.h>
 #include <netinet/in.h>
-         
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <netdb.h>
@@ -42,18 +41,14 @@
 #include <sys/wait.h>
 
 #include <common.h>
-#include <radius/radius.h>	
+#include <radius/radius.h>
 #include <radtest.h>
 #include "gram.h"
-
-#if !HAVE_DECL_GETLINE
-int getline (char **lineptr, size_t *n, FILE *stream);
-#endif
 
 int interactive;                   /* Are we in interactive mode? */
 char prompt_str[] = "radtest> ";   /* Prompt string for interactive mode */
 grad_locus_t source_locus;         /* Current location in the source file */
-static struct obstack string_stk;  /* Keeps all string literals. Gets freed
+static grad_strbuf_t string_buf;   /* Keeps all string literals. Gets freed
 				      after compilation and (eventual)
 				      execution of the statement */
 
@@ -61,14 +56,14 @@ size_t string_start_line;          /* In STRING and HEREDOC mode keeps
 				      the line where the string definition
 				      has started */
 
-/* Here document support */ 
-static char *heredoc_delimiter;    /* End delimiter for here document */ 
+/* Here document support */
+static char *heredoc_delimiter;    /* End delimiter for here document */
 static int strip_tabs;             /* Strip leading tab characters */
- 
+
 
 /* Input buffer */
 
-/* The variables below are used only in interactive mode */ 
+/* The variables below are used only in interactive mode */
 static char *input_line;           /* Input line */
 static size_t input_length;        /* Size of input_line */
 static size_t input_pos;           /* Current position in input_line */
@@ -79,22 +74,25 @@ fill_input_buffer(char *buf, int bufsize)
 {
 	if (interactive) {
 		int rest;
-		
+
 		if (!input_line || input_pos == input_length) {
 			if (disable_readline) {
-				static size_t input_size;
-				
+				char buf[BUFSIZ];
+
 				printf("%s", prompt_str);
 				fflush(stdout);
-				
-				if (getline(&input_line, &input_size,
-					    yyin) < 0) {
+
+				if (!fgets(buf, sizeof(buf), yyin)) {
 					free (input_line);
 					input_line = NULL;
 					input_length = 0;
 					return 0;
 				}
-				input_length = strlen(input_line);
+
+				if (!input_line)
+					input_line = grad_emalloc(sizeof(buf));
+				input_length = strlen(buf);
+				memcpy(input_line, buf, input_length);
 				input_pos = 0;
 			} else {
 				free(input_line);
@@ -125,10 +123,10 @@ fill_input_buffer(char *buf, int bufsize)
 		return fread(buf, 1, bufsize, yyin);
 	}
 }
-			
+
 #ifdef FLEX_SCANNER
 /* Input support for flex */
- 
+
 #undef YY_INPUT
 #define YY_INPUT(buf,result,max_size) \
   result = fill_input_buffer(buf, max_size)
@@ -137,7 +135,7 @@ fill_input_buffer(char *buf, int bufsize)
 /* Input processing for AT&T Lex. Untested. */
 
 static int
-xinput()
+xinput(void)
 {
 	char c;
 	if (fill_input_buffer(&c, 1) <= 0)
@@ -148,17 +146,17 @@ xinput()
 static int
 xunput(int c)
 {
-	if (input_pos == 0) 
+	if (input_pos == 0)
 		abort();
 	return input_line[--input_pos] = c;
 }
- 
+
 #undef unput
 #define unput(c) xunput(c)
 #undef input
 #define input() xinput()
 
-#endif /* FLEX_SCANNER */ 
+#endif /* FLEX_SCANNER */
 
 static size_t string_len;
 static int binary_string;
@@ -178,6 +176,10 @@ static void heredoc_begin();
 
 %}
 
+%option noinput
+%option nounput
+%x STRING HEREDOC
+
 WS [ \t][ \t]*
 IDENTIFIER [a-zA-Z_][a-zA-Z_0-9\.-]*
 D [0-9]+
@@ -186,14 +188,14 @@ DQ {D3}\.{D3}\.{D3}\.{D3}
 
 %%
 #.*\n   { /* a comment */
-        source_locus.line++;
-        return EOL;
-}       
+	source_locus.line++;
+	return EOL;
+}
 #.*     /* end-of-file comment */;
 '[^']*' {
 	add_str(yytext+1,yyleng-2);
-        yylval.string = end_str();
-        return NAME;
+	yylval.string = end_str();
+	return NAME;
 }
 auth    return AUTH;
 acct    return ACCT;
@@ -201,13 +203,13 @@ print   return PRINT;
 send    return SEND;
 expect  return EXPECT;
 exit    return EXIT;
-begin   return T_BEGIN; 
+begin   return T_BEGIN;
 end     return T_END;
 if      return IF;
 else    {
 	switch (peek_ctx()) {
 	case ctx_if:
-	          return ELSE;
+		  return ELSE;
 
 	case ctx_iferr:
 		pop_ctx();
@@ -217,9 +219,9 @@ else    {
 		  parse_error(_("Misplaced 'else'"));
 		  /* Skip the token */
 	}
-} 
+}
 while   {
-	if (peek_ctx() == ctx_doerr) 
+	if (peek_ctx() == ctx_doerr)
 		pop_ctx();
 	else
 		return WHILE;
@@ -237,22 +239,13 @@ case    return CASE;
 in      return IN;
 return  return T_RETURN;
 set{WS}.*\n {
-	int i, argc;
+	int argc;
 	char **argv;
-	char *p;
-	
-	grad_argcv_get(yytext, "", NULL, &argc, &argv);
-	for (i = 0; i < argc; i++) 
-		add_str(argv[i], strlen(argv[i])+1);
 
-	add_chr(0);
-	for (p = end_str(); *p; p += strlen(p) + 1)
-		obstack_ptr_grow(&string_stk, p);
-	p = NULL;
-	obstack_ptr_grow(&string_stk, p);
+	grad_argcv_get(yytext, "", NULL, &argc, &argv);
+	radtest_register_argv(argv);
 	yylval.set.argc = argc;
-	yylval.set.argv = obstack_finish(&string_stk);
-	grad_argcv_free(argc, argv);
+	yylval.set.argv = argv;
 	if (yytext[yyleng-2] == '\\')
 		yyless(yyleng-2);
 	else
@@ -266,8 +259,8 @@ set{WS}.*\n {
 		return NUMBER;
 	}
 	add_str(yytext,yyleng);
-        yylval.string = end_str();
-        return NAME;
+	yylval.string = end_str();
+	return NAME;
 }
 \${IDENTIFIER}- {
 	add_str(yytext+1,yyleng-2);
@@ -284,37 +277,37 @@ set{WS}.*\n {
 }
 \$\{{IDENTIFIER}\}- {
 	add_str(yytext+2, yyleng-4);
-        yylval.deref.name = end_str();
+	yylval.deref.name = end_str();
 	yylval.deref.repl = NULL;
 	yyless(yyleng-1);
-        return IDENT;
+	return IDENT;
 }
 \$\{{IDENTIFIER}\} {
 	add_str(yytext+2, yyleng-3);
-        yylval.deref.name = end_str();
+	yylval.deref.name = end_str();
 	yylval.deref.repl = NULL;
-        return IDENT;
+	return IDENT;
 }
 \$\{{IDENTIFIER}:[=:?\-&].*\}- {
 	char *p;
 	add_str(yytext+2, yyleng-4);
-        yylval.deref.name = end_str();
+	yylval.deref.name = end_str();
 	p = strchr(yylval.deref.name, ':');
 	*p++ = 0;
 	yylval.deref.repl = p;
 	yyless(yyleng-1);
-        return IDENT;
+	return IDENT;
 }
 \$\{{IDENTIFIER}:[=:?\-&].*\} {
 	char *p;
 	add_str(yytext+2, yyleng-3);
-        yylval.deref.name = end_str();
+	yylval.deref.name = end_str();
 	p = strchr(yylval.deref.name, ':');
 	*p++ = 0;
 	yylval.deref.repl = p;
-        return IDENT;
+	return IDENT;
 }
-\$# 	return ARGCOUNT;
+\$#	return ARGCOUNT;
 \${D}  {
 	yylval.parm.number = strtoul(yytext+1, NULL, 0);
 	yylval.parm.repl = NULL;
@@ -334,68 +327,68 @@ set{WS}.*\n {
 	return PARM;
 }
 \"[^\\"]*\" {
-        begin_str();
-        add_str(yytext+1, yyleng-2);
-        yylval.string = end_str();
-        return QUOTE;
+	begin_str();
+	add_str(yytext+1, yyleng-2);
+	yylval.string = end_str();
+	return QUOTE;
 }
 \"[^\\"]*\n {
-        BEGIN(STRING);
-        begin_str();
+	BEGIN(STRING);
+	begin_str();
 	string_start_line = source_locus.line++;
-        add_str(yytext+1, yyleng-1);
+	add_str(yytext+1, yyleng-1);
 }
 \"[^\\"]*\\. {
-        BEGIN(STRING);
-        begin_str();
-        string_start_line = source_locus.line;
-        if (yytext[yyleng-1] == '\n')
-                source_locus.line++;
-        add_str(yytext+1, yyleng - 3);
-        add_chr(backspace(yytext[yyleng-1]));
+	BEGIN(STRING);
+	begin_str();
+	string_start_line = source_locus.line;
+	if (yytext[yyleng-1] == '\n')
+		source_locus.line++;
+	add_str(yytext+1, yyleng - 3);
+	add_chr(backspace(yytext[yyleng-1]));
 }
 \"[^\\"]*\\[0-7]{1,3} {
-        BEGIN(STRING);
-        begin_str();
-        add_num(0, 8, yytext+1, yyleng-1);
+	BEGIN(STRING);
+	begin_str();
+	add_num(0, 8, yytext+1, yyleng-1);
 }
 \"[^\\"]*\\[xX][0-9a-fA-F]{1,2} {
-        BEGIN(STRING);
-        begin_str();
-        add_num(1, 16, yytext+1, yyleng-1);
+	BEGIN(STRING);
+	begin_str();
+	add_num(1, 16, yytext+1, yyleng-1);
 }
 <STRING>[^\\"]*\\[0-7]{1,3} {
-        add_num(0, 8, yytext, yyleng);
+	add_num(0, 8, yytext, yyleng);
 }
 <STRING>[^\\"]*\\[xX][0-9a-fA-F]{1,2} {
-        add_num(1, 16, yytext, yyleng);
+	add_num(1, 16, yytext, yyleng);
 }
 <STRING>[^\\"]*\\. {
-        if (yytext[yyleng-1] == '\n')
-                source_locus.line++;
-        add_str(yytext, yyleng - 2);
-        add_chr(backspace(yytext[yyleng-1]));
+	if (yytext[yyleng-1] == '\n')
+		source_locus.line++;
+	add_str(yytext, yyleng - 2);
+	add_chr(backspace(yytext[yyleng-1]));
 }
 <STRING>[^\\"]*\n {
-        source_locus.line++;
-        add_str(yytext, yyleng);
-        add_chr(backspace(yytext[yyleng-1]));
+	source_locus.line++;
+	add_str(yytext, yyleng);
+	add_chr(backspace(yytext[yyleng-1]));
 }
 <STRING>[^\\"]*\" {
-        BEGIN(INITIAL);
-        add_str(yytext, yyleng - 1);
-        if (binary_string) {
-            yylval.bstring.ptr = end_str();
-            yylval.bstring.length = string_len;
-            return BSTRING;
-        } else {
-            yylval.string = end_str();
-            return QUOTE;
-        }
+	BEGIN(INITIAL);
+	add_str(yytext, yyleng - 1);
+	if (binary_string) {
+	    yylval.bstring.ptr = end_str();
+	    yylval.bstring.length = string_len;
+	    return BSTRING;
+	} else {
+	    yylval.string = end_str();
+	    return QUOTE;
+	}
 }
 "<<"-?{IDENTIFIER}.*\n {
 	BEGIN(HEREDOC);
-        begin_str();
+	begin_str();
 	string_start_line = source_locus.line++;
 	heredoc_begin();
 }
@@ -404,7 +397,7 @@ set{WS}.*\n {
 	if (strncmp (p, heredoc_delimiter, strlen (heredoc_delimiter))
 	    == 0
 	    && isemptystr (p + strlen (heredoc_delimiter))) {
-		grad_free (heredoc_delimiter);
+		free (heredoc_delimiter);
 		heredoc_delimiter = NULL;
 		BEGIN(INITIAL);
 		yylval.string = end_str();
@@ -412,15 +405,15 @@ set{WS}.*\n {
 		return QUOTE;
 	}
 	add_str(p, strlen(p));
-        source_locus.line++;
+	source_locus.line++;
 }
 {DQ} {
-        yylval.ipaddr = grad_ip_strtoip(yytext);
-        return IPADDRESS;
+	yylval.ipaddr = grad_ip_strtoip(yytext);
+	return IPADDRESS;
 }
 {D} {
-        yylval.number = strtol(yytext, NULL, 0);
-        return NUMBER;
+	yylval.number = strtol(yytext, NULL, 0);
+	return NUMBER;
 }
 {WS}    ;
 \\\n    source_locus.line++;
@@ -438,64 +431,63 @@ set{WS}.*\n {
 %%
 
 int
-yywrap()
+yywrap(void)
 {
-	if (YYSTATE == STRING) 
+	if (YYSTATE == STRING)
 		parse_error(_("Unexpected end of file in string started on line %lu"),
 			    string_start_line);
 	else if (YYSTATE == HEREDOC)
 		parse_error(_("Unexpected end of file in multiline string started on line %lu"),
 			    string_start_line);
-		
+
 	grad_write_history_file();
-        return 1;
+	return 1;
 }
 
 int
 open_input(char *name)
 {
-        FILE *fp;
+	FILE *fp;
 
-        obstack_init(&string_stk);
-        if (name && strcmp(name, "-")) {
-                source_locus.file = name;
-                fp = fopen(name, "r");
-                if (!fp) {
-                        grad_log(GRAD_LOG_ERR|GRAD_LOG_PERROR,
-                                 _("can't open input file `%s'"), name);
-                        return 1;
-                }
-        } else {
-                source_locus.file = "<teletype>";
-                fp = stdin;
-        }
+	string_buf = grad_strbuf_create();
+	if (name && strcmp(name, "-")) {
+		source_locus.file = name;
+		fp = fopen(name, "r");
+		if (!fp) {
+			grad_log(GRAD_LOG_ERR|GRAD_LOG_PERROR,
+				 _("can't open input file `%s'"), name);
+			return 1;
+		}
+	} else {
+		source_locus.file = "<teletype>";
+		fp = stdin;
+	}
 
 	interactive = isatty(fileno(fp));
 	grad_readline_init("radtest", interactive, radtest_command_completion);
-	if (interactive) 
+	if (interactive)
 		grad_readline_set_input(fp);
 	grad_read_history_file();
 
-        source_locus.line = 1;
+	source_locus.line = 1;
 #ifdef FLEX_SCANNER
-        yyrestart(fp);
+	yyrestart(fp);
 #else
-        yyin = fp;
+	yyin = fp;
 #endif
-        return 0;
+	return 0;
 }
 
 void
-close_input()
+close_input(void)
 {
-#ifdef FLEX_SCANNER     
-        yy_delete_buffer(YY_CURRENT_BUFFER); 
-#endif  
-        fclose(yyin);
-        yyin = NULL;
-        obstack_free(&string_stk, NULL);
+#ifdef FLEX_SCANNER
+	yy_delete_buffer(YY_CURRENT_BUFFER);
+#endif
+	fclose(yyin);
+	yyin = NULL;
+	grad_strbuf_free(string_buf);
 }
-
 
 /* String processing functions */
 
@@ -503,25 +495,25 @@ close_input()
    and append it to the current string object.
    Arguments:
      skip     Number of characters to skip when processing the escape:
-              0 for octal escapes, 1 -- for hex ones.
+	      0 for octal escapes, 1 -- for hex ones.
      base     Conversion base for the escape.
      text     Start of the string segment.
      leng     Length of the string segment. */
 void
 add_num(int skip, int base, char *text, int leng)
 {
-        int n;
+	int n;
 
-        n = 1;
-        while (leng - n > 0 && text[leng - n] != '\\')
-                n++;
-        add_str(text, leng - n);
-        n -= skip;
-        add_chr(strtol(&text[leng - n + 1], NULL, base));
+	n = 1;
+	while (leng - n > 0 && text[leng - n] != '\\')
+		n++;
+	add_str(text, leng - n);
+	n -= skip;
+	add_chr(strtol(&text[leng - n + 1], NULL, base));
 }
 
 void
-begin_str()
+begin_str(void)
 {
 	string_len = 0;
 	binary_string = 0;
@@ -531,51 +523,50 @@ begin_str()
 void
 add_str(char *str, int len)
 {
-        obstack_grow(&string_stk, str, len);
-        string_len += len;
+	grad_strbuf_grow(string_buf, str, len);
+	string_len += len;
 }
 
 /* Append a single character */
 void
 add_chr(int c)
 {
-        obstack_1grow(&string_stk, c);
-        string_len++;
+	grad_strbuf_grow_char(string_buf, c);
+	string_len++;
 	if (c == 0)
 		binary_string++;
 }
 
 /* Finish the string being constructed. Return pointer to its beginning. */
 char *
-end_str()
+end_str(void)
 {
-	obstack_1grow(&string_stk, 0);
-        return obstack_finish(&string_stk);
+	return grad_strbuf_finish(string_buf, 0);
 }
 
 /* Translate a second part of a C escape */
 int
 backspace(int c)
 {
-        switch (c) {
-        case '\\':
-                return '\\';
-        case 'a':
-                return '\a';
-        case 'b':
-                return '\b';
-        case 'f':
-                return '\f';
-        case 'n':
-                return '\n';
-        case 'r':
-                return '\r';
-        case 't':
-                return '\t';
-        case 'e':
-                return '\033';
-        }
-        return c;
+	switch (c) {
+	case '\\':
+		return '\\';
+	case 'a':
+		return '\a';
+	case 'b':
+		return '\b';
+	case 'f':
+		return '\f';
+	case 'n':
+		return '\n';
+	case 'r':
+		return '\r';
+	case 't':
+		return '\t';
+	case 'e':
+		return '\033';
+	}
+	return c;
 }
 
 /* External interfaces to the above functions */
@@ -593,17 +584,16 @@ radtest_add_string(char *str)
 }
 
 char *
-radtest_end_string()
+radtest_end_string(void)
 {
 	return end_str();
 }
 
 /* Free all string literals */
 void
-radtest_free_strings()
+radtest_free_strings(void)
 {
-	obstack_free(&string_stk, NULL);
-	obstack_init(&string_stk);
+	grad_strbuf_clear(string_buf);
 }
 
 /* This function is called when we have to remember all collected
@@ -619,11 +609,10 @@ radtest_free_strings()
    here. */
 
 void
-radtest_fix_strings()
+radtest_fix_strings(void)
 {
-	obstack_init(&string_stk);
+	grad_strbuf_reset(string_buf);
 }
-
 
 /* "Here document" support */
 
@@ -648,7 +637,7 @@ heredoc_strip_tabs(char *text)
 
 /* Begin processing of a "here document" construct */
 static void
-heredoc_begin()
+heredoc_begin(void)
 {
 	char *p = yytext + 2; /* past the << marker */
 
@@ -662,7 +651,7 @@ heredoc_begin()
 	if (!isspace (*p)) {
 		char *endp;
 		int len;
-      
+
 		for (endp = p; *endp; endp++)
 			if (isspace (*endp))
 				break;

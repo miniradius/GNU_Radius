@@ -1,5 +1,6 @@
 /* This file is part of GNU Radius.
-   Copyright (C) 2000,2001,2002,2003,2005,2007 Free Software Foundation, Inc.
+   Copyright (C) 2000-2025 Free Software
+   Foundation, Inc.
 
    Written by Sergey Poznyakoff
 
@@ -7,15 +8,14 @@
    it under the terms of the GNU General Public License as published by
    the Free Software Foundation; either version 3 of the License, or
    (at your option) any later version.
-  
+
    GNU Radius is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
-  
+
    You should have received a copy of the GNU General Public License
-   along with GNU Radius; if not, write to the Free Software Foundation, 
-   Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
+   along with GNU Radius.  If not, see <http://www.gnu.org/licenses/>. */
 
 #ifdef HAVE_CONFIG_H
 # include <config.h>
@@ -27,55 +27,60 @@
 #include <rewrite.h>
 #include <radius/radscm.h>
 
-SCM_DEFINE(rad_rewrite_execute_string, "rad-rewrite-execute-string", 1, 0, 0,
-           (SCM STRING),
-"Interpret STRING as an invocation of a function in Rewrite language and\n"
-"execute it.\n"
-"Return value: return of the corresponding Rewrite call, translated to\n"
-"the Scheme data type.\n")         
+SCM_DEFINE_PUBLIC(rad_rewrite_execute_string, "rad-rewrite-execute-string",
+		  1, 0, 0,
+		  (SCM string),
+"Interprets @var{string} as a function call in Rewrite language and"
+"executes it.\n\n"
+"Return value: return of the corresponding Rewrite call, translated to "
+"a corresponding Scheme data type.\n")
 #define FUNC_NAME s_rad_rewrite_execute_string
 {
 	grad_value_t val;
 	SCM retval;
-	
-        SCM_ASSERT(scm_is_string(STRING), STRING, SCM_ARG1, FUNC_NAME);
-        if (rewrite_interpret(scm_i_string_chars(STRING), NULL, &val)) {
-                scm_misc_error(FUNC_NAME,
-                               "Error parsing expression: ~S",
-                               scm_list_1(STRING));
-        }
+	char *str;
+	int rc;
 
-        retval = radscm_datum_to_scm(&val);
+	SCM_ASSERT(scm_is_string(string), string, SCM_ARG1, FUNC_NAME);
+	str = scm_to_locale_string(string);
+	rc = rewrite_interpret(str, NULL, &val);
+	free(str);
+	if (rc) {
+		scm_misc_error(FUNC_NAME,
+			       "Error parsing expression: ~S",
+			       scm_list_1(string));
+	}
+
+	retval = radscm_datum_to_scm(&val);
 	grad_value_free(&val);
 	return retval;
 }
 #undef FUNC_NAME
 
-SCM_DEFINE(rad_rewrite_execute, "rad-rewrite-execute", 1, 0, 0,
-           (SCM ARGLIST),
-"Execute a Rewrite language function.\n"
-"(car ARGLIST) is interpreted as a name of the Rewrite function to execute,\n"
-"and (cdr ARGLIST) as a list of arguments to be passed to it.\n"
+SCM_DEFINE_PUBLIC(rad_rewrite_execute, "rad-rewrite-execute", 1, 0, 0,
+		  (SCM arglist),
+"Executes a Rewrite language function.\n"
+"@code{(car @var{arglist})} is interpreted as a name of function to run, "
+"and @code{(cdr @var{arglist})} as a list of arguments to be passed to it.\n\n"
 "Return value: return of the corresponding Rewrite call, translated to\n"
-"the Scheme data type.\n")         
+"a corresponding Scheme data type.\n")
 #define FUNC_NAME s_rad_rewrite_execute
 {
-        SCM_ASSERT((SCM_IMP(ARGLIST) && ARGLIST == SCM_EOL)
-                   || (SCM_NIMP(ARGLIST) && SCM_CONSP(ARGLIST)),
-                   ARGLIST, SCM_ARG2, FUNC_NAME);
-        
-        return radscm_rewrite_execute(FUNC_NAME, ARGLIST);
+	SCM_ASSERT(scm_is_null(arglist) || scm_is_pair(arglist),
+		   arglist, SCM_ARG1, FUNC_NAME);
+
+	return radscm_rewrite_execute(FUNC_NAME, arglist);
 }
 #undef FUNC_NAME
 
 void
-rscm_rewrite_init()
+rscm_rewrite_init(void)
 {
 #include <rscm_rewrite.x>
 }
 
 void
-rscm_server_init()
+rscm_server_init(void)
 {
 	rscm_radlog_init();
 	rscm_rewrite_init();

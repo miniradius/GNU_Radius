@@ -1,6 +1,6 @@
 # -*- radius -*-
 # This file is part of GNU Radius test suite.
-# Copyright (C) 2000,2001,2003,2007 Free Software Foundation, Inc.
+# Copyright (C) 2000-2025 Free Software Foundation, Inc.
 #
 # Written by Sergey Poznyakoff
 #
@@ -15,8 +15,7 @@
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with GNU Radius; if not, write to the Free Software Foundation,
-# Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA. 
+# along with GNU Radius.  If not, see <http://www.gnu.org/licenses/>.
 
 # Begin.exp: Check for BEGIN pattern
 BEGIN   NAS-IP-Address = 127.0.0.2
@@ -31,9 +30,9 @@ DEFAULT NAS-IP-Address = 127.0.0.3,
 DEFAULT NAS-IP-Address = 127.0.0.4,
 		Auth-Type = Reject
 	Reply-Message = "Wrong NAS"
-	
+
 ## Auth.exp: Test Authentication Types
-accept  Auth-Type = Accept     NULL 
+accept  Auth-Type = Accept     NULL
 reject  Auth-Type = Reject     NULL
 local   Auth-Type = Local,
 		User-Password = "guessme"
@@ -51,22 +50,22 @@ bad-one Auth-Type = Accept     NULL
 
 ## Expiration.exp
 expire  Auth-Type = Local,
-               User-Password = "expire",
-               Expiration = "Jan 01 1971"
+	       User-Password = "expire",
+	       Expiration = "Jan 01 1971"
        Service-Type = Framed-User
 
 no-expire  Auth-Type = Local,
-               User-Password = "expire",
-               Expiration = "Jan 01 2011"
+	       User-Password = "expire",
+	       Expiration = "Jan 01 2038"
        Service-Type = Framed-User
 
-		
+
 ## Reply.exp: Test Reply Attributes
 reply   Auth-Type = Local,
 		User-Password = "guessme"
 	Service-Type = Framed-User,
 		Framed-Protocol = PPP
-		
+
 framed-ip Auth-Type = Accept
 	Service-Type = Framed-User,
 		Framed-Protocol = PPP,
@@ -88,11 +87,11 @@ execwait Auth-Type = Accept
 execwait1 Auth-Type = Accept
 	  Service-Type = Framed-User,
 		Exec-Program-Wait = "@BUILDDIR@/raddb/ascend.bin"
-		
+
 execwaitr Auth-Type = Accept
 	Exec-Program-Wait = "=\"@BUILDDIR@/raddb/auth.bin \" + (string)%[NAS-Port-Id] + \" \" + %[User-Name]"
 
-# Match.exp: Check for working Match-Profile attributes		
+# Match.exp: Check for working Match-Profile attributes
 REQ0    NAS-Identifier = "en"
 	Framed-IP-Address = 127.10.10.1
 REQ0    NAS-Identifier = "to"
@@ -106,7 +105,7 @@ REQ1    NAS-IP-Address = 127.0.0.1,
 match1  Auth-Type = Accept,
 		Match-Profile = REQ1
 	Service-Type = Framed-User
-		
+
 ## Scheme-auth.exp: Check for working scheme authentication
 scheme  Auth-Type = Accept
 	Scheme-Procedure = "auth"
@@ -114,7 +113,7 @@ scheme  Auth-Type = Accept
 ## Hint.exp
 hint    Hint = "1",
 		Auth-Type = Accept
-        Reply-Message = "Hint 1"
+	Reply-Message = "Hint 1"
 
 hint    Hint = "2",
 		Auth-Type = Accept
@@ -152,20 +151,20 @@ filter-bad Auth-Type = Accept
 	   Exec-Program-Wait = "|filter"
 
 frw-ok     Auth-Type = Accept
-	   Exec-Program-Wait = "|filter_rw" 		
+	   Exec-Program-Wait = "|filter_rw"
 
 frw-bad    Auth-Type = Accept
 	   Exec-Program-Wait = "|filter_rw"
 
 # Tunnel attributes
-tunnel 	   Auth-Type = Local,
+tunnel	   Auth-Type = Local,
 		User-Password = test
 	   Service-Type = Framed-User,
 		Framed-Protocol = PPTP,
 		Tunnel-Password = tUnnEl
 
 # Tunnel attributes
-tunnel 	   Auth-Type = Local,
+tunnel	   Auth-Type = Local,
 		User-Password = test
 	   Service-Type = Framed-User,
 		Framed-Protocol = PPTP,

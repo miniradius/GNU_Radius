@@ -1,6 +1,5 @@
 /* This file is part of GNU Radius.
-   Copyright (C) 2000,2001,2002,2003,2004,2005,
-   2007,2008 Free Software Foundation, Inc.
+   Copyright (C) 2000-2025 Free Software Foundation, Inc.
 
    Written by Sergey Poznyakoff
 
@@ -8,15 +7,14 @@
    it under the terms of the GNU General Public License as published by
    the Free Software Foundation; either version 3 of the License, or
    (at your option) any later version.
-  
+
    GNU Radius is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
-  
+
    You should have received a copy of the GNU General Public License
-   along with GNU Radius; if not, write to the Free Software Foundation, 
-   Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
+   along with GNU Radius.  If not, see <http://www.gnu.org/licenses/>. */
 
 #if defined(HAVE_CONFIG_H)
 # include <config.h>
@@ -33,7 +31,7 @@
 
 #include <common.h>
 #include <radius/radutmp.h>
-#include <radius/radargp.h>
+#include <radcli.h>
 
 void local_who();
 void radius_who();
@@ -41,7 +39,7 @@ void print_header();
 int want_rad_record(struct radutmp *rt);
 
 /* UTMP stuff. Uses utmpx on svr4 */
-#if defined(__svr4__) || defined(__sgi)  
+#if defined(__svr4__) || defined(__sgi)
 #  include <utmpx.h>
 #  include <sys/fcntl.h>
 #  define utmp utmpx
@@ -121,286 +119,378 @@ lookup_format(char *name)
 char *fmtspec = NULL;
 format_data_t *form;
 
-const char *argp_program_version = "radwho (" PACKAGE ") " VERSION;
-static char doc[] = N_("display who is logged on by Radius");
-
-static struct argp_option options[] = {
-        {NULL, 0, NULL, 0,
-         N_("radwho specific switches:"), 0},
-        {"all", 'A', NULL, 0,
-         N_("print all entries, not only active ones"), 0},
-        {"calling-id", 'c', NULL, 0,
-         N_("display CLID in second column"), 0},
-        {"date-format", 'D', N_("DATEFMT"), 0,
-         N_("change date representation format"), 0},
-        {"empty", 'e', N_("STRING"), 0,
-         N_("print STRING instead of an empty column"), 0},
-        {"file", 'f', N_("FILE"), 0,
-         N_("Use FILE instead of /var/log/radutmp"), 0},
-        {"finger", 'F', NULL, 0,
-         N_("act as a finger daemon"), 0},
-        {"no-header", 'H', NULL, 0,
-         N_("do not display header line"), 0},
-        {"session-id", 'i', NULL, 0,
-         N_("display session ID in the second column"), 0},
-        {"ip-strip-domain", 'I', NULL, 0,
-         N_("display hostnames without domain part"), 0},
-        {"long", 'l', NULL, 0,
-         N_("Long output. All fields will be printed."),
-         0},
-        {"local-also", 'u', NULL, 0,
-         N_("display also local users"), 0},
-        {"no-resolve", 'n', NULL, 0,
-         N_("do not resolve hostnames."), 0},
-        {"format", 'o', N_("FORMAT"), 0,
-         N_("change output format"), 0},
-        {"secure", 's', NULL, 0,
-         N_("secure mode: requires that the username be specified"), 0},
-        {NULL, 0, NULL, 0, NULL, 0}
-};
-
-static error_t
-parse_opt(int key, char *arg, struct argp_state *state)
+static int
+optset_fmt(struct parseopt *po, struct optdef *opt, char *arg)
 {
-        switch (key) {
-        case 'A': /* display all entries */
-                showall++;
-                break;
-        case 'c': /* CLID instead of GECOS */
-                fmtspec = lookup_format("clid");
-                break;
-        case 'D': /* Date format */
-                grad_printutmp_date_format = arg;
-                break;
-        case 'e': /* empty field replacement */
-                grad_printutmp_empty_string = arg;
-                break;
-        case 'f': /* filename */
-                filename = arg;
-                break;
-        case 'F':
-                fingerd++;
-                break;
-        case 'H': /* Disable header line */
-                display_header = 0;
-                break;
-        case 'i': /* Display SID instead of GECOS */
-                fmtspec = lookup_format("sid");
-                break;
-        case 'I': /* Ipaddr format */
-                /*FIXME set_ip_format(arg);*/
-                break;
-        case 'l': /* long output */
-                fmtspec = lookup_format("long");
-                break;
-        case 'n':
-                grad_resolve_hostnames = 0;
-                break;
-        case 'o':
-                fmtspec = lookup_format(arg);
-                break;
-        case 's':
-                secure++;
-                break;
-        case 'u':
-                showlocal++;
-                break;
-        default:
-                return ARGP_ERR_UNKNOWN;
-        }
-        return 0;
+	fmtspec = lookup_format(arg);
+	return 0;
 }
 
-static struct argp argp = {
-        options,
-        parse_opt,
-        NULL,
-        doc,
-        grad_common_argp_child,
-        NULL, NULL
+static int
+optset_fmt_clid(struct parseopt *po, struct optdef *opt, char *arg)
+{
+	fmtspec = lookup_format("clid");
+	return 0;
+}
+
+static int
+optset_fmt_sid(struct parseopt *po, struct optdef *opt, char *arg)
+{
+	fmtspec = lookup_format("sid");
+	return 0;
+}
+
+static int
+optset_fmt_long(struct parseopt *po, struct optdef *opt, char *arg)
+{
+	fmtspec = lookup_format("long");
+	return 0;
+}
+
+static struct optdef options[] = {
+	{
+		.opt_flags = OPTFLAG_DOC,
+		.opt_doc = N_("radwho specific switches:")
+	},
+
+	{
+		.opt_name = "all",
+		.opt_doc = N_("print all entries, not only active ones"),
+		.opt_set = optset_incr,
+		.opt_ptr = &showall
+	},
+	{
+		.opt_name = "A",
+		.opt_flags = OPTFLAG_ALIAS
+	},
+
+	{
+		.opt_name = "calling-id",
+		.opt_doc = N_("display CLID in second column"),
+		.opt_set = optset_fmt_clid
+	},
+	{
+		.opt_name = "c",
+		.opt_flags = OPTFLAG_ALIAS
+	},
+
+	{
+		.opt_name = "date-format",
+		.opt_doc = N_("change date representation format"),
+		.opt_argdoc = N_("DATEFMT"),
+		.opt_set = optset_string_copy,
+		.opt_ptr = &grad_printutmp_date_format
+	},
+	{
+		.opt_name = "D",
+		.opt_flags = OPTFLAG_ALIAS
+	},
+
+	{
+		.opt_name = "empty",
+		.opt_doc = N_("print STRING instead of an empty column"),
+		.opt_argdoc = N_("STRING"),
+		.opt_set = optset_string_copy,
+		.opt_ptr = &grad_printutmp_empty_string
+	},
+	{
+		.opt_name = "e",
+		.opt_flags = OPTFLAG_ALIAS
+	},
+
+	{
+		.opt_name = "file",
+		.opt_doc = N_("Use FILE instead of /var/log/radutmp"),
+		.opt_argdoc = N_("FILE"),
+		.opt_set = optset_string_copy,
+		.opt_ptr = &filename
+	},
+	{
+		.opt_name = "f",
+		.opt_flags = OPTFLAG_ALIAS
+	},
+
+	{
+		.opt_name = "finger",
+		.opt_doc = N_("act as a finger daemon"),
+		.opt_set = optset_true,
+		.opt_ptr = &fingerd
+	},
+	{
+		.opt_name = "F",
+		.opt_flags = OPTFLAG_ALIAS
+	},
+
+	{
+		.opt_name = "no-header",
+		.opt_doc = N_("do not display header line"),
+		.opt_set = optset_false,
+		.opt_ptr = &display_header
+	},
+	{
+		.opt_name = "H",
+		.opt_flags = OPTFLAG_ALIAS
+	},
+
+	{
+		.opt_name = "session-id",
+		.opt_doc = N_("display session ID in the second column"),
+		.opt_set = optset_fmt_sid
+	},
+	{
+		.opt_name = "i",
+		.opt_flags = OPTFLAG_ALIAS
+	},
+/*
+	{
+		.opt_name = "ip-strip-domain",
+		.opt_doc = N_("display hostnames without domain part"),
+	},
+	{
+		.opt_name = "I",
+		.opt_flags = OPTFLAG_ALIAS
+	},
+*/
+	{
+		.opt_name = "long",
+		.opt_doc = N_("Long output. All fields will be printed."),
+		.opt_set = optset_fmt_long,
+	},
+	{
+		.opt_name = "l",
+		.opt_flags = OPTFLAG_ALIAS
+	},
+
+	{
+		.opt_name = "local-also",
+		.opt_doc = N_("display also local users"),
+		.opt_set = optset_true,
+		.opt_ptr = &showlocal,
+	},
+	{
+		.opt_name = "u",
+		.opt_flags = OPTFLAG_ALIAS
+	},
+
+	{
+		.opt_name = "no-resolve",
+		.opt_doc = N_("do not resolve hostnames."),
+		.opt_set = optset_false,
+		.opt_ptr = &grad_resolve_hostnames
+	},
+	{
+		.opt_name = "n",
+		.opt_flags = OPTFLAG_ALIAS
+	},
+
+	{
+		.opt_name = "format",
+		.opt_doc = N_("change output format"),
+		.opt_argdoc = N_("FORMAT"),
+		.opt_set = optset_fmt
+	},
+	{
+		.opt_name = "o",
+		.opt_flags = OPTFLAG_ALIAS
+	},
+
+	{
+		.opt_name = "secure",
+		.opt_doc = N_("secure mode: requires that the username be specified"),
+		.opt_set = optset_true,
+		.opt_ptr = &secure
+	},
+	{
+		.opt_name = "s",
+		.opt_flags = OPTFLAG_ALIAS
+	},
+
+	{ NULL }
+}, *optdef[] = { options, NULL };
+
+static struct parseopt po = {
+	.po_descr = N_("display who is logged on by Radius"),
+	.po_optdef = optdef,
 };
 
 
 int
-main(int  argc, char **argv)
+main(int argc, char **argv)
 {
-        char inbuf[128];
-        char *path;
-        char *p, *q;
-        int index;
+	char inbuf[128];
+	char *path;
+	char *p, *q;
 
-        grad_app_setup();
-        if (grad_argp_parse(&argp, &argc, &argv, 0, &index, NULL))
-                return 1;
+	set_progname(argv[0]);
+	grad_app_setup();
+	grad_parseopt(&po, argc, argv, NULL, NULL);
 
-        if (!fmtspec)
-                fmtspec = getenv("RADWHO_FORMAT");
+	if (!fmtspec)
+		fmtspec = getenv("RADWHO_FORMAT");
 
-        if (!fmtspec)
-                fmtspec = lookup_format("default");
+	if (!fmtspec)
+		fmtspec = lookup_format("default");
 
 	form = grad_utent_compile_form(fmtspec);
 	if (!form)
 		exit(1);
 
-        if (!filename)
-                filename = grad_utmp_file;
-        
-        /* Read the dictionary files */
-        grad_dict_init();
-        /* Read the "naslist" file. */
-        path = grad_mkfilename(grad_config_dir, RADIUS_NASLIST);
+	if (!filename)
+		filename = grad_utmp_file;
+
+	/* Read the dictionary files */
+	grad_dict_init();
+	/* Read the "naslist" file. */
+	path = grad_mkfilename(grad_config_dir, RADIUS_NASLIST);
 	if (grad_nas_read_file(path))
-                exit(1);
-        grad_free(path);
-        /* Read realms */
-        path = grad_mkfilename(grad_config_dir, RADIUS_REALMS);
+		exit(1);
+	free(path);
+	/* Read realms */
+	path = grad_mkfilename(grad_config_dir, RADIUS_REALMS);
 	grad_read_realms(path, 0, 0, NULL);
-        grad_free(path);
-        
-        /*
-         *      See if we are "fingerd".
-         */
-        if (strstr(argv[0], "fingerd")) 
-                fingerd++;
+	free(path);
 
-        if (fingerd) {
-                eol = "\r\n";
-                /*
-                 *      Read first line of the input.
-                 */
-                fgets(inbuf, sizeof(inbuf), stdin);
-                p = inbuf;
-                while(*p == ' ' || *p == '\t') p++;
-                if (*p == '/' && *(p + 1)) p += 2;
-                while(*p == ' ' || *p == '\t') p++;
-                for(q = p; *q && *q != '\r' && *q != '\n'; q++)
-                        ;
-                *q = 0;
-                if (*p)
-                        username = p;
+	/*
+	 *      See if we are "fingerd".
+	 */
+	if (strstr(argv[0], "fingerd"))
+		fingerd++;
 
-                /*
-                 *      See if we fingered a specific user.
-                 */
-                if (secure && username == 0) {
-                        printf(_("must provide username\n"));
-                        exit(1);
-                }
-        }
+	if (fingerd) {
+		eol = "\r\n";
+		/*
+		 *      Read first line of the input.
+		 */
+		fgets(inbuf, sizeof(inbuf), stdin);
+		p = inbuf;
+		while(*p == ' ' || *p == '\t') p++;
+		if (*p == '/' && *(p + 1)) p += 2;
+		while(*p == ' ' || *p == '\t') p++;
+		for(q = p; *q && *q != '\r' && *q != '\n'; q++)
+			;
+		*q = 0;
+		if (*p)
+			username = p;
 
-        if (showlocal)
-                local_who();
+		/*
+		 *      See if we fingered a specific user.
+		 */
+		if (secure && username == 0) {
+			printf(_("must provide username\n"));
+			exit(1);
+		}
+	}
 
-        radius_who();
+	if (showlocal)
+		local_who();
 
-        fflush(stdout);
-        fflush(stderr);
+	radius_who();
 
-        return 0;
+	fflush(stdout);
+	fflush(stderr);
+
+	return 0;
 }
 
 void
 tty_to_port(struct radutmp *rt, char *tty)
 {
-        char *p;
+	char *p;
 
-        p = tty + strlen(tty) - 1; 
-        while (p >= tty && isdigit(*p))
-                p--;
-        rt->nas_port = atoi(p+1);
-        rt->porttype = 0;/*FIXME*/
+	p = tty + strlen(tty) - 1;
+	while (p >= tty && isdigit(*p))
+		p--;
+	rt->nas_port = atoi(p+1);
+	rt->porttype = 0;/*FIXME*/
 }
 
 void
-local_who()
+local_who(void)
 {
-        FILE  *fp;
-        struct utmp ut;
-        struct radutmp rt;
-        
-        if ((fp = fopen(UTMP_FILE, "r")) == NULL) {
-                grad_log(GRAD_LOG_ERR, _("can't open file: %s"),
-                         UTMP_FILE);
-                return;
-        }
+	FILE  *fp;
+	struct utmp ut;
+	struct radutmp rt;
 
-        print_header();
+	if ((fp = fopen(UTMP_FILE, "r")) == NULL) {
+		grad_log(GRAD_LOG_ERR, _("can't open file: %s"),
+			 UTMP_FILE);
+		return;
+	}
 
-        memset(&rt, 0, sizeof(rt));
-        rt.nas_address = rt.framed_address = htonl(INADDR_LOOPBACK);
-        
-        while(fread(&ut, sizeof(ut), 1, fp) == 1) {
+	print_header();
+
+	memset(&rt, 0, sizeof(rt));
+	rt.nas_address = rt.framed_address = htonl(INADDR_LOOPBACK);
+
+	while(fread(&ut, sizeof(ut), 1, fp) == 1) {
 #ifdef USER_PROCESS
-                if (ut.ut_user[0] && ut.ut_line[0] &&
-                    ut.ut_type == USER_PROCESS) {
+		if (ut.ut_user[0] && ut.ut_line[0] &&
+		    ut.ut_type == USER_PROCESS) {
 #else
-                if (ut.ut_user[0] && ut.ut_line[0]) {
+		if (ut.ut_user[0] && ut.ut_line[0]) {
 #endif
-                        rt.type = P_CONSOLE;
-                        strncpy(rt.login, ut.ut_name, RUT_NAMESIZE);
-                        strncpy(rt.orig_login, ut.ut_host, RUT_NAMESIZE);
+			rt.type = P_CONSOLE;
+			strncpy(rt.login, ut.ut_name, RUT_NAMESIZE);
+			strncpy(rt.orig_login, ut.ut_host, RUT_NAMESIZE);
 #if defined __svr4__ || defined __sgi
-                        rt.time = ut.ut_xtime;
+			rt.time = ut.ut_xtime;
 #else
-                        rt.time = ut.ut_time;
+			rt.time = ut.ut_time;
 #endif
-                        tty_to_port(&rt, ut.ut_line);
-                        if (want_rad_record(&rt)) 
-                                grad_utent_print(form, &rt, 1);
-                }
-        }
-        fclose(fp);
+			tty_to_port(&rt, ut.ut_line);
+			if (want_rad_record(&rt))
+				grad_utent_print(form, &rt, 1);
+		}
+	}
+	fclose(fp);
 }
 
 void
-radius_who()
+radius_who(void)
 {
-        radut_file_t file;
-        struct radutmp *up;
-	
-        print_header();
+	radut_file_t file;
+	struct radutmp *up;
 
-        /*
-         *      Show the users logged in on the terminal server(s).
-         */
-        if ((file = grad_ut_setent(filename, 0)) == NULL)
-                return ;
+	print_header();
 
-        while (up = grad_ut_getent(file)) {
-		if (up->type == P_ACCT_DISABLED) 
+	/*
+	 *      Show the users logged in on the terminal server(s).
+	 */
+	if ((file = grad_ut_setent(filename, 0)) == NULL)
+		return ;
+
+	while ((up = grad_ut_getent(file)) != NULL) {
+		if (up->type == P_ACCT_DISABLED)
 			printf(_("System accounting is disabled\n"));
-		else if (want_rad_record(up)) 
-                        grad_utent_print(form, up, 1);
-        }
-        grad_ut_endent(file);
+		else if (want_rad_record(up))
+			grad_utent_print(form, up, 1);
+	}
+	grad_ut_endent(file);
 }
 
 void
-print_header()
+print_header(void)
 {
-        if (display_header) {
-                grad_utent_print_header(form);
-                display_header = 0;
-        }
+	if (display_header) {
+		grad_utent_print_header(form);
+		display_header = 0;
+	}
 }
 
 int
 want_rad_record(struct radutmp *rt)
 {
-        if ((username && strcmp(rt->login, username))
-	    || rt->type == P_ACCT_ENABLED) 
-                return 0;
-        
-        switch (showall) {
-        case 0:
-                return rt->type != P_IDLE;
-        case 1:
-                return rt->login[0] != 0;
-        case 2:
-        default:
-                return (rt->type == P_IDLE && rt->login[0] != 0);
-        }
+	if ((username && strcmp(rt->login, username))
+	    || rt->type == P_ACCT_ENABLED)
+		return 0;
+
+	switch (showall) {
+	case 0:
+		return rt->type != P_IDLE;
+	case 1:
+		return rt->login[0] != 0;
+	case 2:
+	default:
+		return (rt->type == P_IDLE && rt->login[0] != 0);
+	}
 }
-
-

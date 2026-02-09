@@ -1,6 +1,5 @@
 # This file is part of GNU Radius.
-# Copyright (C) 2000,2001,2002,2003,2004,2005,2006,
-# 2007,2008 Free Software Foundation, Inc.
+# Copyright (C) 2000-2025 Free Software Foundation, Inc.
 #      
 # Written by Sergey Poznyakoff
 #
@@ -15,13 +14,13 @@
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with GNU Radius; if not, write to the Free Software Foundation,
-# Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+# along with GNU Radius.  If not, see <http://www.gnu.org/licenses/>. 
 
+SUBDIRS = parseopt
 noinst_LIBRARIES = libradextra.a
 libradextra_a_SOURCES = \
  intl.c\
- radargp.c\
+ radcli.c\
  readline.c 
 
 lib_LTLIBRARIES=libgnuradius.la
@@ -47,16 +46,15 @@ libgnuradius_la_SOURCES= \
  dict.c\
  envar.c\
  getgr.c\
- gethost_r.c\
  getpw_r.c\
  insist.c\
  iputil.c\
- leakdetect.c\
  list.c\
  logger.c\
  md4.c\
  md5.c\
  md5crypt.c\
+ mem.c\
  nas.c\
  printutmp.c\
  raddb.c\
@@ -68,39 +66,39 @@ libgnuradius_la_SOURCES= \
  sha1.c\
  smbdes.c\
  slist.c\
+ strbuf.c\
  symtab.c\
  sysdep.c\
- users_gram.c\
- users_lex.c\
+ users-gram.c\
+ users-lex.c\
  util.c\
  $(NTOSTR_C)
 
+libgnuradius_la_LIBADD = parseopt/libparseopt.la
+
 localedir = $(datadir)/locale
 
-VERSION_SCRIPT=$(srcdir)/gnuradius.vers
-libgnuradius_la_LDFLAGS = --version-info @VI_CURRENT@:@VI_REVISION@:@VI_AGE@ @VERSION_SCRIPT_OPTION@
+libgnuradius_la_LDFLAGS = --version-info @VI_CURRENT@:@VI_REVISION@:@VI_AGE@
 
-AM_CPPFLAGS=-DLOCALEDIR=\"$(localedir)\" @PATHFLAGS@
+AM_CPPFLAGS=@RADIUS_INCLUDE_PATH@ -DLOCALEDIR=\"$(localedir)\" @PATHFLAGS@
 
-BUILT_SOURCES=users_gram.c users_lex.c
-MAINTAINERCLEANFILES=users_gram.c users_gram.h users_lex.c
+BUILT_SOURCES=users-gram.c users-lex.c
+MAINTAINERCLEANFILES=users-gram.c users-gram.h users-lex.c
 MOSTLYCLEANFILES=
-INCLUDES=@RADIUS_INCLUDE_PATH@ 
-EXTRA_DIST=users.y users.l gnuradius.vers numtostr.c intprops.h
+EXTRA_DIST=users-gram.y users-lex.l numtostr.c intprops.h gettext.h
 
-noinst_HEADERS=users_gram.h 
+noinst_HEADERS=users-gram.h 
 
-YLWRAP=$(SHELL) $(top_srcdir)/scripts/gylwrap
+AM_YFLAGS=-vdt
 
-users_gram.c users_gram.h: $(srcdir)/users.y
-	$(YLWRAP) "$(YACC)" $(srcdir)/users.y \
-                  y.tab.c users_gram.c y.tab.h users_gram.h \
-                  -- -yy uyy -vdt
+.l.c:
+	$(FLEX) -o $@ $(AM_LFLAGS) $<
+.y.c:
+	$(BISON) -o $@ $(AM_YFLAGS) $<
 
-users_lex.c: $(srcdir)/users.l
-	$(YLWRAP) "$(LEX)" $(srcdir)/users.l \
-		  lex.yy.c users_lex.c -- -yy uyy
+users-gram.c users-gram.h: users-gram.y
+users-lex.c: users-lex.l
 
-users_lex.o: users_lex.c users_gram.h $(top_srcdir)/include/parser.h
-users_gram.o: users_gram.c users_gram.h $(top_srcdir)/include/parser.h
+users-lex.o: users-lex.c users-gram.h $(top_srcdir)/include/parser.h
+users-gram.o: users-gram.c users-gram.h $(top_srcdir)/include/parser.h
 

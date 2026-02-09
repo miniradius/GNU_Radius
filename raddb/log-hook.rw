@@ -1,5 +1,5 @@
 /* This file is part of GNU Radius. -*- rewrite -*-
-   Copyright (C) 2003,2007 Free Software Foundation, Inc.
+   Copyright (C) 2003-2025 Free Software Foundation, Inc.
 
    Written by Sergey Poznyakoff
 
@@ -14,29 +14,28 @@
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with GNU Radius; if not, write to the Free Software Foundation,
-   Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA. */
+   along with GNU Radius.  If not, see <http://www.gnu.org/licenses/>. */
 
 string
 default_log_prefix(integer reqtype, string nas, integer id)
 {
-        string result;
+	string result;
 
-        result = "(" + request_code_string(reqtype) + " "
-                 + nas + " " + (string)id + " "
-                 + "\"" + quote_string(%[User-Name]) + "\"";
-        if (*%[Calling-Station-Id])
-                result = result + " CLID=" + %[Calling-Station-Id];
-        if (*%[Called-Station-Id])
-                result = result + " CSID=" + %[Called-Station-Id];
-        return result + "): ";
+	result = "(" + request_code_string(reqtype) + " "
+		 + nas + " " + (string)id + " "
+		 + "\"" + quote_string(%[User-Name]) + "\"";
+	if (*%[Calling-Station-Id])
+		result = result + " CLID=" + %[Calling-Station-Id];
+	if (*%[Called-Station-Id])
+		result = result + " CSID=" + %[Called-Station-Id];
+	return result + "): ";
 }
 
 /* The following two hooks emulate log files of versions 1.0 and 1.1.
    To use, add to the logging clause of your raddb/config file the
    following two lines:
 
- 	prefix-hook "compat_log_prefix";
+	prefix-hook "compat_log_prefix";
 	suffix-hook "compat_log_suffix"; */
 
 /* Convert integer request type to its abbreviation used in versions
@@ -49,7 +48,7 @@ old_request_code_string(integer reqtype)
 	else if (reqtype == 2)
 		return "AUTHACK";
 	else if (reqtype == 3)
-	        return "AUTHREJ";
+		return "AUTHREJ";
 	else if (reqtype == 4)
 		return "ACCTREQ";
 	else if (reqtype == 5)
@@ -70,14 +69,14 @@ old_request_code_string(integer reqtype)
 		return "SRVSTAT";
 	return (string) reqtype;
 }
-	
+
 string
 compat_log_prefix(integer reqtype, string nas, integer id)
 {
 	string result;
 
 	result = "(" + old_request_code_string(reqtype) + " "
-                 + nas + " " + (string)id + " " + %[User-Name];
+		 + nas + " " + (string)id + " " + %[User-Name];
 	if (*%[Acct-Session-Id])
 		result = result + " " + %[Acct-Session-Id];
 	return result + "): ";
@@ -90,7 +89,6 @@ compat_log_suffix(integer reqtype, string nas, integer id)
 	if (*%[Calling-Station-Id])
 		result = ", CLID " + %[Calling-Station-Id];
 	else
-		result = ", CLID unknown";	
+		result = ", CLID unknown";
 	return result;
 }
-	

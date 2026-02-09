@@ -1,27 +1,21 @@
-# Makefile for GNU tar regression tests.
+## Makefile for GNU Radius regression tests.
+## Copyright (C) 1996-2025 Free Software Foundation, Inc.
 
-# Copyright (C) 1996, 1997, 1999, 2000, 2001, 2003, 2004, 2007,
-# 2008 Free Software Foundation, Inc.
-
-# François Pinard <pinard@iro.umontreal.ca>, 1988.
-# Sergey Poznyakoff <gray@gnu.org.ua>, 2004.
-
-## This program is free software; you can redistribute it and/or modify
+## GNU Radius is free software; you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
 ## the Free Software Foundation; either version 3, or (at your option)
 ## any later version.
 
-## This program is distributed in the hope that it will be useful,
+## GNU Radius is distributed in the hope that it will be useful,
 ## but WITHOUT ANY WARRANTY; without even the implied warranty of
 ## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ## GNU General Public License for more details.
 
 ## You should have received a copy of the GNU General Public License
-## along with this program; if not, write to the Free Software
-## Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
-## 02110-1301 USA.
+## along with GNU Radius.  If not, see <http://www.gnu.org/licenses/>. */
 
-EXTRA_DIST = $(TESTSUITE_AT) testsuite package.m4 
+
+EXTRA_DIST = $(TESTSUITE_AT) testsuite package.m4
 DISTCLEANFILES       = atconfig $(check_SCRIPTS)
 CLEANFILES           = confdir
 MAINTAINERCLEANFILES = Makefile.in $(TESTSUITE)
@@ -79,7 +73,7 @@ TESTSUITE_AT = \
  scheme-auth.at \
  status-server.at \
  testsuite.at \
- tunnel.at 
+ tunnel.at
 
 TESTSUITE = $(srcdir)/testsuite
 

@@ -62,7 +62,7 @@ keepopen yes
 
 # The idle timeout for the connection (seconds). Default is 4 hours.
 # When a connection is idle for more than this amount of time it gets
-# closed. 
+# closed.
 # Note: This setting takes effect only when keepopen is set to
 # yes.
 idle_timeout 14400
@@ -93,35 +93,32 @@ acct_db RADIUS
 # Query to be used on session start
 acct_start_query     INSERT INTO calls \
 		     VALUES(%C{Acct-Status-Type},\
-                            '%u',\
-                            '%G',\
-                            '%C{NAS-IP-Address}',\
+			    '%u',\
+			    '%G',\
+			    '%C{NAS-IP-Address}',\
 			    %C{NAS-Port-Id},\
-                            '%C{Acct-Session-Id}',\
-                            0,\
-                            0,\
-                            0,\
-                            0,\
-                            '%C{Framed-IP-Address}',\
-                            '%C{Called-Station-Id}',\
-                            '%C{Calling-Station-Id}')
+			    '%C{Acct-Session-Id}',\
+			    0,\
+			    0,\
+			    0,\
+			    0,\
+			    '%C{Framed-IP-Address}',\
+			    '%C{Called-Station-Id}',\
+			    '%C{Calling-Station-Id}')
 
 # Query to be used on session end
 acct_stop_query      UPDATE calls \
-                     SET status=%C{Acct-Status-Type},\
-                         acct_session_time=%C{Acct-Session-Time},\
-                         acct_input_octets=%C{Acct-Input-Octets},\
-                         acct_output_octets=%C{Acct-Output-Octets},\
-                         connect_term_reason=%C{Acct-Terminate-Cause} \
-                         WHERE user_name='%C{User-Name}' AND status = 1
+		     SET status=%C{Acct-Status-Type},\
+			 acct_session_time=%C{Acct-Session-Time},\
+			 acct_input_octets=%C{Acct-Input-Octets},\
+			 acct_output_octets=%C{Acct-Output-Octets},\
+			 connect_term_reason=%C{Acct-Terminate-Cause} \
+			 WHERE user_name='%C{User-Name}' AND status = 1
 
 
-# Query to be used when a NAS goes down, i.e. when it sends 
+# Query to be used when a NAS goes down, i.e. when it sends
 # Accounting-Off packet
 acct_nasdown_query   UPDATE calls \
-                        SET status=2,\
-                        acct_session_time=unix_timestamp(now())-unix_timestamp(event_date_time) \
-                      WHERE status=1 AND nas_ip_address='%C{NAS-IP-Address}'
-
-
-
+			SET status=2,\
+			acct_session_time=unix_timestamp(now())-unix_timestamp(event_date_time) \
+		      WHERE status=1 AND nas_ip_address='%C{NAS-IP-Address}'

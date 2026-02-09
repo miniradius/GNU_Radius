@@ -13,7 +13,7 @@
 #define SHA1Transform		grad_SHA1Transform
 #define SHA1Init		grad_SHA1Init
 #define SHA1Update		grad_SHA1Update
-#define SHA1Final       	grad_SHA1Final
+#define SHA1Final		grad_SHA1Final
 
 typedef struct {
     unsigned long state[5];

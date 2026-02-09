@@ -1,5 +1,6 @@
 # This file is part of GNU Radius.
-# Copyright (C) 2000,2001,2003,2004 Free Software Foundation, Inc.
+# Copyright (C) 2000, 2001, 2003, 2004, 2010, 2013 Free Software Foundation,
+# Inc.
 #
 # Written by Sergey Poznyakoff
 #
@@ -25,17 +26,17 @@ M4_DEFINES=-DSRCDIR=$(srcdir) -DPROGNAME=$(sbindir)/radiusd \
 AM_INSTALLCHECK_STD_OPTIONS_EXEMPT = radauth
 
 radctl: $(srcdir)/radctl.m4
-	$(M4) $(M4_DEFINES) $(srcdir)/radctl.m4 > radctl
+	$(AM_V_GEN)$(M4) $(M4_DEFINES) $(srcdir)/radctl.m4 > radctl
 
 radgrep: $(srcdir)/radgrep.m4
-	$(M4) $(M4_DEFINES) $(srcdir)/radgrep.m4 > radgrep
+	$(AM_V_GEN)$(M4) $(M4_DEFINES) $(srcdir)/radgrep.m4 > radgrep
 
 radping: $(srcdir)/radping.m4
-	$(M4) $(M4_DEFINES) $(srcdir)/radping.m4 > radping
+	$(AM_V_GEN)$(M4) $(M4_DEFINES) $(srcdir)/radping.m4 > radping
 
 radauth: $(srcdir)/radauth.m4
-	$(M4) $(M4_DEFINES) $(srcdir)/radauth.m4 > radauth
+	$(AM_V_GEN)$(M4) $(M4_DEFINES) $(srcdir)/radauth.m4 > radauth
 
 builddbm: $(srcdir)/builddbm.m4
-	$(M4) $(M4_DEFINES) $(srcdir)/builddbm.m4 > builddbm
+	$(AM_V_GEN)$(M4) $(M4_DEFINES) $(srcdir)/builddbm.m4 > builddbm
 

@@ -15,7 +15,7 @@ DEFAULT NAS-IP-Address = 127.0.0.5,
 		NAS-Port-Id = 2,
 		Rewrite-Function = "nt_fixup"
 	NULL
-	
+
 DEFAULT NAS-IP-Address = 127.0.0.5,
 		NAS-Port-Id = 3,
 		Rewrite-Function = "jetstream_fixup"

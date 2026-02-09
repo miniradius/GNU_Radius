@@ -11,9 +11,8 @@ DEFAULT Group = "*LOCKED_ACCOUNT*",
 Please, contact your system administrator\n"
 
 
-## Default entry. 
+## Default entry.
 DEFAULT	Auth-Type = SQL,
-		Simultaneous-Use = 1	
+		Simultaneous-Use = 1
 	Service-Type = Framed-User,
 		Framed-Protocol = PPP
-

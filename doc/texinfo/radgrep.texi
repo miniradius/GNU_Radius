@@ -1,9 +1,9 @@
 @c This is part of the Radius manual.
-@c Copyright (C) 1999,2000,2001,2002,2003 Free Software Foundation, Inc.
+@c Copyright (C) 1999-2025 Free Software Foundation, Inc.
 @c Written by Sergey Poznyakoff
 @c See file radius.texi for copying conditions.
 @comment *******************************************************************
-@node Radgrep, Radping, Radzap, Utility Programs
+@node Radgrep
 @section @command{radgrep}
 @pindex radgrep
 

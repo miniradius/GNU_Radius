@@ -1,9 +1,8 @@
-This is radius.info, produced by makeinfo version 4.13 from radius.texi.
+This is radius.info, produced by makeinfo version 6.8 from radius.texi.
 
-This manual documents GNU Radius (version 1.6.1, 15 December 2008).
+This manual documents GNU Radius (version 1.7, 11 December 2025).
 
-Published by:                        
-
+Published by:
 GNU Press                            Website: www.gnupress.org
 a division of the                    General: press@gnu.org
 Free Software Foundation             Orders: sales@gnu.org
@@ -11,21 +10,14 @@ Free Software Foundation             Orders: sales@gnu.org
 Boston, MA 02110-1301 USA            Fax: 617-542-2652
 
 
-
-   Copyright (C) 1999, 2000, 2001, 2002, 2003 Free Software Foundation
+   Copyright (C) 1999-2025 Free Software Foundation
 
      Permission is granted to copy, distribute and/or modify this
      document under the terms of the GNU Free Documentation License,
-     Version 1.2 or any later version published by the Free Software
-     Foundation; with no Invariant Sections, with the Front-Cover texts
-     being "A GNU Manual", and with the Back-Cover Texts as in (a)
-     below.  A copy of the license is included in the section entitled
-     "GNU Free Documentation License".
-
-     (a) The FSF's Back-Cover Text is: "You have freedom to copy and
-     modify this GNU Manual, like GNU software.  Copies published by
-     the Free Software Foundation raise funds for GNU development."
-
+     Version 1.3 or any later version published by the Free Software
+     Foundation; with no Invariant Sections, no Front-Cover, and no
+     Back-Cover texts.  A copy of the license is included in the section
+     entitled "GNU Free Documentation License."
 INFO-DIR-SECTION GNU radius
 START-INFO-DIR-ENTRY
 * Radius: (radius).           GNU Radius.
@@ -37,301 +29,311 @@ START-INFO-DIR-ENTRY
 * radtest: (radius)Radtest.   A RADIUS client shell.
 * radauth: (radius)Radauth.   Check if a user can be authenticated.
 * radctl: (radius)Radctl.     Radctl monitor.
-* builddbm: (radius)Builddbm. Create DBM version of the `raddb/users' file.
+* builddbm: (radius)Builddbm. Create DBM version of the 'raddb/users' file.
 * radscm: (radius)Radscm.     A Guile interface to radius functions.
 END-INFO-DIR-ENTRY
 
 
 Indirect:
-radius.info-1: 1956
-radius.info-2: 301502
+radius.info-1: 1640
+radius.info-2: 302833
 
 Tag Table:
 (Indirect)
-Node: Top1956
-Node: Intro4748
-Node: Overview5834
-Node: Naming Conventions12928
-Node: Operation14759
-Node: Attributes15387
-Node: Requests17851
-Node: Authentication Requests18663
-Node: Accounting Requests21770
-Node: Matching Rule25406
-Node: Request processing26545
-Node: Checking Duplicates28631
-Node: Proxying30626
-Node: Proxy Service31358
-Node: Realms33265
-Node: Hints34408
-Node: Huntgroups36558
-Node: User Profiles37718
-Ref: User Profiles-Footnote-139386
-Node: Invocation39623
-Node: Configuration Files44049
-Node: config file48078
-Node: option49882
-Node: logging54073
-Node: hooks55432
-Node: category56760
-Node: channel58801
-Node: logging example60269
-Node: auth61414
-Node: acct65862
-Node: usedbm69419
-Node: snmp69793
-Node: rewrite74125
-Node: guile75017
-Node: message77326
-Node: filters79915
-Node: mlc82106
-Node: dictionary file83125
-Node: Comment84746
-Node: $INCLUDE84988
-Node: VENDOR85375
-Node: ATTRIBUTE85856
-Ref: ATTRIBUTE-Footnote-189044
-Node: BEGIN89179
-Node: ALIAS91146
-Node: PROPERTY91530
-Node: VALUE92698
-Node: clients file93320
-Node: clients example94507
-Node: naslist file95063
-Ref: naslist file-Footnote-198454
-Node: naslist example98525
-Node: nastypes file99312
-Node: nastypes syntax99774
-Node: nastypes example101985
-Node: Predefined NAS Types102855
-Node: hints file104486
-Node: hints example105246
-Node: huntgroups file105863
-Node: huntgroups example106343
-Node: realms file106657
-Node: realms example109899
-Node: users file110744
-Node: users example111112
-Node: access.deny file113067
-Node: sqlserver file113494
-Node: SQL Client Parameters114281
-Node: Authentication Server Parameters115870
-Node: Authorization Parameters118515
-Node: Accounting server parameters122281
-Node: Queries124534
-Node: rewrite file132107
-Node: menus directory132456
-Node: menu syntax133168
-Node: menu example134042
-Node: Macro Substitution137105
-Node: Request Comparison141552
-Node: Extended Comparison142001
-Node: Extended Comparison Example145200
-Node: Comparable Attributes146420
-Node: Request Queue147307
-Node: Authentication149051
-Node: Accept Auth150101
-Node: Reject Auth150978
-Node: Local Password Auth151457
-Node: Encrypted Password Auth152736
-Node: System Auth153914
-Node: SQL Auth154328
-Node: PAM Auth154890
-Node: Custom Auth155477
-Node: Multiple Login Checking157179
-Node: Retrieving Session Data158399
-Ref: Retrieving Session Data-Footnote-1161173
-Node: Verifying Active Sessions161235
-Node: Auth Probing164087
-Node: Accounting171853
-Node: System Accounting173229
-Node: Detailed Request Accounting173900
-Node: SQL Accounting177088
-Node: Custom Acct177949
-Node: Logging179217
-Node: Problem Tracking180656
-Node: Rule Tracing180946
-Node: Debugging186341
-Node: Test Mode187566
-Node: Extensions194976
-Node: Filters195524
-Node: Getting Acquainted with Filters196000
-Node: Declaring the Filter197087
-Node: Invoking the Filter from a User Profile198724
-Node: Adding Reply Attributes199225
-Node: Accounting Filters199844
-Node: Invoking Accounting Filter201646
-Node: Rewrite202048
-Node: Syntax Overview202873
-Node: Quick Start203304
-Node: Interaction with Radius204310
-Node: Rewriting Incoming Requests204820
-Node: Rewrite Examples207868
-Node: Login Verification Functions213519
-Node: Examples of Login Verification Functions214675
-Node: Attribute Creation Functions215708
-Node: Logging Hook Functions216705
-Node: Full Syntax Description218033
-Node: Data types218326
-Node: Symbols218850
-Node: Identifiers223987
-Node: Declarations224462
-Node: Statements225616
-Node: Regular Expressions228032
-Node: Built-in Functions229977
-Node: Guile237994
-Node: Data Representation239028
-Node: Authentication with Scheme240211
-Node: Accounting with Scheme243325
-Node: Radius-Specific Functions244388
-Node: Utility Programs248063
-Node: Radwho248818
-Node: radwho options249913
-Ref: radwho options-Footnote-1252270
-Node: Format Strings252422
-Node: Predefined Formats257365
-Node: Radlast259218
-Node: radlast options260139
-Node: Radzap261868
-Node: Radgrep263607
-Node: Radping264161
-Node: Radauth264563
-Node: Radctl265821
-Node: Builddbm267637
-Node: Radscm268958
-Node: Client Package275063
-Node: client.conf275695
-Node: radtest277317
-Node: Invoking radtest277894
-Node: Literal Values279077
-Node: Numeric Values279479
-Node: Strings280625
-Ref: STRNUM282202
-Node: Avlists283113
-Node: Reserved Keywords283758
-Node: Variables in radtest284422
-Node: Using Variables284951
-Node: Variable Assignments286248
-Node: Dereferencing Variables287559
-Ref: minus-ambiguity288516
-Node: Accessing Elements of A/V Pair Lists290780
-Node: Assignment Options291613
-Node: Built-in Variables292665
-Node: Positional Parameters293858
-Node: Expressions in radtest296011
-Node: Arithmetic Ops296660
-Node: String Ops298262
-Node: A/V List Ops298558
-Node: Comparison Ops299996
-Node: Boolean Ops301502
-Node: Conversion Between Data Types302168
-Node: Function Calls304159
-Node: Precedence305092
-Node: Function Definitions306321
-Node: Interacting with Radius Servers307226
-Node: Conditional Statements309603
-Node: Loops312341
-Node: Built-in Primitives314167
-Ref: send-flags318154
-Node: Sample Radtest Program319455
-Node: radsession332168
-Node: nas.scm333157
-Node: pam_radius.so335110
-Node: Attribute List336306
-Node: Authentication Attributes338097
-Node: CHAP-Password338905
-Node: Callback-Id339622
-Node: Callback-Number340154
-Node: Called-Station-Id340833
-Node: Calling-Station-Id341554
-Node: Class342196
-Node: Framed-Compression342805
-Node: Framed-IP-Address343802
-Node: Framed-IP-Netmask345107
-Node: Framed-MTU345846
-Node: Framed-Protocol346441
-Node: Framed-Route347102
-Node: Framed-Routing347667
-Node: Idle-Timeout348448
-Node: NAS-IP-Address349094
-Node: NAS-Identifier349778
-Node: NAS-Port-Id350439
-Node: NAS-Port-Type351602
-Node: Reply-Message352670
-Node: Service-Type353622
-Node: Session-Timeout356313
-Node: State356947
-Node: Termination-Action358022
-Node: User-Name358700
-Node: User-Password359885
-Node: Vendor-Specific361415
-Node: Accounting Attributes361990
-Node: Acct-Authentic362535
-Node: Acct-Delay-Time363389
-Node: Acct-Input-Octets364072
-Node: Acct-Input-Packets364715
-Node: Acct-Output-Octets365382
-Node: Acct-Output-Packets366021
-Node: Acct-Session-Id366678
-Node: Acct-Session-Time367518
-Node: Acct-Status-Type368114
-Node: Acct-Terminate-Cause369333
-Node: Radius Internal Attributes371061
-Node: Acct-Ext-Program371878
-Node: Acct-Type373266
-Node: Auth-Failure-Trigger374142
-Node: Auth-Data375382
-Node: Auth-Type376344
-Node: Crypt-Password378365
-Node: Exec-Program-Wait379074
-Node: Running External Program380008
-Node: Using External Filter382044
-Ref: Using External Filter-Footnote-1383853
-Node: Exec-Program384020
-Node: Fall-Through385586
-Node: Group387488
-Node: Hint387853
-Node: Huntgroup-Name388833
-Node: Log-Mode-Mask390545
-Node: Login-Time392131
-Node: Match-Profile394354
-Node: Menu395903
-Node: Pam-Auth396555
-Node: Prefix397135
-Node: Proxy-Replied398206
-Node: Realm-Name398834
-Node: Replace-User-Name399296
-Node: Rewrite-Function400614
-Node: Scheme-Acct-Procedure401528
-Node: Scheme-Procedure402174
-Node: Simultaneous-Use402811
-Node: Strip-User-Name403473
-Node: Suffix405261
-Node: Termination-Menu406428
-Node: Bugs407139
-Node: News408006
-Node: Distrib409391
-Node: Glossary410430
-Node: Acknowledgements412016
-Node: GNU configuration413167
-Node: Present State414282
-Ref: Present State-Footnote-1417382
-Ref: Present State-Footnote-2417409
-Node: Deficiencies417446
-Ref: Deficiencies-Footnote-1419452
-Node: Solution419735
-Node: Instruction420291
-Node: grad_instr_conditional422250
-Node: grad_instr_call424271
-Node: grad_instr_return425862
-Node: grad_instr_action426617
-Node: grad_instr_reply427437
-Node: grad_instr_proxy428653
-Node: grad_instr_forward429415
-Node: New Rewrite430744
-Node: Traditional Configuration430988
-Node: New Configuration433241
-Node: Copying This Manual433466
-Node: Index455899
+Node: Top1640
+Node: Intro13929
+Node: Overview15015
+Node: Naming Conventions22108
+Node: Operation24146
+Node: Attributes24775
+Node: Requests27245
+Node: Authentication Requests28057
+Node: Accounting Requests31169
+Node: Matching Rule34800
+Node: Request processing35943
+Node: Checking Duplicates38029
+Node: Proxying40027
+Node: Proxy Service40760
+Node: Realms42673
+Node: Hints43817
+Node: Huntgroups45974
+Node: User Profiles47140
+Ref: User Profiles-Footnote-148815
+Node: Invocation49053
+Node: Configuration Files53433
+Node: config file57472
+Node: option59277
+Node: logging63476
+Node: hooks64836
+Node: category66170
+Node: channel68215
+Node: logging example69679
+Node: auth70824
+Node: acct75286
+Node: usedbm78854
+Node: snmp79227
+Node: rewrite83568
+Node: guile84654
+Node: message86967
+Node: filters89556
+Node: mlc91758
+Node: dictionary file92782
+Node: Comment94407
+Node: $INCLUDE94650
+Node: VENDOR95036
+Node: ATTRIBUTE95518
+Ref: ATTRIBUTE-Footnote-198712
+Node: BEGIN98848
+Node: ALIAS100820
+Node: PROPERTY101206
+Node: VALUE102373
+Node: clients file102996
+Node: clients example104187
+Node: naslist file104743
+Ref: naslist file-Footnote-1108148
+Node: naslist example108219
+Node: nastypes file109006
+Node: nastypes syntax109468
+Node: nastypes example111678
+Node: Predefined NAS Types112548
+Node: hints file114181
+Node: hints example114939
+Node: huntgroups file115556
+Node: huntgroups example116037
+Node: realms file116351
+Node: realms example119614
+Node: users file120459
+Node: users example120827
+Node: access.deny file122780
+Node: sqlserver file123209
+Node: SQL Client Parameters123996
+Node: Authentication Server Parameters125583
+Node: Authorization Parameters128239
+Node: Accounting server parameters132011
+Node: Queries134259
+Node: rewrite file141847
+Node: menus directory142197
+Node: menu syntax142914
+Node: menu example143792
+Node: Macro Substitution146860
+Node: Request Comparison151312
+Node: Extended Comparison151762
+Node: Extended Comparison Example154963
+Node: Comparable Attributes156183
+Node: Request Queue157060
+Node: Authentication158806
+Node: Accept Auth159857
+Node: Reject Auth160739
+Node: Local Password Auth161219
+Node: Encrypted Password Auth162503
+Node: System Auth163689
+Node: SQL Auth164105
+Node: PAM Auth164669
+Node: Custom Auth165258
+Node: Multiple Login Checking166964
+Node: Retrieving Session Data168190
+Ref: Retrieving Session Data-Footnote-1170972
+Node: Verifying Active Sessions171034
+Node: Auth Probing173899
+Node: Accounting181695
+Node: System Accounting183073
+Node: Detailed Request Accounting183749
+Node: SQL Accounting186948
+Node: Custom Acct187808
+Node: Logging189080
+Node: Problem Tracking190526
+Node: Rule Tracing190816
+Node: Debugging196218
+Node: Test Mode197450
+Node: Extensions204888
+Node: Filters205439
+Node: Getting Acquainted with Filters205915
+Node: Declaring the Filter207006
+Node: Invoking the Filter from a User Profile208645
+Node: Adding Reply Attributes209146
+Node: Accounting Filters209765
+Node: Invoking Accounting Filter211571
+Node: Rewrite211975
+Node: Syntax Overview212798
+Node: Quick Start213231
+Node: Interaction with Radius214238
+Node: Rewriting Incoming Requests214745
+Node: Rewrite Examples217787
+Node: Login Verification Functions223442
+Node: Examples of Login Verification Functions224597
+Node: Attribute Creation Functions225707
+Node: Logging Hook Functions226893
+Node: Full Syntax Description228223
+Node: Data types228606
+Node: Symbols229130
+Node: Identifiers234275
+Node: Expressions234748
+Node: Type coercion235498
+Node: Assignments236852
+Node: Declarations237288
+Node: Statements238444
+Node: Function calls240416
+Node: Delete statement240997
+Node: Regular Expressions241503
+Node: Built-in Functions243459
+Node: Guile251479
+Node: Data Representation252516
+Node: Authentication with Scheme253702
+Node: Accounting with Scheme256822
+Node: Radius-Specific Functions257888
+Node: Utility Programs261568
+Node: Radwho262323
+Node: radwho options263412
+Ref: radwho options-Footnote-1265800
+Node: Format Strings265953
+Node: Predefined Formats270916
+Node: Radlast272772
+Node: radlast options273685
+Node: Radzap275420
+Node: Radgrep277167
+Node: Radping277721
+Node: Radauth278126
+Node: Radctl279386
+Node: Builddbm281210
+Node: Radscm282532
+Node: Client Package288697
+Node: clientconf289352
+Node: radtest290975
+Node: Invoking radtest291551
+Node: Literal Values292694
+Node: Numeric Values293096
+Node: Strings294244
+Ref: STRNUM295815
+Node: Avlists296730
+Node: Reserved Keywords297377
+Node: Variables in radtest298042
+Node: Using Variables298572
+Node: Variable Assignments299876
+Node: Dereferencing Variables302833
+Ref: minus-ambiguity303789
+Node: Accessing Elements of A/V Pair Lists306058
+Node: Assignment Options306891
+Node: Built-in Variables307946
+Node: Positional Parameters309139
+Node: Expressions in radtest311301
+Node: Arithmetic Ops311951
+Node: String Ops313559
+Node: A/V List Ops313856
+Node: Comparison Ops315299
+Node: Boolean Ops316811
+Node: Conversion Between Data Types317479
+Node: Function Calls319468
+Node: Precedence320405
+Node: Function Definitions321636
+Node: Interacting with Radius Servers322542
+Node: Conditional Statements324921
+Node: Loops327667
+Node: Built-in Primitives329502
+Ref: send-flags333504
+Node: Sample Radtest Program334824
+Node: radsession347572
+Node: nas.scm348563
+Node: pam_radius.so350519
+Node: Attribute List351721
+Node: Authentication Attributes353545
+Node: CHAP-Password354354
+Node: Callback-Id355070
+Node: Callback-Number355601
+Node: Called-Station-Id356279
+Node: Calling-Station-Id356999
+Node: Class357640
+Node: Framed-Compression358248
+Node: Framed-IP-Address359244
+Node: Framed-IP-Netmask360552
+Node: Framed-MTU361290
+Node: Framed-Protocol361883
+Node: Framed-Route362543
+Node: Framed-Routing363107
+Node: Idle-Timeout363887
+Node: NAS-IP-Address364532
+Node: NAS-Identifier365216
+Node: NAS-Port-Id365875
+Node: NAS-Port-Type367040
+Node: Reply-Message368107
+Node: Service-Type369058
+Node: Session-Timeout371748
+Node: State372381
+Node: Termination-Action373455
+Node: User-Name374132
+Node: User-Password375320
+Node: Vendor-Specific376848
+Node: Accounting Attributes377422
+Node: Acct-Authentic377967
+Node: Acct-Delay-Time378820
+Node: Acct-Input-Octets379502
+Node: Acct-Input-Packets380144
+Node: Acct-Output-Octets380810
+Node: Acct-Output-Packets381448
+Node: Acct-Session-Id382104
+Node: Acct-Session-Time382943
+Node: Acct-Status-Type383538
+Node: Acct-Terminate-Cause384756
+Node: Radius Internal Attributes386483
+Node: Acct-Ext-Program387302
+Node: Acct-Type388691
+Node: Auth-Failure-Trigger389578
+Node: Auth-Data390824
+Node: Auth-Type391786
+Node: Crypt-Password393797
+Node: Exec-Program-Wait394507
+Node: Running External Program395434
+Node: Using External Filter397477
+Ref: Using External Filter-Footnote-1399286
+Node: Exec-Program399454
+Node: Fall-Through401021
+Node: Group402926
+Node: Hint403290
+Node: Huntgroup-Name404273
+Node: Log-Mode-Mask405987
+Node: Login-Time407571
+Node: Match-Profile409793
+Node: Menu411343
+Node: Pam-Auth411996
+Node: Prefix412575
+Node: Proxy-Replied413645
+Node: Realm-Name414272
+Node: Replace-User-Name414733
+Node: Rewrite-Function416050
+Node: Scheme-Acct-Procedure416964
+Node: Scheme-Procedure417610
+Node: Simultaneous-Use418238
+Node: Strip-User-Name418900
+Node: Suffix420690
+Node: Termination-Menu421856
+Node: Bugs422568
+Node: News423456
+Node: Distrib424861
+Node: Glossary425901
+Node: Acknowledgements427486
+Node: GNU configuration428639
+Node: Present State429746
+Ref: Present State-Footnote-1432857
+Ref: Present State-Footnote-2432884
+Node: Deficiencies432921
+Ref: Deficiencies-Footnote-1434934
+Node: Solution435219
+Node: Instruction435779
+Node: grad_instr_conditional437741
+Node: grad_instr_call439766
+Node: grad_instr_return441360
+Node: grad_instr_action442121
+Node: grad_instr_reply442944
+Node: grad_instr_proxy444167
+Node: grad_instr_forward444933
+Node: New Rewrite446269
+Node: Traditional Configuration446513
+Node: New Configuration448769
+Node: Copying This Manual448994
+Node: Index474051
 
 End Tag Table
+
+
+Local Variables:
+coding: utf-8
+End:

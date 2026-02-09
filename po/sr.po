@@ -1,0 +1,3170 @@
+# Serbian translation for radius.
+# Copyright © 2021 Free Software Foundation, Inc.
+# This file is distributed under the same license as the radius package.
+# Мирослав Николић <miroslavnikolic@rocketmail.com>, 2021.
+msgid ""
+msgstr ""
+"Project-Id-Version: radius-1.6.1\n"
+"Report-Msgid-Bugs-To: bug-radius@gnu.org\n"
+"POT-Creation-Date: 2025-12-11 13:43+0200\n"
+"PO-Revision-Date: 2021-12-15 09:39+0200\n"
+"Last-Translator: Мирослав Николић <miroslavnikolic@rocketmail.com>\n"
+"Language-Team: Serbian <(nothing)>\n"
+"Language: sr\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
+"%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+"X-Bugs: Report translation errors to the Language-Team address.\n"
+
+#: lib/avl.c:88
+#, c-format
+msgid "make_pair(): attribute %d not found in dictionary"
+msgstr "make_pair(): атрибут %d није нађен у речнику"
+
+#: lib/client.c:125
+#, c-format
+msgid "Actual request length does not match reported length (%d, %d)"
+msgstr "Тренутна затражена величина не одговара пријављеној величини (%d, %d)"
+
+#: lib/client.c:139
+#, c-format
+msgid "Received invalid reply digest from server"
+msgstr "Примих неисправан сажетак одговора са сервера"
+
+#: lib/client.c:221
+#, c-format
+msgid "select() interrupted"
+msgstr "„select()“ је прекинуто"
+
+#: lib/client.c:250
+#, c-format
+msgid "invalid port type"
+msgstr "неисправна врста прикључника"
+
+#: lib/client.c:355
+#, c-format
+msgid "error receiving data from %s:%d"
+msgstr "грешка примања података са „%s:%d“"
+
+#: lib/client.c:415 lib/dict.c:811 radiusd/config.y:216
+#, c-format
+msgid "unknown keyword"
+msgstr "непозната кључна реч"
+
+#: lib/client.c:424 radiusd/files.c:931 radiusd/files.c:1126
+#, c-format
+msgid "wrong number of fields"
+msgstr "погрешан број поља"
+
+#: lib/client.c:433
+#, c-format
+msgid "bad IP address or host name"
+msgstr "лоша ИП адреса или назив домаћина"
+
+#: lib/client.c:441 lib/client.c:448 radtest/main.c:333 radtest/main.c:343
+#, c-format
+msgid "bad port number %s"
+msgstr "лош број прикључника „%s“"
+
+#: lib/client.c:460
+#, c-format
+msgid "bad timeout value"
+msgstr "лоша вредност временског истека"
+
+#: lib/client.c:466
+#, c-format
+msgid "bad retry value"
+msgstr "чоша вредност поновног покушаја"
+
+#: lib/debug.c:207 lib/debug.c:214
+#, c-format
+msgid "compiled without debugging support"
+msgstr "преведено је без подршке прочишћавања"
+
+#: lib/dict.c:122 lib/nas.c:52 radiusd/files.c:1034
+msgid "too few fields"
+msgstr "премало поља"
+
+#: lib/dict.c:125
+msgid "too many fields"
+msgstr "превише поља"
+
+#: lib/dict.c:256
+#, c-format
+msgid "missing ]"
+msgstr "недостаје ]"
+
+#: lib/dict.c:272 lib/dict.c:285
+#, c-format
+msgid "invalid syntax flag %c"
+msgstr "неисправна заставица синтаксе „%c“"
+
+#: lib/dict.c:363
+#, c-format
+msgid "invalid flag %c"
+msgstr "неисправна заставица „%c“"
+
+#: lib/dict.c:419 lib/dict.c:608 lib/dict.c:652
+#, c-format
+msgid "value not a number (near %s)"
+msgstr "вредност није број (близу „%s“)"
+
+#: lib/dict.c:430
+#, c-format
+msgid "no parser registered for this attribute"
+msgstr "нема обрађивача регистрованог за овај атрибут"
+
+#: lib/dict.c:439
+msgid "invalid type"
+msgstr "неисправна врста"
+
+#: lib/dict.c:446 lib/dict.c:695
+#, c-format
+msgid "unknown vendor"
+msgstr "непознат продавац"
+
+#: lib/dict.c:474
+#, c-format
+msgid "Redefining attribute %s"
+msgstr "Поново дефинишем атрибут „%s“"
+
+#: lib/dict.c:481
+#, c-format
+msgid "Redefining alias %s"
+msgstr "Поново дефинишем алијас „%s“"
+
+#: lib/dict.c:511 lib/dict.c:547 lib/dict.c:617
+#, c-format
+msgid "Attribute %s is not defined"
+msgstr "Атрибут „%s“ није дефинисан"
+
+#: lib/dict.c:519
+#, c-format
+msgid "Symbol %s already declared"
+msgstr "Симбол „%s“ је већ објављен"
+
+#: lib/dict.c:577
+#, c-format
+msgid "PROPERTY syntax error"
+msgstr "грешка синтаксе ВЛАСНИШТВА"
+
+#: lib/dict.c:671
+#, c-format
+msgid "blocks cannot be nested"
+msgstr "блокови не могу бити угнеждени"
+
+#: lib/dict.c:673
+#, c-format
+msgid "block opened here"
+msgstr "блок је отворен овде"
+
+#: lib/dict.c:685
+#, c-format
+msgid "block syntax: expected `VENDOR' but found `%s'"
+msgstr "синтакса блока: очекивах „ПРОДАВАЦ“ али нађох „%s“"
+
+#: lib/dict.c:708
+#, c-format
+msgid "unexpected END"
+msgstr "неочекиван КРАЈ"
+
+#: lib/dict.c:834
+#, c-format
+msgid "BEGIN without END"
+msgstr "ПОЧЕТАК без КРАЈА"
+
+#: lib/dict.c:841
+#, c-format
+msgid "%s: %d error"
+msgid_plural "%s: %d errors"
+msgstr[0] "%s: %d грешка"
+msgstr[1] "%s: %d грешке"
+msgstr[2] "%s: %d грешака"
+
+#: lib/mem.c:28
+#, fuzzy, c-format
+#| msgid "out of memory"
+msgid "out of memory: aborting"
+msgstr "нема више меморије"
+
+#: lib/raddb.c:74 lib/users-lex.l:232 radiusd/config.y:914 radiusd/stat.c:77
+#, c-format
+msgid "can't stat `%s'"
+msgstr "не могу да добавим податке „%s“"
+
+#: lib/raddb.c:81 lib/raddb.c:86 radiusd/rewrite.y:1297 radiusd/rewrite.y:2747
+#: radiusd/scheme.c:184 radiusd/stat.c:71
+#, c-format
+msgid "can't open file `%s'"
+msgstr "не могу да отворим датотеку „%s“"
+
+#: lib/raddb.c:98
+#, c-format
+msgid "%s: read error"
+msgstr "%s: грешка читања"
+
+#: lib/raddb.c:101
+#, c-format
+msgid "%s: short read"
+msgstr "%s: кратко читање"
+
+#: lib/radutmp.c:51
+#, c-format
+msgid "grad_ut_setent(): cannot open `%s'"
+msgstr "grad_ut_setent(): не могу да отворим „%s“"
+
+#: lib/radutmp.c:189
+#, c-format
+msgid "login: entry for NAS %s port %d duplicate"
+msgstr "пријава: дупли унос за NAS %s прикључник %d"
+
+#: lib/radutmp.c:195
+#, c-format
+msgid "login: entry for NAS %s port %d wrong order"
+msgstr "пријава: погрешан поредак уноса за NAS %s прикључник %d"
+
+#: lib/radutmp.c:207
+#, c-format
+msgid "logout: entry for NAS %s port %d has wrong ID (expected %s found %s)"
+msgstr ""
+"одјава: унос за NAS %s прикључник %d има погрешан ИД (очекивах „%s“ нађох "
+"„%s“)"
+
+#: lib/radutmp.c:231
+#, c-format
+msgid "logout: login entry for NAS %s port %d not found"
+msgstr "одјава: нисам нашао унос пријаве за NAS %s прикључник %d"
+
+#: lib/radutmp.c:250 radiusd/acct.c:664
+#, c-format
+msgid "can't open %s"
+msgstr "не могу да отворим „%s“"
+
+#: lib/users-lex.l:135
+#, c-format
+msgid "not enough memory"
+msgstr "нема довољно меморије"
+
+#: lib/users-lex.l:245
+#, c-format
+msgid "`%s' already included here"
+msgstr "„%s“ је већ укључено овде"
+
+#: lib/users-lex.l:249
+#, c-format
+msgid "`%s' already included at top level"
+msgstr "„%s“ је већ укључено на највишем нивоу"
+
+#: lib/users-lex.l:257 radiusd/builddbm.c:142
+#, c-format
+msgid "can't open `%s'"
+msgstr "не могу да отворим „%s“"
+
+#: lib/users-gram.y:106 radiusd/files.c:181
+#, c-format
+msgid "discarding user `%s'"
+msgstr "одбацујем корисника „%s“"
+
+#: lib/users-gram.y:216 radiusd/rewrite.y:1859 gram.y:661 gram.y:841
+#: radtest/gram.y:661 radtest/gram.y:841
+#, c-format
+msgid "unknown attribute `%s'"
+msgstr "непознат атрибут „%s“"
+
+#: lib/users-gram.y:245
+#, c-format
+msgid "%s: not an absolute pathname"
+msgstr "%s: није апсолутни назив путање"
+
+#: lib/users-gram.y:258
+msgid "attribute"
+msgstr "атрибут"
+
+#: lib/users-gram.y:290
+#, c-format
+msgid "value %s is not declared for attribute %s"
+msgstr "вредност „%s“ није објављена за атрибут „%s“"
+
+#: lib/users-gram.y:337
+#, c-format
+msgid "%s: can't parse date"
+msgstr "%s: не могу да обрадим датум"
+
+#: lib/users-gram.y:347
+#, c-format
+msgid "%s: unknown attribute type %d"
+msgstr "%s: непозната врста атрибута „%d“"
+
+#: lib/users-gram.y:379
+#, c-format
+msgid "enabled userfile parser debugging"
+msgstr "прочишћавање обрађивача датотеке корисника је укључено"
+
+#: lib/users-gram.y:380
+#, c-format
+msgid "disabled userfile parser debugging"
+msgstr "прочишћавање обрађивача датотеке корисника је искључено"
+
+#: lib/util.c:245
+#, c-format
+msgid "string too long: %s"
+msgstr "ниска је предуга: %s"
+
+#: lib/printutmp.c:488
+#, c-format
+msgid "missing closing quote in string started near `%s'"
+msgstr "недостаје затворена заграда у нисци започетој близу „%s“"
+
+#: lib/printutmp.c:564
+#, c-format
+msgid "error in format spec: unknown format %s"
+msgstr "грешка у одредби формата: непознат формат „%s“"
+
+#: lib/printutmp.c:586
+#, c-format
+msgid "wrong number of arguments to form %s"
+msgstr "погрешан број аргумената за образац „%s“"
+
+#: lib/printutmp.c:614
+#, c-format
+msgid "form `%s' not closed"
+msgstr "образац „%s“ није затворен"
+
+#: lib/radcli.c:36
+msgid "Common options"
+msgstr "Заједничке опције"
+
+#: lib/radcli.c:42
+msgid "Set path to the configuration directory"
+msgstr "Поставља путању до директоријума подешавања"
+
+#: lib/radcli.c:43 radiusd/radiusd.c:267 radiusd/radiusd.c:321
+#: radiusd/radiusd.c:346 radzap/radzap.c:79
+msgid "DIR"
+msgstr "ДИР"
+
+#: lib/radcli.c:55
+msgid ""
+"\n"
+"License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl."
+"html>\n"
+"This is free software: you are free to change and redistribute it.\n"
+"There is NO WARRANTY, to the extent permitted by law.\n"
+"\n"
+msgstr ""
+
+#: lib/radcli.c:68
+msgid "(C)"
+msgstr ""
+
+#: lib/radcli.c:100 radiusd/config.y:779 radiusd/config.y:785
+#: radzap/radzap.c:242
+#, c-format
+msgid "too many arguments"
+msgstr "превише аргумената"
+
+#: lib/parseopt/help.c:92
+#, c-format
+msgid "error in ARGP_HELP_FMT: improper usage of [no-]%s"
+msgstr ""
+
+#: lib/parseopt/help.c:105
+#, fuzzy, c-format
+#| msgid "ARGP_HELP_FMT: %s value is less than or equal to %s"
+msgid "error in ARGP_HELP_FMT: bad value for %s (near %s)"
+msgstr "ARGP_HELP_FMT: „%s“ вредност је мања од или једнака са „%s“"
+
+#: lib/parseopt/help.c:111
+#, fuzzy, c-format
+#| msgid "ARGP_HELP_FMT: %s value is less than or equal to %s"
+msgid "error in ARGP_HELP_FMT: %s value is out of range"
+msgstr "ARGP_HELP_FMT: „%s“ вредност је мања од или једнака са „%s“"
+
+#: lib/parseopt/help.c:118
+#, fuzzy, c-format
+#| msgid "%.*s: ARGP_HELP_FMT parameter requires a value"
+msgid "%s: ARGP_HELP_FMT parameter requires a value"
+msgstr "%.*s: параметар „ARGP_HELP_FMT“ захтева вредност"
+
+#: lib/parseopt/help.c:124
+#, fuzzy, c-format
+#| msgid "%.*s: Unknown ARGP_HELP_FMT parameter"
+msgid "%s: unknown ARGP_HELP_FMT parameter"
+msgstr "%.*s: Непознат параметар „ARGP_HELP_FMT“"
+
+#: lib/parseopt/help.c:150
+#, c-format
+msgid "ARGP_HELP_FMT: missing delimiter near %s"
+msgstr ""
+
+#: lib/parseopt/help.c:301
+msgid "Usage:"
+msgstr "Употреба:"
+
+#: lib/parseopt/help.c:320
+#, fuzzy, c-format
+#| msgid " [OPTION...]"
+msgid "or: %s [OPTIONS...] %s\n"
+msgstr " [ОПЦИЈА...]"
+
+#: lib/parseopt/help.c:584
+msgid ""
+"Mandatory or optional arguments to long options are also mandatory or "
+"optional for any corresponding short options."
+msgstr ""
+"Обавезни или опционални аргументи за дуге опције су такође обавезни или "
+"опционални за све одговарајуће кратке опције."
+
+#: lib/parseopt/help.c:586
+msgid ""
+"If an option has several forms, a mandatory or optional argument is listed "
+"only once, after the last form."
+msgstr ""
+
+#: lib/parseopt/help.c:751
+#, fuzzy, c-format
+#| msgid "Usage:"
+msgid "usage: %s"
+msgstr "Употреба:"
+
+#: lib/parseopt/help.c:757
+#, fuzzy
+#| msgid " [OPTION...]"
+msgid "[OPTIONS...]"
+msgstr " [ОПЦИЈА...]"
+
+#: lib/parseopt/help.c:768
+#, fuzzy, c-format
+#| msgid "got    %s\n"
+msgid "or: %s %s\n"
+msgstr "добих    „%s“\n"
+
+#: lib/parseopt/help.c:813
+#, fuzzy, c-format
+#| msgid ""
+#| "\n"
+#| "Report bugs to <%s>\n"
+msgid "Report bugs and suggestions to <%s>\n"
+msgstr ""
+"\n"
+"Грешке пријавите на <%s>\n"
+
+#: lib/parseopt/help.c:817
+#, c-format
+msgid "%s home page: <%s>\n"
+msgstr ""
+
+#: lib/parseopt/optset.c:120 lib/parseopt/optset.c:136
+msgid "memory allocation error"
+msgstr ""
+
+#: lib/parseopt/parseopt.c:71
+#, fuzzy, c-format
+#| msgid "%s: unrecognized option `--%s'\n"
+msgid "unrecognized option '-%c'"
+msgstr "%s: непозната опција „--%s“\n"
+
+#: lib/parseopt/parseopt.c:142
+#, fuzzy, c-format
+#| msgid "%s: option `%s' is ambiguous\n"
+msgid "option '%s%*.*s' is ambiguous; possibilities:"
+msgstr "%s: опција „%s“ је нејасна\n"
+
+#: lib/parseopt/parseopt.c:174
+#, fuzzy, c-format
+#| msgid "%s: unrecognized option `%c%s'\n"
+msgid "unrecognized option '%s%*.*s'"
+msgstr "%s: непозната опција „%c%s“\n"
+
+#: lib/parseopt/parseopt.c:337
+#, fuzzy, c-format
+#| msgid "%s: option `%s' requires an argument\n"
+msgid "option '%s%s' requires argument"
+msgstr "%s: опција „%s“ захтева аргумент\n"
+
+#: lib/parseopt/parseopt.c:351
+#, fuzzy, c-format
+#| msgid "%s: option `%c%s' doesn't allow an argument\n"
+msgid "option '%s%s' does not take argument"
+msgstr "%s: опција „%c%s“ не дозвољава аргумент\n"
+
+#: lib/parseopt/parseopt.c:369
+#, c-format
+msgid "bad value for option '%s%s'"
+msgstr ""
+
+#: lib/parseopt/parseopt.c:395
+#, fuzzy, c-format
+#| msgid "invalid flag %c"
+msgid "invalid argument '%s'"
+msgstr "неисправна заставица „%c“"
+
+#: lib/parseopt/parseopt.c:580
+#, fuzzy
+#| msgid "Common options"
+msgid "Informative options"
+msgstr "Заједничке опције"
+
+#: lib/parseopt/parseopt.c:585
+#, fuzzy
+#| msgid "give this help list"
+msgid "produce this help text"
+msgstr "приказује овај списак помоћи"
+
+#: lib/parseopt/parseopt.c:594
+msgid "give a short usage message"
+msgstr "даје кратку поруку о коришћењу"
+
+#: lib/parseopt/parseopt.c:604 lib/parseopt/parseopt.c:613
+msgid "print program version"
+msgstr "исписује издање програма"
+
+#: radiusd/acct.c:197
+#, c-format
+msgid "no Acct-Status-Type attribute"
+msgstr "нема атрибута „врста-стања-налога“"
+
+#: radiusd/acct.c:298
+#, c-format
+msgid "NAS %s started (Accounting-On packet seen)"
+msgstr "NAS „%s“ је покренут (пакет „Accounting-On“ је виђен)"
+
+#: radiusd/acct.c:306
+#, c-format
+msgid "NAS %s shut down (Accounting-Off packet seen)"
+msgstr "NAS „%s“ је угашен (пакет „Accounting-Off“ је виђен)"
+
+#: radiusd/acct.c:318
+#, c-format
+msgid "unknown packet type (%d)"
+msgstr "непозната врста пакета (%d)"
+
+#: radiusd/acct.c:372
+#, c-format
+msgid "NOT writing wtmp record"
+msgstr "НЕ пишем „wtmp“ запис"
+
+#: radiusd/acct.c:420
+#, c-format
+msgid "System accounting is disabled"
+msgstr "Стварање налога система је искључено"
+
+#: radiusd/acct.c:463
+#, c-format
+msgid "Cannot stat path component: %s"
+msgstr "Не могу да добавим податке компоненте путање: %s"
+
+#: radiusd/acct.c:480
+#, c-format
+msgid "Cannot create directory %s"
+msgstr "Не могу да направим директоријум „%s“"
+
+#: radiusd/acct.c:486
+#, c-format
+msgid "Path component is not a directory: %s"
+msgstr "Компонента путање није директоријум: „%s“"
+
+#: radiusd/acct.c:502
+#, c-format
+msgid "%s: directory not writable"
+msgstr "%s: директоријум није уписив"
+
+#: radiusd/acct.c:508
+#, c-format
+msgid "%s: not a directory"
+msgstr "%s: није директоријум"
+
+#: radiusd/acct.c:528
+#, c-format
+msgid "Detailed accounting is disabled"
+msgstr "Стварање детаљних налога је искључено"
+
+#: radiusd/acct.c:592 radiusd/radutil.c:460
+msgid "wrong return type"
+msgstr "погрешна врста повратка"
+
+#: radiusd/auth.c:195
+#, c-format
+msgid "Invalid password aging information for user '%s'"
+msgstr "Неисправна информација истека лозинке за корисника „%s“"
+
+#: radiusd/auth.c:230
+msgid "account locked"
+msgstr "налог је закључан"
+
+#: radiusd/auth.c:281
+#, c-format
+msgid "No username"
+msgstr "Нема корисничког имена"
+
+#: radiusd/auth.c:283
+#, c-format
+msgid "Malformed username"
+msgstr "Лоше корисничко име"
+
+#: radiusd/auth.c:314
+#, c-format
+msgid "Access denied by huntgroup %s:%d"
+msgstr "Приступ је одбијен групом бирања „%s:%d“"
+
+#: radiusd/auth.c:586
+#, c-format
+msgid "unknown Password-Location value: %ld"
+msgstr "непозната вредност локације лозинке: %ld"
+
+#: radiusd/auth.c:621
+#, c-format
+msgid "PAM authentication not available"
+msgstr "ПАМ потврђивање идентитета није доступно"
+
+#: radiusd/auth.c:876 radiusd/auth.c:986
+msgid "No such user"
+msgstr "Нема таквог корисника"
+
+#: radiusd/auth.c:894
+msgid "Login rejected"
+msgstr "Пријава је одбијена"
+
+#: radiusd/auth.c:896
+msgid "denied by Scheme procedure "
+msgstr "забрањено процедуром шеме"
+
+#: radiusd/auth.c:930
+#, c-format
+msgid "Invalid Auth-Failure-Trigger value: %s"
+msgstr "Неисправна вредност „окидача-неуспеха-потврђивања-идентитета“: %s"
+
+#: radiusd/auth.c:933
+#, c-format
+msgid "The value of Auth-Failure-Trigger attribute must begin with '/' or '('."
+msgstr ""
+"Вредност атрибута „окидач-неуспеха-потврђивања-идентитета“ мора почети са / "
+"или (."
+
+#: radiusd/auth.c:971
+msgid "Rejected"
+msgstr "Одбијено"
+
+#: radiusd/auth.c:979
+msgid "Ignored"
+msgstr "Занемарено"
+
+#: radiusd/auth.c:995 radiusd/auth.c:1008 radiusd/auth.c:1019
+#: radiusd/auth.c:1157
+msgid "Login incorrect"
+msgstr "Пријава није исправна"
+
+#: radiusd/auth.c:1010
+msgid "Account expired"
+msgstr "Налог је истекао"
+
+#: radiusd/auth.c:1021
+msgid "Password expired"
+msgstr "Лозинка је истекла"
+
+#: radiusd/auth.c:1036
+msgid "Account disabled"
+msgstr "Налог је искључен"
+
+#: radiusd/auth.c:1050
+msgid "Login failed"
+msgstr "Пријава није успела"
+
+#: radiusd/auth.c:1051
+msgid "realm quota exceeded for "
+msgstr "квота подручја је премашена за"
+
+#: radiusd/auth.c:1076
+#, c-format
+msgid "Multiple logins: [%s] max. %ld%s"
+msgstr "Неколико пријава: [%s] max. %ld%s"
+
+#: radiusd/auth.c:1079
+msgid " [MPP attempt]"
+msgstr " [„MPP“ покушај]"
+
+#: radiusd/auth.c:1112
+#, c-format
+msgid "Outside allowed timespan (%s)"
+msgstr "Изван дозвољеног распона времена (%s)"
+
+#: radiusd/auth.c:1159
+msgid "external check failed: "
+msgstr "спољна провера није успела: "
+
+#: radiusd/auth.c:1240
+msgid "Login OK"
+msgstr "Пријава је у реду"
+
+#: radiusd/builddbm.c:60
+msgid "too many attributes"
+msgstr "превише атрибута"
+
+#: radiusd/builddbm.c:100
+#, c-format
+msgid "can't store datum for %s"
+msgstr "не могу да сачувам датум за „%s“"
+
+#: radiusd/builddbm.c:357
+#, c-format
+msgid "cannot open dbm file %s"
+msgstr "не могу да отворим „dbm“ датотеку „%s“"
+
+#: radiusd/checkrad.c:88
+#, c-format
+msgid "unknown NAS type: %s (nas %s)"
+msgstr "непозната NAS врста: %s (нас „%s“)"
+
+#: radiusd/checkrad.c:242
+#, c-format
+msgid "timed out in waiting SNMP response from NAS %s"
+msgstr "истекло је време чекајући SNMP одговор од NAS-а „%s“"
+
+#: radiusd/checkrad.c:292
+#, c-format
+msgid "no snmp_oid"
+msgstr "нема „snmp_oid“"
+
+#: radiusd/checkrad.c:301
+#, c-format
+msgid "invalid OID: %s"
+msgstr "неисправан OID: %s"
+
+#: radiusd/checkrad.c:318
+#, c-format
+msgid "can't create snmp session: %s"
+msgstr "не могу да направим „snmp“ сесију: %s"
+
+#: radiusd/checkrad.c:326
+#, c-format
+msgid "can't open snmp session: %s"
+msgstr "не могу да отворим „snmp“ сесију: %s"
+
+#: radiusd/checkrad.c:334 radiusd/checkrad.c:343 radiusd/snmpserv.c:2685
+#, c-format
+msgid "can't create SNMP PDU: %s"
+msgstr "не могу да направим SNMP PDU: %s"
+
+#: radiusd/checkrad.c:419
+#, c-format
+msgid "unknown host: %s"
+msgstr "непознат домаћин: %s"
+
+#: radiusd/checkrad.c:476
+#, c-format
+msgid "timed out in waiting for finger response from NAS %s"
+msgstr "истекло је време чекајући одговор додира од NAS-а „%s“"
+
+#: radiusd/checkrad.c:562
+#, c-format
+msgid "path variable not set"
+msgstr "променљива путање није постављена"
+
+#: radiusd/checkrad.c:588
+#, c-format
+msgid "expr variable not set"
+msgstr "променљива истека није постављена"
+
+#: radiusd/config.y:175
+msgid "unknown block statement"
+msgstr "непозната изјава блока"
+
+#: radiusd/config.y:304
+#, c-format
+msgid "invalid netmask length: %d"
+msgstr "неисправна дужина мрежне маске: %d"
+
+#: radiusd/config.y:431
+#, c-format
+msgid "%s:%d: unexpected EOF in comment started at line %d"
+msgstr "%s:%d: неочекивани крај датотеке у коментару започетом у %d. реду"
+
+#: radiusd/config.y:649
+#, c-format
+msgid "%s:%d: no such service: %s"
+msgstr "%s:%d: нема такве услуге: %s"
+
+#: radiusd/config.y:675 radiusd/sql.c:344
+#, c-format
+msgid "%s:%d: unknown host: %s"
+msgstr "%s:%d: непознат домаћин: %s"
+
+#: radiusd/config.y:743
+#, c-format
+msgid "INTERNAL ERROR at %s:%d: unknown datatype %d"
+msgstr "УНУТРАШЊА ГРЕШКА на „%s:%d“: непозната врста података %d"
+
+#: radiusd/config.y:769
+#, c-format
+msgid "%s:%d: wrong datatype (should be %s)"
+msgstr "%s:%d: погрешна врста података (треба бити „%s“)"
+
+#: radiusd/config.y:779
+msgid "too few arguments"
+msgstr "премало аргумената"
+
+#: radiusd/config.y:800
+#, c-format
+msgid "%s:%d: obsolete statement"
+msgstr "%s:%d: застарела изјава"
+
+#: radiusd/config.y:921
+#, c-format
+msgid "can't open config file `%s'"
+msgstr "не могу да отворим датотеку подешавања „%s“"
+
+#: radiusd/config.y:931
+#, c-format
+msgid "reading %s"
+msgstr "читам „%s“"
+
+#: radiusd/exec.c:52
+#, c-format
+msgid "no such user: %s"
+msgstr "нема таквог корисника: %s"
+
+#: radiusd/exec.c:74
+#, c-format
+msgid "setgroups(1, %lu) failed"
+msgstr "„setgroups(1, %lu)“ није успело"
+
+#: radiusd/exec.c:85
+#, c-format
+msgid "setegid(%lu) failed"
+msgstr "„setegid(%lu)“ није успело"
+
+#: radiusd/exec.c:89
+#, c-format
+msgid "setregid(%lu,%lu) failed"
+msgstr "„setregid(%lu,%lu)“ није успело"
+
+#: radiusd/exec.c:94
+#, c-format
+msgid "setresgid(%lu,%lu,%lu) failed"
+msgstr "„setresgid(%lu,%lu,%lu)“ није успело"
+
+#: radiusd/exec.c:103
+#, c-format
+msgid "setgid(%lu) failed"
+msgstr "„setgid(%lu)“ није успело"
+
+#: radiusd/exec.c:106
+#, c-format
+msgid "cannot set effective gid to %lu"
+msgstr "не могу да подесим стварни гиб на %lu"
+
+#: radiusd/exec.c:125
+#, c-format
+msgid "setreuid(%lu,-1) failed"
+msgstr "„setreuid(%lu,-1)“ није успело"
+
+#: radiusd/exec.c:131
+#, c-format
+msgid "second setuid(%lu) failed"
+msgstr "други „setuid(%lu)“ није успело"
+
+#: radiusd/exec.c:139
+#, c-format
+msgid "setuid(%lu) failed"
+msgstr "„setuid(%lu)“ није успело"
+
+#: radiusd/exec.c:149
+#, c-format
+msgid "seteuid(0) succeeded when it should not"
+msgstr "„seteuid(0)“ је успело када није требало"
+
+#: radiusd/exec.c:153
+#, c-format
+msgid "cannot drop non-root setuid privileges"
+msgstr "не могу да одбацим не-административна „setuid“ овлашћења"
+
+#: radiusd/exec.c:172
+#, c-format
+msgid "radius_exec_command(): won't execute, not an absolute pathname: %s"
+msgstr "radius_exec_command(): нећу извршити, није апсолутни назив путање: %s"
+
+#: radiusd/exec.c:178 radiusd/exec.c:274
+#, c-format
+msgid "can't reset SIGCHLD"
+msgstr "не могу поново да поставим „SIGCHLD“"
+
+#: radiusd/exec.c:219 radiusd/exec.c:349
+#, c-format
+msgid "can't restore SIGCHLD"
+msgstr "не могу да повратим „SIGCHLD“"
+
+#: radiusd/exec.c:226 radiusd/exec.c:356
+#, c-format
+msgid ""
+"can't run external program `%s' (reason reported via syslog channel user.err)"
+msgstr ""
+"не могу да покренем спољни програм „%s“ (разлог је пријављен путем канала "
+"системског дневника „user.err“)"
+
+#: radiusd/exec.c:237 radiusd/exec.c:365
+#, c-format
+msgid "external program `%s' %s"
+msgstr "спољни програм „%s“: %s"
+
+#: radiusd/exec.c:263
+#, c-format
+msgid "radius_exec_program(): won't execute, not an absolute pathname: %s"
+msgstr "radius_exec_program(): нећу извршити, није апсолутни назив путање: %s"
+
+#: radiusd/exec.c:270
+#, c-format
+msgid "couldn't open pipe"
+msgstr "не могу да отворим спојку"
+
+#: radiusd/exec.c:290 radiusd/exec.c:325
+#, c-format
+msgid "can't close pipe"
+msgstr "не могу да затворим спојку"
+
+#: radiusd/exec.c:293
+#, c-format
+msgid "can't dup stdout"
+msgstr "не могу да дуплирам стандардни излаз"
+
+#: radiusd/exec.c:337 radiusd/exec.c:702
+#, c-format
+msgid "<stdout of %s>:%d: %s"
+msgstr "<стандардни излаз за „%s“>:%d: %s"
+
+#: radiusd/exec.c:498
+#, c-format
+msgid "filter %s (pid %d) %s (in: %u, out: %u)"
+msgstr "филтер „%s“ (пид %d) „%s“ (улаз: %u, излаз: %u)"
+
+#: radiusd/exec.c:552
+#, c-format
+msgid "filter %s is not declared"
+msgstr "филтер „%s“ није објављен"
+
+#: radiusd/exec.c:569
+#, c-format
+msgid "cannot run filter %s"
+msgstr "не могу да покренем филтер „%s“"
+
+#: radiusd/exec.c:587
+#, c-format
+msgid "filter %s"
+msgstr "филтер „%s“"
+
+#: radiusd/exec.c:689 radiusd/exec.c:744
+#, c-format
+msgid "reading from filter %s"
+msgstr "читам из филтера „%s“"
+
+#: radiusd/exec.c:711
+#, c-format
+msgid "filter %s (auth): bad output: %s"
+msgstr "филтер „%s“ (auth): лош излаз: %s"
+
+#: radiusd/exec.c:755 radiusd/exec.c:761
+#, c-format
+msgid "filter %s (acct): bad output: %s"
+msgstr "филтер „%s“ (acct): лош излаз: %s"
+
+#: radiusd/exec.c:832
+#, c-format
+msgid "%s:%d: filter already declared at %s:%d"
+msgstr "%s:%d: филтер је већ објављен у „%s:%d“"
+
+#: radiusd/files.c:220
+#, c-format
+msgid "discarding entry `%s'"
+msgstr "одбацујем унос „%s“"
+
+#: radiusd/files.c:418
+#, c-format
+msgid "zero length username not permitted"
+msgstr "корисничко име нулте дужине није допуштено"
+
+#: radiusd/files.c:553
+#, c-format
+msgid "unknown attribute `%s/%s'"
+msgstr "непознат атрибут „%s/%s“"
+
+#: radiusd/files.c:565 radiusd/files.c:591
+#, c-format
+msgid "expected %s, but found %s"
+msgstr "очекивах „%s“, али добих „%s“"
+
+#. TRANSLATORS: This is used in place of the first %s in the message
+#. "expected %s, but found %s", i.e. it acts as a direct object to
+#. the verb 'expect'. Please bear this in mind when translating
+#: radiusd/files.c:569
+msgid "opcode"
+msgstr "опкод"
+
+#: radiusd/files.c:580
+#, c-format
+msgid "grad_create_pair failed on %s"
+msgstr "„grad_create_pair“ није успело на „%s“"
+
+#: radiusd/files.c:612
+msgid "not defined"
+msgstr "није дефинисано"
+
+#: radiusd/files.c:650
+#, c-format
+msgid "cannot execute `%s'"
+msgstr "не могу да извршим „%s“"
+
+#: radiusd/files.c:1047
+msgid "unknown method"
+msgstr "непозната метода"
+
+#: radiusd/files.c:1131
+#, c-format
+msgid "user `%s' already found in %s"
+msgstr "корисника „%s“ сам већ нашао у „%s“"
+
+#: radiusd/files.c:1157
+#, c-format
+msgid "%d user disabled"
+msgid_plural "%d users disabled"
+msgstr[0] "%d корисник је искључен"
+msgstr[1] "%d корисника су искључена"
+msgstr[2] "%d корисника је искључено"
+
+#: radiusd/files.c:1711
+#, c-format
+msgid "using only dbm: USERS NOT LOADED"
+msgstr "користим само „dbm“: КОРИСНИЦИ НИСУ УЧИТАНИ"
+
+#: radiusd/files.c:1719
+#, c-format
+msgid "DBM files found but no -b flag given - NOT using DBM"
+msgstr ""
+"„DBM“ датотеке су нађене али „-b“ заставица није дата – НЕ користим „DBM“"
+
+#: radiusd/files.c:1723
+#, c-format
+msgid "can't load %s: exited"
+msgstr "не могу да учитам „%s“: изашао је"
+
+#: radiusd/files.c:1726
+#, c-format
+msgid "%s reloaded."
+msgstr "„%s“ је поново учитано."
+
+#: radiusd/files.c:1797
+#, c-format
+msgid "SQL Error: SQL client could not be initialized"
+msgstr "SQL грешка: SQL клијент се не може покренути"
+
+#: radiusd/files.c:1813
+#, c-format
+msgid "INTERNAL ERROR: unknown reload code: %d"
+msgstr "УНУТРАШЊА ГРЕШКА: непознат код поновног учитавања: %d"
+
+#: radiusd/files.c:1884
+#, c-format
+msgid "can't create parser output file `%s'"
+msgstr "не могу да створим излазну датотеку обрађивача „%s“"
+
+#: radiusd/files.c:1898
+#, c-format
+msgid "dumped users database to %s"
+msgstr "избачена је база података корисника у „%s“"
+
+#: radiusd/forward.c:109
+#, c-format
+msgid "Can't forward to %s:%d"
+msgstr "Не могу да проследим у „%s:%d“"
+
+#: radiusd/forward.c:178
+#, c-format
+msgid "Forwarding host %s not listed in clients"
+msgstr "Домаћин прослеђивања „%s“ није на списку клијената"
+
+#: radiusd/forward.c:197
+#, c-format
+msgid "Can't open forwarding socket"
+msgstr "Не могу да отворим прикључницу прослеђивања"
+
+#: radiusd/forward.c:207
+#, c-format
+msgid "Can't bind forwarding socket"
+msgstr "Не могу да повежем прикључницу прослеђивања"
+
+#: radiusd/log.c:152
+msgid "none"
+msgstr "ништа"
+
+#: radiusd/log.c:153
+msgid "Main"
+msgstr "Главни"
+
+#: radiusd/log.c:154
+msgid "Auth"
+msgstr "Потв. идент."
+
+#: radiusd/log.c:155
+msgid "Acct"
+msgstr "Налог"
+
+#: radiusd/log.c:156
+msgid "Proxy"
+msgstr "Посредник"
+
+#: radiusd/log.c:157
+msgid "SNMP"
+msgstr "SNMP"
+
+#: radiusd/log.c:161
+msgid "emerg"
+msgstr "паника"
+
+#: radiusd/log.c:162
+msgid "alert"
+msgstr "узбуна"
+
+#: radiusd/log.c:163
+msgid "crit"
+msgstr "крит"
+
+#: radiusd/log.c:164
+msgid "error"
+msgstr "грешка"
+
+#: radiusd/log.c:165
+msgid "warning"
+msgstr "упозорење"
+
+#: radiusd/log.c:166
+msgid "notice"
+msgstr "напомена"
+
+#: radiusd/log.c:167
+msgid "info"
+msgstr "инфо"
+
+#: radiusd/log.c:168
+msgid "debug"
+msgstr "прочишћавање"
+
+#: radiusd/log.c:412
+#, c-format
+msgid "could not append to file %s"
+msgstr "не могу да придодам у датотеку „%s“"
+
+#: radiusd/log.c:491
+#, c-format
+msgid "%s: cannot change owner to %d:%d"
+msgstr "%s: не могу да променим власника у „%d:%d“"
+
+#: radiusd/log.c:531
+#, c-format
+msgid "can't access log file `%s'"
+msgstr "не могу да приступим датотеци дневника „%s“"
+
+#. TRANSLATORS: the subject will always be printed before this msgid.
+#. for example: "child 222 exited with status 0"
+#.
+#: radiusd/log.c:640
+#, c-format
+msgid "exited with status %d"
+msgstr "је изашао са стањем %d"
+
+#. TRANSLATORS: the subject will always be printed before this msgid.
+#: radiusd/log.c:645
+#, c-format
+msgid "terminated on signal %d"
+msgstr "окончао на сигналу %d"
+
+#. TRANSLATORS: the subject will always be printed before this msgid.
+#: radiusd/log.c:649
+#, c-format
+msgid "terminated"
+msgstr "окончао"
+
+#: radiusd/log.c:764
+#, c-format
+msgid "%s:%d: no channel mode for `%s'"
+msgstr "%s:%d: нема режима канала за „%s“"
+
+#: radiusd/log.c:927
+msgid "no levels applicable for this category"
+msgstr "нема нивоа примењивих за ову категорију"
+
+#: radiusd/log.c:953
+#, c-format
+msgid "%s:%d: channel `%s' not defined"
+msgstr "%s:%d: канал „%s“ није дефинисан"
+
+#: radiusd/log.c:997 radiusd/snmpserv.c:344
+#, c-format
+msgid "%s:%d: list item %d has wrong datatype"
+msgstr "%s:%d: ставка списка %d има погрешну врсту података"
+
+#: radiusd/log.c:1013
+#, c-format
+msgid "%s:%d: no such module name: %s"
+msgstr "%s:%d: нема таквог назива модула: %s"
+
+#: radiusd/menu.c:43 radiusd/menu.c:202
+#, c-format
+msgid "can't open menu `%s'"
+msgstr "не могу да отворим изборник „%s“"
+
+#: radiusd/menu.c:94
+#, c-format
+msgid "menu %s:%d: %s"
+msgstr "изборник „%s:%d“: %s"
+
+#: radiusd/menu.c:205
+msgid ""
+"\n"
+"*** User Menu is Not Available ***\n"
+msgstr ""
+"\n"
+"*** Кориснички изборник није доступан ***\n"
+
+#: radiusd/mlc.c:101
+#, c-format
+msgid "check_ts(): unknown NAS"
+msgstr "check_ts(): непознат NAS"
+
+#: radiusd/mlc.c:133
+#, c-format
+msgid "assuming `%s' is logged in"
+msgstr "подразумевам да је „%s“ прјављен"
+
+#: radiusd/mlc.c:136
+#, c-format
+msgid "assuming `%s' is NOT logged in"
+msgstr "подразумевам да „%s“ НИЈЕ прјављен"
+
+#: radiusd/pam.c:62
+#, c-format
+msgid "rad_pam_conv(): no application-specific data passed"
+msgstr "rad_pam_conv(): програму специфични подаци нису прослеђени"
+
+#: radiusd/proxy.c:198
+#, c-format
+msgid "couldn't send request to realm %s"
+msgstr "не могу да пошаљем захтев за подручје „%s“"
+
+#: radiusd/radck.c:81
+#, c-format
+msgid "Match-Profile refers to non-existing profile (%s)"
+msgstr "„Упореди-профил“ се односи на непостојећи профил (%s)"
+
+#: radiusd/radck.c:125
+#, c-format
+msgid "circular dependency for %s"
+msgstr "кружна зависност за „%s“"
+
+#: radiusd/radck.c:152
+#, c-format
+msgid "not enough memory for transitivity check"
+msgstr "нема довољно меморије за проверу прелаза"
+
+#: radiusd/radck.c:177
+#, c-format
+msgid "USER LIST IS EMPTY"
+msgstr "СПИСАК КОРИСНИКА ЈЕ ПРАЗАН"
+
+#: radiusd/radck.c:185
+#, c-format
+msgid "duplicate %s attribute"
+msgstr "двоструки атрибут „%s“"
+
+#: radiusd/radck.c:226
+#, c-format
+msgid "attribute %s not allowed in LHS"
+msgstr "атрибут „%s“ није дозвољен у LHS-у"
+
+#: radiusd/radck.c:275
+msgid "Match-Profile refers to a DEFAULT entry"
+msgstr "„Упореди-профил“ се односи на ОСНОВНИ унос"
+
+#: radiusd/radck.c:284
+msgid "Simultaneous-Use is used, but multiple login checking is not enabled"
+msgstr ""
+"„Истовремено-коришћење“ је упоребљено, али проверавање више пријава није "
+"укључено"
+
+#: radiusd/radck.c:324 radiusd/radck.c:355
+msgid "No User-Password attribute in LHS"
+msgstr "Нема атрибута лозинке корисника у LHS-у"
+
+#: radiusd/radck.c:332
+#, c-format
+msgid "Auth-Type = System can only be used when running with root privileges"
+msgstr ""
+"„Auth-врста = Систем“ се може користити само када се ради са "
+"администраторским овлашћењима"
+
+#: radiusd/radck.c:342 radiusd/radck.c:379
+msgid "User-Password attribute ignored for this Auth-Type"
+msgstr "Атрибут „Корисничка-лозинка“ је занемарен за ову „Auth-врсту“"
+
+#: radiusd/radck.c:347
+msgid "Password-Location attribute ignored for this Auth-Type"
+msgstr "Атрибут „Место-лозинке“ је занемарен за ову „Auth-врсту“"
+
+#: radiusd/radck.c:363
+msgid "Authentication type not supported"
+msgstr "Врста потврђивања идентитета није подржана"
+
+#: radiusd/radck.c:398
+msgid "Both Auth-Data and PAM-Auth attributes present"
+msgstr "Присутан је и „Auth-подаци“ и „PAM-Auth“ атрибут"
+
+#: radiusd/radck.c:421
+#, c-format
+msgid "attribute %s not allowed in RHS"
+msgstr "атрибут „%s“ није дозвољен у RHS-у"
+
+#: radiusd/radck.c:436
+#, c-format
+msgid "Use of Add-Port-To-IP-Address is deprecated"
+msgstr "Коришћење „додај-прикључник-ИП-адреси“ је застарело"
+
+#: radiusd/radck.c:445
+msgid "BEGIN without Fall-Through"
+msgstr "ПОЧИЊЕ без „пропадања“"
+
+#: radiusd/radius.c:107
+#, c-format
+msgid "request from unknown client"
+msgstr "захтев од непознатог клијента"
+
+#: radiusd/radius.c:426
+msgid "Dropping packet"
+msgstr "Одбацујем пакет"
+
+#: radiusd/radius.c:449
+#, c-format
+msgid "Retransmitting %s reply"
+msgstr "Поново емитујем „%s“ одговор"
+
+#: radiusd/radius.c:454
+msgid "request failed"
+msgstr "захтев није успео"
+
+#: radiusd/radius.c:522
+#, c-format
+msgid "Unrecognized proxy reply from server %s, proxy ID %d"
+msgstr "Непознат одговор посредника са сервера „%s“, ИД посредника %d"
+
+#: radiusd/radius.c:556
+#, c-format
+msgid "unknown request code %d"
+msgstr "непознат код захтева %d"
+
+#: radiusd/radius.c:656
+#, c-format
+msgid "rule trace: %s"
+msgstr "праћење правила: %s"
+
+#: radiusd/radiusd.c:146
+msgid "radiusd compiled without DBM support"
+msgstr "„radiusd“ је преведен без „DBM“ подршке"
+
+#: radiusd/radiusd.c:156
+#, c-format
+msgid "unknown mode: %s"
+msgstr "непознат режим: %s"
+
+#: radiusd/radiusd.c:181
+#, c-format
+msgid "invalid IP address: %s"
+msgstr "неисправна ИП адреса: %s"
+
+#: radiusd/radiusd.c:217
+#, fuzzy, c-format
+#| msgid "invalid port type"
+msgid "%s: invalid port number"
+msgstr "неисправна врста прикључника"
+
+#: radiusd/radiusd.c:228
+msgid "radiusd specific switches:"
+msgstr "„radiusd“-у специфични прекидачи:"
+
+#: radiusd/radiusd.c:233
+msgid "Stay in foreground"
+msgstr "Остаје у првом плану"
+
+#: radiusd/radiusd.c:244
+msgid "Select operation mode: test, checkconf, builddbm."
+msgstr "Бира режим рада: test, checkconf, builddbm."
+
+#: radiusd/radiusd.c:255
+msgid "Run in single process mode"
+msgstr "Ради у режиму једног процеса"
+
+#: radiusd/radiusd.c:266
+msgid "Store pidfile in DIR"
+msgstr "Чува пид датотеку у ДИР"
+
+#: radiusd/radiusd.c:278
+msgid "Show compilation defaults"
+msgstr "Приказује основности превођења"
+
+#: radiusd/radiusd.c:284
+msgid "Quiet mode (valid only with --mode)"
+msgstr "Тихи режим (исправан само са „--mode“)"
+
+#: radiusd/radiusd.c:294
+msgid "Select port numbers from available UDP ports"
+msgstr "Бира бројеве прикључника из доступних UDP прикључника"
+
+#: radiusd/radiusd.c:295 radiusd/tsh.c:82 radlast/radlast.c:253
+#: radtest/main.c:135 radwho/radwho.c:204 radzap/radzap.c:91
+msgid "FILE"
+msgstr "ДАТОТЕКА"
+
+#: radiusd/radiusd.c:304
+msgid "Daemon configuration options. Please use raddb/config instead."
+msgstr "Опције подешавања позадинца. Користите „raddb/config“ уместо овог."
+
+#: radiusd/radiusd.c:309
+msgid "Do detailed authentication logging"
+msgstr "Детаљно дневничење потврђивања идентитета"
+
+#: radiusd/radiusd.c:320
+msgid "Set accounting directory"
+msgstr "Поставља директоријум налога"
+
+#: radiusd/radiusd.c:333
+msgid "Enable DBM support"
+msgstr "Укључује „DBM“ подршку"
+
+#: radiusd/radiusd.c:345
+msgid "Set logging directory name"
+msgstr "Поставља назив директоријума дневника"
+
+#: radiusd/radiusd.c:357
+msgid "Do not resolve IP addresses"
+msgstr "Не решава ИП адресе"
+
+#: radiusd/radiusd.c:368
+msgid "Listen on IPADDR"
+msgstr "Ослушкује на ИПАДРЕСИ"
+
+#: radiusd/radiusd.c:369 radlast/radlast.c:265
+msgid "IPADDR"
+msgstr "ИПАДРЕСА"
+
+#: radiusd/radiusd.c:379
+msgid "Set authentication port number"
+msgstr "Поставља број прикључника потврђивања идентитета"
+
+#: radiusd/radiusd.c:380 radlast/radlast.c:241 radlast/radlast.c:310
+#: radtest/main.c:157 radtest/main.c:181 radzap/radzap.c:115
+msgid "NUMBER"
+msgstr "БРОЈ"
+
+#: radiusd/radiusd.c:390
+msgid "Strip prefixes/suffixes off user names before logging"
+msgstr "Откида префиксе/суфиксе са имена корисника пре пријављивања"
+
+#: radiusd/radiusd.c:401 radiusd/tsh.c:86
+msgid "Set debugging level"
+msgstr "Поставља ниво исправљања грешака"
+
+#: radiusd/radiusd.c:402 radtest/main.c:124
+msgid "DEBUGSPEC"
+msgstr "ОДРЕДБА_ПРОЧИШЋАВАЊА"
+
+#: radiusd/radiusd.c:412
+msgid "Log authentications"
+msgstr "Бележи потврђивања идентитета"
+
+#: radiusd/radiusd.c:422
+msgid "Log users' passwords"
+msgstr "Бележи корисничке лозинке"
+
+#: radiusd/radiusd.c:435
+msgid "GNU radius daemon"
+msgstr "Гну „radius“ позадинац"
+
+#: radiusd/radiusd.c:447
+msgid "Sorry, your account is currently closed\n"
+msgstr "Извините, ваш налог је тренутно затворен\n"
+
+#: radiusd/radiusd.c:449
+msgid "Password has expired\n"
+msgstr "Лозинка је истекла\n"
+
+#: radiusd/radiusd.c:451
+msgid "Password will expire in %R{Password-Expire-Days} Days\n"
+msgstr "Лозинка ће истећи за %R{Password-Expire-Days} дан/а\n"
+
+#: radiusd/radiusd.c:453
+msgid ""
+"\n"
+"Access denied\n"
+msgstr ""
+"\n"
+"Приступ је забрањен\n"
+
+#: radiusd/radiusd.c:455
+msgid ""
+"\n"
+"Realm quota exceeded - access denied\n"
+msgstr ""
+"\n"
+"Квота подручја је премашена – приступ је одбијен\n"
+
+#: radiusd/radiusd.c:457
+msgid ""
+"\n"
+"You are already logged in %R{Simultaneous-Use} times - access denied\n"
+msgstr ""
+"\n"
+"Већ сте пријављени %R{Simultaneous-Use} пута – приступ је одбијен\n"
+
+#: radiusd/radiusd.c:459
+msgid ""
+"\n"
+"You are already logged in - access denied\n"
+msgstr ""
+"\n"
+"Већ сте пријављени – приступ је одбијен\n"
+
+#: radiusd/radiusd.c:461
+msgid "You are calling outside your allowed timespan\n"
+msgstr "Позивате изван вашег допуштеног временског распона\n"
+
+#: radiusd/radiusd.c:499
+#, c-format
+msgid "Terminating the subprocesses"
+msgstr "Окончавам подпроцесе"
+
+#: radiusd/radiusd.c:511
+#, c-format
+msgid "%d process left!"
+msgid_plural "%d processes left!"
+msgstr[0] "%d процес је остао!"
+msgstr[1] "%d процеса су остала!"
+msgstr[2] "%d процеса је остало!"
+
+#: radiusd/radiusd.c:537
+#, c-format
+msgid "Radiusd is not listening on any port."
+msgstr "„radiusd“ не ослушкује ни на једном прикључнику."
+
+#: radiusd/radiusd.c:541
+#, c-format
+msgid "Radiusd is not listening on any port. Trying to continue anyway..."
+msgstr ""
+"„radiusd“ не ослушкује ни на једном прикључнику. Покушавам да наставим било "
+"како..."
+
+#: radiusd/radiusd.c:598
+#, c-format
+msgid "Starting"
+msgstr "Почињем"
+
+#: radiusd/radiusd.c:621
+#, c-format
+msgid "Cannot open output file %s"
+msgstr "Не могу да отворим излазну датотеку „%s“"
+
+#: radiusd/radiusd.c:639
+#, c-format
+msgid "Ready"
+msgstr "Спреман"
+
+#: radiusd/radiusd.c:731
+#, c-format
+msgid "can't find out my own IP address"
+msgstr "не могу да нађем моју властиту ИП адресу"
+
+#: radiusd/radiusd.c:827
+#, c-format
+msgid "RADIUSD SUSPENDED"
+msgstr "„RADIUSD“ ЈЕ ОБУСТАВЉЕН"
+
+#: radiusd/radiusd.c:857
+#, c-format
+msgid "Reloading configuration now"
+msgstr "Поново учитавам подешавање сада"
+
+#: radiusd/radiusd.c:869
+#, c-format
+msgid "Dumping users db to `%s'"
+msgstr "Шаљем излаз корисничке базе података на „%s“"
+
+#: radiusd/radiusd.c:926
+#, c-format
+msgid "restart initiated"
+msgstr "поновно покретање је започето"
+
+#: radiusd/radiusd.c:929
+#, c-format
+msgid "can't restart: not started as absolute pathname"
+msgstr "не могу поново да покренем: није покренуто као апсолутни назив путање"
+
+#: radiusd/radiusd.c:941
+#, c-format
+msgid "radiusd_restart: cannot fork"
+msgstr "radiusd_restart: не могу да испелцујем"
+
+#: radiusd/radiusd.c:956
+#, c-format
+msgid "restarting radius"
+msgstr "поново покрећем радијус"
+
+#: radiusd/radiusd.c:959
+#, c-format
+msgid "RADIUS NOT RESTARTED: exec failed"
+msgstr "РАДИЈУС НИЈЕ ПОНОВО ПОКРЕНУТ: извршавање није успело"
+
+#: radiusd/radiusd.c:996
+#, c-format
+msgid "Normal shutdown."
+msgstr "Нормално гашење."
+
+#: radiusd/radiusd.c:1012
+#, c-format
+msgid "Ready to process requests."
+msgstr "Спреман за обраду захтева."
+
+#: radiusd/radiusd.c:1101
+#, c-format
+msgid "Loading configuration files."
+msgstr "Учитавам датотеке подешавања."
+
+#: radiusd/radiusd.c:1111
+#, c-format
+msgid "Errors reading config file - EXITING"
+msgstr "Грешке читања датотеке подешавања – ИЗЛАЗИМ"
+
+#: radiusd/radiusd.c:1285
+#, c-format
+msgid "socket %s:%d is already assigned for %s"
+msgstr "прикључница „%s:%d“ је већ додељена за „%s“"
+
+#: radiusd/radiusd.c:1492
+#, c-format
+msgid "Ignoring exec-program-user"
+msgstr "Занемарујем извршавање корисниковог програма"
+
+#: radiusd/radutil.c:178
+#, c-format
+msgid "INTERNAL ERROR (%s:%d): attribute %d has bad type (%d)"
+msgstr "УНУТРАШЊА ГРЕШКА (%s:%d): атрибут %d има лошу врсту (%d)"
+
+#: radiusd/radutil.c:509
+#, c-format
+msgid "cannot convert \"%s\" to integer"
+msgstr "не могу да претворим „%s“ у цео број"
+
+#: radiusd/request.c:225
+#, c-format
+msgid "Proxy %s request expired in queue"
+msgstr "Захтев посреденика „%s“ је истекао у реду"
+
+#: radiusd/request.c:244
+#, c-format
+msgid "Killing unresponsive %s child %lu"
+msgstr "Убијам неодазивајући „%s“ пород %lu"
+
+#: radiusd/request.c:249
+#, c-format
+msgid "Cannot terminate child %lu. Attempting to kill inexisting process?"
+msgstr ""
+"Не могу да окончам пород „%lu“. Покушавате да убијете непостојећи процес?"
+
+#: radiusd/request.c:259
+#, c-format
+msgid "Terminating unresponsive %s child %lu, status: %s"
+msgstr "Окончавам неодазивајући „%s“ пород %lu, стање: %s"
+
+#: radiusd/request.c:262
+msgid "OK"
+msgstr "У реду"
+
+#: radiusd/request.c:262
+msgid "FAILURE"
+msgstr "НЕУСПЕХ"
+
+#: radiusd/request.c:290
+msgid "duplicate request"
+msgstr "двоструки захтев"
+
+#: radiusd/request.c:365
+msgid "too many requests in queue"
+msgstr "превише захтева у реду"
+
+#: radiusd/request.c:372
+msgid "too many requests of this type"
+msgstr "превише захтева ове врсте"
+
+#: radiusd/request.c:381
+msgid "Maximum number of children active"
+msgstr "Највећи број активног порода"
+
+#: radiusd/rewrite.y:845 gram.y:397 radtest/gram.y:397
+#, c-format
+msgid "redefinition of function `%s'"
+msgstr "поновно дефинисање функције „%s“"
+
+#: radiusd/rewrite.y:847 radiusd/rewrite.y:5611
+#, c-format
+msgid "previously defined here"
+msgstr "претходно дефинисана овде"
+
+#: radiusd/rewrite.y:1033
+msgid "nothing to break from"
+msgstr "ништа за прекидање"
+
+#: radiusd/rewrite.y:1047
+msgid "nothing to continue"
+msgstr "ништа за наставак"
+
+#: radiusd/rewrite.y:1123
+#, c-format
+msgid "undefined variable: %s"
+msgstr "недефинисана променљива: %s"
+
+#: radiusd/rewrite.y:1608
+#, c-format
+msgid "unexpected EOF in comment started at line %lu"
+msgstr "неочекивани крај датотеке у коментару започетом у %lu. реду"
+
+#: radiusd/rewrite.y:1669
+#, c-format
+msgid "Malformed pragma"
+msgstr "Лош прагматизам"
+
+#: radiusd/rewrite.y:1683
+#, c-format
+msgid "Unknown regexp flag: %s"
+msgstr "Непозната опција регизраза: %s"
+
+#: radiusd/rewrite.y:1815
+msgid "unterminated character constant"
+msgstr "неокончана константа знака"
+
+#: radiusd/rewrite.y:2422
+#, c-format
+msgid "%s implicit coercion %s %s"
+msgstr "„%s“ изричита принуда „%s %s“"
+
+#: radiusd/rewrite.y:2487
+msgid "operation not applicable to strings"
+msgstr "радња није применљива на ниске"
+
+#: radiusd/rewrite.y:2591 radiusd/rewrite.y:2657
+#, c-format
+msgid "(argument %d)"
+msgstr "(аргумент %d)"
+
+#: radiusd/rewrite.y:2606 radiusd/rewrite.y:2668
+#, c-format
+msgid "too many arguments in call to %s"
+msgstr "превише аргумената у позиву за „%s“"
+
+#: radiusd/rewrite.y:2611 radiusd/rewrite.y:2673
+#, c-format
+msgid "too few arguments in call to %s"
+msgstr "премало аргумената у позиву за „%s“"
+
+#: radiusd/rewrite.y:2698 radiusd/tsh.c:242
+#, c-format
+msgid "Undefined"
+msgstr "Неодређено"
+
+#: radiusd/rewrite.y:2700 radtest/runtime.c:783
+msgid "integer"
+msgstr "цео број"
+
+#: radiusd/rewrite.y:2702 radtest/runtime.c:785
+msgid "string"
+msgstr "ниска"
+
+#: radiusd/rewrite.y:2704
+msgid "UNKNOWN"
+msgstr "UNKNOWN"
+
+#: radiusd/rewrite.y:2713
+msgid "from Undefined"
+msgstr "од неодређеног"
+
+#: radiusd/rewrite.y:2715
+msgid "from integer"
+msgstr "од целог броја"
+
+#: radiusd/rewrite.y:2717
+msgid "from string"
+msgstr "од ниске"
+
+#: radiusd/rewrite.y:2719
+msgid "from UNKNOWN"
+msgstr "од НЕПОЗНАТОГ"
+
+#: radiusd/rewrite.y:2728
+msgid "to Undefined"
+msgstr "до неодређеног"
+
+#: radiusd/rewrite.y:2730 radtest/runtime.c:796
+msgid "to integer"
+msgstr "до целог броја"
+
+#: radiusd/rewrite.y:2732 radtest/runtime.c:798
+msgid "to string"
+msgstr "до ниске"
+
+#: radiusd/rewrite.y:2734
+msgid "to UNKNOWN"
+msgstr "до НЕПОЗНАТОГ"
+
+#: radiusd/rewrite.y:3050
+#, c-format
+msgid "missing return statement"
+msgstr "недостаје изјава повратка"
+
+#: radiusd/rewrite.y:3201 radiusd/rewrite.y:3211
+#, c-format
+msgid "divide by zero"
+msgstr "подели нулом"
+
+#: radiusd/rewrite.y:3859
+#, c-format
+msgid "regexp error: %s"
+msgstr "грешка регуларног израза: %s"
+
+#: radiusd/rewrite.y:3907
+msgid "out of pushdown space"
+msgstr "нестало је простора за потискивање "
+
+#: radiusd/rewrite.y:3921 radiusd/rewrite.y:3952
+msgid "heap overrun"
+msgstr "прекорачење гомиле"
+
+#: radiusd/rewrite.y:3977
+msgid "out of heap space"
+msgstr "нема више простора гомиле"
+
+#: radiusd/rewrite.y:4005 radiusd/rewrite.y:4048
+msgid "out of popup"
+msgstr "нема више искока"
+
+#: radiusd/rewrite.y:4117 radiusd/rewrite.y:4127
+msgid "rewrite runtime error"
+msgstr "грешка истека времена поновног писања"
+
+#: radiusd/rewrite.y:4225
+msgid "no request supplied"
+msgstr "никакав захтев није достављен"
+
+#: radiusd/rewrite.y:4262
+msgid "can't create A/V pair"
+msgstr "не могу да направим A/V пар"
+
+#: radiusd/rewrite.y:4563 radiusd/rewrite.y:4579
+msgid "division by zero!"
+msgstr "дељење нулом!"
+
+#: radiusd/rewrite.y:4786
+#, c-format
+msgid "rewrite regex failure: %s. Input: %s"
+msgstr "неуспех поновног писања регизраза: %s. Улаз: %s"
+
+#: radiusd/rewrite.y:4839
+msgid "pc out of range"
+msgstr "рачунар је ван опсега"
+
+#: radiusd/rewrite.y:5292
+msgid "Invalid backreference"
+msgstr "Неисправна повратна упута"
+
+#: radiusd/rewrite.y:5327 radiusd/rewrite.y:5367
+msgid "regexp compile error: "
+msgstr "грешка превођења регизраза: "
+
+#: radiusd/rewrite.y:5609
+#, c-format
+msgid "redefinition of function %s"
+msgstr "поновно дефинисање функције „%s“"
+
+#: radiusd/rewrite.y:5665
+#, c-format
+msgid "function %s not defined"
+msgstr "функција „%s“ није дефинисана"
+
+#: radiusd/rewrite.y:5669
+#, c-format
+msgid "function %s returns wrong data type"
+msgstr "функција „%s“ је вратила погрешну врсту података"
+
+#: radiusd/rewrite.y:5677
+#, c-format
+msgid "function %s takes too many arguments"
+msgstr "функција „%s“ узима превише аргумената"
+
+#: radiusd/rewrite.y:5684
+#, c-format
+msgid "function %s: argument %d must be integer"
+msgstr "функција „%s“: аргумент %d мора бити цео број"
+
+#: radiusd/rewrite.y:5693
+#, c-format
+msgid "function %s: argument %d must be string"
+msgstr "функција „%s“: аргумент %d мора бити ниска"
+
+#: radiusd/rewrite.y:5706
+#, c-format
+msgid "function %s takes too few arguments"
+msgstr "функција „%s“ узима премало аргумената"
+
+#: radiusd/rewrite.y:5897
+#, c-format
+msgid "function %s() requires %d parameter"
+msgid_plural "function %s() requires %d parameters"
+msgstr[0] "функција „%s()“ захтева %d параметар"
+msgstr[1] "функција „%s()“ захтева %d параметра"
+msgstr[2] "функција „%s()“ захтева %d параметара"
+
+#: radiusd/rewrite.y:6054
+#, c-format
+msgid "file not found: %s"
+msgstr "датотека није нађена: „%s“"
+
+#: radiusd/rewrite.y:6188
+msgid "function ~S not defined"
+msgstr "функција „~S“ није дефинисана"
+
+#: radiusd/rewrite.y:6204
+msgid "too many arguments for ~S"
+msgstr "превише аргумената за „~S“"
+
+#: radiusd/rewrite.y:6232
+msgid "type mismatch in argument ~S(~S) in call to ~S"
+msgstr "врста неодговара у аргументу „~S(~S)“ у позиву за „~S“"
+
+#: radiusd/rewrite.y:6242
+msgid "too few arguments for ~S"
+msgstr "премало аргумената за „~S“"
+
+#: radiusd/scheme.c:224
+#, c-format
+msgid "%s is not a procedure object"
+msgstr "„%s“ није предмет поступка"
+
+#: radiusd/scheme.c:229
+#, c-format
+msgid "Procedure `%s' failed: see error output for details"
+msgstr "Поступак „%s“ није успео: видите излаз грешке за детаље"
+
+#: radiusd/scheme.c:305 radiusd/scheme.c:341
+#, c-format
+msgid "Unexpected return value from Guile authentication function `%s'"
+msgstr ""
+"Неочекивана повратна вредност од функције „%s“ „Guile“ потврђивања идентитета"
+
+#: radiusd/scheme.c:361
+#, c-format
+msgid "Unexpected return value from Guile accounting function `%s'"
+msgstr "Неочекивана повратна вредност од функције „%s“ „Guile“ прављења налога"
+
+#: radiusd/scheme.c:454
+#, c-format
+msgid "Invalid hex number: %s"
+msgstr "Неисправан хексадецимални број: %s"
+
+#: radiusd/scheme.c:645
+#, fuzzy, c-format
+#| msgid "Guile authentication disabled in config"
+msgid "Guile extensions disabled in config"
+msgstr "„Guile“ потврђивање идентитета је искључено у подешавањима"
+
+#: radiusd/scheme.c:662
+#, c-format
+msgid "Guile authentication not available"
+msgstr "„Guile“ потврђивање идентитета није доступно"
+
+#: radiusd/snmpserv.c:279
+#, c-format
+msgid "%s:%d: community %s already declared"
+msgstr "%s:%d: заједница „%s“ је већ објављена"
+
+#: radiusd/snmpserv.c:375 radiusd/snmpserv.c:409
+#, c-format
+msgid "%s:%d: no such network: %s"
+msgstr "%s:%d: нема такве мреже: %s"
+
+#: radiusd/snmpserv.c:383
+#, c-format
+msgid "%s:%d: undefined community %s"
+msgstr "%s:%d: недефинисана заједница „%s“"
+
+#: radiusd/snmpserv.c:1332
+#, c-format
+msgid "acct server re-initializing on SNMP request"
+msgstr "сервер налога поново почиње на SNMP захтев"
+
+#: radiusd/snmpserv.c:1684
+#, c-format
+msgid "auth server re-initializing on SNMP request"
+msgstr "сервер потврђивања идентитета поново почиње на SNMP захтев"
+
+#: radiusd/snmpserv.c:1964
+#, c-format
+msgid "server re-initializing on SNMP request"
+msgstr "сервер поново почиње на SNMP захтев"
+
+#: radiusd/snmpserv.c:1968
+#, c-format
+msgid "server restart on SNMP request"
+msgstr "сервер се поново покреће на SNMP захтев"
+
+#: radiusd/snmpserv.c:1972
+#, c-format
+msgid "server continuing on SNMP request"
+msgstr "сервер наставља на SNMP захтев"
+
+#: radiusd/snmpserv.c:1976
+#, c-format
+msgid "server suspending on SNMP request"
+msgstr "сервер се обуставља на SNMP захтев"
+
+#: radiusd/snmpserv.c:1980
+#, c-format
+msgid "server shutting down on SNMP request"
+msgstr "сервер се гаси на SNMP захтев"
+
+#: radiusd/snmpserv.c:2692
+#, c-format
+msgid "can't decode SNMP packet from %s: %s"
+msgstr "не могу да декодирам SNMP пакет из „%s“: %s"
+
+#: radiusd/snmpserv.c:2702
+#, c-format
+msgid "DENIED attempt to access community %s from %s"
+msgstr "ЗАБРАЊЕН покушај приступа заједници „%s“ из „%s“"
+
+#: radiusd/snmpserv.c:2757
+#, c-format
+msgid "Dropping SNMP request from client %s: %s"
+msgstr "Одбацујем SNMP захтев од клијента „%s“: %s"
+
+#: radiusd/sql.c:315
+#, c-format
+msgid "could not read sqlserver file %s"
+msgstr "не могу да прочитам „%s“ датотеку „sql“ сервера"
+
+#: radiusd/sql.c:327
+msgid "unrecognized keyword"
+msgstr "непозната кључна реч"
+
+#: radiusd/sql.c:335
+msgid "required argument missing"
+msgstr "недостаје захтевани аргумент"
+
+#: radiusd/sql.c:360 radiusd/sql.c:387
+msgid "number parse error"
+msgstr "грешка обраде броја"
+
+#: radiusd/sql.c:379 radiusd/sql.c:397 radiusd/sql.c:405
+msgid "expected boolean value"
+msgstr "очекивах логичку вредност"
+
+#: radiusd/sql.c:420
+msgid "auth_max_connections is obsolete"
+msgstr "„auth_max_connections“ је застарело"
+
+#: radiusd/sql.c:427
+msgid "acct_max_connections is obsolete"
+msgstr "„acct_max_connections“ је застарело"
+
+#: radiusd/sql.c:434
+msgid "query_buffer_size is obsolete"
+msgstr "„query_buffer_size“ је застарело"
+
+#: radiusd/sql.c:442
+msgid "Unsupported SQL interface"
+msgstr "Неподржано SQL сучеље"
+
+#: radiusd/sql.c:497
+#, c-format
+msgid "%s: missing `%s' statement"
+msgstr "%s: недостаје „%s“ изјава"
+
+#: radiusd/sql.c:515
+#, c-format
+msgid "%s: SQL interface not specified"
+msgstr "%s: SQL сучеље није наведено"
+
+#: radiusd/sql.c:584
+#, c-format
+msgid "disabling SQL authentication"
+msgstr "искључује SQL потврђивање идентитета"
+
+#: radiusd/sql.c:586
+#, c-format
+msgid "disabling SQL accounting"
+msgstr "искључује SQL прављење налога"
+
+#: radiusd/sql.c:593
+#, c-format
+msgid "SQL configuration changed: closing existing connections"
+msgstr "SQL подешавање је промењено: затварам постојеће везе"
+
+#: radiusd/sql.c:812
+#, c-format
+msgid "no Acct-Status-Type attribute in rad_sql_acct()"
+msgstr "нема атрибута „врста-стања-налога“ у „rad_sql_acct()“"
+
+#: radiusd/sql.c:888 radiusd/sql.c:1201
+#, c-format
+msgid "%s updated %d record"
+msgid_plural "%s updated %d records"
+msgstr[0] "„%s“ је освежио %d запис"
+msgstr[1] "„%s“ је освежио %d записа"
+msgstr[2] "„%s“ је освежио %d записа"
+
+#: radiusd/sql.c:906
+#, c-format
+msgid "SQL Auth specified in users file, but not in sqlserver file"
+msgstr ""
+"SQL потврђивање идентитета је наведено у датотеци корисника, али не и у "
+"„sqlserver“ датотеци"
+
+#: radiusd/sql.c:998
+#, c-format
+msgid "SQL: invalid operator: %s"
+msgstr "SQL: неисправан оператер: %s"
+
+#: radiusd/sql.c:1061
+msgid "SQL authentication is not enabled in raddb/sqlserver"
+msgstr "SQL потврђивање идентитета није укључено у „raddb/sqlserver“"
+
+#: radiusd/sql.c:1290
+msgid "Radiusd is compiled without SQL support"
+msgstr "„radiusd“ је преведен без „SQL“ подршке"
+
+#: radiusd/stat.c:84
+#, c-format
+msgid "SNMP system disabled: file `%s' has incorrect permissions"
+msgstr "SNMP систем је искључен: датотека „%s“ има неодговарајућа овлашћења"
+
+#: radiusd/stat.c:103
+#, c-format
+msgid "mmap failed"
+msgstr "„mmap“ није успело"
+
+#: radiusd/stat.c:131
+#, c-format
+msgid "shmem_get(): can't allocate %d byte"
+msgid_plural "shmem_get(): can't allocate %d bytes"
+msgstr[0] "shmem_get(): не могу да доделим %d бајт"
+msgstr[1] "shmem_get(): не могу да доделим %d бајта"
+msgstr[2] "shmem_get(): не могу да доделим %d бајтова"
+
+#: radiusd/stat.c:167
+#, c-format
+msgid "stat_init failed"
+msgstr "„stat_init“ није успело"
+
+#: radiusd/stat.c:230
+#, c-format
+msgid ""
+"reached SNMP storage limit for the number of monitored ports: increase max-"
+"port-count"
+msgstr ""
+"достигнуто је ограничење SNMP смештаја за број праћених прикључника: "
+"повећавам „највећи-број-прикључника“"
+
+#: radiusd/stat.c:290
+#, c-format
+msgid "stat_update(): portno %d: can't find nas for IP %s"
+msgstr "stat_update(): број прикључника %d: не могу да нађем „nas“ за ИП %s"
+
+#: radiusd/stat.c:301
+#, c-format
+msgid "stat_update(): port %d not found on NAS %s"
+msgstr "stat_update(): нисам нашао прикључник %d на NAS-у „%s“"
+
+#: radiusd/stat.c:315
+msgid "negative port idle time"
+msgstr "негативно време мировања прикључника"
+
+#: radiusd/stat.c:339
+msgid "negative port session time"
+msgstr "негативно време сесије прикључника"
+
+#: radiusd/stat.c:471
+#, c-format
+msgid ""
+"reached SNMP storage limit for the number of monitored NASes: increase max-"
+"nas-count"
+msgstr ""
+"достигнуто је ограничење SNMP смештаја за број праћених NAS-ова: повећавам "
+"„највећи-број-nas-а“"
+
+#: radiusd/version.c:137
+msgid "GNU RADIUS server version "
+msgstr "издање Гну Радијус сервера"
+
+#: radiusd/version.c:164
+#, fuzzy, c-format
+#| msgid "rule trace: %s"
+msgid "Build target: %s\n"
+msgstr "праћење правила: %s"
+
+#: radiusd/version.c:168
+#, c-format
+msgid "Compilation platform: "
+msgstr "Платформа превођења:"
+
+#: radiusd/version.c:172
+#, c-format
+msgid ""
+"\n"
+"Debugging flags: "
+msgstr ""
+"\n"
+"Заставице прочишћавања: "
+
+#: radiusd/version.c:177
+#, c-format
+msgid ""
+"\n"
+"Compilation flags: "
+msgstr ""
+"\n"
+"Заставице превођења: "
+
+#: radiusd/version.c:182
+#, c-format
+msgid "Compilation defaults:\n"
+msgstr "Основности превођења:\n"
+
+#: radiusd/version.c:183
+#, c-format
+msgid "Ports in use:\n"
+msgstr "Прикључници у употреби:\n"
+
+#: radiusd/version.c:186
+#, c-format
+msgid "Paths:\n"
+msgstr "Путање:\n"
+
+#: radiusd/version.c:187
+#, c-format
+msgid " configuration directory: %s\n"
+msgstr " директоријум подешавања:    %s\n"
+
+#: radiusd/version.c:188
+#, c-format
+msgid " logging directory:       %s\n"
+msgstr " директоријум дневника:      %s\n"
+
+#: radiusd/version.c:189
+#, c-format
+msgid " accounting directory:    %s\n"
+msgstr " директоријум налога:        %s\n"
+
+#: radiusd/version.c:190
+#, c-format
+msgid " pidfile directory:       %s\n"
+msgstr " директоријум пид-датотеке:  %s\n"
+
+#: radiusd/version.c:191
+#, c-format
+msgid ""
+"\n"
+"Report bugs to <%s>\n"
+msgstr ""
+"\n"
+"Грешке пријавите на <%s>\n"
+
+#: radiusd/rpp.c:353
+#, c-format
+msgid "child %lu %s"
+msgstr "пород „%lu %s“"
+
+#: radiusd/rpp.c:496
+#, c-format
+msgid "Killing process %lu: %s"
+msgstr "Убијам процес %lu: %s"
+
+#: radiusd/rpp.c:563
+msgid "error writing header"
+msgstr "грешка писања заглавља"
+
+#: radiusd/rpp.c:567
+msgid "error writing data"
+msgstr "грешка писања података"
+
+#: radiusd/rpp.c:598
+#, c-format
+msgid "Child exiting on timeout."
+msgstr "Пород излази на истеку времена."
+
+#: radiusd/rpp.c:644
+#, c-format
+msgid "Child received malformed header (len = %d, error = %s)"
+msgstr "Пород је примио лоше заглавље (вел = %d, грешка = %s)"
+
+#: radiusd/rpp.c:656
+#, c-format
+msgid "Child received malformed data"
+msgstr "Пород је примио лоше податке"
+
+#: radiusd/rpp.c:704
+msgid "error reading data"
+msgstr "грешка читања података"
+
+#: radiusd/rpp.c:717
+msgid "error reading data; wrong data size returned"
+msgstr "грешка читања података; враћена је погрешна величина података"
+
+#: radiusd/tsh.c:71
+msgid "Print this help screen"
+msgstr "Исписује овај екран помоћи"
+
+#: radiusd/tsh.c:72
+msgid "NAS LOGIN SID PORT [IP]"
+msgstr "NAS ПРИЈАВА СИД ПРИКЉ [ИП]"
+
+#: radiusd/tsh.c:73
+msgid "Query the given NAS"
+msgstr "Пропитује дати NAS"
+
+#: radiusd/tsh.c:75
+msgid "Enter Guile"
+msgstr "Уводи „Guile“"
+
+#: radiusd/tsh.c:77
+msgid "[NUMBER]"
+msgstr "[БРОЈ]"
+
+#: radiusd/tsh.c:78
+msgid "Print or set the Rewrite stack size"
+msgstr "Исписује или поставља величину спремника поновног писања"
+
+#: radiusd/tsh.c:80
+msgid "FUNCTION(args..)"
+msgstr "ФУНКЦИЈА(аргументи..)"
+
+#: radiusd/tsh.c:81
+msgid "Run given Rewrite function"
+msgstr "Покреће дату функцију поновног писања"
+
+#: radiusd/tsh.c:83
+msgid "Source the given Rewrite file"
+msgstr "Извире дату датотеку поновног писања"
+
+#: radiusd/tsh.c:84
+msgid "TIMESPAN [DOW [HH [MM]]]"
+msgstr "РАСПОНВРЕМЕНА [DOW [ЧЧ [ММ]]]"
+
+#: radiusd/tsh.c:85
+msgid "Check the timespan interval"
+msgstr "Проверава интервал распона времена"
+
+#: radiusd/tsh.c:86
+msgid "LEVEL"
+msgstr "НИВО"
+
+#: radiusd/tsh.c:87
+msgid "[PAIR [,PAIR]]"
+msgstr "[ПАР [,ПАР]]"
+
+#: radiusd/tsh.c:87
+msgid "Define a request"
+msgstr "Дефинише захтев"
+
+#: radiusd/tsh.c:89
+msgid "Print the request"
+msgstr "Исписује захтев"
+
+#: radiusd/tsh.c:91
+msgid "Quit the shell"
+msgstr "Напушта љуску"
+
+#: radiusd/tsh.c:157 radiusd/tsh.c:196 radiusd/tsh.c:219 radiusd/tsh.c:258
+#: radiusd/tsh.c:277 radiusd/tsh.c:322
+#, c-format
+msgid "%s: wrong number of arguments\n"
+msgstr "%s: погрешан број аргумената\n"
+
+#: radiusd/tsh.c:163
+#, c-format
+msgid "%s is a network name\n"
+msgstr "„%s“ је назив мреже\n"
+
+#: radiusd/tsh.c:170
+#, c-format
+msgid "%s: unknown nas\n"
+msgstr "%s: непознат нас\n"
+
+#: radiusd/tsh.c:206
+#, c-format
+msgid "%s: argument is not a number\n"
+msgstr "%s: аргумент није број\n"
+
+#: radiusd/tsh.c:347
+#, c-format
+msgid "Enter the pair list. End with end of file\n"
+msgstr "Уноси списак парова. Завршава крајем реда\n"
+
+#: radiusd/tsh.c:459
+#, c-format
+msgid "Bad command\n"
+msgstr "Лоша наредба\n"
+
+#: radlast/radlast.c:117 radlast/radlast.c:131
+#, fuzzy, c-format
+#| msgid "Invalid hex number: %s"
+msgid "%s%s: invalid number"
+msgstr "Неисправан хексадецимални број: %s"
+
+#: radlast/radlast.c:158 radzap/radzap.c:54
+#, fuzzy, c-format
+#| msgid "invalid port type"
+msgid "%s: invalid port"
+msgstr "неисправна врста прикључника"
+
+#: radlast/radlast.c:175
+msgid "radlast specific switches:"
+msgstr "„radlast“-у специфични прекидачи:"
+
+#: radlast/radlast.c:240
+msgid "show at most NUMBER records"
+msgstr "приказује највише БРОЈЕВНЕ записе"
+
+#: radlast/radlast.c:252
+msgid "use FILE as radwtmp"
+msgstr "користи ДАТОТЕКУ као „radwtmp“"
+
+#: radlast/radlast.c:264
+msgid "show logins with IPADDR"
+msgstr "приказује пријављивања са ИПАДРЕСОМ"
+
+#: radlast/radlast.c:275
+msgid "mark records with missed stops with bump (!)"
+msgstr "означава записе са недостајућим зауставкама са квржицом (!)"
+
+#: radlast/radlast.c:286
+msgid "show logins from given NAS"
+msgstr "приказује пријављивања из датог NAS-а"
+
+#: radlast/radlast.c:287 radzap/radzap.c:103
+msgid "NASNAME"
+msgstr "НАС_НАЗИВ"
+
+#: radlast/radlast.c:298
+msgid "use long output format"
+msgstr "користи дуги формат излаза"
+
+#: radlast/radlast.c:309
+msgid "show logins from given port"
+msgstr "приказује пријављивања са датог прикључника"
+
+#: radlast/radlast.c:321
+msgid "show the login session duration in seconds"
+msgstr "приказује трајање сесије пријављивања у секундама"
+
+#: radlast/radlast.c:332
+msgid "widen the duration field to show seconds"
+msgstr "раширено поље трајања да би приказало секунде"
+
+#: radlast/radlast.c:344
+msgid "report last logins from Radius database."
+msgstr "извештава о последњим пријављивањима из базе података Радијуса."
+
+#: radlast/radlast.c:346
+#, fuzzy
+#| msgid " [OPTION...]"
+msgid "[OPTIONS] [USER...]"
+msgstr " [ОПЦИЈА...]"
+
+#: radlast/radlast.c:401 radlast/radlast.c:465 radzap/radzap.c:161
+#, c-format
+msgid "can't open file %s"
+msgstr "не могу да отворим датотеку „%s“"
+
+#: radlast/radlast.c:536 radwho/radwho.c:464
+#, c-format
+msgid "System accounting is disabled\n"
+msgstr "Налози система су искључени\n"
+
+#: radlast/radlast.c:553
+#, c-format
+msgid ""
+"\n"
+"radwtmp begins %s\n"
+msgstr ""
+"\n"
+"„radwtmp“ почиње „%s“\n"
+
+#: radlast/radlast.c:869
+#, c-format
+msgid "still logged in"
+msgstr "још увек пријављен"
+
+#: radlast/radlast.c:908
+msgid "shutdown"
+msgstr "гасим"
+
+#: radlast/radlast.c:910
+msgid "reboot"
+msgstr "поново подижем"
+
+#: radlast/radlast.c:931
+msgid "acct_off"
+msgstr "налог_искљ."
+
+#: radlast/radlast.c:933
+msgid "acct_on"
+msgstr "налог_укљ."
+
+#: radscm/radscm.c:305 radtest/main.c:281
+#, c-format
+msgid "error reading dictionary file"
+msgstr "грешка читања датотеке речника"
+
+#: gram.y:308 radtest/gram.y:308
+msgid "not enough 'while's to break from"
+msgstr "нема довољно „while“ за прекидање"
+
+#: gram.y:316 radtest/gram.y:316
+msgid "not enough 'while's to continue"
+msgstr "нема довољно „while“ за наставак"
+
+#: gram.y:360 radtest/gram.y:360
+msgid "return outside of a function definition"
+msgstr "резултат је ван дефиниције функције"
+
+#: gram.y:372 gram.y:753 radtest/gram.y:372 radtest/gram.y:753
+#, c-format
+msgid "undefined function `%s'"
+msgstr "недефинисана функција „%s“"
+
+#: gram.y:385 radtest/gram.y:385
+msgid "nested function definitions are not allowed"
+msgstr "угнеждене дефиниције функције нису допуштене"
+
+#: gram.y:388 radtest/gram.y:388
+msgid "the current function definition begins here"
+msgstr "текућа дефиниција функције почиње овде"
+
+#: gram.y:399 radtest/gram.y:399
+#, c-format
+msgid "`%s' previously defined here"
+msgstr "„%s“ је претходно дефинисана овде"
+
+#: gram.y:478 radtest/gram.y:478
+msgid "warning: truncating binary string"
+msgstr "упозорење: кратим бинарну ниску"
+
+#: gram.y:511 radtest/gram.y:511
+msgid "expected integer value or request code name"
+msgstr "очекивана је целобројна вредност или назив кода захтева"
+
+#: gram.y:670 radtest/gram.y:670
+msgid "warning: '*' is meaningless for this attribute type"
+msgstr "упозорење: „*“ је без значења за ову врсту атрибута"
+
+#: gram.y:904 radtest/gram.y:904
+msgid "Misplaced `end'"
+msgstr "Лоше стављено „end“"
+
+#: gram.y:908 radtest/gram.y:908
+msgid "Unexpected end of line"
+msgstr "Неочекиван крај реда"
+
+#: gram.y:936 radtest/gram.y:936
+#, c-format
+msgid "In function `%s':\n"
+msgstr "У функцији „%s“:\n"
+
+#: gram.y:939 radtest/gram.y:939
+#, c-format
+msgid "At top level:\n"
+msgstr "На највишем нивоу:\n"
+
+#: radtest/main.c:60
+#, c-format
+msgid "assign: expected `='\n"
+msgstr "додела: очекивано је „=“\n"
+
+#: radtest/main.c:107
+msgid "radtest specific switches:"
+msgstr "„radtest“-у специфични прекидачи:"
+
+#: radtest/main.c:112
+msgid "assign a VALUE to VARIABLE"
+msgstr "додељује ВРЕДНОСТ ПРОМЕНЉИВОЈ"
+
+#: radtest/main.c:113
+msgid "VARIABLE=VALUE"
+msgstr "ПРОМЕНЉИВА=ВРЕДНОСТ"
+
+#: radtest/main.c:123
+msgid "set debugging level"
+msgstr "поставља ниво прочишћавања"
+
+#: radtest/main.c:134
+#, fuzzy
+#| msgid "Read input from FILE. Stops further processing of the command line."
+msgid "read input from FILE; stops further processing of the command line"
+msgstr "Чита улаз из ДАТОТЕКЕ. Зауставља даљу обраду линије наредби."
+
+#: radtest/main.c:145
+#, fuzzy
+#| msgid "Loading configuration files."
+msgid "don't read the configuration file"
+msgstr "Учитавам датотеке подешавања."
+
+#: radtest/main.c:156
+msgid "set number of retries"
+msgstr "поставља број поновних покушаја"
+
+#: radtest/main.c:168
+msgid "set radius server parameters"
+msgstr "поставља параметре радијус сервера"
+
+#: radtest/main.c:169
+msgid "SERVER"
+msgstr "СЕРВЕР"
+
+#: radtest/main.c:180
+msgid "set timeout"
+msgstr "поставља истек времена"
+
+#: radtest/main.c:192
+msgid "verbose mode"
+msgstr "режим опширности"
+
+#: radtest/main.c:202
+msgid "disable interactive mode"
+msgstr "искључује међудејствени режим"
+
+#: radtest/main.c:213
+msgid "Check the input file syntax and exit"
+msgstr "Проверава синтаксу датотеке улаза и излази"
+
+#: radtest/main.c:225
+msgid "Radius client shell"
+msgstr "Шкољка клијента Радијуса"
+
+#: radtest/main.c:302
+#, c-format
+msgid "can't parse server definition"
+msgstr "не могу да обрадим дефиницију сервера"
+
+#: radtest/main.c:307
+#, c-format
+msgid "no shared secret for the server"
+msgstr "нема дељене тајне за сервер"
+
+#: radtest/main.c:319
+#, c-format
+msgid "bad IP address or host name: %s"
+msgstr "лоша ИП адреса или назив домаћина: %s"
+
+#: radtest/main.c:352
+#, c-format
+msgid "bad separator near %s"
+msgstr "лош раздвојник близу „%s“"
+
+#: radtest/main.c:371
+#, c-format
+msgid "No servers specfied. Use -s option.\n"
+msgstr "Није наведен сервер. Користите опцију „-s“.\n"
+
+#: radtest/main.c:400
+#, c-format
+msgid "assign: missing closing quote\n"
+msgstr "додела: недостају затварајући наводници\n"
+
+#: radtest/main.c:419 radtest/main.c:428
+#, c-format
+msgid "assign: invalid IP address: %s\n"
+msgstr "додела: неисправна ИП адреса: %s\n"
+
+#: radtest/runtime.c:153 radtest/runtime.c:159
+msgid "out of memory"
+msgstr "нема више меморије"
+
+#: radtest/runtime.c:200 radtest/runtime.c:206
+msgid "division by zero"
+msgstr "дељење нулом"
+
+#. TRANSLATORS: The following operation names are used as complements,
+#. e.g.: "incompatible types in addition"
+#.
+#: radtest/runtime.c:264
+msgid "addition"
+msgstr "сабирању"
+
+#: radtest/runtime.c:265
+msgid "subtraction"
+msgstr "одузимање"
+
+#: radtest/runtime.c:266
+msgid "multiplication"
+msgstr "множење"
+
+#: radtest/runtime.c:267 radtest/runtime.c:268
+msgid "division"
+msgstr "дељење"
+
+#: radtest/runtime.c:269
+msgid "boolean conjunction"
+msgstr "логичка конјункција"
+
+#: radtest/runtime.c:270
+msgid "boolean disjunction"
+msgstr "логичка дисјункција"
+
+#: radtest/runtime.c:271 radtest/runtime.c:272 radtest/runtime.c:273
+#: radtest/runtime.c:274 radtest/runtime.c:275 radtest/runtime.c:276
+msgid "comparison"
+msgstr "поређење"
+
+#: radtest/runtime.c:282
+#, c-format
+msgid "incompatible types in %s"
+msgstr "несагласне врсте у %s"
+
+#: radtest/runtime.c:290
+msgid "binary negation"
+msgstr "бинарна негација"
+
+#: radtest/runtime.c:291
+msgid "numeric negation"
+msgstr "бројевна негација"
+
+#: radtest/runtime.c:298
+#, c-format
+msgid "incompatible data type in %s"
+msgstr "несагласна врста података у „%s“"
+
+#: radtest/runtime.c:442 radtest/runtime.c:511
+#, c-format
+msgid "variable `%s' used before definition"
+msgstr "променљива „%s“ је коришћена пре дефиниције"
+
+#: radtest/runtime.c:454
+#, c-format
+msgid "%s:%d: unknown data type"
+msgstr "%s:%d: непозната врста података"
+
+#: radtest/runtime.c:477 radtest/runtime.c:571 radtest/runtime.c:1411
+#, fuzzy, c-format
+#| msgid "regexp error: %s"
+msgid "read error: %s"
+msgstr "грешка регуларног израза: %s"
+
+#: radtest/runtime.c:487 radtest/runtime.c:581 radtest/runtime.c:1420
+#, fuzzy
+#| msgid "string too long: %s"
+msgid "input line too long"
+msgstr "ниска је предуга: %s"
+
+#: radtest/runtime.c:628 radtest/runtime.c:677
+msgid "invalid data type"
+msgstr "неисправна врста података"
+
+#. TRANSLATORS: The following six msgids are data type names in the
+#. form of *direct object*. They are used in place of the first %s
+#. in the sentence 'cannot convert %s %s'
+#: radtest/runtime.c:782
+msgid "undefined"
+msgstr "недефинисану"
+
+#: radtest/runtime.c:784
+msgid "ipaddress"
+msgstr "ип-адресу"
+
+#: radtest/runtime.c:786
+msgid "binary string"
+msgstr "бинарну ниску"
+
+#: radtest/runtime.c:787
+msgid "pairlist"
+msgstr "списак пара"
+
+#: radtest/runtime.c:788
+msgid "A/V list"
+msgstr "A/V списак"
+
+#. TRANSLATORS: The following six msgids are data type names in the
+#. form of *indirect object*. They are used in place of second %s
+#. in the sentence 'cannot convert %s %s'
+#: radtest/runtime.c:795
+msgid "to undefined"
+msgstr "у недефинисану"
+
+#: radtest/runtime.c:797
+msgid "to ipaddress"
+msgstr "у ип-адресу"
+
+#: radtest/runtime.c:799
+msgid "to binary string"
+msgstr "у бинарну ниску"
+
+#: radtest/runtime.c:800
+msgid "to pairlist"
+msgstr "у списак пара"
+
+#: radtest/runtime.c:801
+msgid "to A/V list"
+msgstr "у A/V списак"
+
+#. TRANSLATORS: First %s is replaced with a type name,
+#. second %s -- with a type name with an appropriate preposition.
+#. For example, in English:
+#. cannot convert integer to string
+#.
+#: radtest/runtime.c:814
+#, c-format
+msgid "cannot convert %s %s"
+msgstr "не могу да претворим „%s %s“"
+
+#: radtest/runtime.c:1140
+msgid "not a pair list"
+msgstr "није списак парова"
+
+#: radtest/runtime.c:1281
+msgid "invalid data type in send statement (expected A/V list)"
+msgstr "неисправна врста података у изјави слања (очекивах A/V списак)"
+
+#: radtest/runtime.c:1297
+#, c-format
+msgid "expect %s\n"
+msgstr "очекивах „%s“\n"
+
+#: radtest/runtime.c:1298
+#, c-format
+msgid "got    %s\n"
+msgstr "добих    „%s“\n"
+
+#: radtest/runtime.c:1308
+msgid "expected A/V pair list"
+msgstr "очекивах A/V списак парова"
+
+#: radtest/runtime.c:1336
+msgid "invalid data type in exit statement"
+msgstr "неисправна врста података у изјави изласка"
+
+#: radtest/runtime.c:1559
+msgid "invalid data type in `shift'"
+msgstr "неисправна врста података у „помаку“"
+
+#: radtest/runtime.c:1566
+msgid "not enough arguments to shift"
+msgstr "нема довољно аргумената за помицање"
+
+#: radwho/radwho.c:153
+msgid "radwho specific switches:"
+msgstr "„radwho“-у специфични прекидачи:"
+
+#: radwho/radwho.c:158
+msgid "print all entries, not only active ones"
+msgstr "исписује све уносе, ане само оне активне"
+
+#: radwho/radwho.c:169
+msgid "display CLID in second column"
+msgstr "приказује CLID у другој колони"
+
+#: radwho/radwho.c:179
+msgid "change date representation format"
+msgstr "мења формат приказивања датума"
+
+#: radwho/radwho.c:180
+msgid "DATEFMT"
+msgstr "ФМТ-ДАТУМА"
+
+#: radwho/radwho.c:191
+msgid "print STRING instead of an empty column"
+msgstr "исписује НИСКУ уместо празне колоне"
+
+#: radwho/radwho.c:192
+msgid "STRING"
+msgstr "НИСКА"
+
+#: radwho/radwho.c:203
+msgid "Use FILE instead of /var/log/radutmp"
+msgstr "Користи ДАТОТЕКУ уместо „/var/log/radutmp“"
+
+#: radwho/radwho.c:215
+msgid "act as a finger daemon"
+msgstr "делује као позадинац додира"
+
+#: radwho/radwho.c:226
+msgid "do not display header line"
+msgstr "не приказује ред заглавља"
+
+#: radwho/radwho.c:237
+msgid "display session ID in the second column"
+msgstr "приказује ИД сесије у другој колони"
+
+#: radwho/radwho.c:256
+msgid "Long output. All fields will be printed."
+msgstr "Дуг излаз. Биће исписана сва поља."
+
+#: radwho/radwho.c:266
+msgid "display also local users"
+msgstr "приказује такође локалне кориснике"
+
+#: radwho/radwho.c:277
+msgid "do not resolve hostnames."
+msgstr "не решава називе домаћина."
+
+#: radwho/radwho.c:288
+msgid "change output format"
+msgstr "мења формат излаза"
+
+#: radwho/radwho.c:289
+msgid "FORMAT"
+msgstr "ФОРМАТ"
+
+#: radwho/radwho.c:299
+msgid "secure mode: requires that the username be specified"
+msgstr "безбедни режим: захтева да се наведе корисничко име"
+
+#: radwho/radwho.c:312
+msgid "display who is logged on by Radius"
+msgstr "приказује које пријављен помоћу Радијуса"
+
+#: radwho/radwho.c:379
+#, c-format
+msgid "must provide username\n"
+msgstr "морате доставити корисничко име\n"
+
+#: radwho/radwho.c:415
+#, c-format
+msgid "can't open file: %s"
+msgstr "не могу да отворим датотеку: %s"
+
+#: radzap/radzap.c:63
+msgid "radzap specific switches:"
+msgstr "„radzap“-у специфични прекидачи:"
+
+#: radzap/radzap.c:68
+msgid "ask for confirmation before zapping"
+msgstr "тражи потврђивање пре запирања"
+
+#: radzap/radzap.c:78
+msgid "set logging directory"
+msgstr "поставља директоријум дневника"
+
+#: radzap/radzap.c:90
+msgid "operate on FILE instead of /var/log/radutmp"
+msgstr "ради на ДАТОТЕЦИ уместо „/var/log/radutmp“"
+
+#: radzap/radzap.c:102
+msgid "zap user from given NAS"
+msgstr "зап корисник са датог NAS-а"
+
+#: radzap/radzap.c:114
+msgid "zap user coming from given port"
+msgstr "зап корисник који долази са датог прикључника"
+
+#: radzap/radzap.c:126
+msgid "do not ask for confirmation before zapping"
+msgstr "не тражи потврђивање пре запирања"
+
+#: radzap/radzap.c:139
+msgid "delete Radius login records"
+msgstr "брише записе пријављивања Радијуса"
+
+#: radzap/radzap.c:141
+msgid "[OPTIONS] [USER]"
+msgstr ""
+
+#: radzap/radzap.c:201
+#, c-format
+msgid "radzap: zapping %s from %s, port %d"
+msgstr "radzap: запирам „%s“ из „%s“, прикључник %d"
+
+#: radzap/radzap.c:209
+#, c-format
+msgid "Not confirmed\n"
+msgstr "Није потврђено\n"
+
+#: radzap/radzap.c:247
+#, c-format
+msgid "at least one port, nas or user must be specified"
+msgstr "најмање један прикључник, нас или корисник мора бити наведен"
+
+#: radzap/radzap.c:269
+#, c-format
+msgid "%s: host not found.\n"
+msgstr "%s: нисам нашао домаћина.\n"
+
+#: sql/disp.c:138
+msgid "Failed query was"
+msgstr "Неуспели упит беше"
+
+#: sql/mysql.c:78
+msgid "gave up on connect"
+msgstr "одустани након повезивања"
+
+#: sql/mysql.c:106
+#, c-format
+msgid "[MYSQL] cannot connect to %s as %s: %s"
+msgstr "[MYSQL] не могу да се повежем на „%s“ као „%s“: %s"
+
+#: sql/mysql.c:162
+#, c-format
+msgid "[MYSQL]: can't get result"
+msgstr "[MYSQL]: не могу да добавим резултат"
+
+#: sql/odbc.c:229
+#, c-format
+msgid "query returned more tuples: %s"
+msgstr "упит је вратио више н-торки: %s"
+
+#: sql/odbc.c:341
+#, c-format
+msgid "too few columns returned (%d req'd)"
+msgstr "премало колона је враћено (%d req'd)"
+
+#: sql/postgres.c:69
+#, c-format
+msgid "PQconnectStart failed: %s"
+msgstr "„PQconnectStart“ није успело: %s"
+
+#: sql/postgres.c:151 sql/postgres.c:201 sql/postgres.c:268
+#, c-format
+msgid "PQexec returned %s"
+msgstr "„PQexec“ је вратило „%s“"
+
+#: sql/postgres.c:192
+#, c-format
+msgid "query returned %d tuple: %s"
+msgid_plural "query returned %d tuples: %s"
+msgstr[0] "упит је вратио %d н-торку: %s"
+msgstr[1] "упит је вратио %d н-торке: %s"
+msgstr[2] "упит је вратио %d н-торки: %s"
+
+#, c-format
+#~ msgid "%s: option `--%s' doesn't allow an argument\n"
+#~ msgstr "%s: опција „--%s“ не дозвољава аргумент\n"
+
+#, c-format
+#~ msgid "%s: illegal option -- %c\n"
+#~ msgstr "%s: неисправна опција — %c\n"
+
+#, c-format
+#~ msgid "%s: invalid option -- %c\n"
+#~ msgstr "%s: неисправна опција — %c\n"
+
+#, c-format
+#~ msgid "%s: option requires an argument -- %c\n"
+#~ msgstr "%s: опција захтева аргумент — %c\n"
+
+#, c-format
+#~ msgid "%s: option `-W %s' is ambiguous\n"
+#~ msgstr "%s: опција „-W %s“ је нејасна\n"
+
+#, c-format
+#~ msgid "%s: option `-W %s' doesn't allow an argument\n"
+#~ msgstr "%s: опција „-W %s“ не дозвољава аргумент\n"
+
+#, c-format
+#~ msgid "%.*s: ARGP_HELP_FMT parameter must be positive"
+#~ msgstr "%.*s: параметар „ARGP_HELP_FMT“ мора бити позитиван"
+
+#, c-format
+#~ msgid "Garbage in ARGP_HELP_FMT: %s"
+#~ msgstr "Ђубре у „ARGP_HELP_FMT“-у: %s"
+
+#~ msgid "  or: "
+#~ msgstr "  или: "
+
+#, c-format
+#~ msgid "Try `%s --help' or `%s --usage' for more information.\n"
+#~ msgstr "Пробајте „%s --help“ или „%s --usage“ за више информација.\n"
+
+#, c-format
+#~ msgid "Report bugs to %s.\n"
+#~ msgstr "Грешке пријавите на „%s“.\n"
+
+#~ msgid "Unknown system error"
+#~ msgstr "Непозната системска грешка"
+
+#~ msgid "NAME"
+#~ msgstr "НАЗИВ"
+
+#~ msgid "set the program name"
+#~ msgstr "поставља назив програма"
+
+#~ msgid "SECS"
+#~ msgstr "СЕКУНДЕ"
+
+#~ msgid "hang for SECS seconds (default 3600)"
+#~ msgstr "стаје за СЕКУНДЕ секунде (основно је 3600)"
+
+#, c-format
+#~ msgid "(PROGRAM ERROR) No version known!?"
+#~ msgstr "(ГРЕШКА ПРОГРАМА) Није познато издање!?"
+
+#, c-format
+#~ msgid "%s: Too many arguments\n"
+#~ msgstr "%s: Превише аргумената\n"
+
+#~ msgid "(PROGRAM ERROR) Option should have been recognized!?"
+#~ msgstr "(ГРЕШКА ПРОГРАМА) Опција треба да буде препозната!?"
+
+#, c-format
+#~ msgid "low core: aborting"
+#~ msgstr "ниско језгро: прекидам"
+
+#~ msgid "print license and exit"
+#~ msgstr "исписује лиценцу и излази"
+
+#~ msgid ""
+#~ "   This program is free software; you can redistribute it and/or modify\n"
+#~ "   it under the terms of the GNU General Public License as published by\n"
+#~ "   the Free Software Foundation; either version 3, or (at your option)\n"
+#~ "   any later version.\n"
+#~ "\n"
+#~ "   This program is distributed in the hope that it will be useful,\n"
+#~ "   but WITHOUT ANY WARRANTY; without even the implied warranty of\n"
+#~ "   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\n"
+#~ "   GNU General Public License for more details.\n"
+#~ "\n"
+#~ "   You should have received a copy of the GNU General Public License\n"
+#~ "   along with GNU Radius; if not, write to the Free Software Foundation,\n"
+#~ "   Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.\n"
+#~ "\n"
+#~ msgstr ""
+#~ "   Овај програм је слободан софтвер; можете га прослеђивати\n"
+#~ "   и/или мењати под условима ГНУ Опште јавне лиценце коју је\n"
+#~ "   објавила Задужбина слободног софтвера; верзије 3 лиценце\n"
+#~ "   или (по вашем избору) било које новије верзије.\n"
+#~ "\n"
+#~ "   Овај програм се расподељује у нади да ће бити користан,\n"
+#~ "   али БЕЗ ИКАКВЕ ГАРАНЦИЈЕ; чак и без примењене гаранције\n"
+#~ "   ТРЖИШНЕ ВРЕДНОСТИ или ПРИЛАГОЂЕНОСТИ ОДРЕЂЕНОЈ НАМЕНИ.\n"
+#~ "   Погледајте ГНУ Општу јавну лиценцу за више детаља.\n"
+#~ "\n"
+#~ "   Треба да сте примили примерак ГНУ Опште јавне лиценце\n"
+#~ "   уз овај програм; ако нисте, пишите Фондацији слободног\n"
+#~ "   софтвера на адресу: „Free Software Foundation, Inc.,\n"
+#~ "   51 Franklin Street, Fifth Floor, Boston, MA 02111-1307, USA“.\n"
+
+#~ msgid "gsub: not enough memory"
+#~ msgstr "gsub: нема довољно меморије"
+
+#~ msgid "sub: not enough memory"
+#~ msgstr "sub: нема довољно меморије"
+
+#, c-format
+#~ msgid "%s: GNU Radius version %s"
+#~ msgstr "%s: Гну Радијус издање %s"
+
+#, c-format
+#~ msgid "--width is incompatible with --show-seconds"
+#~ msgstr "„--width“ није сагласна са „--show-seconds“"
+
+#~ msgid "display hostnames without domain part"
+#~ msgstr "приказује називе домаћина без дела домена"

@@ -2,7 +2,7 @@
  *  SHA-1 in C
  *  By Steve Reid <steve@edmweb.com>
  *  100% Public Domain
- *  
+ *
  *  Version:	$Id$
  */
 
@@ -111,12 +111,12 @@ unsigned int i, j;
     if ((context->count[0] += len << 3) < (len << 3)) context->count[1]++;
     context->count[1] += (len >> 29);
     if ((j + len) > 63) {
-        memcpy(&context->buffer[j], data, (i = 64-j));
-        SHA1Transform(context->state, context->buffer);
-        for ( ; i + 63 < len; i += 64) {
-            SHA1Transform(context->state, &data[i]);
-        }
-        j = 0;
+	memcpy(&context->buffer[j], data, (i = 64-j));
+	SHA1Transform(context->state, context->buffer);
+	for ( ; i + 63 < len; i += 64) {
+	    SHA1Transform(context->state, &data[i]);
+	}
+	j = 0;
     }
     else i = 0;
     memcpy(&context->buffer[j], &data[i], len - i);
@@ -131,17 +131,17 @@ unsigned long i, j;
 unsigned char finalcount[8];
 
     for (i = 0; i < 8; i++) {
-        finalcount[i] = (unsigned char)((context->count[(i >= 4 ? 0 : 1)]
-         >> ((3-(i & 3)) * 8) ) & 255);  /* Endian independent */
+	finalcount[i] = (unsigned char)((context->count[(i >= 4 ? 0 : 1)]
+	 >> ((3-(i & 3)) * 8) ) & 255);  /* Endian independent */
     }
-    SHA1Update(context, "\200", 1);
+    SHA1Update(context, (unsigned char*)"\200", 1);
     while ((context->count[0] & 504) != 448) {
-        SHA1Update(context, "\0", 1);
+	SHA1Update(context, (unsigned char*)"\0", 1);
     }
     SHA1Update(context, finalcount, 8);  /* Should cause a SHA1Transform() */
     for (i = 0; i < 20; i++) {
-        digest[i] = (unsigned char)
-         ((context->state[i>>2] >> ((3-(i & 3)) * 8) ) & 255);
+	digest[i] = (unsigned char)
+	 ((context->state[i>>2] >> ((3-(i & 3)) * 8) ) & 255);
     }
     /* Wipe variables */
     i = j = 0;
@@ -153,4 +153,3 @@ unsigned char finalcount[8];
     SHA1Transform(context->state, context->buffer);
 #endif
 }
-

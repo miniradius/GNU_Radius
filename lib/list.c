@@ -1,20 +1,18 @@
 /* This file is part of GNU Radius.
-   Copyright (C) 2003,2004,2007,2008 Free Software Foundation
-  
+   Copyright (C) 2003,2004,2007,2008,2013 Free Software Foundation
+
    GNU Radius is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
    the Free Software Foundation; either version 3 of the License, or
    (at your option) any later version.
-  
+
    GNU Radius is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
-  
-   You should have received a copy of the GNU General Public
-   License along with GNU Radius; if not, write to the Free
-   Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-   Boston, MA 02110-1301 USA. */
+
+   You should have received a copy of the GNU General Public License
+   along with GNU Radius.  If not, see <http://www.gnu.org/licenses/>. */
 
 #ifdef HAVE_CONFIG_H
 # include <config.h>
@@ -43,7 +41,7 @@ struct grad_iterator {
 };
 
 struct grad_list *
-grad_list_create()
+grad_list_create(void)
 {
 	struct grad_list *p = grad_emalloc(sizeof(*p));
 	p->head = p->tail = NULL;
@@ -56,7 +54,7 @@ grad_list_destroy(struct grad_list **plist, list_iterator_t user_free, void *dat
 {
 	struct grad_list_entry *p;
 	struct grad_list *list;
-	
+
 	if (!*plist)
 		return;
 
@@ -67,10 +65,10 @@ grad_list_destroy(struct grad_list **plist, list_iterator_t user_free, void *dat
 		struct grad_list_entry *next = p->next;
 		if (user_free)
 			user_free(p->data, data);
-		grad_free(p);
+		free(p);
 		p = next;
 	}
-	grad_free(list);
+	free(list);
 }
 
 void *
@@ -88,7 +86,7 @@ grad_iterator_attach(grad_iterator_t *itr, grad_list_t *list)
 	itr->cur = NULL;
 	itr->next = list->itr;
 	itr->advanced = 0;
-	list->itr = itr;	
+	list->itr = itr;
 }
 
 static grad_iterator_t *
@@ -101,7 +99,7 @@ grad_iterator_detach(grad_iterator_t *iter)
 	     prev = cur, cur = cur->next)
 		if (cur == iter)
 			break;
-	
+
 	if (cur) {
 		if (prev)
 			prev->next = cur->next;
@@ -110,7 +108,7 @@ grad_iterator_detach(grad_iterator_t *iter)
 	}
 	return cur;
 }
-		     
+
 grad_iterator_t *
 grad_iterator_create(grad_list_t *list)
 {
@@ -127,15 +125,15 @@ void
 grad_iterator_destroy(grad_iterator_t **ip)
 {
 	grad_iterator_t *itr;
-	
+
 	if (!ip || !*ip)
 		return;
 	itr = grad_iterator_detach(*ip);
 	if (itr)
-		grad_free(itr);
+		free(itr);
 	*ip = NULL;
 }
-		
+
 void *
 grad_iterator_first(grad_iterator_t *ip)
 {
@@ -155,7 +153,7 @@ grad_iterator_next(grad_iterator_t *ip)
 		ip->cur = ip->cur->next;
 	ip->advanced = 0;
 	return grad_iterator_current(ip);
-}	
+}
 
 static void
 _iterator_advance(grad_iterator_t *ip, struct grad_list_entry *e)
@@ -249,15 +247,15 @@ grad_list_remove(struct grad_list *list, void *data, list_comp_t cmp)
 		list->head = list->head->next;
 		if (!list->head)
 			list->tail = NULL;
-	} else 
+	} else
 		prev->next = p->next;
-	
+
 	if (p == list->tail)
 		list->tail = prev;
-	
-	grad_free(p);
+
+	free(p);
 	list->count--;
-	
+
 	return data;
 }
 
@@ -268,7 +266,7 @@ grad_list_iterate(struct grad_list *list, list_iterator_t func, void *data)
 {
 	grad_iterator_t itr;
 	void *p;
-	
+
 	if (!list)
 		return;
 	grad_iterator_attach(&itr, list);
@@ -292,17 +290,17 @@ grad_list_locate(struct grad_list *list, void *data, list_comp_t cmp)
 			break;
 	return cur ? cur->data : NULL;
 }
-	
+
 int
 grad_list_insert_sorted(struct grad_list *list, void *data, list_comp_t cmp)
 {
 	struct grad_list_entry *cur, *prev;
-	
+
 	if (!list)
 		return -1;
 	if (!cmp)
 		return -1;
-		
+
 	for (cur = list->head, prev = NULL; cur; prev = cur, cur = cur->next)
 		if (cmp(cur->data, data) > 0)
 			break;
@@ -320,4 +318,3 @@ grad_list_insert_sorted(struct grad_list *list, void *data, list_comp_t cmp)
 	}
 	return 0;
 }
-

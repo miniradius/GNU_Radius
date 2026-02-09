@@ -29,7 +29,7 @@ ATTRIBUTE       Tunnel-Server-Auth-Id           91      string
 
 VALUE		Framed-Protocol		PPTP			9
 
-#  Some of the new Tunnel values 
+#  Some of the new Tunnel values
 #VALUE		Tunnel-Security		None			0
 #VALUE		Tunnel-Security		Control-Only		1
 #VALUE		Tunnel-Security		Data-Only		2
@@ -56,4 +56,3 @@ VALUE		Tunnel-Medium-Type	IP		1
 VALUE		Tunnel-Medium-Type	X25		2
 VALUE		Tunnel-Medium-Type	ATM		3
 VALUE		Tunnel-Medium-Type	Frame-Relay	4
-

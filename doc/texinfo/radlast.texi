@@ -1,9 +1,9 @@
 @c This is part of the Radius manual.
-@c Copyright (C) 1999,2000,2001,2002,2003 Free Software Foundation, Inc.
+@c Copyright (C) 1999-2025 Free Software Foundation, Inc.
 @c Written by Sergey Poznyakoff
 @c See file radius.texi for copying conditions.
 @comment *******************************************************************
-@node Radlast, Radzap, Radwho, Utility Programs
+@node Radlast
 @section @command{radlast}
 @pindex radlast
 
@@ -47,21 +47,21 @@ Use following command line options to control the behavior of the
 @table @option
 @item -@var{number}
 @itemx -c @var{number}
-@itemx --count @var{number}
+@itemx --count=@var{number}
 When given this option, @command{radlast} will output at most this many
-lines of information. 
+lines of information.
 
 @item -f
-@itemx --file @var{name}
+@itemx --file=@var{name}
 Read the specified file instead of the default @file{/var/log/radwtmp}.
 
 @item -h @var{hostname}
-@itemx --host @var{hostname}
+@itemx --host=@var{hostname}
 Report the logins from given host. Host can be either a name or a
 dotted-quad Internet address.
 
 @item -n @var{shortname}
-@itemx --nas @var{shortname}
+@itemx --nas=@var{shortname}
 Report the logins from the given @NAS{}.
 
 @item -l
@@ -70,7 +70,7 @@ Long output format. Report all the information stored in
 @file{radwtmp} file.
 
 @item -p @var{number}
-@itemx --port @var{number}
+@itemx --port=@var{number}
 Report the logins on a given port. The port may be specified either fully or
 abbreviated, e.g. @code{radlast -p S03} or @code{radlast -p 3}.
 

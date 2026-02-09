@@ -1,5 +1,5 @@
 # This file is part of GNU Radius.
-# Copyright (C) 2000,2001,2002,2003,2004,2007 Free Software Foundation, Inc.
+# Copyright (C) 2000-2025 Free Software Foundation, Inc.
 #
 # Written by Sergey Poznyakoff
 #
@@ -14,13 +14,15 @@
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with GNU Radius; if not, write to the Free Software Foundation,
-# Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+# along with GNU Radius.  If not, see <http://www.gnu.org/licenses/>.
 
-AUTOMAKE_OPTIONS = gnits 1.8 dist-bzip2
-ACLOCAL_AMFLAGS = -I m4 -I am
+if RA_COND_GUILE
+  GINT_DIR = gint
+  RADSCM_DIR = radscm
+endif
 
-SUBDIRS= scripts include lib gnu sql snmplib radscm radiusd radwho \
+SUBDIRS= scripts include lib $(GINT_DIR) sql snmplib $(RADSCM_DIR) \
+         radiusd radwho \
          radzap radlast radscripts elisp raddb db client radtest \
          examples tests doc po\
          mibs contrib 
@@ -36,34 +38,17 @@ update-dictionary:
 distuninstallcheck_listfiles = \
  find $(prefix) -type f -not -path '$(sysconfdir)/raddb/*'
 
-.PHONY: make-ChangeLog
-make-ChangeLog: 
-	if test -d .git; then                                           \
-	  $(top_srcdir)/build-aux/gitlog-to-changelog |                 \
-            sed '/<unknown>$$/d' | fmt -s > $(distdir)/cl-t;            \
-	  echo "" >> $(distdir)/cl-t;                                 \
-	  echo "Local Variables:" >> $(distdir)/cl-t;                   \
-	  echo "mode: change-log" >> $(distdir)/cl-t;                   \
-	  echo "version-control: never"  >> $(distdir)/cl-t;            \
-	  echo "buffer-read-only: t" >> $(distdir)/cl-t;                \
-	  echo "End:" >> $(distdir)/cl-t;                               \
-	  rm -f $(distdir)/ChangeLog;                                   \
-	  mv $(distdir)/cl-t $(distdir)/ChangeLog;                      \
-	fi
-
-dist-hook: make-ChangeLog
-
 .PHONY: ChangeLog
-ChangeLog: 
-	if test -d .git; then                                           \
-	  $(top_srcdir)/build-aux/gitlog-to-changelog |                 \
-            sed '/<unknown>$$/d' | fmt -s > ChangeLog;                  \
-	  echo "" >> ChangeLog;                                       \
-	  echo "Local Variables:" >> ChangeLog;                         \
-	  echo "mode: change-log" >> ChangeLog;                         \
-	  echo "version-control: never"  >> ChangeLog;                  \
-	  echo "buffer-read-only: t" >> ChangeLog;                      \
-	  echo "End:" >> ChangeLog;                                     \
+ChangeLog:
+	$(AM_V_GEN)if test -d .git; then                                     \
+	 (git log --pretty='format:%H#%ad  %cn  <%ae>%n%n%w(72,8,8)%s%n%n%b' \
+		  --date=short | sed -r -f scripts/ChangeLog.sed;            \
+	  echo "";                                                           \
+	  echo "Local Variables:";                                           \
+	  echo "mode: change-log";                                           \
+	  echo "version-control: never";                                     \
+	  echo "buffer-read-only: t";                                        \
+	  echo "End:") > ChangeLog;                                          \
         fi
 
 MAINTAINERCLEANFILES=core *~ err out
@@ -77,5 +62,5 @@ alphacheck:
 	$(MAKE) distcheck distdir=$(PACKAGE)-$(VERSION)-`date +'%Y%m%d'`
 
 
- 
+
 

@@ -1,0 +1,3206 @@
+# Translation of radius in Romanian.
+# Mesajele în limba română pentru pachetul radius.
+# Copyright © 2025 Free Software Foundation, Inc.
+# This file is distributed under the same license as the radius package.
+#
+# Remus-Gabriel Chelu <remusgabriel.chelu@disroot.org>, 2025.
+#
+# Cronologia traducerii fișierului „radius”:
+# Traducerea inițială, făcută de R-GC, pentru versiunea radius 1.6.1 (30% - tradus), iul-2025.
+# Completare traducere, făcută de R-GC, pentru versiunea radius 1.6.1 (100% - tradus), aug-2025.
+# Actualizare a traducerii pentru versiunea 1.6.90, făcută de R-GC, dec-2025.
+# Actualizare a traducerii pentru versiunea Y, făcută de X, Z(luna-anul).
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: radius 1.6.90\n"
+"Report-Msgid-Bugs-To: bug-radius@gnu.org\n"
+"POT-Creation-Date: 2025-12-11 13:43+0200\n"
+"PO-Revision-Date: 2025-12-02 18:26+0100\n"
+"Last-Translator: Remus-Gabriel Chelu <remusgabriel.chelu@disroot.org>\n"
+"Language-Team: Romanian <translation-team-ro@lists.sourceforge.net>\n"
+"Language: ro\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n==1 ? 0 : (n==0 || (n%100 > 0 && n%100 < "
+"20)) ? 1 : 2);\n"
+"X-Bugs: Report translation errors to the Language-Team address.\n"
+"X-Generator: Poedit 3.6\n"
+
+#: lib/avl.c:88
+#, c-format
+msgid "make_pair(): attribute %d not found in dictionary"
+msgstr "make_pair(): atributul %d nu a fost găsit în dicționar"
+
+#: lib/client.c:125
+#, c-format
+msgid "Actual request length does not match reported length (%d, %d)"
+msgstr "Lungimea reală a cererii nu corespunde cu lungimea raportată (%d, %d)"
+
+#: lib/client.c:139
+#, c-format
+msgid "Received invalid reply digest from server"
+msgstr "S-a primit o sumă de control (digest) de răspuns nevalidă de la server"
+
+#: lib/client.c:221
+#, c-format
+msgid "select() interrupted"
+msgstr "select() a fost întreruptă"
+
+#: lib/client.c:250
+#, c-format
+msgid "invalid port type"
+msgstr "tip de port nevalid"
+
+#: lib/client.c:355
+#, c-format
+msgid "error receiving data from %s:%d"
+msgstr "eroare la primirea datelor de la %s:%d"
+
+#: lib/client.c:415 lib/dict.c:811 radiusd/config.y:216
+#, c-format
+msgid "unknown keyword"
+msgstr "cuvânt cheie necunoscut"
+
+#: lib/client.c:424 radiusd/files.c:931 radiusd/files.c:1126
+#, c-format
+msgid "wrong number of fields"
+msgstr "număr greșit de câmpuri"
+
+#: lib/client.c:433
+#, c-format
+msgid "bad IP address or host name"
+msgstr "adresă IP sau nume de gazdă greșite"
+
+#: lib/client.c:441 lib/client.c:448 radtest/main.c:333 radtest/main.c:343
+#, c-format
+msgid "bad port number %s"
+msgstr "număr de port incorect %s"
+
+#: lib/client.c:460
+#, c-format
+msgid "bad timeout value"
+msgstr "valoare greșită a timpului de așteptare"
+
+#: lib/client.c:466
+#, c-format
+msgid "bad retry value"
+msgstr "valoare greșită a numărului de reîncercări"
+
+#: lib/debug.c:207 lib/debug.c:214
+#, c-format
+msgid "compiled without debugging support"
+msgstr "compilat fără suport pentru depanare"
+
+#: lib/dict.c:122 lib/nas.c:52 radiusd/files.c:1034
+msgid "too few fields"
+msgstr "prea puține câmpuri"
+
+#: lib/dict.c:125
+msgid "too many fields"
+msgstr "prea multe câmpuri"
+
+#: lib/dict.c:256
+#, c-format
+msgid "missing ]"
+msgstr "lipsește „]”"
+
+#: lib/dict.c:272 lib/dict.c:285
+#, c-format
+msgid "invalid syntax flag %c"
+msgstr "opțiune de sintaxă nevalidă %c"
+
+#: lib/dict.c:363
+#, c-format
+msgid "invalid flag %c"
+msgstr "opțiune nevalidă %c"
+
+#: lib/dict.c:419 lib/dict.c:608 lib/dict.c:652
+#, c-format
+msgid "value not a number (near %s)"
+msgstr "valoarea nu este un număr (lângă %s)"
+
+#: lib/dict.c:430
+#, c-format
+msgid "no parser registered for this attribute"
+msgstr "nu este înregistrat niciun analizator pentru acest atribut"
+
+#: lib/dict.c:439
+msgid "invalid type"
+msgstr "tip nevalid"
+
+#: lib/dict.c:446 lib/dict.c:695
+#, c-format
+msgid "unknown vendor"
+msgstr "furnizor necunoscut"
+
+#: lib/dict.c:474
+#, c-format
+msgid "Redefining attribute %s"
+msgstr "Se redefinește atributul %s"
+
+#: lib/dict.c:481
+#, c-format
+msgid "Redefining alias %s"
+msgstr "Se redefinește alias %s"
+
+#: lib/dict.c:511 lib/dict.c:547 lib/dict.c:617
+#, c-format
+msgid "Attribute %s is not defined"
+msgstr "Atributul „%s” nu este definit"
+
+#: lib/dict.c:519
+#, c-format
+msgid "Symbol %s already declared"
+msgstr "Simbolul %s este deja declarat"
+
+#: lib/dict.c:577
+#, c-format
+msgid "PROPERTY syntax error"
+msgstr "Eroare de sintaxă a PROPERTY"
+
+#: lib/dict.c:671
+#, c-format
+msgid "blocks cannot be nested"
+msgstr "blocurile nu pot fi imbricate"
+
+#: lib/dict.c:673
+#, c-format
+msgid "block opened here"
+msgstr "bloc deschis aici"
+
+#: lib/dict.c:685
+#, c-format
+msgid "block syntax: expected `VENDOR' but found `%s'"
+msgstr "sintaxa blocului: se aștepta „VENDOR”, dar s-a găsit „%s”."
+
+#: lib/dict.c:708
+#, c-format
+msgid "unexpected END"
+msgstr "END neașteptat"
+
+#: lib/dict.c:834
+#, c-format
+msgid "BEGIN without END"
+msgstr "BEGIN fără END"
+
+#: lib/dict.c:841
+#, c-format
+msgid "%s: %d error"
+msgid_plural "%s: %d errors"
+msgstr[0] "%s: %d eroare"
+msgstr[1] "%s: %d erori"
+msgstr[2] "%s: %d de erori"
+
+#: lib/mem.c:28
+#, c-format
+msgid "out of memory: aborting"
+msgstr "memorie epuizată; se abandonează"
+
+#: lib/raddb.c:74 lib/users-lex.l:232 radiusd/config.y:914 radiusd/stat.c:77
+#, c-format
+msgid "can't stat `%s'"
+msgstr "nu se poate stabili starea lui „%s”"
+
+#: lib/raddb.c:81 lib/raddb.c:86 radiusd/rewrite.y:1297 radiusd/rewrite.y:2747
+#: radiusd/scheme.c:184 radiusd/stat.c:71
+#, c-format
+msgid "can't open file `%s'"
+msgstr "nu se poate deschide fișierul „%s”"
+
+#: lib/raddb.c:98
+#, c-format
+msgid "%s: read error"
+msgstr "%s: eroare de citire"
+
+#: lib/raddb.c:101
+#, c-format
+msgid "%s: short read"
+msgstr "%s: citire scurtă"
+
+#: lib/radutmp.c:51
+#, c-format
+msgid "grad_ut_setent(): cannot open `%s'"
+msgstr "grad_ut_setent(): nu poate deschide „%s”"
+
+#: lib/radutmp.c:189
+#, c-format
+msgid "login: entry for NAS %s port %d duplicate"
+msgstr "login: intrarea pentru NAS %s portul %d este duplicată"
+
+#: lib/radutmp.c:195
+#, c-format
+msgid "login: entry for NAS %s port %d wrong order"
+msgstr "login: intrarea pentru NAS %s portul %d este în ordine greșită"
+
+#: lib/radutmp.c:207
+#, c-format
+msgid "logout: entry for NAS %s port %d has wrong ID (expected %s found %s)"
+msgstr ""
+"logout: intrarea pentru NAS %s portul %d are ID-ul greșit (așteptat %s găsit "
+"%s)"
+
+#: lib/radutmp.c:231
+#, c-format
+msgid "logout: login entry for NAS %s port %d not found"
+msgstr ""
+"logout: intrarea de autentificare pentru NAS %s portul %d nu a fost găsită"
+
+#: lib/radutmp.c:250 radiusd/acct.c:664
+#, c-format
+msgid "can't open %s"
+msgstr "nu se poate deschide %s"
+
+#: lib/users-lex.l:135
+#, c-format
+msgid "not enough memory"
+msgstr "memorie insuficientă"
+
+#: lib/users-lex.l:245
+#, c-format
+msgid "`%s' already included here"
+msgstr "„%s” este deja inclus aici"
+
+#: lib/users-lex.l:249
+#, c-format
+msgid "`%s' already included at top level"
+msgstr "„%s” este deja inclus la nivelul superior"
+
+#: lib/users-lex.l:257 radiusd/builddbm.c:142
+#, c-format
+msgid "can't open `%s'"
+msgstr "nu se poate deschide „%s”"
+
+#: lib/users-gram.y:106 radiusd/files.c:181
+#, c-format
+msgid "discarding user `%s'"
+msgstr "se elimină utilizatorul „%s”"
+
+#: lib/users-gram.y:216 radiusd/rewrite.y:1859 gram.y:661 gram.y:841
+#: radtest/gram.y:661 radtest/gram.y:841
+#, c-format
+msgid "unknown attribute `%s'"
+msgstr "atribut necunoscut „%s”"
+
+#: lib/users-gram.y:245
+#, c-format
+msgid "%s: not an absolute pathname"
+msgstr "%s: nu este un nume de rută absolută"
+
+#: lib/users-gram.y:258
+msgid "attribute"
+msgstr "atribut"
+
+#: lib/users-gram.y:290
+#, c-format
+msgid "value %s is not declared for attribute %s"
+msgstr "valoarea %s nu este declarată pentru atributul %s"
+
+#: lib/users-gram.y:337
+#, c-format
+msgid "%s: can't parse date"
+msgstr "%s: nu se poate analiza data"
+
+#: lib/users-gram.y:347
+#, c-format
+msgid "%s: unknown attribute type %d"
+msgstr "%s: tip de atribut necunoscut %d"
+
+#: lib/users-gram.y:379
+#, c-format
+msgid "enabled userfile parser debugging"
+msgstr "s-a activat depanarea analizatorului de fișiere utilizator"
+
+#: lib/users-gram.y:380
+#, c-format
+msgid "disabled userfile parser debugging"
+msgstr "s-a dezactivat depanarea analizatorului de fișiere utilizator"
+
+#: lib/util.c:245
+#, c-format
+msgid "string too long: %s"
+msgstr "șirul este prea lung: %s"
+
+#: lib/printutmp.c:488
+#, c-format
+msgid "missing closing quote in string started near `%s'"
+msgstr "ghilimele de închidere lipsă din șirul început lângă „%s”"
+
+#: lib/printutmp.c:564
+#, c-format
+msgid "error in format spec: unknown format %s"
+msgstr "eroare în specificația de format: format necunoscut %s"
+
+#: lib/printutmp.c:586
+#, c-format
+msgid "wrong number of arguments to form %s"
+msgstr "număr greșit de argumente pentru formatul %s"
+
+#: lib/printutmp.c:614
+#, c-format
+msgid "form `%s' not closed"
+msgstr "formatul „%s” nu este închis"
+
+#: lib/radcli.c:36
+msgid "Common options"
+msgstr "Opțiuni comune"
+
+#: lib/radcli.c:42
+msgid "Set path to the configuration directory"
+msgstr "Definește ruta către directorul de configurare"
+
+#: lib/radcli.c:43 radiusd/radiusd.c:267 radiusd/radiusd.c:321
+#: radiusd/radiusd.c:346 radzap/radzap.c:79
+msgid "DIR"
+msgstr "DIR"
+
+#: lib/radcli.c:55
+msgid ""
+"\n"
+"License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl."
+"html>\n"
+"This is free software: you are free to change and redistribute it.\n"
+"There is NO WARRANTY, to the extent permitted by law.\n"
+"\n"
+msgstr ""
+
+#: lib/radcli.c:68
+msgid "(C)"
+msgstr ""
+
+#: lib/radcli.c:100 radiusd/config.y:779 radiusd/config.y:785
+#: radzap/radzap.c:242
+#, c-format
+msgid "too many arguments"
+msgstr "prea multe argumente"
+
+#: lib/parseopt/help.c:92
+#, c-format
+msgid "error in ARGP_HELP_FMT: improper usage of [no-]%s"
+msgstr ""
+
+#: lib/parseopt/help.c:105
+#, fuzzy, c-format
+#| msgid "ARGP_HELP_FMT: %s value is less than or equal to %s"
+msgid "error in ARGP_HELP_FMT: bad value for %s (near %s)"
+msgstr "ARGP_HELP_FMT: %s valoarea este mai mică sau egală cu %s"
+
+#: lib/parseopt/help.c:111
+#, fuzzy, c-format
+#| msgid "ARGP_HELP_FMT: %s value is less than or equal to %s"
+msgid "error in ARGP_HELP_FMT: %s value is out of range"
+msgstr "ARGP_HELP_FMT: %s valoarea este mai mică sau egală cu %s"
+
+#: lib/parseopt/help.c:118
+#, fuzzy, c-format
+#| msgid "%.*s: ARGP_HELP_FMT parameter requires a value"
+msgid "%s: ARGP_HELP_FMT parameter requires a value"
+msgstr "%.*s: parametrul ARGP_HELP_FMT necesită o valoare"
+
+#: lib/parseopt/help.c:124
+#, fuzzy, c-format
+#| msgid "%.*s: Unknown ARGP_HELP_FMT parameter"
+msgid "%s: unknown ARGP_HELP_FMT parameter"
+msgstr "%.*s: Parametru ARGP_HELP_FMT necunoscut"
+
+#: lib/parseopt/help.c:150
+#, c-format
+msgid "ARGP_HELP_FMT: missing delimiter near %s"
+msgstr ""
+
+#: lib/parseopt/help.c:301
+msgid "Usage:"
+msgstr "Utilizare:"
+
+#: lib/parseopt/help.c:320
+#, fuzzy, c-format
+#| msgid " [OPTION...]"
+msgid "or: %s [OPTIONS...] %s\n"
+msgstr " [OPȚIUNE...]"
+
+#: lib/parseopt/help.c:584
+msgid ""
+"Mandatory or optional arguments to long options are also mandatory or "
+"optional for any corresponding short options."
+msgstr ""
+"Argumentele obligatorii sau opționale pentru opțiunile lungi sunt "
+"obligatorii sau opționale și pentru opțiunile corespunzătoare scurte."
+
+#: lib/parseopt/help.c:586
+msgid ""
+"If an option has several forms, a mandatory or optional argument is listed "
+"only once, after the last form."
+msgstr ""
+
+#: lib/parseopt/help.c:751
+#, fuzzy, c-format
+#| msgid "Usage:"
+msgid "usage: %s"
+msgstr "Utilizare:"
+
+#: lib/parseopt/help.c:757
+#, fuzzy
+#| msgid " [OPTION...]"
+msgid "[OPTIONS...]"
+msgstr " [OPȚIUNE...]"
+
+#: lib/parseopt/help.c:768
+#, fuzzy, c-format
+#| msgid "got    %s\n"
+msgid "or: %s %s\n"
+msgstr "s-a primit %s\n"
+
+#: lib/parseopt/help.c:813
+#, fuzzy, c-format
+#| msgid ""
+#| "\n"
+#| "Report bugs to <%s>\n"
+msgid "Report bugs and suggestions to <%s>\n"
+msgstr ""
+"\n"
+"Raportați erorile la <%s>.\n"
+
+#: lib/parseopt/help.c:817
+#, c-format
+msgid "%s home page: <%s>\n"
+msgstr ""
+
+#: lib/parseopt/optset.c:120 lib/parseopt/optset.c:136
+msgid "memory allocation error"
+msgstr ""
+
+#: lib/parseopt/parseopt.c:71
+#, fuzzy, c-format
+#| msgid "%s: unrecognized option '%s%s'\n"
+msgid "unrecognized option '-%c'"
+msgstr "%s: opțiune nerecunoscută „%s%s”\n"
+
+#: lib/parseopt/parseopt.c:142
+#, fuzzy, c-format
+#| msgid "%s: option '%s%s' is ambiguous; possibilities:"
+msgid "option '%s%*.*s' is ambiguous; possibilities:"
+msgstr "%s: opțiunea „%s%s” este ambiguă; posibilități:"
+
+#: lib/parseopt/parseopt.c:174
+#, fuzzy, c-format
+#| msgid "%s: unrecognized option '%s%s'\n"
+msgid "unrecognized option '%s%*.*s'"
+msgstr "%s: opțiune nerecunoscută „%s%s”\n"
+
+#: lib/parseopt/parseopt.c:337
+#, fuzzy, c-format
+#| msgid "%s: option '%s%s' requires an argument\n"
+msgid "option '%s%s' requires argument"
+msgstr "%s: opțiunea „%s%s” necesită un argument\n"
+
+#: lib/parseopt/parseopt.c:351
+#, fuzzy, c-format
+#| msgid "%s: option '%s%s' doesn't allow an argument\n"
+msgid "option '%s%s' does not take argument"
+msgstr "%s: opțiunea „%s%s” nu permite argumente\n"
+
+#: lib/parseopt/parseopt.c:369
+#, fuzzy, c-format
+#| msgid "%s: unrecognized option '%s%s'\n"
+msgid "bad value for option '%s%s'"
+msgstr "%s: opțiune nerecunoscută „%s%s”\n"
+
+#: lib/parseopt/parseopt.c:395
+#, fuzzy, c-format
+#| msgid "invalid flag %c"
+msgid "invalid argument '%s'"
+msgstr "opțiune nevalidă %c"
+
+#: lib/parseopt/parseopt.c:580
+#, fuzzy
+#| msgid "Common options"
+msgid "Informative options"
+msgstr "Opțiuni comune"
+
+#: lib/parseopt/parseopt.c:585
+#, fuzzy
+#| msgid "give this help list"
+msgid "produce this help text"
+msgstr "oferă această listă de ajutor"
+
+#: lib/parseopt/parseopt.c:594
+msgid "give a short usage message"
+msgstr "oferă un mesaj de utilizare scurt"
+
+#: lib/parseopt/parseopt.c:604 lib/parseopt/parseopt.c:613
+msgid "print program version"
+msgstr "afișează versiunea programului"
+
+#: radiusd/acct.c:197
+#, c-format
+msgid "no Acct-Status-Type attribute"
+msgstr "fără atributul „Acct-Status-Type”"
+
+#: radiusd/acct.c:298
+#, c-format
+msgid "NAS %s started (Accounting-On packet seen)"
+msgstr "NAS %s a pornit (s-a primit pachetul Accounting-On)"
+
+#: radiusd/acct.c:306
+#, c-format
+msgid "NAS %s shut down (Accounting-Off packet seen)"
+msgstr "NAS %s s-a oprit (s-a primit pachetul Accounting-Off)"
+
+#: radiusd/acct.c:318
+#, c-format
+msgid "unknown packet type (%d)"
+msgstr "tip de pachet necunoscut (%d)"
+
+#: radiusd/acct.c:372
+#, c-format
+msgid "NOT writing wtmp record"
+msgstr "NU se scrie înregistrarea wtmp"
+
+#: radiusd/acct.c:420
+#, c-format
+msgid "System accounting is disabled"
+msgstr "Administrarea conturilor sistemului este dezactivată"
+
+#: radiusd/acct.c:463
+#, c-format
+msgid "Cannot stat path component: %s"
+msgstr "Nu se poate stabili starea componentei rutei: %s"
+
+#: radiusd/acct.c:480
+#, c-format
+msgid "Cannot create directory %s"
+msgstr "Nu se poate crea directorul %s"
+
+#: radiusd/acct.c:486
+#, c-format
+msgid "Path component is not a directory: %s"
+msgstr "Componenta rutei nu este un director: %s"
+
+#: radiusd/acct.c:502
+#, c-format
+msgid "%s: directory not writable"
+msgstr "%s: nu se poate scrie în director"
+
+#: radiusd/acct.c:508
+#, c-format
+msgid "%s: not a directory"
+msgstr "%s: nu este un director"
+
+#: radiusd/acct.c:528
+#, c-format
+msgid "Detailed accounting is disabled"
+msgstr "Administrarea detaliată a conturilor este dezactivată"
+
+#: radiusd/acct.c:592 radiusd/radutil.c:460
+msgid "wrong return type"
+msgstr "tip de returnare greșit"
+
+#: radiusd/auth.c:195
+#, c-format
+msgid "Invalid password aging information for user '%s'"
+msgstr "Informații nevalide privind vechimea parolei pentru utilizatorul „%s”."
+
+#: radiusd/auth.c:230
+msgid "account locked"
+msgstr "cont blocat"
+
+#: radiusd/auth.c:281
+#, c-format
+msgid "No username"
+msgstr "Fără nume de utilizator"
+
+#: radiusd/auth.c:283
+#, c-format
+msgid "Malformed username"
+msgstr "Nume de utilizator incorect"
+
+#: radiusd/auth.c:314
+#, c-format
+msgid "Access denied by huntgroup %s:%d"
+msgstr "Acces refuzat pentru grupul de căutare %s:%d"
+
+#: radiusd/auth.c:586
+#, c-format
+msgid "unknown Password-Location value: %ld"
+msgstr "valoare necunoscută Password-Location: %ld"
+
+#: radiusd/auth.c:621
+#, c-format
+msgid "PAM authentication not available"
+msgstr "Autentificarea PAM nu este disponibilă"
+
+#: radiusd/auth.c:876 radiusd/auth.c:986
+msgid "No such user"
+msgstr "Nu există acest utilizator"
+
+#: radiusd/auth.c:894
+msgid "Login rejected"
+msgstr "Autentificare respinsă"
+
+#: radiusd/auth.c:896
+msgid "denied by Scheme procedure "
+msgstr "refuzat prin procedura Scheme "
+
+#: radiusd/auth.c:930
+#, c-format
+msgid "Invalid Auth-Failure-Trigger value: %s"
+msgstr "Valoare Auth-Failure-Trigger nevalidă: %s"
+
+#: radiusd/auth.c:933
+#, c-format
+msgid "The value of Auth-Failure-Trigger attribute must begin with '/' or '('."
+msgstr ""
+"Valoarea atributului Auth-Failure-Trigger trebuie să înceapă cu „/” sau „(”."
+
+#: radiusd/auth.c:971
+msgid "Rejected"
+msgstr "Respins"
+
+#: radiusd/auth.c:979
+msgid "Ignored"
+msgstr "Ignorat"
+
+#: radiusd/auth.c:995 radiusd/auth.c:1008 radiusd/auth.c:1019
+#: radiusd/auth.c:1157
+msgid "Login incorrect"
+msgstr "Autentificare incorectă"
+
+#: radiusd/auth.c:1010
+msgid "Account expired"
+msgstr "Cont expirat"
+
+#: radiusd/auth.c:1021
+msgid "Password expired"
+msgstr "Parolă expirată"
+
+#: radiusd/auth.c:1036
+msgid "Account disabled"
+msgstr "Cont dezactivat"
+
+#: radiusd/auth.c:1050
+msgid "Login failed"
+msgstr "Autentificare eșuată"
+
+#: radiusd/auth.c:1051
+msgid "realm quota exceeded for "
+msgstr "cotă de domeniu (realm) depășită pentru "
+
+#: radiusd/auth.c:1076
+#, c-format
+msgid "Multiple logins: [%s] max. %ld%s"
+msgstr "Autentificări multiple: [%s] max. %ld%s"
+
+#: radiusd/auth.c:1079
+msgid " [MPP attempt]"
+msgstr " [încercare MPP]"
+
+#: radiusd/auth.c:1112
+#, c-format
+msgid "Outside allowed timespan (%s)"
+msgstr "În afara intervalului de timp permis (%s)"
+
+#: radiusd/auth.c:1159
+msgid "external check failed: "
+msgstr "verificarea externă a eșuat: "
+
+#: radiusd/auth.c:1240
+msgid "Login OK"
+msgstr "Autentificare - Ok"
+
+#: radiusd/builddbm.c:60
+msgid "too many attributes"
+msgstr "prea multe atribute"
+
+#: radiusd/builddbm.c:100
+#, c-format
+msgid "can't store datum for %s"
+msgstr "nu se pot stoca datele pentru %s"
+
+#: radiusd/builddbm.c:357
+#, c-format
+msgid "cannot open dbm file %s"
+msgstr "nu se poate deschide fișierul dbm %s"
+
+#: radiusd/checkrad.c:88
+#, c-format
+msgid "unknown NAS type: %s (nas %s)"
+msgstr "tip de NAS necunoscut: %s (nas %s)"
+
+#: radiusd/checkrad.c:242
+#, c-format
+msgid "timed out in waiting SNMP response from NAS %s"
+msgstr "s-a depășit timpul de așteptare a răspunsului SNMP de la NAS %s"
+
+#: radiusd/checkrad.c:292
+#, c-format
+msgid "no snmp_oid"
+msgstr "niciun snmp_oid"
+
+#: radiusd/checkrad.c:301
+#, c-format
+msgid "invalid OID: %s"
+msgstr "OID nevalid: %s"
+
+#: radiusd/checkrad.c:318
+#, c-format
+msgid "can't create snmp session: %s"
+msgstr "nu se poate crea sesiunea snmp: %s"
+
+#: radiusd/checkrad.c:326
+#, c-format
+msgid "can't open snmp session: %s"
+msgstr "nu se poate deschide sesiunea snmp: %s"
+
+#: radiusd/checkrad.c:334 radiusd/checkrad.c:343 radiusd/snmpserv.c:2685
+#, c-format
+msgid "can't create SNMP PDU: %s"
+msgstr "nu se poate crea PDU SNMP: %s"
+
+#: radiusd/checkrad.c:419
+#, c-format
+msgid "unknown host: %s"
+msgstr "gazdă necunoscută: %s"
+
+#: radiusd/checkrad.c:476
+#, c-format
+msgid "timed out in waiting for finger response from NAS %s"
+msgstr "s-a depășit timpul de așteptare a răspunsului „finger” de la NAS %s"
+
+#: radiusd/checkrad.c:562
+#, c-format
+msgid "path variable not set"
+msgstr "variabila „path” nu este definită"
+
+#: radiusd/checkrad.c:588
+#, c-format
+msgid "expr variable not set"
+msgstr "variabila „expr” nu este definită"
+
+#: radiusd/config.y:175
+msgid "unknown block statement"
+msgstr "declarație de bloc necunoscută"
+
+#: radiusd/config.y:304
+#, c-format
+msgid "invalid netmask length: %d"
+msgstr "lungime nevalidă a măștii de rețea: %d"
+
+#: radiusd/config.y:431
+#, c-format
+msgid "%s:%d: unexpected EOF in comment started at line %d"
+msgstr "%s:%d: sfârșit de fișier neașteptat în comentariul început la linia %d"
+
+#: radiusd/config.y:649
+#, c-format
+msgid "%s:%d: no such service: %s"
+msgstr "%s:%d: nu există un astfel de serviciu: %s"
+
+#: radiusd/config.y:675 radiusd/sql.c:344
+#, c-format
+msgid "%s:%d: unknown host: %s"
+msgstr "%s:%d: gazdă necunoscută: %s"
+
+#: radiusd/config.y:743
+#, c-format
+msgid "INTERNAL ERROR at %s:%d: unknown datatype %d"
+msgstr "EROARE INTERNĂ la %s:%d: tip de date necunoscut %d"
+
+#: radiusd/config.y:769
+#, c-format
+msgid "%s:%d: wrong datatype (should be %s)"
+msgstr "%s:%d: tip de date greșit (trebuie să fie %s)"
+
+#: radiusd/config.y:779
+msgid "too few arguments"
+msgstr "prea puține argumente"
+
+#: radiusd/config.y:800
+#, c-format
+msgid "%s:%d: obsolete statement"
+msgstr "%s:%d: instrucțiune învechită"
+
+#: radiusd/config.y:921
+#, c-format
+msgid "can't open config file `%s'"
+msgstr "nu se poate deschide fișierul de configurare „%s”"
+
+#: radiusd/config.y:931
+#, c-format
+msgid "reading %s"
+msgstr "se citește %s"
+
+#: radiusd/exec.c:52
+#, c-format
+msgid "no such user: %s"
+msgstr "nu există acest utilizator: %s"
+
+#: radiusd/exec.c:74
+#, c-format
+msgid "setgroups(1, %lu) failed"
+msgstr "setgroups(1, %lu) a eșuat"
+
+#: radiusd/exec.c:85
+#, c-format
+msgid "setegid(%lu) failed"
+msgstr "setegid(%lu) a eșuat"
+
+#: radiusd/exec.c:89
+#, c-format
+msgid "setregid(%lu,%lu) failed"
+msgstr "setregid(%lu,%lu) a eșuat"
+
+#: radiusd/exec.c:94
+#, c-format
+msgid "setresgid(%lu,%lu,%lu) failed"
+msgstr "setresgid(%lu,%lu,%lu) a eșuat"
+
+#: radiusd/exec.c:103
+#, c-format
+msgid "setgid(%lu) failed"
+msgstr "setgid(%lu) a eșuat"
+
+#: radiusd/exec.c:106
+#, c-format
+msgid "cannot set effective gid to %lu"
+msgstr "nu se poate configura gid-ul efectiv la %lu"
+
+#: radiusd/exec.c:125
+#, c-format
+msgid "setreuid(%lu,-1) failed"
+msgstr "setreuid(%lu,-1) a eșuat"
+
+#: radiusd/exec.c:131
+#, c-format
+msgid "second setuid(%lu) failed"
+msgstr "al doilea setuid(%lu) a eșuat"
+
+#: radiusd/exec.c:139
+#, c-format
+msgid "setuid(%lu) failed"
+msgstr "setuid(%lu) a eșuat"
+
+#: radiusd/exec.c:149
+#, c-format
+msgid "seteuid(0) succeeded when it should not"
+msgstr "seteuid(0) a reușit când nu ar fi trebuit"
+
+#: radiusd/exec.c:153
+#, c-format
+msgid "cannot drop non-root setuid privileges"
+msgstr "nu se pot înlătura privilegiile setuid non-root"
+
+#: radiusd/exec.c:172
+#, c-format
+msgid "radius_exec_command(): won't execute, not an absolute pathname: %s"
+msgstr ""
+"radius_exec_command(): nu se va executa, nu este un nume de rută absolut: %s"
+
+#: radiusd/exec.c:178 radiusd/exec.c:274
+#, c-format
+msgid "can't reset SIGCHLD"
+msgstr "nu se poate reinițializa SIGCHLD"
+
+#: radiusd/exec.c:219 radiusd/exec.c:349
+#, c-format
+msgid "can't restore SIGCHLD"
+msgstr "nu se poate restaura SIGCHLD"
+
+#: radiusd/exec.c:226 radiusd/exec.c:356
+#, c-format
+msgid ""
+"can't run external program `%s' (reason reported via syslog channel user.err)"
+msgstr ""
+"nu se poate rula programul extern „%s” (motiv raportat prin canalul syslog "
+"user.err)"
+
+#: radiusd/exec.c:237 radiusd/exec.c:365
+#, c-format
+msgid "external program `%s' %s"
+msgstr "program extern „%s” %s"
+
+#: radiusd/exec.c:263
+#, c-format
+msgid "radius_exec_program(): won't execute, not an absolute pathname: %s"
+msgstr ""
+"radius_exec_program(): nu se va executa, nu este un nume de rută absolut: %s"
+
+#: radiusd/exec.c:270
+#, c-format
+msgid "couldn't open pipe"
+msgstr "nu se poate deschide conducta"
+
+#: radiusd/exec.c:290 radiusd/exec.c:325
+#, c-format
+msgid "can't close pipe"
+msgstr "nu se poate închide conducta"
+
+#: radiusd/exec.c:293
+#, c-format
+msgid "can't dup stdout"
+msgstr "nu se poate duplica ieșirea standard: (stdout)"
+
+#: radiusd/exec.c:337 radiusd/exec.c:702
+#, c-format
+msgid "<stdout of %s>:%d: %s"
+msgstr "<ieșirea standard a %s>:%d: %s"
+
+#: radiusd/exec.c:498
+#, c-format
+msgid "filter %s (pid %d) %s (in: %u, out: %u)"
+msgstr "filtru %s (pid %d) %s (intrare: %u, ieșire: %u)"
+
+#: radiusd/exec.c:552
+#, c-format
+msgid "filter %s is not declared"
+msgstr "filtrul %s nu este declarat"
+
+#: radiusd/exec.c:569
+#, c-format
+msgid "cannot run filter %s"
+msgstr "nu se poate rula filtrul %s"
+
+#: radiusd/exec.c:587
+#, c-format
+msgid "filter %s"
+msgstr "filtru %s"
+
+#: radiusd/exec.c:689 radiusd/exec.c:744
+#, c-format
+msgid "reading from filter %s"
+msgstr "citire din filtrul %s"
+
+#: radiusd/exec.c:711
+#, c-format
+msgid "filter %s (auth): bad output: %s"
+msgstr "filtru %s (auth): ieșire greșită: %s"
+
+#: radiusd/exec.c:755 radiusd/exec.c:761
+#, c-format
+msgid "filter %s (acct): bad output: %s"
+msgstr "filtru %s (acct): ieșire greșită: %s"
+
+#: radiusd/exec.c:832
+#, c-format
+msgid "%s:%d: filter already declared at %s:%d"
+msgstr "%s:%d: filtru deja declarat la %s:%d"
+
+#: radiusd/files.c:220
+#, c-format
+msgid "discarding entry `%s'"
+msgstr "se elimină intrarea „%s”"
+
+#: radiusd/files.c:418
+#, c-format
+msgid "zero length username not permitted"
+msgstr "numele de utilizator de lungime zero nu este permis"
+
+#: radiusd/files.c:553
+#, c-format
+msgid "unknown attribute `%s/%s'"
+msgstr "atribut necunoscut „%s/%s”"
+
+#: radiusd/files.c:565 radiusd/files.c:591
+#, c-format
+msgid "expected %s, but found %s"
+msgstr "se aștepta %s, dar s-a găsit %s"
+
+#. TRANSLATORS: This is used in place of the first %s in the message
+#. "expected %s, but found %s", i.e. it acts as a direct object to
+#. the verb 'expect'. Please bear this in mind when translating
+#: radiusd/files.c:569
+msgid "opcode"
+msgstr "cod operațional"
+
+#: radiusd/files.c:580
+#, c-format
+msgid "grad_create_pair failed on %s"
+msgstr "grad_create_pair a eșuat pe %s"
+
+#: radiusd/files.c:612
+msgid "not defined"
+msgstr "nu este definit"
+
+#: radiusd/files.c:650
+#, c-format
+msgid "cannot execute `%s'"
+msgstr "nu se poate executa „%s”"
+
+#: radiusd/files.c:1047
+msgid "unknown method"
+msgstr "metodă necunoscută"
+
+#: radiusd/files.c:1131
+#, c-format
+msgid "user `%s' already found in %s"
+msgstr "utilizatorul „%s” a fost deja găsit în %s"
+
+#: radiusd/files.c:1157
+#, c-format
+msgid "%d user disabled"
+msgid_plural "%d users disabled"
+msgstr[0] "%d utilizator dezactivat"
+msgstr[1] "%d utilizatori dezactivați"
+msgstr[2] "%d de utilizatori dezactivați"
+
+#: radiusd/files.c:1711
+#, c-format
+msgid "using only dbm: USERS NOT LOADED"
+msgstr "folosind doar dbm: UTILIZATORII NU SUNT ÎNCĂRCAȚI"
+
+#: radiusd/files.c:1719
+#, c-format
+msgid "DBM files found but no -b flag given - NOT using DBM"
+msgstr ""
+"Fișierele DBM au fost găsite, dar nu a fost dată opțiunea „-b” - NU se "
+"utilizează DBM"
+
+#: radiusd/files.c:1723
+#, c-format
+msgid "can't load %s: exited"
+msgstr "nu se poate încărca %s: ieșind"
+
+#: radiusd/files.c:1726
+#, c-format
+msgid "%s reloaded."
+msgstr "%s a fost reîncărcat."
+
+#: radiusd/files.c:1797
+#, c-format
+msgid "SQL Error: SQL client could not be initialized"
+msgstr "Eroare SQL: clientul SQL nu a putut fi inițializat"
+
+#: radiusd/files.c:1813
+#, c-format
+msgid "INTERNAL ERROR: unknown reload code: %d"
+msgstr "EROARE INTERNĂ: cod de reîncărcare necunoscut: %d"
+
+#: radiusd/files.c:1884
+#, c-format
+msgid "can't create parser output file `%s'"
+msgstr "nu se poate crea fișierul de ieșire al analizatorului „%s”"
+
+#: radiusd/files.c:1898
+#, c-format
+msgid "dumped users database to %s"
+msgstr "s-a descărcat baza de date cu utilizatori în %s"
+
+#: radiusd/forward.c:109
+#, c-format
+msgid "Can't forward to %s:%d"
+msgstr "Nu se poate redirecționa către %s:%d"
+
+#: radiusd/forward.c:178
+#, c-format
+msgid "Forwarding host %s not listed in clients"
+msgstr "Gazda de redirecționare %s nu este listată în clienți"
+
+#: radiusd/forward.c:197
+#, c-format
+msgid "Can't open forwarding socket"
+msgstr "Nu se poate deschide soclul de redirecționare"
+
+#: radiusd/forward.c:207
+#, c-format
+msgid "Can't bind forwarding socket"
+msgstr "Nu se poate lega soclul de redirecționare"
+
+#: radiusd/log.c:152
+msgid "none"
+msgstr "niciunul"
+
+#: radiusd/log.c:153
+msgid "Main"
+msgstr "Principal"
+
+#: radiusd/log.c:154
+msgid "Auth"
+msgstr "Auth"
+
+#: radiusd/log.c:155
+msgid "Acct"
+msgstr "Acct"
+
+#: radiusd/log.c:156
+msgid "Proxy"
+msgstr "Proxy"
+
+#: radiusd/log.c:157
+msgid "SNMP"
+msgstr "SNMP"
+
+#: radiusd/log.c:161
+msgid "emerg"
+msgstr "urgență"
+
+#: radiusd/log.c:162
+msgid "alert"
+msgstr "alertă"
+
+#: radiusd/log.c:163
+msgid "crit"
+msgstr "critică"
+
+#: radiusd/log.c:164
+msgid "error"
+msgstr "eroare"
+
+#: radiusd/log.c:165
+msgid "warning"
+msgstr "avertisment"
+
+#: radiusd/log.c:166
+msgid "notice"
+msgstr "notificare"
+
+#: radiusd/log.c:167
+msgid "info"
+msgstr "informație"
+
+#: radiusd/log.c:168
+msgid "debug"
+msgstr "depanare"
+
+#: radiusd/log.c:412
+#, c-format
+msgid "could not append to file %s"
+msgstr "nu s-a putut adăuga în fișierul %s"
+
+#: radiusd/log.c:491
+#, c-format
+msgid "%s: cannot change owner to %d:%d"
+msgstr "%s: nu se poate schimba proprietarul în %d:%d"
+
+#: radiusd/log.c:531
+#, c-format
+msgid "can't access log file `%s'"
+msgstr "nu se poate accesa fișierul jurnal „%s”"
+
+#. TRANSLATORS: the subject will always be printed before this msgid.
+#. for example: "child 222 exited with status 0"
+#.
+#: radiusd/log.c:640
+#, c-format
+msgid "exited with status %d"
+msgstr "s-a ieșit cu starea %d"
+
+#. TRANSLATORS: the subject will always be printed before this msgid.
+#: radiusd/log.c:645
+#, c-format
+msgid "terminated on signal %d"
+msgstr "terminat cu semnalul %d"
+
+#. TRANSLATORS: the subject will always be printed before this msgid.
+#: radiusd/log.c:649
+#, c-format
+msgid "terminated"
+msgstr "terminat"
+
+#: radiusd/log.c:764
+#, c-format
+msgid "%s:%d: no channel mode for `%s'"
+msgstr "%s:%d: niciun mod canal pentru „%s”"
+
+#: radiusd/log.c:927
+msgid "no levels applicable for this category"
+msgstr "nu există niveluri aplicabile pentru această categorie"
+
+#: radiusd/log.c:953
+#, c-format
+msgid "%s:%d: channel `%s' not defined"
+msgstr "%s:%d: canalul „%s” nu este definit"
+
+#: radiusd/log.c:997 radiusd/snmpserv.c:344
+#, c-format
+msgid "%s:%d: list item %d has wrong datatype"
+msgstr "%s:%d: elementul %d din listă are un tip de date incorect"
+
+#: radiusd/log.c:1013
+#, c-format
+msgid "%s:%d: no such module name: %s"
+msgstr "%s:%d: nu există un astfel de nume de modul: %s"
+
+#: radiusd/menu.c:43 radiusd/menu.c:202
+#, c-format
+msgid "can't open menu `%s'"
+msgstr "nu se poate deschide fișierul de meniu „%s”"
+
+#: radiusd/menu.c:94
+#, c-format
+msgid "menu %s:%d: %s"
+msgstr "meniu %s:%d: %s"
+
+#: radiusd/menu.c:205
+msgid ""
+"\n"
+"*** User Menu is Not Available ***\n"
+msgstr ""
+"\n"
+"*** Meniul utilizatorului nu este disponibil ***\n"
+
+#: radiusd/mlc.c:101
+#, c-format
+msgid "check_ts(): unknown NAS"
+msgstr "check_ts(): NAS necunoscut"
+
+#: radiusd/mlc.c:133
+#, c-format
+msgid "assuming `%s' is logged in"
+msgstr "presupunând că „%s” este conectat"
+
+#: radiusd/mlc.c:136
+#, c-format
+msgid "assuming `%s' is NOT logged in"
+msgstr "presupunând că „%s” NU este conectat"
+
+#: radiusd/pam.c:62
+#, c-format
+msgid "rad_pam_conv(): no application-specific data passed"
+msgstr "rad_pam_conv(): nu s-au furnizat date specifice aplicației"
+
+#: radiusd/proxy.c:198
+#, c-format
+msgid "couldn't send request to realm %s"
+msgstr "nu s-a putut trimite cererea către domeniul (realm) %s"
+
+#: radiusd/radck.c:81
+#, c-format
+msgid "Match-Profile refers to non-existing profile (%s)"
+msgstr "Match-Profile se referă la un profil inexistent (%s)"
+
+#: radiusd/radck.c:125
+#, c-format
+msgid "circular dependency for %s"
+msgstr "dependență circulară pentru %s"
+
+#: radiusd/radck.c:152
+#, c-format
+msgid "not enough memory for transitivity check"
+msgstr "memorie insuficientă pentru verificarea tranzitivității"
+
+#: radiusd/radck.c:177
+#, c-format
+msgid "USER LIST IS EMPTY"
+msgstr "LISTA UTILIZATORILOR ESTE GOALĂ"
+
+#: radiusd/radck.c:185
+#, c-format
+msgid "duplicate %s attribute"
+msgstr "atribut duplicat %s"
+
+#: radiusd/radck.c:226
+#, c-format
+msgid "attribute %s not allowed in LHS"
+msgstr "atributul %s nu este permis în LHS"
+
+#: radiusd/radck.c:275
+msgid "Match-Profile refers to a DEFAULT entry"
+msgstr "Match-Profile se referă la o intrare DEFAULT"
+
+#: radiusd/radck.c:284
+msgid "Simultaneous-Use is used, but multiple login checking is not enabled"
+msgstr ""
+"Se utilizează Simultaneous-Use, dar verificarea conectărilor multiple nu "
+"este activată."
+
+#: radiusd/radck.c:324 radiusd/radck.c:355
+msgid "No User-Password attribute in LHS"
+msgstr "Nu există atributul User-Password în LHS"
+
+#: radiusd/radck.c:332
+#, c-format
+msgid "Auth-Type = System can only be used when running with root privileges"
+msgstr ""
+"Auth-Type = Sistemul poate fi utilizat numai atunci când rulează cu "
+"privilegii de root."
+
+#: radiusd/radck.c:342 radiusd/radck.c:379
+msgid "User-Password attribute ignored for this Auth-Type"
+msgstr "Atributul User-Password ignorat pentru acest Auth-Type"
+
+#: radiusd/radck.c:347
+msgid "Password-Location attribute ignored for this Auth-Type"
+msgstr "Atributul Password-Location ignorat pentru acest Auth-Type"
+
+#: radiusd/radck.c:363
+msgid "Authentication type not supported"
+msgstr "Tipul de autentificare nu este acceptat"
+
+#: radiusd/radck.c:398
+msgid "Both Auth-Data and PAM-Auth attributes present"
+msgstr "Este prezent atât atributul Auth-Data, cât și atributul PAM-Auth"
+
+#: radiusd/radck.c:421
+#, c-format
+msgid "attribute %s not allowed in RHS"
+msgstr "atributul %s nu este permis în RHS"
+
+#: radiusd/radck.c:436
+#, c-format
+msgid "Use of Add-Port-To-IP-Address is deprecated"
+msgstr "Utilizarea atributului Add-Port-To-IP-Address este depreciată."
+
+#: radiusd/radck.c:445
+msgid "BEGIN without Fall-Through"
+msgstr "BEGIN fără Fall-Through"
+
+#: radiusd/radius.c:107
+#, c-format
+msgid "request from unknown client"
+msgstr "cerere de la client necunoscut"
+
+#: radiusd/radius.c:426
+msgid "Dropping packet"
+msgstr "Se elimină pachetul"
+
+#: radiusd/radius.c:449
+#, c-format
+msgid "Retransmitting %s reply"
+msgstr "Se retransmite răspunsul %s"
+
+#: radiusd/radius.c:454
+msgid "request failed"
+msgstr "cererea a eșuat"
+
+#: radiusd/radius.c:522
+#, c-format
+msgid "Unrecognized proxy reply from server %s, proxy ID %d"
+msgstr "Răspuns proxy nerecunoscut de la serverul %s, ID proxy %d"
+
+#: radiusd/radius.c:556
+#, c-format
+msgid "unknown request code %d"
+msgstr "cod de cerere necunoscut %d"
+
+#: radiusd/radius.c:656
+#, c-format
+msgid "rule trace: %s"
+msgstr "urmărire regulă: %s"
+
+#: radiusd/radiusd.c:146
+msgid "radiusd compiled without DBM support"
+msgstr "radiusd compilat fără suport DBM"
+
+#: radiusd/radiusd.c:156
+#, c-format
+msgid "unknown mode: %s"
+msgstr "mod necunoscut: %s"
+
+#: radiusd/radiusd.c:181
+#, c-format
+msgid "invalid IP address: %s"
+msgstr "adresă IP nevalidă: %s"
+
+#: radiusd/radiusd.c:217
+#, fuzzy, c-format
+#| msgid "invalid port type"
+msgid "%s: invalid port number"
+msgstr "tip de port nevalid"
+
+#: radiusd/radiusd.c:228
+msgid "radiusd specific switches:"
+msgstr "Opțiuni specifice pentru radiusd:"
+
+#: radiusd/radiusd.c:233
+msgid "Stay in foreground"
+msgstr "Rămâne în prim-plan"
+
+#: radiusd/radiusd.c:244
+msgid "Select operation mode: test, checkconf, builddbm."
+msgstr "Selectează modul de operare: test, checkconf, builddbm."
+
+#: radiusd/radiusd.c:255
+msgid "Run in single process mode"
+msgstr "Rulează în modul de proces unic"
+
+#: radiusd/radiusd.c:266
+msgid "Store pidfile in DIR"
+msgstr "Stochează fișierul pid în DIR"
+
+#: radiusd/radiusd.c:278
+msgid "Show compilation defaults"
+msgstr "Afișează opțiunile de compilare implicite"
+
+#: radiusd/radiusd.c:284
+msgid "Quiet mode (valid only with --mode)"
+msgstr "Modul silențios (valabil numai cu „--mode”)"
+
+#: radiusd/radiusd.c:294
+msgid "Select port numbers from available UDP ports"
+msgstr "Selectează numerele de porturi din porturile UDP disponibile"
+
+#: radiusd/radiusd.c:295 radiusd/tsh.c:82 radlast/radlast.c:253
+#: radtest/main.c:135 radwho/radwho.c:204 radzap/radzap.c:91
+msgid "FILE"
+msgstr "FIȘIER"
+
+#: radiusd/radiusd.c:304
+msgid "Daemon configuration options. Please use raddb/config instead."
+msgstr ""
+"Opțiuni de configurare a demonului. Vă rugăm să utilizați raddb/config în "
+"schimb."
+
+#: radiusd/radiusd.c:309
+msgid "Do detailed authentication logging"
+msgstr "Efectuează înregistrarea detaliată a autentificării"
+
+#: radiusd/radiusd.c:320
+msgid "Set accounting directory"
+msgstr "Stabilește directorul de contabilizare"
+
+#: radiusd/radiusd.c:333
+msgid "Enable DBM support"
+msgstr "Activează suportul DBM"
+
+#: radiusd/radiusd.c:345
+msgid "Set logging directory name"
+msgstr "Stabilește numele directorului de jurnalizare"
+
+#: radiusd/radiusd.c:357
+msgid "Do not resolve IP addresses"
+msgstr "Nu rezolvă adresele IP"
+
+#: radiusd/radiusd.c:368
+msgid "Listen on IPADDR"
+msgstr "Ascultă la ADRESA-IP"
+
+#: radiusd/radiusd.c:369 radlast/radlast.c:265
+msgid "IPADDR"
+msgstr "ADRESA-IP"
+
+#: radiusd/radiusd.c:379
+msgid "Set authentication port number"
+msgstr "Definește numărul portului de autentificare"
+
+#: radiusd/radiusd.c:380 radlast/radlast.c:241 radlast/radlast.c:310
+#: radtest/main.c:157 radtest/main.c:181 radzap/radzap.c:115
+msgid "NUMBER"
+msgstr "NUMĂR"
+
+#: radiusd/radiusd.c:390
+msgid "Strip prefixes/suffixes off user names before logging"
+msgstr ""
+"Elimină prefixele/sufixele din numele utilizatorilor înainte de conectare"
+
+#: radiusd/radiusd.c:401 radiusd/tsh.c:86
+msgid "Set debugging level"
+msgstr "Stabilește nivelul de depanare"
+
+#: radiusd/radiusd.c:402 radtest/main.c:124
+msgid "DEBUGSPEC"
+msgstr "NIVEL_DEPANARE"
+
+#: radiusd/radiusd.c:412
+msgid "Log authentications"
+msgstr "Jurnalizează autentificările"
+
+#: radiusd/radiusd.c:422
+msgid "Log users' passwords"
+msgstr "Înregistrează parolele utilizatorilor"
+
+#: radiusd/radiusd.c:435
+msgid "GNU radius daemon"
+msgstr "Demonul GNU radius"
+
+#: radiusd/radiusd.c:447
+msgid "Sorry, your account is currently closed\n"
+msgstr "Ne pare rău, contul dvs. este închis în prezent.\n"
+
+#: radiusd/radiusd.c:449
+msgid "Password has expired\n"
+msgstr "Parola a expirat\n"
+
+#: radiusd/radiusd.c:451
+msgid "Password will expire in %R{Password-Expire-Days} Days\n"
+msgstr "Parola va expira în %R{Password-Expire-Days} zile\n"
+
+#: radiusd/radiusd.c:453
+msgid ""
+"\n"
+"Access denied\n"
+msgstr ""
+"\n"
+"Acces refuzat\n"
+
+#: radiusd/radiusd.c:455
+msgid ""
+"\n"
+"Realm quota exceeded - access denied\n"
+msgstr ""
+"\n"
+"Cotă de domeniu (realm) depășită - acces refuzat\n"
+
+#: radiusd/radiusd.c:457
+msgid ""
+"\n"
+"You are already logged in %R{Simultaneous-Use} times - access denied\n"
+msgstr ""
+"\n"
+"Sunteți deja conectat de %R{Simultaneous-Use} ori - acces refuzat\n"
+
+#: radiusd/radiusd.c:459
+msgid ""
+"\n"
+"You are already logged in - access denied\n"
+msgstr ""
+"\n"
+"Sunteți deja conectat - acces refuzat\n"
+
+#: radiusd/radiusd.c:461
+msgid "You are calling outside your allowed timespan\n"
+msgstr "Apelați în afara intervalului de timp permis\n"
+
+#: radiusd/radiusd.c:499
+#, c-format
+msgid "Terminating the subprocesses"
+msgstr "Terminând subprocesele"
+
+#: radiusd/radiusd.c:511
+#, c-format
+msgid "%d process left!"
+msgid_plural "%d processes left!"
+msgstr[0] "A mai rămas %d proces!"
+msgstr[1] "Au mai rămas %d procese!"
+msgstr[2] "Au mai rămas %d de procese!"
+
+#: radiusd/radiusd.c:537
+#, c-format
+msgid "Radiusd is not listening on any port."
+msgstr "Radiusd nu ascultă pe niciun port."
+
+#: radiusd/radiusd.c:541
+#, c-format
+msgid "Radiusd is not listening on any port. Trying to continue anyway..."
+msgstr "Radiusd nu ascultă pe niciun port. Încercând să se continue oricum..."
+
+#: radiusd/radiusd.c:598
+#, c-format
+msgid "Starting"
+msgstr "Se pornește"
+
+#: radiusd/radiusd.c:621
+#, c-format
+msgid "Cannot open output file %s"
+msgstr "Nu se poate deschide fișierul de ieșire %s"
+
+#: radiusd/radiusd.c:639
+#, c-format
+msgid "Ready"
+msgstr "Gata"
+
+#: radiusd/radiusd.c:731
+#, c-format
+msgid "can't find out my own IP address"
+msgstr "nu se poate determina propria adresă IP"
+
+#: radiusd/radiusd.c:827
+#, c-format
+msgid "RADIUSD SUSPENDED"
+msgstr "RADIUSD SUSPENDAT"
+
+#: radiusd/radiusd.c:857
+#, c-format
+msgid "Reloading configuration now"
+msgstr "Se reîncarcă configurația acum"
+
+#: radiusd/radiusd.c:869
+#, c-format
+msgid "Dumping users db to `%s'"
+msgstr "Se descarcă baza de date de utilizatori în „%s”"
+
+#: radiusd/radiusd.c:926
+#, c-format
+msgid "restart initiated"
+msgstr "repornire inițiată"
+
+#: radiusd/radiusd.c:929
+#, c-format
+msgid "can't restart: not started as absolute pathname"
+msgstr "nu se poate reporni: nu a fost pornit ca nume de rută absolută"
+
+#: radiusd/radiusd.c:941
+#, c-format
+msgid "radiusd_restart: cannot fork"
+msgstr "radiusd_restart: nu se poate crea un proces secundar (bifurca)"
+
+#: radiusd/radiusd.c:956
+#, c-format
+msgid "restarting radius"
+msgstr "se repornește radius"
+
+#: radiusd/radiusd.c:959
+#, c-format
+msgid "RADIUS NOT RESTARTED: exec failed"
+msgstr "RADIUS NU A FOST REPORNIT: exec() a eșuat"
+
+#: radiusd/radiusd.c:996
+#, c-format
+msgid "Normal shutdown."
+msgstr "Oprire normală."
+
+#: radiusd/radiusd.c:1012
+#, c-format
+msgid "Ready to process requests."
+msgstr "Pregătit pentru procesarea cererilor."
+
+#: radiusd/radiusd.c:1101
+#, c-format
+msgid "Loading configuration files."
+msgstr "Se încarcă fișierele de configurare."
+
+#: radiusd/radiusd.c:1111
+#, c-format
+msgid "Errors reading config file - EXITING"
+msgstr "Erori la citirea fișierului de configurare - IEȘIRE"
+
+#: radiusd/radiusd.c:1285
+#, c-format
+msgid "socket %s:%d is already assigned for %s"
+msgstr "soclul %s:%d este deja atribuit pentru %s"
+
+#: radiusd/radiusd.c:1492
+#, c-format
+msgid "Ignoring exec-program-user"
+msgstr "Se ignoră exec-program-user"
+
+#: radiusd/radutil.c:178
+#, c-format
+msgid "INTERNAL ERROR (%s:%d): attribute %d has bad type (%d)"
+msgstr "EROARE INTERNĂ (%s:%d): atributul %d are tipul incorect (%d)"
+
+#: radiusd/radutil.c:509
+#, c-format
+msgid "cannot convert \"%s\" to integer"
+msgstr "nu se poate converti „%s” în număr întreg"
+
+#: radiusd/request.c:225
+#, c-format
+msgid "Proxy %s request expired in queue"
+msgstr "Cererea proxy %s a expirat în coada de așteptare"
+
+#: radiusd/request.c:244
+#, c-format
+msgid "Killing unresponsive %s child %lu"
+msgstr "Se omoară procesul-copil %s care nu răspunde %lu"
+
+#: radiusd/request.c:249
+#, c-format
+msgid "Cannot terminate child %lu. Attempting to kill inexisting process?"
+msgstr ""
+"Nu se poate termina procesul-copil %lu. Se încearcă omorârea unui proces "
+"inexistent?"
+
+#: radiusd/request.c:259
+#, c-format
+msgid "Terminating unresponsive %s child %lu, status: %s"
+msgstr "Terminarea procesului-copil %s care nu răspunde %lu, stare: %s"
+
+#: radiusd/request.c:262
+msgid "OK"
+msgstr "Ok"
+
+#: radiusd/request.c:262
+msgid "FAILURE"
+msgstr "EȘEC"
+
+#: radiusd/request.c:290
+msgid "duplicate request"
+msgstr "cerere duplicată"
+
+#: radiusd/request.c:365
+msgid "too many requests in queue"
+msgstr "prea multe cereri în coadă"
+
+#: radiusd/request.c:372
+msgid "too many requests of this type"
+msgstr "prea multe cereri de acest tip"
+
+#: radiusd/request.c:381
+msgid "Maximum number of children active"
+msgstr "Numărul maxim de procese-copil active"
+
+#: radiusd/rewrite.y:845 gram.y:397 radtest/gram.y:397
+#, c-format
+msgid "redefinition of function `%s'"
+msgstr "redefinirea funcției „%s”"
+
+#: radiusd/rewrite.y:847 radiusd/rewrite.y:5611
+#, c-format
+msgid "previously defined here"
+msgstr "definită anterior aici"
+
+#: radiusd/rewrite.y:1033
+msgid "nothing to break from"
+msgstr "nu există nimic de întrerupt"
+
+#: radiusd/rewrite.y:1047
+msgid "nothing to continue"
+msgstr "nu există nimic de continuat"
+
+#: radiusd/rewrite.y:1123
+#, c-format
+msgid "undefined variable: %s"
+msgstr "variabilă nedefinită: %s"
+
+#: radiusd/rewrite.y:1608
+#, c-format
+msgid "unexpected EOF in comment started at line %lu"
+msgstr "sfârșit de fișier neașteptat în comentariul început la linia %lu"
+
+#: radiusd/rewrite.y:1669
+#, c-format
+msgid "Malformed pragma"
+msgstr "Directivă pragma incorectă"
+
+#: radiusd/rewrite.y:1683
+#, c-format
+msgid "Unknown regexp flag: %s"
+msgstr "Opțiune de expresie regulată necunoscută: %s"
+
+#: radiusd/rewrite.y:1815
+msgid "unterminated character constant"
+msgstr "constantă de caracter neterminată"
+
+#: radiusd/rewrite.y:2422
+#, c-format
+msgid "%s implicit coercion %s %s"
+msgstr "%s conversie implicită %s %s"
+
+#: radiusd/rewrite.y:2487
+msgid "operation not applicable to strings"
+msgstr "operația nu este aplicabilă pentru șiruri de caractere"
+
+#: radiusd/rewrite.y:2591 radiusd/rewrite.y:2657
+#, c-format
+msgid "(argument %d)"
+msgstr "(argument %d)"
+
+#: radiusd/rewrite.y:2606 radiusd/rewrite.y:2668
+#, c-format
+msgid "too many arguments in call to %s"
+msgstr "prea multe argumente în apelul către %s"
+
+#: radiusd/rewrite.y:2611 radiusd/rewrite.y:2673
+#, c-format
+msgid "too few arguments in call to %s"
+msgstr "prea puține argumente în apelul către %s"
+
+#: radiusd/rewrite.y:2698 radiusd/tsh.c:242
+#, c-format
+msgid "Undefined"
+msgstr "Nedefinit"
+
+#: radiusd/rewrite.y:2700 radtest/runtime.c:783
+msgid "integer"
+msgstr "număr întreg"
+
+#: radiusd/rewrite.y:2702 radtest/runtime.c:785
+msgid "string"
+msgstr "șir"
+
+#: radiusd/rewrite.y:2704
+msgid "UNKNOWN"
+msgstr "NECUNOSCUT"
+
+#: radiusd/rewrite.y:2713
+msgid "from Undefined"
+msgstr "dintr-un tip nedefinit"
+
+#: radiusd/rewrite.y:2715
+msgid "from integer"
+msgstr "dintr-un număr întreg"
+
+#: radiusd/rewrite.y:2717
+msgid "from string"
+msgstr "dintr-un șir"
+
+#: radiusd/rewrite.y:2719
+msgid "from UNKNOWN"
+msgstr "dintr-un tip NECUNOSCUT"
+
+#: radiusd/rewrite.y:2728
+msgid "to Undefined"
+msgstr "la un tip nedefinit"
+
+#: radiusd/rewrite.y:2730 radtest/runtime.c:796
+msgid "to integer"
+msgstr "la un număr întreg"
+
+#: radiusd/rewrite.y:2732 radtest/runtime.c:798
+msgid "to string"
+msgstr "la un șir"
+
+#: radiusd/rewrite.y:2734
+msgid "to UNKNOWN"
+msgstr "la un tip NECUNOSCUT"
+
+#: radiusd/rewrite.y:3050
+#, c-format
+msgid "missing return statement"
+msgstr "lipsește instrucțiunea «return»"
+
+#: radiusd/rewrite.y:3201 radiusd/rewrite.y:3211
+#, c-format
+msgid "divide by zero"
+msgstr "împărțit la zero"
+
+#: radiusd/rewrite.y:3859
+#, c-format
+msgid "regexp error: %s"
+msgstr "eroare în expresia regulată: %s"
+
+#: radiusd/rewrite.y:3907
+msgid "out of pushdown space"
+msgstr "debordare a stivei"
+
+#: radiusd/rewrite.y:3921 radiusd/rewrite.y:3952
+msgid "heap overrun"
+msgstr "nivel de grămadă depășit"
+
+#: radiusd/rewrite.y:3977
+msgid "out of heap space"
+msgstr "spațiu în memorie pentru grămadă insuficient"
+
+#: radiusd/rewrite.y:4005 radiusd/rewrite.y:4048
+msgid "out of popup"
+msgstr "stivă goală"
+
+#: radiusd/rewrite.y:4117 radiusd/rewrite.y:4127
+msgid "rewrite runtime error"
+msgstr "rewrite: eroare de execuție"
+
+#: radiusd/rewrite.y:4225
+msgid "no request supplied"
+msgstr "nu s-a furnizat nicio cerere"
+
+#: radiusd/rewrite.y:4262
+msgid "can't create A/V pair"
+msgstr "nu se poate crea perechea Atribut/Valoare"
+
+#: radiusd/rewrite.y:4563 radiusd/rewrite.y:4579
+msgid "division by zero!"
+msgstr "împărțire la zero!"
+
+#: radiusd/rewrite.y:4786
+#, c-format
+msgid "rewrite regex failure: %s. Input: %s"
+msgstr "rewrite: eroare expresie regulată: %s. intrare: %s"
+
+#: radiusd/rewrite.y:4839
+msgid "pc out of range"
+msgstr "pc în afara intervalului"
+
+#: radiusd/rewrite.y:5292
+msgid "Invalid backreference"
+msgstr "Referință inversă nevalidă"
+
+#: radiusd/rewrite.y:5327 radiusd/rewrite.y:5367
+msgid "regexp compile error: "
+msgstr "eroare de compilare a expresiei regulate: "
+
+#: radiusd/rewrite.y:5609
+#, c-format
+msgid "redefinition of function %s"
+msgstr "redefinirea funcției %s"
+
+#: radiusd/rewrite.y:5665
+#, c-format
+msgid "function %s not defined"
+msgstr "funcția %s nu este definită"
+
+#: radiusd/rewrite.y:5669
+#, c-format
+msgid "function %s returns wrong data type"
+msgstr "funcția %s returnează un tip de date incorect"
+
+#: radiusd/rewrite.y:5677
+#, c-format
+msgid "function %s takes too many arguments"
+msgstr "funcția %s primește prea multe argumente"
+
+#: radiusd/rewrite.y:5684
+#, c-format
+msgid "function %s: argument %d must be integer"
+msgstr "funcția %s: argumentul %d trebuie să fie un număr întreg"
+
+#: radiusd/rewrite.y:5693
+#, c-format
+msgid "function %s: argument %d must be string"
+msgstr "funcția %s: argumentul %d trebuie să fie șir de caractere"
+
+#: radiusd/rewrite.y:5706
+#, c-format
+msgid "function %s takes too few arguments"
+msgstr "funcția %s primește prea puține argumente"
+
+#: radiusd/rewrite.y:5897
+#, c-format
+msgid "function %s() requires %d parameter"
+msgid_plural "function %s() requires %d parameters"
+msgstr[0] "funcția %s() necesită %d parametru"
+msgstr[1] "funcția %s() necesită %d parametri"
+msgstr[2] "funcția %s() necesită %d de parametri"
+
+#: radiusd/rewrite.y:6054
+#, c-format
+msgid "file not found: %s"
+msgstr "fișier negăsit: %s"
+
+#: radiusd/rewrite.y:6188
+msgid "function ~S not defined"
+msgstr "funcția ~S nu este definită"
+
+#: radiusd/rewrite.y:6204
+msgid "too many arguments for ~S"
+msgstr "prea multe argumente pentru ~S"
+
+#: radiusd/rewrite.y:6232
+msgid "type mismatch in argument ~S(~S) in call to ~S"
+msgstr "neconcordanță de tip în argumentul ~S(~S) în apelul către ~S"
+
+#: radiusd/rewrite.y:6242
+msgid "too few arguments for ~S"
+msgstr "prea puține argumente pentru ~S"
+
+#: radiusd/scheme.c:224
+#, c-format
+msgid "%s is not a procedure object"
+msgstr "%s nu este un obiect de procedură"
+
+#: radiusd/scheme.c:229
+#, c-format
+msgid "Procedure `%s' failed: see error output for details"
+msgstr "Procedura „%s” a eșuat: consultați mesajul de eroare pentru detalii."
+
+#: radiusd/scheme.c:305 radiusd/scheme.c:341
+#, c-format
+msgid "Unexpected return value from Guile authentication function `%s'"
+msgstr ""
+"Valoare de returnare neașteptată din funcția de autentificare Guile „%s”"
+
+#: radiusd/scheme.c:361
+#, c-format
+msgid "Unexpected return value from Guile accounting function `%s'"
+msgstr ""
+"Valoare de returnare neașteptată din funcția de contabilizare Guile „%s”"
+
+#: radiusd/scheme.c:454
+#, c-format
+msgid "Invalid hex number: %s"
+msgstr "Număr hexazecimal nevalid: %s"
+
+#: radiusd/scheme.c:645
+#, fuzzy, c-format
+#| msgid "Guile authentication disabled in config"
+msgid "Guile extensions disabled in config"
+msgstr "Autentificarea Guile este dezactivată în configurație"
+
+#: radiusd/scheme.c:662
+#, c-format
+msgid "Guile authentication not available"
+msgstr "Autentificarea Guile nu este disponibilă"
+
+#: radiusd/snmpserv.c:279
+#, c-format
+msgid "%s:%d: community %s already declared"
+msgstr "%s:%d: comunitatea %s este deja declarată"
+
+#: radiusd/snmpserv.c:375 radiusd/snmpserv.c:409
+#, c-format
+msgid "%s:%d: no such network: %s"
+msgstr "%s:%d: nu există o astfel de rețea: %s"
+
+#: radiusd/snmpserv.c:383
+#, c-format
+msgid "%s:%d: undefined community %s"
+msgstr "%s:%d: comunitatea nu este definită %s"
+
+#: radiusd/snmpserv.c:1332
+#, c-format
+msgid "acct server re-initializing on SNMP request"
+msgstr "se reinițializează serverul de contabilizare la cererea SNMP"
+
+#: radiusd/snmpserv.c:1684
+#, c-format
+msgid "auth server re-initializing on SNMP request"
+msgstr "se reinițializează serverul de autentificare la cererea SNMP"
+
+#: radiusd/snmpserv.c:1964
+#, c-format
+msgid "server re-initializing on SNMP request"
+msgstr "se reinițializează serverul la cererea SNMP"
+
+#: radiusd/snmpserv.c:1968
+#, c-format
+msgid "server restart on SNMP request"
+msgstr "repornirea serverului la cererea SNMP"
+
+#: radiusd/snmpserv.c:1972
+#, c-format
+msgid "server continuing on SNMP request"
+msgstr "se continuă funcționarea serverului la cererea SNMP"
+
+#: radiusd/snmpserv.c:1976
+#, c-format
+msgid "server suspending on SNMP request"
+msgstr "se suspendă funcționarea serverului la cererea SNMP"
+
+#: radiusd/snmpserv.c:1980
+#, c-format
+msgid "server shutting down on SNMP request"
+msgstr "se oprește serverul la cererea SNMP"
+
+#: radiusd/snmpserv.c:2692
+#, c-format
+msgid "can't decode SNMP packet from %s: %s"
+msgstr "nu se poate decodifica pachetul SNMP de la %s: %s"
+
+#: radiusd/snmpserv.c:2702
+#, c-format
+msgid "DENIED attempt to access community %s from %s"
+msgstr "încercare REFUZATĂ de a accesa comunitatea %s din %s"
+
+#: radiusd/snmpserv.c:2757
+#, c-format
+msgid "Dropping SNMP request from client %s: %s"
+msgstr "Se elimină cererea SNMP de la clientul %s: %s"
+
+#: radiusd/sql.c:315
+#, c-format
+msgid "could not read sqlserver file %s"
+msgstr "nu s-a putut citi fișierul sqlserver %s"
+
+#: radiusd/sql.c:327
+msgid "unrecognized keyword"
+msgstr "cuvânt cheie nerecunoscut"
+
+#: radiusd/sql.c:335
+msgid "required argument missing"
+msgstr "lipsește argumentul necesar"
+
+#: radiusd/sql.c:360 radiusd/sql.c:387
+msgid "number parse error"
+msgstr "eroare la analizarea numărului"
+
+#: radiusd/sql.c:379 radiusd/sql.c:397 radiusd/sql.c:405
+msgid "expected boolean value"
+msgstr "se aștepta o valoare booleană"
+
+#: radiusd/sql.c:420
+msgid "auth_max_connections is obsolete"
+msgstr "auth_max_connections este învechit"
+
+#: radiusd/sql.c:427
+msgid "acct_max_connections is obsolete"
+msgstr "acct_max_connections este învechit"
+
+#: radiusd/sql.c:434
+msgid "query_buffer_size is obsolete"
+msgstr "query_buffer_size este învechit"
+
+#: radiusd/sql.c:442
+msgid "Unsupported SQL interface"
+msgstr "Interfață SQL neacceptată"
+
+#: radiusd/sql.c:497
+#, c-format
+msgid "%s: missing `%s' statement"
+msgstr "%s: lipsește instrucțiunea „%s”"
+
+#: radiusd/sql.c:515
+#, c-format
+msgid "%s: SQL interface not specified"
+msgstr "%s: interfața SQL nu este specificată"
+
+#: radiusd/sql.c:584
+#, c-format
+msgid "disabling SQL authentication"
+msgstr "se dezactivează autentificarea SQL"
+
+#: radiusd/sql.c:586
+#, c-format
+msgid "disabling SQL accounting"
+msgstr "se dezactivează contabilizarea SQL"
+
+#: radiusd/sql.c:593
+#, c-format
+msgid "SQL configuration changed: closing existing connections"
+msgstr "Configurație SQL modificată: se închid conexiunile existente"
+
+#: radiusd/sql.c:812
+#, c-format
+msgid "no Acct-Status-Type attribute in rad_sql_acct()"
+msgstr "nu există atributul Acct-Status-Type în rad_sql_acct()"
+
+#: radiusd/sql.c:888 radiusd/sql.c:1201
+#, c-format
+msgid "%s updated %d record"
+msgid_plural "%s updated %d records"
+msgstr[0] "%s a actualizat %d înregistrare"
+msgstr[1] "%s a actualizat %d înregistrări"
+msgstr[2] "%s a actualizat %d de înregistrări"
+
+#: radiusd/sql.c:906
+#, c-format
+msgid "SQL Auth specified in users file, but not in sqlserver file"
+msgstr ""
+"Fișierul utilizatorilor „users” necesită autentificare SQL, dar aceasta nu "
+"este activată în fișierul „sqlserver”."
+
+#: radiusd/sql.c:998
+#, c-format
+msgid "SQL: invalid operator: %s"
+msgstr "SQL: operator nevalid: %s"
+
+#: radiusd/sql.c:1061
+msgid "SQL authentication is not enabled in raddb/sqlserver"
+msgstr "Autentificarea SQL nu este activată în raddb/sqlserver"
+
+#: radiusd/sql.c:1290
+msgid "Radiusd is compiled without SQL support"
+msgstr "Radiusd este compilat fără suport SQL"
+
+#: radiusd/stat.c:84
+#, c-format
+msgid "SNMP system disabled: file `%s' has incorrect permissions"
+msgstr "Sistemul SNMP este dezactivat: fișierul „%s” are permisiuni incorecte"
+
+#: radiusd/stat.c:103
+#, c-format
+msgid "mmap failed"
+msgstr "mmap() a eșuat"
+
+#: radiusd/stat.c:131
+#, c-format
+msgid "shmem_get(): can't allocate %d byte"
+msgid_plural "shmem_get(): can't allocate %d bytes"
+msgstr[0] "shmem_get(): nu se poate aloca %d octet"
+msgstr[1] "shmem_get(): nu se pot aloca %d octeți"
+msgstr[2] "shmem_get(): nu se pot aloca %d de octeți"
+
+#: radiusd/stat.c:167
+#, c-format
+msgid "stat_init failed"
+msgstr "stat_init a eșuat"
+
+#: radiusd/stat.c:230
+#, c-format
+msgid ""
+"reached SNMP storage limit for the number of monitored ports: increase max-"
+"port-count"
+msgstr ""
+"s-a atins limita de stocare SNMP pentru numărul de porturi monitorizate: "
+"creșteți valoarea lui max-port-count"
+
+#: radiusd/stat.c:290
+#, c-format
+msgid "stat_update(): portno %d: can't find nas for IP %s"
+msgstr "stat_update(): portul %d: nu poate găsi un NAS-ul pentru adresa IP %s"
+
+#: radiusd/stat.c:301
+#, c-format
+msgid "stat_update(): port %d not found on NAS %s"
+msgstr "stat_update(): portul %d nu a fost găsit pe NAS %s"
+
+#: radiusd/stat.c:315
+msgid "negative port idle time"
+msgstr "timp de inactivitate negativ a portului"
+
+#: radiusd/stat.c:339
+msgid "negative port session time"
+msgstr "timp de sesiune negativ al portului"
+
+#: radiusd/stat.c:471
+#, c-format
+msgid ""
+"reached SNMP storage limit for the number of monitored NASes: increase max-"
+"nas-count"
+msgstr ""
+"s-a atins limita de stocare SNMP pentru numărul de NAS-uri monitorizate: "
+"creșteți valoarea lui max-nas-count"
+
+#: radiusd/version.c:137
+msgid "GNU RADIUS server version "
+msgstr "Versiunea serverului GNU RADIUS "
+
+#: radiusd/version.c:164
+#, fuzzy, c-format
+#| msgid "rule trace: %s"
+msgid "Build target: %s\n"
+msgstr "urmărire regulă: %s"
+
+#: radiusd/version.c:168
+#, c-format
+msgid "Compilation platform: "
+msgstr "Platforma de compilare: "
+
+#: radiusd/version.c:172
+#, c-format
+msgid ""
+"\n"
+"Debugging flags: "
+msgstr ""
+"\n"
+"Opțiuni de depanare: "
+
+#: radiusd/version.c:177
+#, c-format
+msgid ""
+"\n"
+"Compilation flags: "
+msgstr ""
+"\n"
+"Opțiunii de compilare: "
+
+#: radiusd/version.c:182
+#, c-format
+msgid "Compilation defaults:\n"
+msgstr "Opțiuni de compilare implicite:\n"
+
+#: radiusd/version.c:183
+#, c-format
+msgid "Ports in use:\n"
+msgstr "Porturi în uz:\n"
+
+#: radiusd/version.c:186
+#, c-format
+msgid "Paths:\n"
+msgstr "Rute:\n"
+
+#: radiusd/version.c:187
+#, c-format
+msgid " configuration directory: %s\n"
+msgstr " directorul de configurare:   %s\n"
+
+#: radiusd/version.c:188
+#, c-format
+msgid " logging directory:       %s\n"
+msgstr " directorul de jurnalizare:   %s\n"
+
+#: radiusd/version.c:189
+#, c-format
+msgid " accounting directory:    %s\n"
+msgstr " directorul de contabilizare: %s\n"
+
+#: radiusd/version.c:190
+#, c-format
+msgid " pidfile directory:       %s\n"
+msgstr " directorul fișierului pid:   %s\n"
+
+#: radiusd/version.c:191
+#, c-format
+msgid ""
+"\n"
+"Report bugs to <%s>\n"
+msgstr ""
+"\n"
+"Raportați erorile la <%s>.\n"
+
+#: radiusd/rpp.c:353
+#, c-format
+msgid "child %lu %s"
+msgstr "procesul-copil %lu %s"
+
+#: radiusd/rpp.c:496
+#, c-format
+msgid "Killing process %lu: %s"
+msgstr "Se omoară procesul %lu: %s"
+
+#: radiusd/rpp.c:563
+msgid "error writing header"
+msgstr "eroare la scrierea antetului"
+
+#: radiusd/rpp.c:567
+msgid "error writing data"
+msgstr "eroare la scrierea datelor"
+
+#: radiusd/rpp.c:598
+#, c-format
+msgid "Child exiting on timeout."
+msgstr "Procesul-copil s-a terminat: perioada de așteptare a expirat."
+
+#: radiusd/rpp.c:644
+#, c-format
+msgid "Child received malformed header (len = %d, error = %s)"
+msgstr ""
+"Procesul-copil a primit un antet incorect format (lungime = %d, eroare = %s)"
+
+#: radiusd/rpp.c:656
+#, c-format
+msgid "Child received malformed data"
+msgstr "Procesul-copil a primit date incorecte"
+
+#: radiusd/rpp.c:704
+msgid "error reading data"
+msgstr "eroare la citirea datelor"
+
+#: radiusd/rpp.c:717
+msgid "error reading data; wrong data size returned"
+msgstr "eroare la citirea datelor: dimensiunea datelor returnate este greșită"
+
+#: radiusd/tsh.c:71
+msgid "Print this help screen"
+msgstr "Afișează acest mesaj de ajutor"
+
+#: radiusd/tsh.c:72
+msgid "NAS LOGIN SID PORT [IP]"
+msgstr "NAS UTILIZATOR ID-SESIUNE PORT [IP]"
+
+#: radiusd/tsh.c:73
+msgid "Query the given NAS"
+msgstr "Interoghează NAS-ul specificat"
+
+#: radiusd/tsh.c:75
+msgid "Enter Guile"
+msgstr "Pornește shell-ul Guile"
+
+#: radiusd/tsh.c:77
+msgid "[NUMBER]"
+msgstr "[NUMĂR]"
+
+#: radiusd/tsh.c:78
+msgid "Print or set the Rewrite stack size"
+msgstr "Afișează sau stabilește dimensiunea stivei Rewrite"
+
+#: radiusd/tsh.c:80
+msgid "FUNCTION(args..)"
+msgstr "FUNCȚIE(argumente..)"
+
+#: radiusd/tsh.c:81
+msgid "Run given Rewrite function"
+msgstr "Rulează funcția Rewrite dată"
+
+#: radiusd/tsh.c:83
+msgid "Source the given Rewrite file"
+msgstr "Sursa fișierului Rewrite dat"
+
+#: radiusd/tsh.c:84
+msgid "TIMESPAN [DOW [HH [MM]]]"
+msgstr "INTERVAL-TIMP [ZIUA SĂPTĂMÂNII [ORĂ [MINUTE]]]"
+
+#: radiusd/tsh.c:85
+msgid "Check the timespan interval"
+msgstr "Verifică intervalul de timp"
+
+#: radiusd/tsh.c:86
+msgid "LEVEL"
+msgstr "NIVEL"
+
+#: radiusd/tsh.c:87
+msgid "[PAIR [,PAIR]]"
+msgstr "[PERECHE [,PERECHE]]"
+
+#: radiusd/tsh.c:87
+msgid "Define a request"
+msgstr "Definește o cerere"
+
+#: radiusd/tsh.c:89
+msgid "Print the request"
+msgstr "Afișează cererea"
+
+#: radiusd/tsh.c:91
+msgid "Quit the shell"
+msgstr "Părăsește shell-ul"
+
+#: radiusd/tsh.c:157 radiusd/tsh.c:196 radiusd/tsh.c:219 radiusd/tsh.c:258
+#: radiusd/tsh.c:277 radiusd/tsh.c:322
+#, c-format
+msgid "%s: wrong number of arguments\n"
+msgstr "%s: număr greșit de argumente\n"
+
+#: radiusd/tsh.c:163
+#, c-format
+msgid "%s is a network name\n"
+msgstr "%s este un nume de rețea\n"
+
+#: radiusd/tsh.c:170
+#, c-format
+msgid "%s: unknown nas\n"
+msgstr "%s: NAS necunoscut\n"
+
+#: radiusd/tsh.c:206
+#, c-format
+msgid "%s: argument is not a number\n"
+msgstr "%s: argumentul nu este un număr\n"
+
+#: radiusd/tsh.c:347
+#, c-format
+msgid "Enter the pair list. End with end of file\n"
+msgstr ""
+"Introduceți lista de perechi. Terminați cu simbolul „sfârșit de fișier”\n"
+
+#: radiusd/tsh.c:459
+#, c-format
+msgid "Bad command\n"
+msgstr "Comandă greșită\n"
+
+#: radlast/radlast.c:117 radlast/radlast.c:131
+#, fuzzy, c-format
+#| msgid "Invalid hex number: %s"
+msgid "%s%s: invalid number"
+msgstr "Număr hexazecimal nevalid: %s"
+
+#: radlast/radlast.c:158 radzap/radzap.c:54
+#, fuzzy, c-format
+#| msgid "invalid port type"
+msgid "%s: invalid port"
+msgstr "tip de port nevalid"
+
+#: radlast/radlast.c:175
+msgid "radlast specific switches:"
+msgstr "Opțiuni specifice pentru radlast:"
+
+#: radlast/radlast.c:240
+msgid "show at most NUMBER records"
+msgstr "afișează cel mult NUMĂR înregistrări"
+
+#: radlast/radlast.c:252
+msgid "use FILE as radwtmp"
+msgstr "utilizează FIȘIERUL ca radwtmp"
+
+#: radlast/radlast.c:264
+msgid "show logins with IPADDR"
+msgstr "afișează autentificările cu adresa IP"
+
+#: radlast/radlast.c:275
+msgid "mark records with missed stops with bump (!)"
+msgstr "marchează înregistrările cu opriri lipsă cu semnul exclamării (!)"
+
+#: radlast/radlast.c:286
+msgid "show logins from given NAS"
+msgstr "afișează autentificările de pe NAS-ul specificat"
+
+#: radlast/radlast.c:287 radzap/radzap.c:103
+msgid "NASNAME"
+msgstr "NUME_NAS"
+
+#: radlast/radlast.c:298
+msgid "use long output format"
+msgstr "utilizează un format de listare lungă"
+
+#: radlast/radlast.c:309
+msgid "show logins from given port"
+msgstr "arată autentificările din portul specificat"
+
+#: radlast/radlast.c:321
+msgid "show the login session duration in seconds"
+msgstr "afișează durata sesiunii în secunde"
+
+#: radlast/radlast.c:332
+msgid "widen the duration field to show seconds"
+msgstr "extinde câmpul de durată pentru a afișa secundele"
+
+#: radlast/radlast.c:344
+msgid "report last logins from Radius database."
+msgstr "raportează ultimele autentificări din baza de date Radius."
+
+#: radlast/radlast.c:346
+#, fuzzy
+#| msgid " [OPTION...]"
+msgid "[OPTIONS] [USER...]"
+msgstr " [OPȚIUNE...]"
+
+#: radlast/radlast.c:401 radlast/radlast.c:465 radzap/radzap.c:161
+#, c-format
+msgid "can't open file %s"
+msgstr "nu se poate deschide fișierul %s"
+
+#: radlast/radlast.c:536 radwho/radwho.c:464
+#, c-format
+msgid "System accounting is disabled\n"
+msgstr "Contabilitatea sistemului este dezactivată\n"
+
+#: radlast/radlast.c:553
+#, c-format
+msgid ""
+"\n"
+"radwtmp begins %s\n"
+msgstr ""
+"\n"
+"începutul fișierului radwtmp: %s\n"
+
+#: radlast/radlast.c:869
+#, c-format
+msgid "still logged in"
+msgstr "încă conectat"
+
+#: radlast/radlast.c:908
+msgid "shutdown"
+msgstr "oprire"
+
+#: radlast/radlast.c:910
+msgid "reboot"
+msgstr "repornire"
+
+#: radlast/radlast.c:931
+msgid "acct_off"
+msgstr "cont_dezactivat"
+
+#: radlast/radlast.c:933
+msgid "acct_on"
+msgstr "cont_activat"
+
+#: radscm/radscm.c:305 radtest/main.c:281
+#, c-format
+msgid "error reading dictionary file"
+msgstr "eroare la citirea fișierului de dicționar"
+
+#: gram.y:308 radtest/gram.y:308
+msgid "not enough 'while's to break from"
+msgstr "Nu sunt suficiente instrucțiuni while imbricate pentru a executa break"
+
+#: gram.y:316 radtest/gram.y:316
+msgid "not enough 'while's to continue"
+msgstr ""
+"Nu sunt suficiente instrucțiuni while imbricate pentru a executa continue"
+
+#: gram.y:360 radtest/gram.y:360
+msgid "return outside of a function definition"
+msgstr "return utilizat în afara definiției funcției"
+
+#: gram.y:372 gram.y:753 radtest/gram.y:372 radtest/gram.y:753
+#, c-format
+msgid "undefined function `%s'"
+msgstr "funcție nedefinită „%s”"
+
+#: gram.y:385 radtest/gram.y:385
+msgid "nested function definitions are not allowed"
+msgstr "definițiile de funcții imbricate nu sunt permise"
+
+#: gram.y:388 radtest/gram.y:388
+msgid "the current function definition begins here"
+msgstr "definiția funcției curente începe aici"
+
+#: gram.y:399 radtest/gram.y:399
+#, c-format
+msgid "`%s' previously defined here"
+msgstr "„%s” definită anterior aici"
+
+#: gram.y:478 radtest/gram.y:478
+msgid "warning: truncating binary string"
+msgstr "avertizare: se trunchiază șirul binar"
+
+#: gram.y:511 radtest/gram.y:511
+msgid "expected integer value or request code name"
+msgstr "se aștepta o valoare în număr întreg sau numele codului cererii"
+
+#: gram.y:670 radtest/gram.y:670
+msgid "warning: '*' is meaningless for this attribute type"
+msgstr "avertizare: „*” este lipsit de sens pentru acest tip de atribut"
+
+#: gram.y:904 radtest/gram.y:904
+msgid "Misplaced `end'"
+msgstr "„end” plasat greșit"
+
+#: gram.y:908 radtest/gram.y:908
+msgid "Unexpected end of line"
+msgstr "Sfârșit de linie neașteptat"
+
+#: gram.y:936 radtest/gram.y:936
+#, c-format
+msgid "In function `%s':\n"
+msgstr "În funcția „%s”:\n"
+
+#: gram.y:939 radtest/gram.y:939
+#, c-format
+msgid "At top level:\n"
+msgstr "La nivelul superior:\n"
+
+#: radtest/main.c:60
+#, c-format
+msgid "assign: expected `='\n"
+msgstr "atribuire: se aștepta „=”\n"
+
+#: radtest/main.c:107
+msgid "radtest specific switches:"
+msgstr "Opțiuni specifice pentru radtest:"
+
+#: radtest/main.c:112
+msgid "assign a VALUE to VARIABLE"
+msgstr "atribuie VALOAREA la VARIABILĂ"
+
+#: radtest/main.c:113
+msgid "VARIABLE=VALUE"
+msgstr "VARIABILĂ=VALOARE"
+
+#: radtest/main.c:123
+msgid "set debugging level"
+msgstr "stabilește nivelul de depanare"
+
+#: radtest/main.c:134
+#, fuzzy
+#| msgid "Read input from FILE. Stops further processing of the command line."
+msgid "read input from FILE; stops further processing of the command line"
+msgstr ""
+"Citește intrarea din FIȘIER. Oprește procesarea în continuare a liniei de "
+"comandă."
+
+#: radtest/main.c:145
+#, fuzzy
+#| msgid "Loading configuration files."
+msgid "don't read the configuration file"
+msgstr "Se încarcă fișierele de configurare."
+
+#: radtest/main.c:156
+msgid "set number of retries"
+msgstr "stabilește numărul de reîncercări"
+
+#: radtest/main.c:168
+msgid "set radius server parameters"
+msgstr "stabilește parametrii serverului radius"
+
+#: radtest/main.c:169
+msgid "SERVER"
+msgstr "SERVER"
+
+#: radtest/main.c:180
+msgid "set timeout"
+msgstr "stabilește timpul de așteptare"
+
+#: radtest/main.c:192
+msgid "verbose mode"
+msgstr "modul super-descriptiv"
+
+#: radtest/main.c:202
+msgid "disable interactive mode"
+msgstr "dezactivează modul interactiv"
+
+#: radtest/main.c:213
+msgid "Check the input file syntax and exit"
+msgstr "Verifică sintaxa fișierului introdus și iese"
+
+#: radtest/main.c:225
+msgid "Radius client shell"
+msgstr "Shell-ul clientului Radius"
+
+#: radtest/main.c:302
+#, c-format
+msgid "can't parse server definition"
+msgstr "nu s-a putut analiza definiția serverului"
+
+#: radtest/main.c:307
+#, c-format
+msgid "no shared secret for the server"
+msgstr "nu există nicio cheie partajată pentru acest server"
+
+#: radtest/main.c:319
+#, c-format
+msgid "bad IP address or host name: %s"
+msgstr "adresă IP sau nume de gazdă greșit: %s"
+
+#: radtest/main.c:352
+#, c-format
+msgid "bad separator near %s"
+msgstr "separator incorect lângă %s"
+
+#: radtest/main.c:371
+#, c-format
+msgid "No servers specfied. Use -s option.\n"
+msgstr "Nu au fost specificate serverele. Utilizați opțiunea „-s”.\n"
+
+#: radtest/main.c:400
+#, c-format
+msgid "assign: missing closing quote\n"
+msgstr "assign: lipsesc ghilimele de închidere\n"
+
+#: radtest/main.c:419 radtest/main.c:428
+#, c-format
+msgid "assign: invalid IP address: %s\n"
+msgstr "assign: adresă IP nevalidă: %s\n"
+
+#: radtest/runtime.c:153 radtest/runtime.c:159
+msgid "out of memory"
+msgstr "memorie epuizată"
+
+#: radtest/runtime.c:200 radtest/runtime.c:206
+msgid "division by zero"
+msgstr "împărțire la zero"
+
+#. TRANSLATORS: The following operation names are used as complements,
+#. e.g.: "incompatible types in addition"
+#.
+#: radtest/runtime.c:264
+msgid "addition"
+msgstr "adunare"
+
+#: radtest/runtime.c:265
+msgid "subtraction"
+msgstr "scădere"
+
+#: radtest/runtime.c:266
+msgid "multiplication"
+msgstr "înmulțire"
+
+#: radtest/runtime.c:267 radtest/runtime.c:268
+msgid "division"
+msgstr "împărțire"
+
+#: radtest/runtime.c:269
+msgid "boolean conjunction"
+msgstr "conjuncție booleană"
+
+#: radtest/runtime.c:270
+msgid "boolean disjunction"
+msgstr "disjuncție booleană"
+
+#: radtest/runtime.c:271 radtest/runtime.c:272 radtest/runtime.c:273
+#: radtest/runtime.c:274 radtest/runtime.c:275 radtest/runtime.c:276
+msgid "comparison"
+msgstr "comparare"
+
+#: radtest/runtime.c:282
+#, c-format
+msgid "incompatible types in %s"
+msgstr "tipuri incompatibile în %s"
+
+#: radtest/runtime.c:290
+msgid "binary negation"
+msgstr "negație binară"
+
+#: radtest/runtime.c:291
+msgid "numeric negation"
+msgstr "negație numerică"
+
+#: radtest/runtime.c:298
+#, c-format
+msgid "incompatible data type in %s"
+msgstr "tip de date incompatibil în %s"
+
+#: radtest/runtime.c:442 radtest/runtime.c:511
+#, c-format
+msgid "variable `%s' used before definition"
+msgstr "variabila „%s” utilizată înainte de definire"
+
+#: radtest/runtime.c:454
+#, c-format
+msgid "%s:%d: unknown data type"
+msgstr "%s:%d: tip de date necunoscut"
+
+#: radtest/runtime.c:477 radtest/runtime.c:571 radtest/runtime.c:1411
+#, fuzzy, c-format
+#| msgid "regexp error: %s"
+msgid "read error: %s"
+msgstr "eroare în expresia regulată: %s"
+
+#: radtest/runtime.c:487 radtest/runtime.c:581 radtest/runtime.c:1420
+#, fuzzy
+#| msgid "string too long: %s"
+msgid "input line too long"
+msgstr "șirul este prea lung: %s"
+
+#: radtest/runtime.c:628 radtest/runtime.c:677
+msgid "invalid data type"
+msgstr "tip de date nevalid"
+
+#. TRANSLATORS: The following six msgids are data type names in the
+#. form of *direct object*. They are used in place of the first %s
+#. in the sentence 'cannot convert %s %s'
+#: radtest/runtime.c:782
+msgid "undefined"
+msgstr "nedefinit(ă)"
+
+#: radtest/runtime.c:784
+msgid "ipaddress"
+msgstr "adresă-IP"
+
+#: radtest/runtime.c:786
+msgid "binary string"
+msgstr "șir binar"
+
+#: radtest/runtime.c:787
+msgid "pairlist"
+msgstr "listă-perechi"
+
+#: radtest/runtime.c:788
+msgid "A/V list"
+msgstr "listă Atribut/Valoare"
+
+#. TRANSLATORS: The following six msgids are data type names in the
+#. form of *indirect object*. They are used in place of second %s
+#. in the sentence 'cannot convert %s %s'
+#: radtest/runtime.c:795
+msgid "to undefined"
+msgstr "la un tip nedefinit"
+
+#: radtest/runtime.c:797
+msgid "to ipaddress"
+msgstr "la adresă-IP"
+
+#: radtest/runtime.c:799
+msgid "to binary string"
+msgstr "la șir binar"
+
+#: radtest/runtime.c:800
+msgid "to pairlist"
+msgstr "la listă-perechi"
+
+#: radtest/runtime.c:801
+msgid "to A/V list"
+msgstr "la listă Atribut/Valoare"
+
+#. TRANSLATORS: First %s is replaced with a type name,
+#. second %s -- with a type name with an appropriate preposition.
+#. For example, in English:
+#. cannot convert integer to string
+#.
+#: radtest/runtime.c:814
+#, c-format
+msgid "cannot convert %s %s"
+msgstr "nu se poate converti %s %s"
+
+#: radtest/runtime.c:1140
+msgid "not a pair list"
+msgstr "nu este o listă de perechi"
+
+#: radtest/runtime.c:1281
+msgid "invalid data type in send statement (expected A/V list)"
+msgstr ""
+"tip de date nevalid în declarația de trimitere (se aștepta o listă ATRIBUT/"
+"VALOARE)"
+
+#: radtest/runtime.c:1297
+#, c-format
+msgid "expect %s\n"
+msgstr "se aștepta %s\n"
+
+#: radtest/runtime.c:1298
+#, c-format
+msgid "got    %s\n"
+msgstr "s-a primit %s\n"
+
+#: radtest/runtime.c:1308
+msgid "expected A/V pair list"
+msgstr "se aștepta listă de perechei Atribut/Valoare"
+
+#: radtest/runtime.c:1336
+msgid "invalid data type in exit statement"
+msgstr "tip de date nevalid în instrucțiunea „exit”"
+
+#: radtest/runtime.c:1559
+msgid "invalid data type in `shift'"
+msgstr "tip de date nevalid în instrucțiunea „shift”"
+
+#: radtest/runtime.c:1566
+msgid "not enough arguments to shift"
+msgstr "nu sunt suficiente argumente pentru „shift”"
+
+#: radwho/radwho.c:153
+msgid "radwho specific switches:"
+msgstr "Opțiuni specifice pentru radwho:"
+
+#: radwho/radwho.c:158
+msgid "print all entries, not only active ones"
+msgstr "print all entries, not only active ones"
+
+#: radwho/radwho.c:169
+msgid "display CLID in second column"
+msgstr "afișează CLID în a doua coloană"
+
+#: radwho/radwho.c:179
+msgid "change date representation format"
+msgstr "modifică formatul de reprezentare a datei"
+
+#: radwho/radwho.c:180
+msgid "DATEFMT"
+msgstr "FORMAT_DATĂ"
+
+#: radwho/radwho.c:191
+msgid "print STRING instead of an empty column"
+msgstr "imprimă ȘIRUL în loc de o coloană goală"
+
+#: radwho/radwho.c:192
+msgid "STRING"
+msgstr "ȘIR"
+
+#: radwho/radwho.c:203
+msgid "Use FILE instead of /var/log/radutmp"
+msgstr "Utilizează FIȘIERUL în loc de „/var/log/radutmp”"
+
+#: radwho/radwho.c:215
+msgid "act as a finger daemon"
+msgstr "acționează ca un demon finger"
+
+#: radwho/radwho.c:226
+msgid "do not display header line"
+msgstr "nu afișează linia de antet"
+
+#: radwho/radwho.c:237
+msgid "display session ID in the second column"
+msgstr "afișează ID-ul sesunii în a doua coloană"
+
+#: radwho/radwho.c:256
+msgid "Long output. All fields will be printed."
+msgstr "Ieșire lungă. Toate câmpurile vor fi afișate."
+
+#: radwho/radwho.c:266
+msgid "display also local users"
+msgstr "afișează de asemenea utilizatorii locali"
+
+#: radwho/radwho.c:277
+msgid "do not resolve hostnames."
+msgstr "nu rexolvă numele de gazdă."
+
+#: radwho/radwho.c:288
+msgid "change output format"
+msgstr "schimbă formatul de ieșire"
+
+#: radwho/radwho.c:289
+msgid "FORMAT"
+msgstr "FORMAT"
+
+#: radwho/radwho.c:299
+msgid "secure mode: requires that the username be specified"
+msgstr "modul securizat: necesită specificarea numelui de utilizator"
+
+#: radwho/radwho.c:312
+msgid "display who is logged on by Radius"
+msgstr "afișează cine este conectat prin Radius"
+
+#: radwho/radwho.c:379
+#, c-format
+msgid "must provide username\n"
+msgstr "trebuie să furnizați numele de utilizator\n"
+
+#: radwho/radwho.c:415
+#, c-format
+msgid "can't open file: %s"
+msgstr "nu se poate deschide fișierul: %s"
+
+#: radzap/radzap.c:63
+msgid "radzap specific switches:"
+msgstr "Opțiuni specifice pentru radxap:"
+
+#: radzap/radzap.c:68
+msgid "ask for confirmation before zapping"
+msgstr "solicită interactiv confirmarea înainte de a omorî"
+
+#: radzap/radzap.c:78
+msgid "set logging directory"
+msgstr "stabilește directorul de jurnalizare"
+
+#: radzap/radzap.c:90
+msgid "operate on FILE instead of /var/log/radutmp"
+msgstr "operează pe FIȘIER în loc de „/var/log/radutmp”"
+
+#: radzap/radzap.c:102
+msgid "zap user from given NAS"
+msgstr "șterge utilizatorul din NAS-ul specificat"
+
+#: radzap/radzap.c:114
+msgid "zap user coming from given port"
+msgstr "șterge utilizatorii cu numărul de port specificat"
+
+#: radzap/radzap.c:126
+msgid "do not ask for confirmation before zapping"
+msgstr "nu solicită interactiv confirmarea înainte de a omorî"
+
+#: radzap/radzap.c:139
+msgid "delete Radius login records"
+msgstr "șterge înregistrările de autentificare Radius"
+
+#: radzap/radzap.c:141
+msgid "[OPTIONS] [USER]"
+msgstr ""
+
+#: radzap/radzap.c:201
+#, c-format
+msgid "radzap: zapping %s from %s, port %d"
+msgstr "radzap: se șterge %s din %s, portul %d"
+
+#: radzap/radzap.c:209
+#, c-format
+msgid "Not confirmed\n"
+msgstr "Nu a fost confirmat\n"
+
+#: radzap/radzap.c:247
+#, c-format
+msgid "at least one port, nas or user must be specified"
+msgstr "cel puțin un port, NAS sau utilizator trebuie să fie specificat"
+
+#: radzap/radzap.c:269
+#, c-format
+msgid "%s: host not found.\n"
+msgstr "%s: gazda nu a fost găsită.\n"
+
+#: sql/disp.c:138
+msgid "Failed query was"
+msgstr "Întrebarea care a eșuat"
+
+#: sql/mysql.c:78
+msgid "gave up on connect"
+msgstr "s-a renunțat la conectare"
+
+#: sql/mysql.c:106
+#, c-format
+msgid "[MYSQL] cannot connect to %s as %s: %s"
+msgstr "[MYSQL] nu se poate conecta la %s ca %s: %s"
+
+#: sql/mysql.c:162
+#, c-format
+msgid "[MYSQL]: can't get result"
+msgstr "[MYSQL]: can't get result"
+
+#: sql/odbc.c:229
+#, c-format
+msgid "query returned more tuples: %s"
+msgstr "interogarea a returnat mai multe tupluri: %s"
+
+#: sql/odbc.c:341
+#, c-format
+msgid "too few columns returned (%d req'd)"
+msgstr "prea puține coloane returnate (%d req'd)"
+
+#: sql/postgres.c:69
+#, c-format
+msgid "PQconnectStart failed: %s"
+msgstr "PQconnectStart a eșuaT: %s"
+
+#: sql/postgres.c:151 sql/postgres.c:201 sql/postgres.c:268
+#, c-format
+msgid "PQexec returned %s"
+msgstr "PQexec a returnat %s"
+
+#: sql/postgres.c:192
+#, c-format
+msgid "query returned %d tuple: %s"
+msgid_plural "query returned %d tuples: %s"
+msgstr[0] "interogarea a returnat %d tuple: %s"
+msgstr[1] "interogarea a returnat %d tuple: %s"
+msgstr[2] "interogarea a returnat %d de tuple: %s"
+
+#, c-format
+#~ msgid "%s: option '%s%s' is ambiguous\n"
+#~ msgstr "%s: opțiunea „%s%s” este ambiguă\n"
+
+#, c-format
+#~ msgid "%s: invalid option -- '%c'\n"
+#~ msgstr "%s: opțiune nevalidă -- „%c”\n"
+
+#, c-format
+#~ msgid "%s: option requires an argument -- '%c'\n"
+#~ msgstr "%s: opțiunea necesită un argument -- „%c”\n"
+
+#, c-format
+#~ msgid "Garbage in ARGP_HELP_FMT: %s"
+#~ msgstr "Deșeuri în ARGP_HELP_FMT: %s"
+
+#~ msgid "  or: "
+#~ msgstr "  sau: "
+
+#, c-format
+#~ msgid "Try '%s --help' or '%s --usage' for more information.\n"
+#~ msgstr ""
+#~ "Încercați «%s --help» sau «%s --usage» pentru mai multe informații.\n"
+
+#, c-format
+#~ msgid "Report bugs to %s.\n"
+#~ msgstr "Raportați erorile la %s.\n"
+
+#~ msgid "Unknown system error"
+#~ msgstr "Eroare de sistem necunoscută"
+
+#~ msgid "NAME"
+#~ msgstr "NUME"
+
+#~ msgid "set the program name"
+#~ msgstr "stabilește numele programului"
+
+#~ msgid "SECS"
+#~ msgstr "SEC"
+
+#~ msgid "hang for SECS seconds (default 3600)"
+#~ msgstr "suspendă pentru SEC secunde (implicit 3600)"
+
+#~ msgid "(PROGRAM ERROR) No version known!?"
+#~ msgstr "(EROARE DE PROGRAM) Nu se cunoaște versiunea!?"
+
+#, c-format
+#~ msgid "%s: Too many arguments\n"
+#~ msgstr "%s: Prea multe argumente\n"
+
+#~ msgid "(PROGRAM ERROR) Option should have been recognized!?"
+#~ msgstr "(EROARE DE PROGRAM) Opțiunea ar fi trebuit să fie recunoscută!?"
+
+#~ msgid "print license and exit"
+#~ msgstr "imprimă licența și iese"
+
+#~ msgid ""
+#~ "   GNU Radius is free software; you can redistribute it and/or modify\n"
+#~ "   it under the terms of the GNU General Public License as published by\n"
+#~ "   the Free Software Foundation; either version 3, or (at your option)\n"
+#~ "   any later version.\n"
+#~ "\n"
+#~ "   GNU Radius is distributed in the hope that it will be useful,\n"
+#~ "   but WITHOUT ANY WARRANTY; without even the implied warranty of\n"
+#~ "   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\n"
+#~ "   GNU General Public License for more details.\n"
+#~ "\n"
+#~ "   You should have received a copy of the GNU General Public License\n"
+#~ "   along with GNU Radius.  If not, see <http://www.gnu.org/licenses/>.\n"
+#~ "\n"
+#~ msgstr ""
+#~ "   Acest program este software liber; îl puteți redistribui și/sau "
+#~ "modifica\n"
+#~ "   în conformitate cu termenii Licenței Publice Generale GNU publicată "
+#~ "de\n"
+#~ "   Free Software Foundation; fie versiunea 3, fie (la alegerea "
+#~ "dumneavoastră)\n"
+#~ "   orice versiune ulterioară.\n"
+#~ "\n"
+#~ "   Acest program este distribuit în speranța că va fi util, dar FĂRĂ "
+#~ "NICIO\n"
+#~ "   GARANȚIE; fără nici măcar garanția implicită de COMERCIALIZARE sau "
+#~ "ADECVARE\n"
+#~ "   PENTRU UN SCOP PARTICULAR. Consultați Licența publică generală GNU "
+#~ "pentru\n"
+#~ "   mai multe detalii.\n"
+#~ "\n"
+#~ "   Trebuie să fi primit o copie a Licenței Publice Generale GNU împreună "
+#~ "cu\n"
+#~ "   GNU Radius. Dacă nu, consultați <http://www.gnu.org/licenses/>.\n"
+#~ "\n"
+
+#~ msgid "gsub: not enough memory"
+#~ msgstr "gsub: memorie insuficientă"
+
+#~ msgid "sub: not enough memory"
+#~ msgstr "sub: memorie insuficientă"
+
+#, c-format
+#~ msgid "%s: GNU Radius version %s"
+#~ msgstr "%s: GNU Radius versiunea %s"
+
+#, c-format
+#~ msgid "--width is incompatible with --show-seconds"
+#~ msgstr "opțiunea „--width” este incompatibilă cu opțiunea „--show-seconds”"
+
+#~ msgid "display hostnames without domain part"
+#~ msgstr "afișează numele gazdelor fără partea de domeniu"
+
+#, c-format
+#~ msgid "%s: option `--%s' doesn't allow an argument\n"
+#~ msgstr "%s: opțiunea „--%s” nu permite argumente\n"
+
+#, c-format
+#~ msgid "%s: unrecognized option `--%s'\n"
+#~ msgstr "%s: opțiune nerecunoscută „--%s”\n"
+
+#, c-format
+#~ msgid "%s: illegal option -- %c\n"
+#~ msgstr "%s: opțiune ilegală -- %c\n"
+
+#, c-format
+#~ msgid "%s: option `-W %s' is ambiguous\n"
+#~ msgstr "%s: opțiunea „-W %s” este ambiguă\n"
+
+#, c-format
+#~ msgid "%s: option `-W %s' doesn't allow an argument\n"
+#~ msgstr "%s: opțiunea „-W %s” nu permite argumente\n"
+
+#, c-format
+#~ msgid "%.*s: ARGP_HELP_FMT parameter must be positive"
+#~ msgstr "%.*s: Parametrul ARGP_HELP_FMT trebuie să fie pozitiv"
+
+#, c-format
+#~ msgid "low core: aborting"
+#~ msgstr "memorie insuficientă: se abandonează"

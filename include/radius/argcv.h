@@ -1,5 +1,5 @@
 /* GNU Mailutils -- a suite of utilities for electronic mail
-   Copyright (C) 1999, 2000, 2001, 2005, 2007 Free Software Foundation, Inc.
+   Copyright (C) 1999-2025 Free Software Foundation, Inc.
 
    This library is free software; you can redistribute it and/or
    modify it under the terms of the GNU Lesser General Public
@@ -11,9 +11,8 @@
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
    Lesser General Public License for more details.
 
-   You should have received a copy of the GNU Lesser General Public
-   License along with this library; if not, write to the Free Software
-   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA  */
+   You should have received a copy of the GNU Lesser General Public License
+   along with GNU Radius.  If not, see <http://www.gnu.org/licenses/>. */
 
 #ifndef _ARGCV_H
 #define _ARGCV_H 1
@@ -27,29 +26,19 @@
 extern "C" {
 #endif
 
-#ifndef __P
-# if defined PROTOTYPES || (defined __STDC__ && __STDC__)
-#  define __P(args) args
-# else
-#  define __P(args) ()
-# endif
-#endif /*__P */
-
-extern int grad_argcv_get    __P ((const char *command, const char *delim,
+extern int grad_argcv_get    (const char *command, const char *delim,
 			      const char* cmnt,
-			      int *argc, char ***argv));
-extern int grad_argcv_string __P ((int argc, char **argv, char **string));
-extern int grad_argcv_free   __P ((int argc, char **argv));
-extern int grad_argcv_unquote_char __P((int c));
-extern int grad_argcv_quote_char __P((int c));
-extern size_t grad_argcv_quoted_length __P((const char *str, int *quote));
-extern size_t grad_argcv_quoted_length_n __P((const char *str, size_t size,
-					      int *quote));
-extern void grad_argcv_unquote_copy __P((char *dst, const char *src,
-					 size_t n));
-extern void grad_argcv_quote_copy_n __P((char *dst, const char *src,
-					 size_t size));
-extern void grad_argcv_quote_copy __P((char *dst, const char *src));
+			      int *argc, char ***argv);
+extern int grad_argcv_string (int argc, char **argv, char **string);
+extern int grad_argcv_free   (int argc, char **argv);
+extern int grad_argcv_unquote_char (int c);
+extern int grad_argcv_quote_char (int c);
+extern size_t grad_argcv_quoted_length (const char *str, int *quote);
+extern size_t grad_argcv_quoted_length_n (const char *str, size_t size,
+					  int *quote);
+extern void grad_argcv_unquote_copy (char *dst, const char *src, size_t n);
+extern void grad_argcv_quote_copy_n (char *dst, const char *src, size_t size);
+extern void grad_argcv_quote_copy (char *dst, const char *src);
 
 #ifdef __cplusplus
 }

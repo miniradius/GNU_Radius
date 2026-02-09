@@ -1,6 +1,5 @@
 # This file is part of GNU Radius.
-# Copyright (C) 2000,2001,2002,2003,2004,2005,
-# 2007,2008 Free Software Foundation, Inc.
+# Copyright (C) 2000-2025 Free Software Foundation, Inc.
 #
 # Written by Sergey Poznyakoff
 #
@@ -15,26 +14,44 @@
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with GNU Radius; if not, write to the Free Software Foundation,
-# Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+# along with GNU Radius.  If not, see <http://www.gnu.org/licenses/>.
 
-AC_PREREQ(2.61)
+AC_PREREQ([2.71])
 
-AC_REVISION($Revision$)
-AC_INIT([GNU Radius], [1.6.1], [bug-gnu-radius@gnu.org])
+AC_INIT([GNU Radius],[1.7],[bug-gnu-radius@gnu.org])
 AC_CONFIG_SRCDIR(radiusd/radiusd.c)
 AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_AUX_DIR([build-aux])
-AC_CONFIG_LIBOBJ_DIR([gnu])
-AC_CANONICAL_SYSTEM
-AM_INIT_AUTOMAKE(no-exeext)
+AC_CANONICAL_TARGET
+AC_CONFIG_MACRO_DIRS([m4 am lib/parseopt gint])
+AM_INIT_AUTOMAKE([1.16 gnits no-exeext dist-bzip2 dist-xz std-options silent-rules])
 AC_CONFIG_HEADERS([config.h])
+
+# Enable silent rules by default:
+AM_SILENT_RULES([yes])
 
 AC_SUBST(BUILD_TARGET)
 AC_SUBST(RADIUS_PID)
 
 AC_SUBST(RADIUS_INCLUDE_PATH,
-         ['-I$(top_builddir) -I$(top_srcdir)/include -I$(top_builddir)/include -I$(top_builddir)/include/radius -I$(top_srcdir)/include/radius -I$(top_srcdir)/lib -I$(top_srcdir)/gnu -I$(top_builddir)/gnu'])
+         ['-I$(top_builddir) -I$(top_srcdir)/include -I$(top_builddir)/include -I$(top_builddir)/include/radius -I$(top_srcdir)/include/radius -I$(top_srcdir)/lib'])
+
+dnl Additional version variables
+splitver() {
+    save_IFS="$IFS"
+    IFS='.'
+    set -- $PACKAGE_VERSION
+    IFS="$save_IFS"
+    PACKAGE_VERSION_MAJOR=$1
+    PACKAGE_VERSION_MINOR=$2
+    PACKAGE_VERSION_PATCH=${3:-0}
+    PACKAGE_VERSION_PACKED=$(( $1 * 1000 + $2 * 100 + ${3:-0} ))
+}
+splitver
+AC_SUBST(PACKAGE_VERSION_MAJOR)
+AC_SUBST(PACKAGE_VERSION_MINOR)
+AC_SUBST(PACKAGE_VERSION_PATCH)
+AC_SUBST(PACKAGE_VERSION_PACKED)
 
 dnl Library versioning
 AC_SUBST(VI_CURRENT, 1)
@@ -43,88 +60,50 @@ AC_SUBST(VI_AGE, 0)
 
 ## * Checks for programs.
 AC_PROG_CC
-gl_EARLY
-AM_PROG_CC_STDC
-AC_PROG_YACC
-AM_PROG_LEX
+AC_PATH_PROG([BISON],[bison],
+ [\$(SHELL) \$(top_srcdir)/build-aux/missing bison])
+AC_PATH_PROG([FLEX],[flex],
+ [\$(SHELL) \$(top_srcdir)/build-aux/missing flex])
+
 AC_PROG_AWK
 
 AC_PATH_PROG(PS, ps, no, $PATH:/usr/ccs/bin:/usr/bin:/usr/local/bin)
 AC_ARG_VAR(PS,[Full path to ps binary])
 
 AC_PROG_LN_S
-AM_PROG_LIBTOOL
+LT_INIT
 
 AC_SUBST(M4,['`cd $(top_srcdir); pwd`/build-aux/missing --run m4'])
-RA_MAINTAINER_MODE
-RA_LD_VERSIONING
+
+### Parseopt
+PARSEOPT_SETUP(lib/parseopt, shared, CPPFLAGS='-I$(top_srcdir)/lib')
 
 ### Check if Guile is installed.
-AC_ARG_WITH(guile,
-	AC_HELP_STRING([--without-guile],
-	[do not compile Guile support]),
-	[USE_GUILE=$withval],
-	[USE_GUILE=yes])
+GINT_INIT([gint],[2.2 with-guile],
+  [USE_GUILE=yes
+   GUILE_BINDIR=`guile-config info bindir`
+   AC_ARG_WITH([server-guile],
+     AS_HELP_STRING([--with-server-guile],[compile server Guile support]),
+     [USE_SERVER_GUILE=$withval],
+     [USE_SERVER_GUILE=yes])
+   if test $USE_SERVER_GUILE = yes; then
+     AC_DEFINE([USE_SERVER_GUILE],1,
+               [Define this to enable Guile interface])
+     RA_RADIUSD_LDADD(../radscm/libradscm.la ../radscm/libservscm.a $GUILE_LIBS)
+   fi],
+  [USE_GUILE=no])
 
-AC_ARG_WITH(server-guile,
-	AC_HELP_STRING([--with-server-guile], [compile server Guile support]),
-	[USE_SERVER_GUILE=$withval],
-	[USE_SERVER_GUILE=yes])
+AM_CONDITIONAL([RA_COND_GUILE],[test "$USE_GUILE" = "yes"])
 
-if test $USE_GUILE = yes; then
-	RA_CHECK_GUILE(,
-			[LIBRADSCM="libradscm.la libservscm.a"
-                         RADSCM=radscm
-			 RADSESSION=radsession
-			 RADSCM_BUILT_SOURCES_LIST='${RADSCM_BUILT_SOURCE_FILES}'
-			 RADSCM_PKGDATA='${RADSCM_PKGDATA_FILES}'
-                         GUILE_BINDIR=`guile-config info bindir`
-			 if test $USE_SERVER_GUILE = yes; then
-				AC_DEFINE(USE_SERVER_GUILE,1,
-                                    [Define this to enable Guile interface])
-				RA_RADIUSD_LDADD(../radscm/libradscm.la ../radscm/libservscm.a $GUILE_LIBS)
-			 fi],
-                        [USE_GUILE=no])
-fi
-
-AC_SUBST(GUILE_CONFIG, ["# "])
+AC_SUBST(RA_GUILE_ENABLE, ["# "])
 if test "$USE_GUILE" = yes; then
-  GUILE_CONFIG=
+  RA_GUILE_ENABLE=
 fi
 
-# We used to have 'case' here that determined the Guile snarfer version
-# to use. Now that we don't support 1.4 any more, it is gone as well.
-# Hopefully, next versions of Guile will install the snarfer, so I
-# be able to get rid from scripts/guile once and for all. For the
-# time being, let's assume the shipped 1.6-compatible snarfer will
-# work for all future versions of Guile. If it does not, please report
-# to <bug-gnu-radius@gnu.org>. Make sure to include a copy of your config.log,
-# and any relevant error messages, produced when compiling/running.
-
-GUILE_SNARF_VERSION="1.6"
-
-AC_SUBST(GUILE_INCLUDES)
-AC_SUBST(GUILE_LIBS)
-AC_SUBST(GUILE_SNARF_VERSION)
 AC_SUBST(GUILE_BINDIR)
-AC_SUBST(LIBRADSCM)
-AC_SUBST(RADSCM)
-AC_SUBST(RADSESSION)
-AC_SUBST(RADSCM_BUILT_SOURCES_LIST)
-AC_SUBST(RADSCM_PKGDATA)
 
 ### Check for Emacs site-lisp directory
 AM_PATH_LISPDIR
-
-## * Check for preprocessor capabilities
-AC_MSG_CHECKING(whether compiler defines __FUNCTION__)
-AC_TRY_RUN(
-main() { return strcmp(__FUNCTION__,"main"); },
-	AC_MSG_RESULT(yes),
-	AC_DEFINE_UNQUOTED(__FUNCTION__, (char*)0,
-                           [Defined if your compiler does not define it])
-	AC_MSG_RESULT(no),
-	AC_MSG_RESULT(don't know))
 
 ## *************************************
 ## add any additional libraries/includes
@@ -165,38 +144,12 @@ if test $USE_LOADABLE_MODULES = yes; then
 fi
 
 ## * Checks for header files.
-
-AC_HEADER_STDC
-AC_HEADER_SYS_WAIT
-AC_CHECK_HEADERS(fcntl.h malloc.h strings.h\
- sys/file.h sys/time.h sys/types.h unistd.h\
- ctype.h sys/socket.h socket.h netinet/in.h arpa/inet.h\
- netdb.h stdarg.h varargs.h termcap.h termios.h termio.h sgtty.h\
- crypt.h sys/uio.h sys/select.h sys/resources.h libintl.h)
-
-AC_TYPE_PID_T
-AC_TYPE_SIZE_T
-AC_TYPE_OFF_T
-AC_TYPE_SIGNAL
-AC_CHECK_SIZEOF(uint32_t)
-AC_CHECK_SIZEOF(unsigned long)
-AC_CHECK_SIZEOF(unsigned int)
-
-AC_CHECK_TYPE(socklen_t, , AC_DEFINE(socklen_t, int, [Define to int if <sys/types.h> does not define]),
-[
-#if HAVE_SYS_TYPES_H
-# include <sys/types.h>
-#endif
-#ifdef HAVE_SYS_SOCKET_H
-# include <sys/socket.h>
-#endif
-#ifdef HAVE_SOCKET_H
-# include <socket.h>
-#endif
-])
+AC_CHECK_HEADERS([security/_pam_aconf.h])
 
 AC_CHECK_MEMBERS([struct passwd.pw_expire, struct passwd.pw_change], , ,
                  [#include <pwd.h>])
+AC_CHECK_MEMBERS([struct tm.tm_gmtoff],,,
+                 [#include <time.h>])
 
 ## Check for shadow support
 AC_CHECK_HEADER([shadow.h],
@@ -235,126 +188,34 @@ AH_TOP([
 #endif
 ])
 
-AC_ARG_VAR([LEAK_DETECTOR],
-           [Enable leak detector support. Allowed values: 0 - disable leak detector, 1 - enable debug messages, 2 - enable debug messages and memory statistics. The setting takes effect only if --enable-maintainer-mode is specified. Using --enable-maintainer-mode alone implies LEAK_DETECTOR=1.])
-
-case $LEAK_DETECTOR in
-[[0-9]])	AC_DEFINE_UNQUOTED(LEAK_DETECTOR, $LEAK_DETECTOR);;
-*)	;;
-esac
-
-AH_BOTTOM([
-#ifdef MAINTAINER_MODE
-# define LEAK_DETECTOR 1
-#endif
-])
-
 ## * Checks for typedefs, structures, and compiler characteristics.
 AC_C_CONST
 AC_TYPE_UID_T
 AC_TYPE_OFF_T
 AC_TYPE_PID_T
 AC_TYPE_SIZE_T
-AC_TYPE_SIGNAL
+
 AC_CHECK_TYPE(u_char, unsigned char)
 AC_CHECK_TYPE(u_int, unsigned int)
 AC_CHECK_TYPE(u_long, unsigned long)
-AC_HEADER_TIME
+
 AC_STRUCT_TM
 AC_CHECK_MEMBERS([struct sockaddr_in.sin_len], , ,
     [ #include <sys/types.h>
       #include <netinet/in.h> ])
 RA_CHECK_INADDR_LOOPBACK
 
-## * Checks for library functions.
-#AC_FUNC_MEMCMP
-AC_FUNC_STRFTIME
-AC_FUNC_VPRINTF
-AC_FUNC_MMAP
-
-gl_INIT
-
-# Radius uses code that conflicts with gcc understanding of C aliasing:
-#
-#   http://gcc.gnu.org/bugzilla/show_bug.cgi?id=38527
-#
-# In particular, when compiling radiusd/rewrite.y gcc >= 4.3.0 generates
-# code containing explicit dead loops. According to gcc folks, such code
-# generation is correct. I can hardly agree with that. And not only me.
-# Quoting Linus Torvalds:
-#   The gcc people are more interested in trying to find out what can be
-#   allowed by the c99 specs than about making things actually _work_. The
-#   aliasing code in particular is not even worth enabling, it's just not
-#   possible to sanely tell gcc when some things can alias.
-# (see http://lkml.org/lkml/2003/2/26/158, for details)
-#
-# (The code below is borrowed from Python's configure.in)
-AC_SUBST(OPTFLAGS)
-case $GCC in
-yes)
-    AC_MSG_CHECKING(whether $CC accepts -fno-strict-aliasing)
-     ac_save_cc="$CC"
-     CC="$CC -fno-strict-aliasing"
-     AC_TRY_RUN([int main() { return 0; }],
-     ac_cv_no_strict_aliasing_ok=yes,
-     ac_cv_no_strict_aliasing_ok=no,
-     ac_cv_no_strict_aliasing_ok=no)
-     CC="$ac_save_cc"
-    AC_MSG_RESULT($ac_cv_no_strict_aliasing_ok)
-    if test $ac_cv_no_strict_aliasing_ok = yes
-    then
-      OPTFLAGS="$OPTFLAGS -fno-strict-aliasing"
-    fi
-    ;;
-*)  # FIXME
-    ;;
-esac
-
 ## * Check for national language support
 AM_GNU_GETTEXT([external], [need-ngettext])
-AM_GNU_GETTEXT_VERSION(0.15)
+AM_GNU_GETTEXT_VERSION(0.21)
 
-AC_CHECK_FUNCS(setsid gethostname gettimeofday \
- mkdir mktime select socket strdup strtol lockf \
- setlocale bzero \
- inet_ntoa inet_aton \
- setvbuf setegid setregid setresgid seteuid setreuid getdtablesize sigaction)
-
-# FIXME: Do we need to check for the functions before `crypt'?
-AC_CHECK_DECLS([strncasecmp, strtok_r, localtime_r, asprintf, vasprintf,
-getline, crypt, crypt_set_format], , ,
-               [
-#define _REENTRANT
-#include <string.h>
-#ifdef HAVE_STRINGS_H
-# include <strings.h>
-#endif
-#ifdef HAVE_SYS_TIME_H
-# include <sys/time.h>
-# ifdef TIME_WITH_SYS_TIME
-#  include <time.h>
-# endif
-#else
-# include <time.h>
-#endif
-#if defined(HAVE_CRYPT_H)
-# include <crypt.h>
-#endif
-#include <stdio.h>])
-
-# Always use included argp stuff.
-# Earlier, configure preferred to use the one from glibc, if provided,
-# while offering --with-included-argp configuration option. This proved
-# to be unreliable, since there are too many broken argp implementations
-# around
-
-AH_BOTTOM([
-#define GNULIB_ARGP_EXTERN_BASENAME 1
-])
+# FIXME: Checking for functions in the second line is superfluous
+# nowadays.
+AC_CHECK_FUNCS(setlocale getdtablesize crypt_set_format \
+ setegid setregid setresgid seteuid setreuid sigaction)
 
 AC_ARG_WITH([readline],
-            AC_HELP_STRING([--without-readline],
-                           [do not use readline]),
+            AS_HELP_STRING([--without-readline],[do not use readline]),
             [
 case "${withval}" in
   yes) usereadline=yes ;;
@@ -401,9 +262,6 @@ AH_BOTTOM([
 # define rl_completion_matches completion_matches
 #endif])
 
-RA_CHECK_STRUCT_FIELD(hostent, h_addr_list,
-                       [#include <netdb.h>])
-
 ## ********************************************************************
 ## *                     User-configurable options                    *
 ## ********************************************************************
@@ -413,8 +271,7 @@ RA_CHECK_STRUCT_FIELD(hostent, h_addr_list,
 ## **************
 RADIUS_DEBUG=1
 AC_ARG_ENABLE(debug,                     
-	AC_HELP_STRING([--disable-debug],
-	[disable debugging functions]),
+	AS_HELP_STRING([--disable-debug],[disable debugging functions]),
 	[case $enableval in
 		yes)	RADIUS_DEBUG=1;;
 		no)	RADIUS_DEBUG=0;;
@@ -425,8 +282,7 @@ AC_DEFINE_UNQUOTED(RADIUS_DEBUG, $RADIUS_DEBUG,
 
 AC_MSG_CHECKING(for log directory path)
 AC_ARG_WITH(log-dir,
-	AC_HELP_STRING([--with-log-dir=PATH],
-	[Use PATH instead of default log directory path]),
+	AS_HELP_STRING([--with-log-dir=PATH],[Use PATH instead of default log directory path]),
 	[case "$withval" in
 	 /*) RADLOG_DIR=$withval;;
          *)  AC_MSG_ERROR(Argument must be an absolute pathname);;
@@ -440,13 +296,12 @@ AC_ARG_WITH(log-dir,
          fi])
 AC_MSG_RESULT($RADLOG_DIR)
 if test $RADLOG_DIR = NONE; then
-   AC_MSG_ERROR("Don't know where to place default logging directory")
+   AC_MSG_ERROR(Don't know where to place default logging directory)
 fi  
 
 AC_MSG_CHECKING(for pidfile directory path)
 AC_ARG_WITH(pid-dir,
-	AC_HELP_STRING([--with-pid-dir=PATH],
-	[Use PATH instead of default podfile location]),
+	AS_HELP_STRING([--with-pid-dir=PATH],[Use PATH instead of default podfile location]),
 	[case "$withval" in
 	 /*) RADPID_DIR=$withval;;
          *)  AC_MSG_ERROR(Argument must be an absolute pathname);;
@@ -471,8 +326,7 @@ AC_DEFINE_UNQUOTED(BUILD_TARGET,
 ## ******************
 AC_MSG_CHECKING(whether to build radius daemon)
 AC_ARG_ENABLE(server,
-	AC_HELP_STRING([--disable-server],
-	[do not compile radius daemon (radiusd) and accompanying programs (implies --enable-client]),
+	AS_HELP_STRING([--disable-server],[do not compile radius daemon (radiusd) and accompanying programs (implies --enable-client]),
 	[case $enableval in
          yes|no) BUILD_SERVER=$enableval;;
 	 *)      AC_MSG_ERROR([Invalid argument for --enable-server]);;
@@ -482,8 +336,7 @@ AC_MSG_RESULT($BUILD_SERVER)
 
 AC_MSG_CHECKING(whether to build client programs)
 AC_ARG_ENABLE(client,
-	AC_HELP_STRING([--enable-client],
-	[compile client programs]),
+	AS_HELP_STRING([--enable-client],[compile client programs]),
 	[case $enableval in
          yes) BUILD_CLIENT=$enableval;;
          no)  if test $BUILD_SERVER = yes; then
@@ -500,74 +353,11 @@ AC_ARG_ENABLE(client,
 AC_MSG_RESULT($BUILD_CLIENT)
 
 ## **************
-## Contributions
-## **************
-
-AC_ARG_WITH(php,
-            AC_HELP_STRING([--with-php=PATH],
-                           [Enable PHP module]),
-            [case $withval in
-             no)	PHP_PREFIX=
-			;;
-             yes)       PHP_PREFIX=
-			;;
-             /*)	PHP_PREFIX=$withval
-			;;
-	     *)		AC_MSG_ERROR([Invalid prefix in --with-php])
-	     esac],
-             [PHP_PREFIX=])
-
-if test "$PHP_PREFIX" != ""; then
-  AC_SUBST(PHP_INCLUDES)
-  PHP_INCLUDES="-I${PHP_PREFIX}/include/php/main -I${PHP_PREFIX}/include/php/Zend -I${PHP_PREFIX}/include/php -I${PHP_PREFIX}/include/php/TSRM"
-
-  php_save_CPPFLAGS=$CPPFLAGS
-  CPPFLAGS="$CPPFLAGS $PHP_INCLUDES"
-  AC_CHECK_HEADER([php.h],[:],AC_MSG_ERROR([php.h not found]))
-  CPPFLAGS=$php_save_CPPFLAGS
-
-  AC_SUBST(PHPMODDIR)
-  AC_ARG_WITH([php-moddir],
-              AC_HELP_STRING([--with-php-moddir=PATH],
-                             [Set install prefix for PHP extension modules]),
-              [case $withval in
-               /*)	PHPMODDIR=$withval;;
-	       *)	AC_MSG_ERROR([--with-php-moddir requires absolute file name as its argument]);;
-	       esac],
-               [PHPMODDIR='$(libdir)/php/extensions'])
-
-  AC_SUBST(BUILD_MOD_RADIUS_LA)
-  BUILD_MOD_RADIUS_LA=mod_radius.la
-fi
-
-AC_SUBST(APACHEMODDIR)
-AC_SUBST(APACHE_INCLUDES)
-AC_SUBST(BUILD_MOD_AUTH_RADIUS_LA)
-AC_ARG_WITH(apache,
-            AC_HELP_STRING([--with-apache],
-                           [Enable Apache modules]),
-            [case $withval in
-             no)  ;;	
-	     yes) AC_ARG_VAR([APXS],[Name of apxs program])
-                  AC_CHECK_PROG(APXS, [apxs], [apxs], [no])
-                  if test $APXS = no; then
-                    AC_MSG_ERROR([apxs not found])
-                  fi
-                  APACHEMODDIR=`$APXS -q LIBEXECDIR`
-	          APACHE_INCLUDES=`$APXS -q INCLUDEDIR`
-	          BUILD_MOD_AUTH_RADIUS_LA='mod_auth_radius.la'
-	          ;;
-	     *)	  AC_MSG_ERROR([Invalid option argument in --with-apache])
-	     esac])
-
-
-## **************
 ## auth port no
 ## **************
 AC_MSG_CHECKING(authentication port number)
 AC_ARG_WITH(auth-port,
-	AC_HELP_STRING([--with-auth-port={rfc|old|NUMBER}],
-	[specify port number to use for authentication]),
+	AS_HELP_STRING([--with-auth-port={rfc|old|NUMBER}],[specify port number to use for authentication]),
 	[case $withval in
 		[[0-9]][[0-9]]*)	AUTH_PORT=$withval
 				;;
@@ -583,15 +373,12 @@ ACCT_PORT="`expr $AUTH_PORT + 1`"
 AC_MSG_RESULT([Default ports are $AUTH_PORT/$ACCT_PORT])
 AC_SUBST(AUTH_PORT)
 AC_SUBST(ACCT_PORT)
-AC_DEFINE_UNQUOTED(DEF_AUTH_PORT, $AUTH_PORT, [Default authentication port])
-AC_DEFINE_UNQUOTED(DEF_ACCT_PORT, $ACCT_PORT, [Default accounting port])
 		
 ## **************
 ## PAM support
 ## **************
 AC_ARG_ENABLE(pam,
-	AC_HELP_STRING([--enable-pam],
-	[enable pam support]),
+	AS_HELP_STRING([--enable-pam],[enable pam support]),
 	[case $enableval in
 	 yes)	USE_PAM=yes
                 AC_DEFINE(USE_PAM,1,[Enable PAM support]);;
@@ -638,8 +425,7 @@ rad_lib_ndbm() {
 
 AH_TEMPLATE(USE_DBM,[Define this to enable DBM support])
 AC_ARG_ENABLE(dbm,
-	AC_HELP_STRING([--enable-dbm[={dbm|ndbm}]],
-	[include dbm support]),
+	AS_HELP_STRING([--enable-dbm[={dbm|ndbm}]],[include dbm support]),
 	[case $enableval in
 	 yes)	    rad_lib_ndbm
 	            AC_DEFINE_UNQUOTED(USE_DBM,DBM_NDBM);;
@@ -653,7 +439,8 @@ AC_ARG_ENABLE(dbm,
 		    AC_DEFINE_UNQUOTED(USE_DBM,DBM_NDBM);;
 
 	 *)	    AC_MSG_ERROR(unsupported option value: $enableval)
-	esac])	
+	esac],
+	[USE_DBM=no])	
 
 
 ## **************
@@ -707,8 +494,7 @@ mysql_init() {
 }
 
 AC_ARG_WITH(mysql,
-	AC_HELP_STRING([--with-mysql],
-	[Configure to work with MySQL]),
+	AS_HELP_STRING([--with-mysql],[Configure to work with MySQL]),
 	[case $withval in
 	 yes)   SQL_MODULES="$SQL_MODULES mysql"
 		;;
@@ -733,8 +519,7 @@ postgres_init() {
 }
 
 AC_ARG_WITH(postgres,
-	AC_HELP_STRING([--with-postgres],
-	[Configure to work with Postgres]),
+	AS_HELP_STRING([--with-postgres],[Configure to work with Postgres]),
 	[case $withval in
 	 yes)	SQL_MODULES="$SQL_MODULES postgres"
 		;;
@@ -782,8 +567,7 @@ odbc_init() {
 }
 
 AC_ARG_WITH(odbc,
-	AC_HELP_STRING([--with-odbc[={odbc|iodbc}]],
-	[Configure to work with ODBC]),
+	AS_HELP_STRING([--with-odbc[={odbc|iodbc}]],[Configure to work with ODBC]),
 	[case $withval in
 	 yes|odbc|ODBC|iodbc|iODBC|IODBC)
 		SQL_MODULES="$SQL_MODULES odbc"
@@ -800,8 +584,7 @@ AC_ARG_WITH(odbc,
 ## ***********
 
 AC_ARG_WITH(sql,
-        AC_HELP_STRING([--with-sql=modlist],
-                       [Configure to work with SQL]),
+        AS_HELP_STRING([--with-sql=modlist],[Configure to work with SQL]),
 	[for mod in `echo $withval | tr ':,' '  '`
          do
 		if test -r $srcdir/sql/${mod}.c; then
@@ -852,8 +635,7 @@ AH_TEMPLATE(USE_SNMP, [Define this to enable SNMP support])
 AC_SUBST(SNMP_CONFIG)
 SNMP_CONFIG="# "
 AC_ARG_ENABLE(snmp,
-	AC_HELP_STRING([--enable-snmp[={yes|no|compat}]],
-	[enable SNMP support]),
+	AS_HELP_STRING([--enable-snmp[={yes|no|compat}]],[enable SNMP support]),
 	[case $enableval in
 	 compat) USE_SNMP=yes
 		 AC_DEFINE(USE_SNMP)
@@ -868,7 +650,8 @@ AC_ARG_ENABLE(snmp,
          no)	 ;;
 	 *)	 AC_MSG_ERROR(--enable-snmp can't be used with an argument)
  		 exit 1;;
-	esac])
+	esac],
+	[USE_SNMP=no])
 
 AH_BOTTOM([
 #ifndef HAVE_MMAP
@@ -880,8 +663,7 @@ AH_BOTTOM([
 ## **************
 PAMDIR='$(prefix)/lib/security'
 AC_ARG_WITH(pamdir,
-	AC_HELP_STRING([--with-pamdir=DIR],
-	[install PAM modules in DIR [[PREFIX/lib/security)]]]),
+	AS_HELP_STRING([--with-pamdir=DIR],[install PAM modules in DIR [[PREFIX/lib/security)]]]),
 	[PAMDIR=$withval])
 AC_SUBST(PAMDIR)
 
@@ -890,21 +672,20 @@ AC_SUBST(PAMDIR)
 ## ***********************************************************************
 
 AC_ARG_ENABLE(livingston-menus,
-	AC_HELP_STRING([--enable-livingston-menus],
-	[enable Livingston-compatible menus]),
-	[USE_LIVINGSTON_MENUS=$enableval
-         case $enableval in
-	 yes)    AC_DEFINE(USE_LIVINGSTON_MENUS,1,
-                           [Enable support for Livingstone menus]);;
-	 *)	;;
-	 esac])
+	AS_HELP_STRING([--enable-livingston-menus],[enable Livingston-compatible menus]),
+	[USE_LIVINGSTON_MENUS=$enableval],
+	[USE_LIVINGSTON_MENUS=yes])
+
+if test $USE_LIVINGSTON_MENUS = yes; then
+  AC_DEFINE(USE_LIVINGSTON_MENUS,1,
+            [Enable support for Livingstone menus])
+fi
 
 AH_TEMPLATE(DENY_SHELL,
             [When defined, users with the given shell will be always denied
              access])
 AC_ARG_ENABLE(deny_shell,
-	AC_HELP_STRING([--enable-deny-shell=STRING],
-	[always reject users with given shell]),
+	AS_HELP_STRING([--enable-deny-shell=STRING],[always reject users with given shell]),
 	[USE_DENY_SHELL=$enableval
          case $enableval in
          yes|no)  AC_MSG_ERROR([--enable-deny-shell requires an argument])
@@ -957,7 +738,7 @@ AH_BOTTOM([
 ])
 
 AC_SUBST(LIBGNURADIUS,'${top_builddir}/lib/libgnuradius.la')
-AC_SUBST(LIBRADEXTRA,'${top_builddir}/lib/libradextra.a ${top_builddir}/gnu/libgnu.la')
+AC_SUBST(LIBRADEXTRA,'${top_builddir}/lib/libradextra.a')
 
 ### Display the status
 
@@ -992,18 +773,10 @@ SNMP ............................. $status_snmp
 Livingston Menus ................. $status_menus
 Deny Shell ....................... $status_deny_shell
 Guile ............................ $status_server_guile
-SQL .............................. $status_sql_modules
+SQL ..............................$status_sql_modules
 
 EOF
 fi
-
-cat <<EOF
-Modules
-
-PHP .............................. $status_mod_php
-Apache ........................... $status_mod_apache
-*******************************************************************
-EOF
 ],
 [status_nls=$USE_NLS
 if test $RADIUS_DEBUG -eq 1; then
@@ -1025,18 +798,8 @@ status_dbm="${USE_DBM:-no}"
 status_snmp="$USE_SNMP"
 status_menus="$USE_LIVINGSTON_MENUS"
 status_deny_shell="${USE_DENY_SHELL:-no}"
-status_server_guile="$USE_SERVER_GUILE"
-status_sql_modules="${SQL_MODULES:-no}"
-if test "$PHP_PREFIX" != ""; then
-  status_mod_php=yes
-else
-  status_mod_php=no
-fi
-if test "$BUILD_MOD_AUTH_RADIUS_LA" != ""; then
-  status_mod_apache=yes
-else
-  status_mod_apache=no
-fi
+status_server_guile="${USE_SERVER_GUILE:-no}"
+status_sql_modules="${SQL_MODULES:- no}"
 ])
 
 AC_CONFIG_FILES(Makefile 
@@ -1045,8 +808,9 @@ AC_CONFIG_FILES(Makefile
           raddb/config
           include/Makefile
 	  include/radius/Makefile
+	  include/radius/version.h
           include/snmp/Makefile
-          gnu/Makefile
+	  gint/Makefile
           lib/Makefile
           sql/Makefile
           snmplib/Makefile 
@@ -1071,14 +835,11 @@ AC_CONFIG_FILES(Makefile
           radtest/Makefile
           examples/Makefile 
           scripts/Makefile
-          scripts/guile/Makefile 
-          scripts/guile/1.6/Makefile 
           contrib/Makefile
           contrib/web-radact/Makefile
           contrib/passcvt/Makefile
           contrib/passwd_to_db/Makefile
-          contrib/radsend/Makefile
-          contrib/php/Makefile)
+          contrib/radsend/Makefile)
 AC_OUTPUT
 
 # EOF

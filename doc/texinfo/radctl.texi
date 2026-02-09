@@ -1,5 +1,5 @@
 @c This is part of the Radius manual.
-@c Copyright (C) 1999,2000,2001,2002,2003,2004 Free Software Foundation, Inc.
+@c Copyright (C) 1999-2025 Free Software Foundation, Inc.
 @c Written by Sergey Poznyakoff
 @c See file radius.texi for copying conditions.
 @comment *******************************************************************
@@ -12,9 +12,9 @@ daemon. It allows the
 user running it to query @command{radiusd} about various aspects of its
 work and to issue administrative commands to it. The syntax is
 
-@smallexample
+@example
 radctl @var{command} [@var{args}]
-@end smallexample
+@end example
 
 @noindent
 where @var{command} is a command telling @command{radctl} which actions to
@@ -42,7 +42,7 @@ Causes the running @command{radiusd} server to reread its configuration files.
 
 @item dumpdb
 Tells @command{radiusd} to dump its user hash table into the file
-@file{@var{radlog}/radius.parse}. This can be used for debugging 
+@file{@var{radlog}/radius.parse}. This can be used for debugging
 configuration files.
 
 @c @item status
@@ -59,9 +59,9 @@ detail on @command{ps} output.
 Here is an example of what @command{radctl status} prints on
 @code{GNU/Linux}:
 
-@smallexample
+@example
 19692 ?        01:53:11 radiusd
-@end smallexample
+@end example
 
 Here, first field is the @acronym{PID} of the process, second field
 (@samp{?}) indicates that the running program has detached from the
@@ -69,6 +69,3 @@ controlling terminal, the third field gives total amount of
 @acronym{CPU} time used by the program, and, finally, the last field
 shows the full name under which the command was invoked.
 @end table
-
-
-

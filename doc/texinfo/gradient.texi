@@ -1,5 +1,5 @@
 @c This is part of the Radius manual.
-@c Copyright (C) 2004 Free Software Foundation, Inc.
+@c Copyright (C) 2004-2025 Free Software Foundation, Inc.
 @c Written by Sergey Poznyakoff
 @c See file radius.texi for copying conditions.
 @comment *******************************************************************
@@ -66,7 +66,7 @@ of login names.
 The purpose of this file was to separate incoming requests depending
 on their source, i.e. on the @NAS{} that sent them and the port
 number on that @NAS{}. It also served as a sort of simplified
-@dfn{access control list}. 
+@dfn{access control list}.
 
 @item users
 This file contained a users database. It described criteria for
@@ -146,10 +146,10 @@ nested queries, such a feature could come quite handy.
 
 Processing of incoming requests is controlled by
 @dfn{request-processing program}. Request-processing program is a
-list-like structure, consisting of @dfn{instructions}. 
+list-like structure, consisting of @dfn{instructions}.
 
 @menu
-* Instruction::        
+* Instruction::
 * grad_instr_conditional::
 * grad_instr_call::
 * grad_instr_return::
@@ -173,7 +173,8 @@ This instruction marks a branch point within the program.
 Represents a @dfn{call} of a subprogram
 
 @item grad_instr_action_t
-Invokes a Rewrite @FIXME{or Scheme?} function
+Invokes a Rewrite function
+@FIXME{or Scheme function?}
 
 @item grad_instr_proxy_t
 Proxies a request to the remote server
@@ -189,7 +190,7 @@ Consequently, an instruction is defined as a union of the above node
 types:
 
 @deftp Instruction grad_instr_t
-@smallexample
+@example
 @group
 enum grad_instr_type
 @{
@@ -216,10 +217,10 @@ struct grad_instr
       grad_instr_reply_t reply;
       grad_instr_proxy_t proxy;
       grad_instr_forward_t forward;
-    @} v;                                                             
+    @} v;
 @};
 @end group
-@end smallexample
+@end example
 
 @code{Type} member contains type of the instruction. The evaluator
 uses @code{type} to determine which part of @code{union v}, holds
@@ -238,7 +239,7 @@ be discussed in the following subsections.
 @UNREVISED{}
 
 @deftp Instruction grad_instr_conditional_t cond iftrue iffalse
-@smallexample
+@example
 @group
 struct grad_instr_conditional
 @{
@@ -249,7 +250,7 @@ struct grad_instr_conditional
 @};
 typedef struct grad_instr_conditional grad_instr_conditional_t;
 @end group
-@end smallexample
+@end example
 
 Instructions of type @code{grad_instr_conditional_t} indicate branching.
 Upon encountering an @code{grad_instr_conditional_t}, the
@@ -284,7 +285,7 @@ Optional RPL expression that is executed if @var{expr} evaluates to
 @group
 (COND "%[User-Name] ~= \"test-.*\""
       (REPLY Access-Reject ("Reply-Message" . "Test accounts disabled")))
-@end group      
+@end group
 @end smalllisp
 
 @noindent
@@ -298,7 +299,7 @@ Optional RPL expression that is executed if @var{expr} evaluates to
              ("Framed-Protocol" . "PPP"))
       (REPLY Access-Reject
              ("Reply-Message" . "Access Denied")))
-@end group      
+@end group
 @end smalllisp
 
 @node grad_instr_call
@@ -306,23 +307,24 @@ Optional RPL expression that is executed if @var{expr} evaluates to
 @UNREVISED{}
 
 @deftp Instruction grad_instr_call_t entry
-@smallexample
+@example
 @group
 struct grad_instr_call @{
-       grad_instr_t *entry;    
+       grad_instr_t *entry;
 @};
 typedef struct grad_instr_call grad_instr_call_t;
 @end group
-@end smallexample
+@end example
 @end deftp
 
 Instructions of type @code{grad_instr_call} instruct the engine to
 @dfn{call} the given subprogram. The engine pushes the current
-instruction @FIXME{definition of current instruction or pc?} to the return
-point stack @FIXME{definition of this?} and branches to instruction
+instruction to the return point stack and branches to instruction
 @code{entry}. Execution of the subprogram ends when the engine
 encounters an instruction of one of the following types:
 @code{grad_instr_return}, @code{grad_instr_reply} or @code{grad_instr_proxy}.
+
+@FIXME{definitions of current instruction, pc and stack?}
 
 If @code{grad_instr_return} is encountered, the engine pops the
 instruction from the top of the return point stack and makes it
@@ -388,7 +390,7 @@ Instructions of this type have no data associated with them in union @code{v}.
 @UNREVISED{}
 
 @deftp Instruction grad_instr_reply_t expr
-@smallexample
+@example
 @group
 struct grad_instr_action @{
        grad_entry_point_t expr;    /* Entry point to the compiled
@@ -396,7 +398,7 @@ struct grad_instr_action @{
 @};
 typedef struct grad_instr_action grad_instr_reply_t;
 @end group
-@end smallexample
+@end example
 @end deftp
 
 The machine executes a Rewrite expression with entry point
@@ -422,14 +424,14 @@ request being processed and the reply pairs collected so far.}
 @UNREVISED{}
 
 @deftp Instruction grad_instr_reply_t return_code
-@smallexample
+@example
 @group
 struct grad_instr_reply @{
        u_char reply_code;         /* Radius request code */
 @};
 typedef struct grad_instr_reply grad_instr_reply_t;
 @end group
-@end smallexample
+@end example
 @end deftp
 
 @code{grad_instr_reply} instructs @command{radiusd} to send to the
@@ -468,8 +470,8 @@ as a @code{cons}: @code{(@var{name-or-number} . @var{value})}.
 @subsection grad_instr_proxy
 @UNREVISED{}
 
-@deftp Instruction grad_instr_proxy_t realm    
-@smallexample
+@deftp Instruction grad_instr_proxy_t realm
+@example
 @group
 struct grad_instr_proxy
 @{
@@ -477,7 +479,7 @@ struct grad_instr_proxy
 @};
 typedef struct grad_instr_proxy grad_instr_proxy_t;
 @end group
-@end smallexample
+@end example
 @end deftp
 
 This instruction tells radius to proxy the request to the server defined
@@ -488,8 +490,8 @@ in @code{realm}. In other words, the engine executes
 
 @deffn {RPL defun} PROXY @var{realm-name}
 @var{Realm-name} is name of the realm as defined in
-@file{raddb/realms}. @FIXME{No, no. That's senseless. I must
-get rid of @file{raddb/*}!}
+@file{raddb/realms}.
+@FIXME{No, no. That's senseless. I must get rid of @file{raddb/*}!}
 @end deffn
 
 @subheading Examples
@@ -500,15 +502,15 @@ get rid of @file{raddb/*}!}
 @UNREVISED{}
 
 @deftp Instruction grad_instr_forward_t server_list
-@smallexample
+@example
 @group
 struct grad_instr_forward
 @{
-  grad_list_t server_list; 
+  grad_list_t server_list;
 @};
 typedef struct grad_instr_forward grad_instr_forward_t;
 @end group
-@end smallexample
+@end example
 @end deftp
 
 This node @dfn{forwards} the request to each servers from
@@ -527,10 +529,10 @@ Currently forwarding is performed by @code{forward_request} function
 Namely, it will be rewritten to get server list as argument, instead
 of using static variable @code{forward_list}. Consequently, the
 functions responsible for creating and initializing this static
-variable will disappear along with the variable itself. @FIXME{Ok, but
-what shall we do with @code{forward} statement in @file{raddb/config}?
-I should address this issue in the section dedicated to backward
-compatibility}.
+variable will disappear along with the variable itself.
+@FIXME{Ok, but what shall we do with @code{forward} statement in
+@file{raddb/config}? I should address this issue in the section
+dedicated to backward compatibility}.
 
 @subsection RPL representation
 @deffn {RPL defun} FORWARD @var{server-list}
@@ -561,10 +563,10 @@ program:
 
 For example, consider the following configuration:
 
-@smallexample
+@example
 # raddb/hints:
 DEFAULT Prefix = "PPP" Hint = PPP
-@end smallexample
+@end example
 
 This will produce the following program:
 
@@ -573,13 +575,13 @@ This will produce the following program:
  (COND "%[Prefix] == \"PPP\"")
        (ACTION "%[Hint] = \"PPP\""))
 @end smalllisp
- 
 
-@smallexample
+
+@example
 #raddb/huntgroups
 DEFAULT NAS-IP-Address = 10.10.4.1      Suffix = "staff"
 DEFAULT NAS-IP-Address = 10.10.4.2      Huntgroup-Name = "second"
-@end smallexample
+@end example
 
 Will produce
 
@@ -594,7 +596,7 @@ Will produce
 
 Finally, @file{users}:
 
-@smallexample
+@example
 #raddb/users
 DEFAULT Hint = "PPP",
                Auth-Type = PAM
@@ -605,7 +607,7 @@ DEFAULT Huntgroup-Name = "second",
                Auth-Type = PAM
         Service-Type = "Authenticate-Only",
                Reply-Message = "Authentity Confirmed"
-@end smallexample                                              
+@end example
 
 @noindent
 will produce
@@ -623,7 +625,7 @@ will produce
               (Service-Type . "Authenticate-Only")
               (Reply-Message . "Authentity Confirmed"))))
 @end smalllisp
-        
+
 
 @node New Configuration
 @appendixsec New Configuration Files

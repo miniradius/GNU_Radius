@@ -1,5 +1,5 @@
 /* This file is part of GNU Radius. -*- rewrite -*-
-   Copyright (C) 2000,2001,2002,2003,2007 Free Software Foundation, Inc.
+   Copyright (C) 2000-2025 Free Software Foundation, Inc.
 
    Written by Sergey Poznyakoff
 
@@ -14,10 +14,9 @@
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with GNU Radius; if not, write to the Free Software Foundation,
-   Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
+   along with GNU Radius.  If not, see <http://www.gnu.org/licenses/>. */
 
-/* ************************************************************************ 
+/* ************************************************************************
  * Functions for normalizing packets coming from a cisco AS5300
  * usage:
  *     1. Uncomment $INCLUDE dictionary.voip in raddb/dictionary
@@ -30,11 +29,11 @@
 # The functions below assume basic case-sensitive regular expressions
 #pragma regex -extended -icase
 
-/* 
+/*
  * The port rewriting function for cisco AS5300 used for voip.
  * This function is used to generate NAS-Port-Id pair on the basis
- * of vendor-specific pair 2. If the latter is in the form 
- * "ISDN 9:D:999" (where each 9 represents a decimal digit), then 
+ * of vendor-specific pair 2. If the latter is in the form
+ * "ISDN 9:D:999" (where each 9 represents a decimal digit), then
  * the function returns the number after the last colon. This is
  * used as a port number.
  */
@@ -49,9 +48,9 @@ cisco_pid(string A)
 
 /* This rewrites the brain-damaged cisco session id.
  * The actual sid is the number before the first slash character.
- * Other possibly relevant fields are also parsed out and saved 
+ * Other possibly relevant fields are also parsed out and saved
  * in the Voip-* A/V pairs.
- * Note that you should $INCLUDE dictionary.voip in your main 
+ * Note that you should $INCLUDE dictionary.voip in your main
  * dictionary file.
  */
 string
@@ -66,7 +65,7 @@ cisco_sid(string S)
 		%[Voip-Disconnect-Cause] = \7;
 		%[Voip-Remote-IP] = \8;
 		return \1;
-	} 
+	}
 	return S;
 }
 
@@ -77,7 +76,7 @@ cisco_sid(string S)
 {
 	if (S =~ "\(.[^/]*\)/.*") {
 		return \1;
-	} 
+	}
 	return S;
 }
  *

@@ -1,6 +1,5 @@
 /* This file is part of GNU Radius.
-   Copyright (C) 2002,2003,2004,2005,2006,2007,
-   2008 Free Software Foundation, Inc.
+   Copyright (C) 2002-2025 Free Software Foundation, Inc.
 
    Written by Sergey Poznyakoff
 
@@ -8,15 +7,14 @@
    it under the terms of the GNU General Public License as published by
    the Free Software Foundation; either version 3 of the License, or
    (at your option) any later version.
-  
+
    GNU Radius is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
-  
+
    You should have received a copy of the GNU General Public License
-   along with GNU Radius; if not, write to the Free Software Foundation,
-   Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
+   along with GNU Radius.  If not, see <http://www.gnu.org/licenses/>. */
 
 #ifdef HAVE_CONFIG_H
 # include <config.h>
@@ -68,13 +66,13 @@ radius_switch_to_user(RADIUS_USER *usr)
 
 	if (usr->username == NULL)
 		return 0;
-	
+
 	/* Reset group permissions */
 	emptygidset[0] = usr->gid ? usr->gid : getegid();
 	if (geteuid() == 0 && setgroups(1, emptygidset)) {
 		grad_log(GRAD_LOG_ERR|GRAD_LOG_PERROR,
-		         _("setgroups(1, %lu) failed"),
-		         (u_long) emptygidset[0]);
+			 _("setgroups(1, %lu) failed"),
+			 (u_long) emptygidset[0]);
 		rc = 1;
 	}
 
@@ -84,29 +82,29 @@ radius_switch_to_user(RADIUS_USER *usr)
 #if defined(HAVE_SETEGID)
 	if ((rc = setegid(usr->gid)) < 0)
 		grad_log(GRAD_LOG_ERR|GRAD_LOG_PERROR,
-		         _("setegid(%lu) failed"), (u_long) usr->gid);
+			 _("setegid(%lu) failed"), (u_long) usr->gid);
 #elif defined(HAVE_SETREGID)
 	if ((rc = setregid(usr->gid, usr->gid)) < 0)
 		grad_log(GRAD_LOG_ERR|GRAD_LOG_PERROR,
-		         _("setregid(%lu,%lu) failed"),
-		         (u_long) usr->gid, (u_long) usr->gid);
+			 _("setregid(%lu,%lu) failed"),
+			 (u_long) usr->gid, (u_long) usr->gid);
 #elif defined(HAVE_SETRESGID)
 	if ((rc = setresgid(usr->gid, usr->gid, usr->gid)) < 0)
 		grad_log(GRAD_LOG_ERR|GRAD_LOG_PERROR,
-		         _("setresgid(%lu,%lu,%lu) failed"),
-		         (u_long) usr->gid,
-		         (u_long) usr->gid,
-		         (u_long) usr->gid);
+			 _("setresgid(%lu,%lu,%lu) failed"),
+			 (u_long) usr->gid,
+			 (u_long) usr->gid,
+			 (u_long) usr->gid);
 #endif
 
 	if (rc == 0 && usr->gid != 0) {
-		if ((rc = setgid(usr->gid)) < 0 && getegid() != usr->gid) 
+		if ((rc = setgid(usr->gid)) < 0 && getegid() != usr->gid)
 			grad_log(GRAD_LOG_ERR|GRAD_LOG_PERROR,
-			         _("setgid(%lu) failed"), (u_long) usr->gid);
+				 _("setgid(%lu) failed"), (u_long) usr->gid);
 		if (rc == 0 && getegid() != usr->gid) {
 			grad_log(GRAD_LOG_ERR,
-			         _("cannot set effective gid to %lu"),
-			         (u_long) usr->gid);
+				 _("cannot set effective gid to %lu"),
+				 (u_long) usr->gid);
 			rc = 1;
 		}
 	}
@@ -119,40 +117,40 @@ radius_switch_to_user(RADIUS_USER *usr)
 		    || geteuid() != usr->uid
 		    || (getuid() != usr->uid
 			&& (geteuid() == 0 || getuid() == 0))) {
-			
+
 #if defined(HAVE_SETREUID)
 			if (geteuid() != usr->uid) {
-				if (setreuid(usr->uid, -1) < 0) { 
+				if (setreuid(usr->uid, -1) < 0) {
 					grad_log(GRAD_LOG_ERR|GRAD_LOG_PERROR,
-					         _("setreuid(%lu,-1) failed"),
-					         (u_long) usr->uid);
+						 _("setreuid(%lu,-1) failed"),
+						 (u_long) usr->uid);
 					rc = 1;
 				}
 				if (setuid(usr->uid) < 0) {
 					grad_log(GRAD_LOG_ERR|GRAD_LOG_PERROR,
-					         _("second setuid(%lu) failed"),
-					         (u_long) usr->uid);
+						 _("second setuid(%lu) failed"),
+						 (u_long) usr->uid);
 					rc = 1;
 				}
 			} else
 #endif
 				{
 					grad_log(GRAD_LOG_ERR|GRAD_LOG_PERROR,
-					         _("setuid(%lu) failed"),
-					         (u_long) usr->uid);
+						 _("setuid(%lu) failed"),
+						 (u_long) usr->uid);
 					rc = 1;
 				}
 		}
-	
+
 
 		euid = geteuid();
 		if (usr->uid != 0 && setuid(0) == 0) {
-			grad_log(GRAD_LOG_ERR, 
-                                 _("seteuid(0) succeeded when it should not"));
+			grad_log(GRAD_LOG_ERR,
+				 _("seteuid(0) succeeded when it should not"));
 			rc = 1;
 		} else if (usr->uid != euid && setuid(euid) == 0) {
-			grad_log(GRAD_LOG_ERR, 
-                                 _("cannot drop non-root setuid privileges"));
+			grad_log(GRAD_LOG_ERR,
+				 _("cannot drop non-root setuid privileges"));
 			rc = 1;
 		}
 
@@ -164,83 +162,82 @@ radius_switch_to_user(RADIUS_USER *usr)
 int
 radius_exec_command(char *cmd)
 {
-        int n;
-        grad_avp_t *vp;
+	int n;
 	pid_t pid;
 	int status;
-	RETSIGTYPE (*oldsig)();
-	
-        if (cmd[0] != '/') {
-                grad_log(GRAD_LOG_ERR,
+	void (*oldsig)(int);
+
+	if (cmd[0] != '/') {
+		grad_log(GRAD_LOG_ERR,
    _("radius_exec_command(): won't execute, not an absolute pathname: %s"),
-                         cmd);
-                return -1;
-        }
+			 cmd);
+		return -1;
+	}
 
 	if ((oldsig = grad_set_signal(SIGCHLD, SIG_DFL)) == SIG_ERR) {
 		grad_log(GRAD_LOG_ERR|GRAD_LOG_PERROR, _("can't reset SIGCHLD"));
 		return -1;
-        } 
+	}
 
-        if ((pid = fork()) == 0) {
-                int argc;
-                char **argv;
+	if ((pid = fork()) == 0) {
+		int argc;
+		char **argv;
 
-                grad_argcv_get(cmd, "", NULL, &argc, &argv);
+		grad_argcv_get(cmd, "", NULL, &argc, &argv);
 
 		/* Leave open only stderr */
-                for (n = grad_max_fd(); n > 2; n--)
-                        close(n);
+		for (n = grad_max_fd(); n > 2; n--)
+			close(n);
 		close(0);
 		close(1);
-		
-                chdir("/tmp");
 
-                if (radius_switch_to_user(&exec_user))
+		chdir("/tmp");
+
+		if (radius_switch_to_user(&exec_user))
 			exit(2);
-		
-                execvp(argv[0], argv);
 
-                /* Report error via syslog: we might not be able
+		execvp(argv[0], argv);
+
+		/* Report error via syslog: we might not be able
 		   to restore initial privileges if we were started
 		   as non-root. */
-                openlog("radiusd", LOG_PID, LOG_USER);
-                syslog(LOG_ERR, "can't run %s (ruid=%lu, euid=%lu): %m",
-                       argv[0], (u_long) getuid(), (u_long) geteuid());
-                exit(2);
-        }
+		openlog("radiusd", LOG_PID, LOG_USER);
+		syslog(LOG_ERR, "can't run %s (ruid=%lu, euid=%lu): %m",
+		       argv[0], (u_long) getuid(), (u_long) geteuid());
+		exit(2);
+	}
 
-        /* Parent branch */ 
-        if (pid < 0) {
-                grad_log(GRAD_LOG_ERR|GRAD_LOG_PERROR, "fork");
-                return -1;
-        }
+	/* Parent branch */
+	if (pid < 0) {
+		grad_log(GRAD_LOG_ERR|GRAD_LOG_PERROR, "fork");
+		return -1;
+	}
 
 	waitpid(pid, &status, 0);
 	if (grad_set_signal(SIGCHLD, oldsig) == SIG_ERR)
 		grad_log(GRAD_LOG_CRIT|GRAD_LOG_PERROR,
 			 _("can't restore SIGCHLD"));
 
-        if (WIFEXITED(status)) {
-                status = WEXITSTATUS(status);
-                GRAD_DEBUG1(1, "returned: %d", status);
-                if (status == 2) {
-                        grad_log(GRAD_LOG_ERR,
-                                 _("can't run external program `%s' "
-                                   "(reason reported via syslog channel "
-                                   "user.err)"),
-			         cmd);
-                }
-        } else {
+	if (WIFEXITED(status)) {
+		status = WEXITSTATUS(status);
+		GRAD_DEBUG(1, "returned: %d", status);
+		if (status == 2) {
+			grad_log(GRAD_LOG_ERR,
+				 _("can't run external program `%s' "
+				   "(reason reported via syslog channel "
+				   "user.err)"),
+				 cmd);
+		}
+	} else {
 		char buffer[RAD_BUFFER_SIZE];
-		
+
 		format_exit_status(buffer, sizeof buffer, status);
-		
+
 		grad_log(GRAD_LOG_ERR,
-		         _("external program `%s' %s"), cmd, buffer);
+			 _("external program `%s' %s"), cmd, buffer);
 	}
-	
-        return status;
+
+	return status;
 }
 
 /* Execute a program on successful authentication.
@@ -250,129 +247,129 @@ int
 radius_exec_program(char *cmd, radiusd_request_t *req, grad_avp_t **reply,
 		    int exec_wait)
 {
-        int p[2];
-        int n;
-        char *ptr, *errp;
-        grad_avp_t *vp;
-        FILE *fp;
-        int line_num;
-        char buffer[RAD_BUFFER_SIZE];
+	int p[2];
+	int n;
+	char *ptr, *errp;
+	grad_avp_t *vp;
+	FILE *fp;
+	int line_num;
+	char buffer[RAD_BUFFER_SIZE];
 	pid_t pid;
 	int status;
-	RETSIGTYPE (*oldsig)();
-	
-        if (cmd[0] != '/') {
-                grad_log(GRAD_LOG_ERR,
-   _("radius_exec_program(): won't execute, not an absolute pathname: %s"),
-                         cmd);
-                return -1;
-        }
+	void (*oldsig)(int);
 
-        if (exec_wait) {
-                if (pipe(p) != 0) {
-                        grad_log(GRAD_LOG_ERR|GRAD_LOG_PERROR, _("couldn't open pipe"));
-                        return -1;
-                }
+	if (cmd[0] != '/') {
+		grad_log(GRAD_LOG_ERR,
+   _("radius_exec_program(): won't execute, not an absolute pathname: %s"),
+			 cmd);
+		return -1;
+	}
+
+	if (exec_wait) {
+		if (pipe(p) != 0) {
+			grad_log(GRAD_LOG_ERR|GRAD_LOG_PERROR, _("couldn't open pipe"));
+			return -1;
+		}
 		if ((oldsig = grad_set_signal(SIGCHLD, SIG_DFL)) == SIG_ERR) {
 			grad_log(GRAD_LOG_ERR|GRAD_LOG_PERROR, _("can't reset SIGCHLD"));
 			return -1;
 		}
-        } 
+	}
 
-        if ((pid = fork()) == 0) {
-                int argc;
-                char **argv;
+	if ((pid = fork()) == 0) {
+		int argc;
+		char **argv;
 
-                GRAD_DEBUG1(1, "command line: %s", cmd);
+		GRAD_DEBUG(1, "command line: %s", cmd);
 
-                grad_argcv_get(cmd, "", NULL, &argc, &argv);
-                
-                if (exec_wait) {
-                        if (close(p[0]))
-                                grad_log(GRAD_LOG_ERR|GRAD_LOG_PERROR,
+		grad_argcv_get(cmd, "", NULL, &argc, &argv);
+
+		if (exec_wait) {
+			if (close(p[0]))
+				grad_log(GRAD_LOG_ERR|GRAD_LOG_PERROR,
 					 _("can't close pipe"));
-                        if (p[1] != 1 && dup2(p[1], 1) != 1)
-                                grad_log(GRAD_LOG_ERR|GRAD_LOG_PERROR,
+			if (p[1] != 1 && dup2(p[1], 1) != 1)
+				grad_log(GRAD_LOG_ERR|GRAD_LOG_PERROR,
 					 _("can't dup stdout"));
-                } else
+		} else
 			close(1);
 
-                for (n = grad_max_fd(); n >= 3; n--)
-                        close(n);
+		for (n = grad_max_fd(); n >= 3; n--)
+			close(n);
 
-                chdir("/tmp");
+		chdir("/tmp");
 
-                if (radius_switch_to_user(&exec_user))
+		if (radius_switch_to_user(&exec_user))
 			exit(2);
-		
-                execvp(argv[0], argv);
 
-                /* Report error via syslog: we might not be able
+		execvp(argv[0], argv);
+
+		/* Report error via syslog: we might not be able
 		   to restore initial privileges if we were started
 		   as non-root. */
-                openlog("radiusd", LOG_PID, LOG_USER);
-                syslog(LOG_ERR, "can't run %s (ruid=%lu, euid=%lu): %m",
-                       argv[0], (u_long) getuid(), (u_long) geteuid());
-                exit(2);
-        }
+		openlog("radiusd", LOG_PID, LOG_USER);
+		syslog(LOG_ERR, "can't run %s (ruid=%lu, euid=%lu): %m",
+		       argv[0], (u_long) getuid(), (u_long) geteuid());
+		exit(2);
+	}
 
-        /* Parent branch */ 
-        if (pid < 0) {
-                grad_log(GRAD_LOG_ERR|GRAD_LOG_PERROR, "fork");
-                return -1;
-        }
-        if (!exec_wait)
-                return 0;
+	/* Parent branch */
+	if (pid < 0) {
+		grad_log(GRAD_LOG_ERR|GRAD_LOG_PERROR, "fork");
+		return -1;
+	}
+	if (!exec_wait)
+		return 0;
 
-        if (close(p[1]))
-                grad_log(GRAD_LOG_ERR|GRAD_LOG_PERROR, _("can't close pipe"));
+	if (close(p[1]))
+		grad_log(GRAD_LOG_ERR|GRAD_LOG_PERROR, _("can't close pipe"));
 
-        fp = fdopen(p[0], "r");
+	fp = fdopen(p[0], "r");
 
-        vp = NULL;
-        line_num = 0;
+	vp = NULL;
+	line_num = 0;
 
-        while (ptr = fgets(buffer, sizeof(buffer), fp)) {
-                line_num++;
-                GRAD_DEBUG1(1, "got `%s'", buffer);
-                if (userparse(ptr, &vp, &errp)) {
-                        grad_log(GRAD_LOG_ERR,
-			         _("<stdout of %s>:%d: %s"),
-			         cmd, line_num, errp);
-                        grad_avl_free(vp);
-                        vp = NULL;
-                }
-        }
+	while ((ptr = fgets(buffer, sizeof(buffer), fp)) != NULL) {
+		line_num++;
+		GRAD_DEBUG(1, "got `%s'", buffer);
+		if (userparse(ptr, &vp, &errp)) {
+			grad_log(GRAD_LOG_ERR,
+				 _("<stdout of %s>:%d: %s"),
+				 cmd, line_num, errp);
+			grad_avl_free(vp);
+			vp = NULL;
+		}
+	}
 
-        fclose(fp);
+	fclose(fp);
 
 	waitpid(pid, &status, 0);
 	if (grad_set_signal(SIGCHLD, oldsig) == SIG_ERR)
 		grad_log(GRAD_LOG_CRIT|GRAD_LOG_PERROR,
 			 _("can't restore SIGCHLD"));
 
-        if (WIFEXITED(status)) {
-                status = WEXITSTATUS(status);
-                GRAD_DEBUG1(1, "returned: %d", status);
-                if (status == 2) {
-                        grad_log(GRAD_LOG_ERR,
-                                 _("can't run external program `%s' "
-                                   "(reason reported via syslog channel "
-                                   "user.err)"),
-			         cmd);
-                }
-        } else {
+	if (WIFEXITED(status)) {
+		status = WEXITSTATUS(status);
+		GRAD_DEBUG(1, "returned: %d", status);
+		if (status == 2) {
+			grad_log(GRAD_LOG_ERR,
+				 _("can't run external program `%s' "
+				   "(reason reported via syslog channel "
+				   "user.err)"),
+				 cmd);
+		}
+	} else {
 		format_exit_status(buffer, sizeof buffer, status);
-		
+
 		grad_log(GRAD_LOG_ERR,
-		         _("external program `%s' %s"), cmd, buffer);
+			 _("external program `%s' %s"), cmd, buffer);
 	}
 
-        if (vp && reply) 
-                grad_avl_merge(reply, &vp);
+	if (vp && reply)
+		grad_avl_merge(reply, &vp);
 	grad_avl_free(vp);
 
-        return status;
+	return status;
 }
 
 pid_t
@@ -384,7 +381,7 @@ radius_run_filter(int argc, char **argv, char *errfile, int *p)
 
 	pipe(leftp);
 	pipe(rightp);
-    
+
 	switch (pid = fork()) {
 
 		/* The child branch.  */
@@ -398,21 +395,21 @@ radius_run_filter(int argc, char **argv, char *errfile, int *p)
 			dup2(leftp[0], 0);
 		}
 		close(leftp[1]);
-		
+
 		/* Right-end */
 		if (rightp[1] != 1) {
 			close(1);
 			dup2(rightp[1], 1);
 		}
-		close(rightp[0]); 
+		close(rightp[0]);
 
 		/* Error output */
 		i = open(errfile, O_CREAT|O_WRONLY|O_APPEND, 0644);
-                if (i > 0 && i != 2) {
-                        dup2(i, 2);
+		if (i > 0 && i != 2) {
+			dup2(i, 2);
 			close(i);
 		}
-		
+
 		/* Close unneded descripitors */
 		for (i = grad_max_fd(); i > 2; i--)
 			close(i);
@@ -420,14 +417,14 @@ radius_run_filter(int argc, char **argv, char *errfile, int *p)
 		if (radius_switch_to_user(&exec_user))
 			exit(2);
 		execvp(argv[0], argv);
-		
-                /* Report error via syslog: we might not be able
+
+		/* Report error via syslog: we might not be able
 		   to restore initial privileges if we were started
 		   as non-root. */
-                openlog("radiusd", LOG_PID, LOG_USER);
-                syslog(LOG_ERR, "can't run %s (ruid=%d, euid=%d): %m",
-                       argv[0], getuid(), geteuid());
-                exit(2);
+		openlog("radiusd", LOG_PID, LOG_USER);
+		syslog(LOG_ERR, "can't run %s (ruid=%d, euid=%d): %m",
+		       argv[0], getuid(), geteuid());
+		exit(2);
 		/********************/
 
 		/* Parent branches: */
@@ -439,11 +436,11 @@ radius_run_filter(int argc, char **argv, char *errfile, int *p)
 		close(leftp[0]);
 		close(leftp[1]);
 		break;
-		
+
 	default:
 		p[0]  = rightp[0];
 		close(rightp[1]);
-		
+
 		p[1] = leftp[1];
 		close(leftp[0]);
 	}
@@ -458,27 +455,27 @@ typedef struct filter_symbol Filter;
 #define FILTER_MAX  2
 
 struct filter_symbol {
-        struct filter_symbol *next;
+	struct filter_symbol *next;
 	char *name;                 /* Name of the filter */
 	/* Configuration data */
 	int line_num;               /* Number of line in raddb/config where
 				       the filter is defined */
 	int  argc;                  /* Number of entries in the argv */
-        char **argv;                /* Invocation vector */
+	char **argv;                /* Invocation vector */
 	char *errfile;              /* Filename for error output (fd 2) */
 	struct {
-		char *input_fmt;    
+		char *input_fmt;
 		int wait_reply;
 		int on_fail;
 	} descr[FILTER_MAX];
-	
+
 	/* Runtime data */
 	pid_t  pid;                 /* Pid of the filter process */
 	size_t lines_input;         /* Number of lines read from the filter */
 	size_t lines_output;        /* Number of lines written to the filter */
 	int    input;               /* Input file descriptor */
 	int    output;              /* Output file descriptor */
-}; 
+};
 
 static grad_symtab_t *filter_tab;
 
@@ -486,7 +483,7 @@ struct cleanup_info {
 	pid_t pid;
 	int status;
 };
-	
+
 static int
 filter_cleanup_proc(void *ptr, grad_symbol_t *sym)
 {
@@ -495,13 +492,13 @@ filter_cleanup_proc(void *ptr, grad_symbol_t *sym)
 
 	if (filter->pid == info->pid) {
 		static char buffer[512];
-		
+
 		format_exit_status(buffer, sizeof buffer, info->status);
 		grad_log(GRAD_LOG_ERR,
-		         _("filter %s (pid %d) %s (in: %u, out: %u)"),
-		         filter->name, filter->pid,
-		         buffer,
-		         filter->lines_input, filter->lines_output);
+			 _("filter %s (pid %d) %s (in: %u, out: %u)"),
+			 filter->name, filter->pid,
+			 buffer,
+			 filter->lines_input, filter->lines_output);
 		filter->pid = 0;
 		return 1;
 	}
@@ -511,7 +508,7 @@ filter_cleanup_proc(void *ptr, grad_symbol_t *sym)
 /* Note: signal-safe */
 void
 filter_cleanup(pid_t pid, int status)
-{	
+{
 	struct cleanup_info info;
 	info.pid = pid;
 	info.status = status;
@@ -521,7 +518,7 @@ filter_cleanup(pid_t pid, int status)
 void
 filter_close(Filter *filter)
 {
-	if (filter->pid == -1) 
+	if (filter->pid == -1)
 		return;
 
 	if (filter->input >= 0) {
@@ -541,7 +538,7 @@ filter_close(Filter *filter)
 void
 filter_kill(Filter *filter)
 {
-	if (filter->pid == 0)  
+	if (filter->pid == 0)
 		return;
 	kill(filter->pid, SIGKILL);
 }
@@ -566,13 +563,13 @@ filter_open(char *name, radiusd_request_t *req, int type, int *errp)
 						filter->argv,
 						filter->errfile,
 						pipe);
-		
+
 		if (filter->pid <= 0) {
 			grad_log_req(GRAD_LOG_ERR|GRAD_LOG_PERROR, req->request,
 				     _("cannot run filter %s"),
 				     name);
 			filter = NULL;
-		} else { 
+		} else {
 			if (!filter->descr[R_AUTH].wait_reply
 			    && !filter->descr[R_ACCT].wait_reply) {
 				close(pipe[0]);
@@ -596,7 +593,7 @@ filter_open(char *name, radiusd_request_t *req, int type, int *errp)
 }
 
 char *
-filter_xlate(struct obstack *sp, char *fmt, radiusd_request_t *radreq)
+filter_xlate(grad_strbuf_t sp, char *fmt, radiusd_request_t *radreq)
 {
 	return util_xlate(sp, fmt, radreq->request);
 }
@@ -605,28 +602,27 @@ static int
 filter_write(Filter *filter, char *fmt, radiusd_request_t *radreq)
 {
 	int rc, length;
-	struct obstack stack;
+	grad_strbuf_t sb;
 	char *str;
-	
+
 	if (!fmt)
 		return -1;
-	
-	obstack_init(&stack);
-	str = filter_xlate(&stack, fmt, radreq);
+
+	sb = grad_strbuf_create();
+	str = filter_xlate(sb, fmt, radreq);
 	if (!str) {
 		rc = length = 0;
 	} else {
 		char nl = '\n';
 		length = strlen(str);
-		GRAD_DEBUG2(1, "%s < \"%s\"", filter->name, str);
+		GRAD_DEBUG(1, "%s < \"%s\"", filter->name, str);
 		rc = write(filter->output, str, length);
 		if (rc == length) {
 			if (write(filter->output, &nl, 1) == 1)
 				rc++;
 		}
-
 	}
-	obstack_free(&stack, NULL);
+	grad_strbuf_free(sb);
 	filter->lines_output++;
 	return rc != length + 1;
 }
@@ -636,7 +632,7 @@ filter_read(Filter *filter, int type, char *buffer, size_t buflen)
 {
 	int rc;
 	int rbytes = 0;
-	
+
 	while (1) {
 		rc = -1;
 		if (rbytes >= buflen-1) {
@@ -653,7 +649,7 @@ filter_read(Filter *filter, int type, char *buffer, size_t buflen)
 			rc = 0;
 			break;
 		}
-	} 
+	}
 
 	if (rc == 0) {
 		buffer[rbytes] = 0;
@@ -665,33 +661,33 @@ filter_read(Filter *filter, int type, char *buffer, size_t buflen)
 
 /* Interface triggered by Auth-External-Filter.
    Returns: 0   -- Authentication succeeded
-            !0  -- Authentication failed */
+	    !0  -- Authentication failed */
 int
 filter_auth(char *name, radiusd_request_t *req, grad_avp_t **reply_pairs)
 {
 	Filter *filter;
 	int rc = -1;
 	int err;
-	
+
 	filter = filter_open(name, req, R_AUTH, &err);
 	if (!filter)
 		return err;
 	if (filter->pid == -1)
 		rc = err;
-	else if (filter_write(filter, filter->descr[R_AUTH].input_fmt, req)) 
+	else if (filter_write(filter, filter->descr[R_AUTH].input_fmt, req))
 		rc = err;
-	else if (!filter->descr[R_AUTH].wait_reply) 
+	else if (!filter->descr[R_AUTH].wait_reply)
 		rc = 0;
 	else {
 		int status;
 		char buffer[1024];
 
 		status = filter_read(filter, R_AUTH, buffer, sizeof buffer);
-			
+
 		if (status <= 0) {
 			grad_log(GRAD_LOG_ERR|GRAD_LOG_PERROR,
-		       	         _("reading from filter %s"),
-		       	         filter->name);
+				 _("reading from filter %s"),
+				 filter->name);
 			filter_close(filter);
 			rc = err;
 		} else if (isdigit(buffer[0])) {
@@ -699,21 +695,21 @@ filter_auth(char *name, radiusd_request_t *req, grad_avp_t **reply_pairs)
 			grad_avp_t *vp = NULL;
 			char *errp;
 
-			GRAD_DEBUG2(1, "%s > \"%s\"", filter->name, buffer);
+			GRAD_DEBUG(1, "%s > \"%s\"", filter->name, buffer);
 			rc = strtoul(buffer, &ptr, 0);
 			if (userparse(ptr, &vp, &errp)) {
 				grad_log(GRAD_LOG_ERR,
-				         _("<stdout of %s>:%d: %s"),
-				         filter->name,
-				         filter->lines_output,
-				         errp);
+					 _("<stdout of %s>:%d: %s"),
+					 filter->name,
+					 filter->lines_output,
+					 errp);
 				grad_avl_free(vp);
-			} else 
+			} else
 				grad_avl_merge(reply_pairs, &vp);
 		} else {
 			grad_log(GRAD_LOG_ERR,
-			         _("filter %s (auth): bad output: %s"),
-			         filter->name, buffer);
+				 _("filter %s (auth): bad output: %s"),
+				 filter->name, buffer);
 			rc = err;
 		}
 	}
@@ -727,15 +723,15 @@ filter_acct(char *name, radiusd_request_t *req)
 	Filter *filter;
 	int rc = -1;
 	int err;
-	
+
 	filter = filter_open(name, req, R_ACCT, &err);
 	if (!filter)
 		return err;
 	if (filter->pid == -1)
 		rc = err;
-	else if (filter_write(filter, filter->descr[R_ACCT].input_fmt, req)) 
+	else if (filter_write(filter, filter->descr[R_ACCT].input_fmt, req))
 		rc = err;
-	else if (!filter->descr[R_ACCT].wait_reply) 
+	else if (!filter->descr[R_ACCT].wait_reply)
 		rc = 0;
 	else {
 		int status;
@@ -745,25 +741,25 @@ filter_acct(char *name, radiusd_request_t *req)
 
 		if (status <= 0) {
 			grad_log(GRAD_LOG_ERR|GRAD_LOG_PERROR,
-		       	         _("reading from filter %s"),
-		       	         filter->name);
+				 _("reading from filter %s"),
+				 filter->name);
 			rc = err;
 			filter_close(filter);
 		} else if (isdigit(buffer[0])) {
 			char *ptr;
 
-			GRAD_DEBUG2(1, "%s > \"%s\"", filter->name, buffer);
+			GRAD_DEBUG(1, "%s > \"%s\"", filter->name, buffer);
 			rc = strtoul(buffer, &ptr, 0);
 			if (!isspace(*ptr)) {
 				grad_log(GRAD_LOG_ERR,
-				         _("filter %s (acct): bad output: %s"),
-				         filter->name, buffer);
+					 _("filter %s (acct): bad output: %s"),
+					 filter->name, buffer);
 				return -1;
 			}
 		} else {
 			grad_log(GRAD_LOG_ERR,
-			         _("filter %s (acct): bad output: %s"),
-			         filter->name, buffer);
+				 _("filter %s (acct): bad output: %s"),
+				 filter->name, buffer);
 			rc = err;
 		}
 	}
@@ -776,16 +772,16 @@ filter_acct(char *name, radiusd_request_t *req)
 
 static struct filter_symbol filter_symbol;
 
-static int
-free_symbol_entry(Filter *filter)
+static void
+free_symbol_entry(void *p)
 {
-	grad_free(filter->descr[R_AUTH].input_fmt);
-	grad_free(filter->descr[R_ACCT].input_fmt);
+	Filter *filter = p;
+	free(filter->descr[R_AUTH].input_fmt);
+	free(filter->descr[R_ACCT].input_fmt);
 	grad_argcv_free(filter->argc, filter->argv);
-	grad_free(filter->errfile);
+	free(filter->errfile);
 	if (filter->pid > 0)
 		filter_close(filter);
-	return 0;
 }
 
 int
@@ -796,7 +792,7 @@ filters_stmt_term(int finish, void *block_data, void *handler_data)
 			grad_symtab_clear(filter_tab);
 		else
 			filter_tab = grad_symtab_create(sizeof(Filter),
-						        free_symbol_entry);
+							free_symbol_entry);
 	}
 	return 0;
 }
@@ -810,7 +806,7 @@ filter_stmt_handler(int argc, cfg_value_t *argv, void *block_data,
 		return 0;
 	}
 
- 	if (argv[1].type != CFG_STRING) {
+	if (argv[1].type != CFG_STRING) {
 		cfg_type_error(CFG_STRING);
 		return 0;
 	}
@@ -829,13 +825,13 @@ filter_stmt_end(void *block_data, void *handler_data)
 {
 	if (filter_symbol.argc) {
 		Filter *sym = grad_sym_lookup_or_install(filter_tab,
-						         filter_symbol.name,
-						         1);
+							 filter_symbol.name,
+							 1);
 		if (sym->argc) {
 			grad_log(GRAD_LOG_ERR,
-			         _("%s:%d: filter already declared at %s:%d"),
-			         cfg_filename, cfg_line_num,
-			         cfg_filename, sym->line_num);
+				 _("%s:%d: filter already declared at %s:%d"),
+				 cfg_filename, cfg_line_num,
+				 cfg_filename, sym->line_num);
 			return 0;
 		}
 
@@ -869,11 +865,11 @@ exec_path_handler(int argc, cfg_value_t *argv,
 		return 0;
 	}
 
- 	if (argv[1].type != CFG_STRING) {
+	if (argv[1].type != CFG_STRING) {
 		cfg_type_error(CFG_STRING);
 		return 0;
 	}
-	
+
 	if (grad_argcv_get(argv[1].v.string, "", NULL,
 		      &filter_symbol.argc, &filter_symbol.argv)) {
 		grad_argcv_free(filter_symbol.argc, filter_symbol.argv);
@@ -891,7 +887,7 @@ error_log_handler(int argc, cfg_value_t *argv,
 		return 0;
 	}
 
- 	if (argv[1].type != CFG_STRING) {
+	if (argv[1].type != CFG_STRING) {
 		cfg_type_error(CFG_STRING);
 		return 0;
 	}
@@ -904,7 +900,7 @@ error_log_handler(int argc, cfg_value_t *argv,
 		char *p = grad_mkfilename(grad_log_dir, argv[1].v.string);
 		filter_symbol.errfile = cfg_malloc(strlen(p)+1, NULL);
 		strcpy(filter_symbol.errfile, p);
-		grad_free(p);
+		free(p);
 	}
 	return 0;
 }
@@ -918,7 +914,7 @@ _store_format_ptr(int argc, cfg_value_t *argv, void *block_data,
 		return 0;
 	}
 
- 	if (argv[1].type != CFG_STRING) {
+	if (argv[1].type != CFG_STRING) {
 		cfg_type_error(CFG_STRING);
 		return 0;
 	}
@@ -961,7 +957,7 @@ static struct cfg_stmt filter_stmt[] = {
 	{ "acct", CS_BLOCK, NULL, NULL, NULL, filter_acct_stmt, NULL },
 	{ NULL },
 };
-	
+
 struct cfg_stmt filters_stmt[] = {
 	{ "filter", CS_BLOCK, NULL, filter_stmt_handler, NULL, filter_stmt,
 	  filter_stmt_end },

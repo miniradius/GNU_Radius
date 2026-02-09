@@ -1,5 +1,5 @@
 @c This is part of the Radius manual.
-@c Copyright (C) 1999,2000,2001,2002,2003 Free Software Foundation, Inc.
+@c Copyright (C) 1999-2025 Free Software Foundation, Inc.
 @c Written by Sergey Poznyakoff
 @c See file radius.texi for copying conditions.
 @comment *******************************************************************
@@ -11,7 +11,6 @@
 Controlling who and when was logged in
 * Radwho::              Show who is logged in by radius now.
 * Radlast::             Show the history of logins by radius.
-@c * Raduse::              Monitor the users in real time.
 
 Maintenance commands
 * Radzap::              Modify the login records.
@@ -27,7 +26,6 @@ Guile interface
 
 @include radwho.texi
 @include radlast.texi
-@c @include raduse.texi
 @include radzap.texi
 @include radgrep.texi
 @include radping.texi

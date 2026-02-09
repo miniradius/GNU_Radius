@@ -1,22 +1,20 @@
 /* This file is part of GNU Radius.
-   Copyright (C) 2000,2001,2002,2003,2004,2007 Free Software Foundation, Inc.
+   Copyright (C) 2000-2025 Free Software Foundation, Inc.
 
    Written by Sergey Poznyakoff
-  
+
    GNU Radius is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
    the Free Software Foundation; either version 3 of the License, or
    (at your option) any later version.
-  
+
    GNU Radius is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
-  
-   You should have received a copy of the GNU General Public
-   License along with GNU Radius; if not, write to the Free
-   Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-   Boston, MA 02110-1301 USA. */
+
+   You should have received a copy of the GNU General Public License
+   along with GNU Radius.  If not, see <http://www.gnu.org/licenses/>. */
 
 #ifdef HAVE_CONFIG_H
 # include <config.h>
@@ -54,7 +52,7 @@ store_passwd(struct passwd *pwd, struct passwd *result, char *buffer,
 }
 
 /* struct passwd *getpwnam_r(const char  *name,
-              struct passwd *pwd, char *buffer, int buflen);
+	      struct passwd *pwd, char *buffer, int buflen);
  */
 struct passwd *
 grad_getpwnam_r(const char  *name, struct passwd *result, char *buffer,
@@ -68,6 +66,3 @@ grad_getpwnam_r(const char  *name, struct passwd *result, char *buffer,
 	LOCK_RELEASE(lock);
 	return result;
 }
-
-
-

@@ -1,0 +1,3163 @@
+# Translation into Dutch of radius
+# Copyright (C) 2009 Free Software Foundation, Inc.
+# This file is distributed under the same license as the radius package.
+# Erwin Poeze <erwin.poeze@gmail.com>, 2009.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: radius-1.6.1\n"
+"Report-Msgid-Bugs-To: bug-radius@gnu.org\n"
+"POT-Creation-Date: 2025-12-11 13:43+0200\n"
+"PO-Revision-Date: 2009-05-16 15:42+0200\n"
+"Last-Translator: Erwin Poeze <erwin.poeze@gmail.com>\n"
+"Language-Team: Dutch <vertaling@vrijschrift.org>\n"
+"Language: nl\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Bugs: Report translation errors to the Language-Team address.\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Poedit-Language: Dutch\n"
+"X-Poedit-Country: NETHERLANDS\n"
+"X-Poedit-SourceCharset: utf-8\n"
+
+#: lib/avl.c:88
+#, c-format
+msgid "make_pair(): attribute %d not found in dictionary"
+msgstr "make_pair(): attribuut %d is niet gevonden in woordenlijst"
+
+#: lib/client.c:125
+#, c-format
+msgid "Actual request length does not match reported length (%d, %d)"
+msgstr "Werkelijk lengte komt niet overeen met de gemelde lengte (%d, %d)"
+
+#: lib/client.c:139
+#, c-format
+msgid "Received invalid reply digest from server"
+msgstr "Ongeldig controlegetal ontvangen als antwoord van server"
+
+#: lib/client.c:221
+#, c-format
+msgid "select() interrupted"
+msgstr "select() onderbroken"
+
+#: lib/client.c:250
+#, c-format
+msgid "invalid port type"
+msgstr "ongeldig poorttype"
+
+#: lib/client.c:355
+#, c-format
+msgid "error receiving data from %s:%d"
+msgstr "ontvangst gegevens van %s:%d is mislukt"
+
+#: lib/client.c:415 lib/dict.c:811 radiusd/config.y:216
+#, c-format
+msgid "unknown keyword"
+msgstr "onbekend trefwoord"
+
+#: lib/client.c:424 radiusd/files.c:931 radiusd/files.c:1126
+#, c-format
+msgid "wrong number of fields"
+msgstr "onjuist aantal velden"
+
+#: lib/client.c:433
+#, c-format
+msgid "bad IP address or host name"
+msgstr "onjuist IP-adres of hostnaam"
+
+#: lib/client.c:441 lib/client.c:448 radtest/main.c:333 radtest/main.c:343
+#, c-format
+msgid "bad port number %s"
+msgstr "onjuist poortnummer %s"
+
+#: lib/client.c:460
+#, c-format
+msgid "bad timeout value"
+msgstr "onjuiste waarde van tijdslimiet"
+
+#: lib/client.c:466
+#, c-format
+msgid "bad retry value"
+msgstr "onjuiste waarde van hernieuwde poging"
+
+#: lib/debug.c:207 lib/debug.c:214
+#, c-format
+msgid "compiled without debugging support"
+msgstr "gecompileerd zonder debug-ondersteuning"
+
+#: lib/dict.c:122 lib/nas.c:52 radiusd/files.c:1034
+msgid "too few fields"
+msgstr "te weinig velden"
+
+#: lib/dict.c:125
+msgid "too many fields"
+msgstr "te veel velden"
+
+#: lib/dict.c:256
+#, c-format
+msgid "missing ]"
+msgstr "ontbrekende ]"
+
+#: lib/dict.c:272 lib/dict.c:285
+#, c-format
+msgid "invalid syntax flag %c"
+msgstr "ongeldige syntaxvlag %c"
+
+#: lib/dict.c:363
+#, c-format
+msgid "invalid flag %c"
+msgstr "ongeldige vlag %c"
+
+#: lib/dict.c:419 lib/dict.c:608 lib/dict.c:652
+#, c-format
+msgid "value not a number (near %s)"
+msgstr "waarde is geen getal (nabij %s)"
+
+#: lib/dict.c:430
+#, c-format
+msgid "no parser registered for this attribute"
+msgstr "voor dit attribuut is geen parser opgegeven"
+
+#: lib/dict.c:439
+msgid "invalid type"
+msgstr "ongeldige type"
+
+#: lib/dict.c:446 lib/dict.c:695
+#, c-format
+msgid "unknown vendor"
+msgstr "onbekende fabrikant"
+
+#: lib/dict.c:474
+#, c-format
+msgid "Redefining attribute %s"
+msgstr "attribuut %s herdefiniëren"
+
+#: lib/dict.c:481
+#, c-format
+msgid "Redefining alias %s"
+msgstr "Alias %s herdefiniëren"
+
+#: lib/dict.c:511 lib/dict.c:547 lib/dict.c:617
+#, c-format
+msgid "Attribute %s is not defined"
+msgstr "Attribuut %s is niet gedefinieerd"
+
+#: lib/dict.c:519
+#, c-format
+msgid "Symbol %s already declared"
+msgstr "Symbool %s is reeds gedeclareerd"
+
+#: lib/dict.c:577
+#, c-format
+msgid "PROPERTY syntax error"
+msgstr "PROPERTY-syntaxfout"
+
+#: lib/dict.c:671
+#, c-format
+msgid "blocks cannot be nested"
+msgstr "blokken kunnen niet in elkaar zitten"
+
+#: lib/dict.c:673
+#, c-format
+msgid "block opened here"
+msgstr "blok is hier geopend"
+
+#: lib/dict.c:685
+#, c-format
+msgid "block syntax: expected `VENDOR' but found `%s'"
+msgstr "bloksyntax: `VENDOR' verwacht, maar `%s' gevonden"
+
+#: lib/dict.c:708
+#, c-format
+msgid "unexpected END"
+msgstr "onverwachte END"
+
+#: lib/dict.c:834
+#, c-format
+msgid "BEGIN without END"
+msgstr "BEGIN zonder END"
+
+#: lib/dict.c:841
+#, c-format
+msgid "%s: %d error"
+msgid_plural "%s: %d errors"
+msgstr[0] "%s: %d fout"
+msgstr[1] "%s: %d fouten"
+
+#: lib/mem.c:28
+#, fuzzy, c-format
+#| msgid "out of memory"
+msgid "out of memory: aborting"
+msgstr "geheugen overschreden"
+
+#: lib/raddb.c:74 lib/users-lex.l:232 radiusd/config.y:914 radiusd/stat.c:77
+#, c-format
+msgid "can't stat `%s'"
+msgstr "kan status `%s' niet bevragen"
+
+#: lib/raddb.c:81 lib/raddb.c:86 radiusd/rewrite.y:1297 radiusd/rewrite.y:2747
+#: radiusd/scheme.c:184 radiusd/stat.c:71
+#, c-format
+msgid "can't open file `%s'"
+msgstr "kan bestand `%s' niet openen"
+
+#: lib/raddb.c:98
+#, c-format
+msgid "%s: read error"
+msgstr "%s: leesfout"
+
+#: lib/raddb.c:101
+#, c-format
+msgid "%s: short read"
+msgstr "%s: te weinig ingelezen"
+
+#: lib/radutmp.c:51
+#, c-format
+msgid "grad_ut_setent(): cannot open `%s'"
+msgstr "grad_ut_setent(): kan `%s' niet openen"
+
+#: lib/radutmp.c:189
+#, c-format
+msgid "login: entry for NAS %s port %d duplicate"
+msgstr "login: dubbele invoer voor NAS %s poort %d"
+
+#: lib/radutmp.c:195
+#, c-format
+msgid "login: entry for NAS %s port %d wrong order"
+msgstr "login: invoer voor NAS %s poort %d in verkeerde volgorde"
+
+#: lib/radutmp.c:207
+#, c-format
+msgid "logout: entry for NAS %s port %d has wrong ID (expected %s found %s)"
+msgstr ""
+"login: invoer voor NAS %s poort %d heeft onjuiste ID (verwachtte %s, maar is "
+"%s)"
+
+#: lib/radutmp.c:231
+#, c-format
+msgid "logout: login entry for NAS %s port %d not found"
+msgstr "login: invoer voor NAS %s poort %d niet gevonden"
+
+#: lib/radutmp.c:250 radiusd/acct.c:664
+#, c-format
+msgid "can't open %s"
+msgstr "kan %s niet openen"
+
+#: lib/users-lex.l:135
+#, c-format
+msgid "not enough memory"
+msgstr "onvoldoende geheugen"
+
+#: lib/users-lex.l:245
+#, c-format
+msgid "`%s' already included here"
+msgstr "`%s' is hier al toegevoegd"
+
+#: lib/users-lex.l:249
+#, c-format
+msgid "`%s' already included at top level"
+msgstr "`%s' is al toegevoegd op hoogste niveau"
+
+#: lib/users-lex.l:257 radiusd/builddbm.c:142
+#, c-format
+msgid "can't open `%s'"
+msgstr "kan `%s' niet openen"
+
+#: lib/users-gram.y:106 radiusd/files.c:181
+#, c-format
+msgid "discarding user `%s'"
+msgstr "gebruiker `%s' verworpen"
+
+#: lib/users-gram.y:216 radiusd/rewrite.y:1859 gram.y:661 gram.y:841
+#: radtest/gram.y:661 radtest/gram.y:841
+#, c-format
+msgid "unknown attribute `%s'"
+msgstr "onbekend attribuut `%s'"
+
+#: lib/users-gram.y:245
+#, c-format
+msgid "%s: not an absolute pathname"
+msgstr "%s: geen volledige padnaam"
+
+#: lib/users-gram.y:258
+msgid "attribute"
+msgstr "attribuut"
+
+#: lib/users-gram.y:290
+#, c-format
+msgid "value %s is not declared for attribute %s"
+msgstr "waarde %s voor attribuut %s is niet gedeclareerd"
+
+#: lib/users-gram.y:337
+#, c-format
+msgid "%s: can't parse date"
+msgstr "%s: kan gegevens niet ontleden"
+
+#: lib/users-gram.y:347
+#, c-format
+msgid "%s: unknown attribute type %d"
+msgstr "%s: onbekend attribuuttype %d"
+
+#: lib/users-gram.y:379
+#, c-format
+msgid "enabled userfile parser debugging"
+msgstr "foutopsporen in parser van gebruikersbestand ingeschakeld"
+
+#: lib/users-gram.y:380
+#, c-format
+msgid "disabled userfile parser debugging"
+msgstr "foutopsporen in parser van gebruikersbestand uitgeschakeld"
+
+#: lib/util.c:245
+#, c-format
+msgid "string too long: %s"
+msgstr "tekenreeks te lang: %s"
+
+#: lib/printutmp.c:488
+#, c-format
+msgid "missing closing quote in string started near `%s'"
+msgstr "Sluitaanhalingsteken ontbreekt in tekenreeks beginnend nabij `%s'  "
+
+#: lib/printutmp.c:564
+#, c-format
+msgid "error in format spec: unknown format %s"
+msgstr "fout in indelingsspecificatie: onbekende indeling %s"
+
+#: lib/printutmp.c:586
+#, c-format
+msgid "wrong number of arguments to form %s"
+msgstr "verkeerd aantal argumenten naar form %s"
+
+#: lib/printutmp.c:614
+#, c-format
+msgid "form `%s' not closed"
+msgstr "form `%s' is niet gesloten"
+
+#: lib/radcli.c:36
+msgid "Common options"
+msgstr "Algemene opties"
+
+#: lib/radcli.c:42
+msgid "Set path to the configuration directory"
+msgstr "pad naar de configuratiemap instellen"
+
+#: lib/radcli.c:43 radiusd/radiusd.c:267 radiusd/radiusd.c:321
+#: radiusd/radiusd.c:346 radzap/radzap.c:79
+msgid "DIR"
+msgstr "MAP"
+
+#: lib/radcli.c:55
+msgid ""
+"\n"
+"License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl."
+"html>\n"
+"This is free software: you are free to change and redistribute it.\n"
+"There is NO WARRANTY, to the extent permitted by law.\n"
+"\n"
+msgstr ""
+
+#: lib/radcli.c:68
+msgid "(C)"
+msgstr ""
+
+#: lib/radcli.c:100 radiusd/config.y:779 radiusd/config.y:785
+#: radzap/radzap.c:242
+#, c-format
+msgid "too many arguments"
+msgstr "te veel argumenten"
+
+#: lib/parseopt/help.c:92
+#, c-format
+msgid "error in ARGP_HELP_FMT: improper usage of [no-]%s"
+msgstr ""
+
+#: lib/parseopt/help.c:105
+#, fuzzy, c-format
+#| msgid "ARGP_HELP_FMT: %s value is less than or equal to %s"
+msgid "error in ARGP_HELP_FMT: bad value for %s (near %s)"
+msgstr "ARGP_HELP_FMT: %s waarde is kleiner of gelijk aan %s"
+
+#: lib/parseopt/help.c:111
+#, fuzzy, c-format
+#| msgid "ARGP_HELP_FMT: %s value is less than or equal to %s"
+msgid "error in ARGP_HELP_FMT: %s value is out of range"
+msgstr "ARGP_HELP_FMT: %s waarde is kleiner of gelijk aan %s"
+
+#: lib/parseopt/help.c:118
+#, fuzzy, c-format
+#| msgid "%.*s: ARGP_HELP_FMT parameter requires a value"
+msgid "%s: ARGP_HELP_FMT parameter requires a value"
+msgstr "%.*s: ARGP_HELP_FMT-parameter vereist een waarde"
+
+#: lib/parseopt/help.c:124
+#, fuzzy, c-format
+#| msgid "%.*s: Unknown ARGP_HELP_FMT parameter"
+msgid "%s: unknown ARGP_HELP_FMT parameter"
+msgstr "%.*s: onbekende ARGP_HELP_FMT-parameter"
+
+#: lib/parseopt/help.c:150
+#, c-format
+msgid "ARGP_HELP_FMT: missing delimiter near %s"
+msgstr ""
+
+#: lib/parseopt/help.c:301
+msgid "Usage:"
+msgstr "Gebruik:"
+
+#: lib/parseopt/help.c:320
+#, fuzzy, c-format
+#| msgid " [OPTION...]"
+msgid "or: %s [OPTIONS...] %s\n"
+msgstr " [OPTIE...]"
+
+#: lib/parseopt/help.c:584
+msgid ""
+"Mandatory or optional arguments to long options are also mandatory or "
+"optional for any corresponding short options."
+msgstr ""
+"Verplichte of optionele argumenten bij lange opties zijn eveneens verplicht "
+"resp. optioneel voor alle overeenkomende korte opties."
+
+#: lib/parseopt/help.c:586
+msgid ""
+"If an option has several forms, a mandatory or optional argument is listed "
+"only once, after the last form."
+msgstr ""
+
+#: lib/parseopt/help.c:751
+#, fuzzy, c-format
+#| msgid "Usage:"
+msgid "usage: %s"
+msgstr "Gebruik:"
+
+#: lib/parseopt/help.c:757
+#, fuzzy
+#| msgid " [OPTION...]"
+msgid "[OPTIONS...]"
+msgstr " [OPTIE...]"
+
+#: lib/parseopt/help.c:768
+#, fuzzy, c-format
+#| msgid "got    %s\n"
+msgid "or: %s %s\n"
+msgstr "kreeg    %s\n"
+
+#: lib/parseopt/help.c:813
+#, fuzzy, c-format
+#| msgid ""
+#| "\n"
+#| "Report bugs to <%s>\n"
+msgid "Report bugs and suggestions to <%s>\n"
+msgstr ""
+"\n"
+"Meld fouten aan <%s>\n"
+
+#: lib/parseopt/help.c:817
+#, c-format
+msgid "%s home page: <%s>\n"
+msgstr ""
+
+#: lib/parseopt/optset.c:120 lib/parseopt/optset.c:136
+msgid "memory allocation error"
+msgstr ""
+
+#: lib/parseopt/parseopt.c:71
+#, fuzzy, c-format
+#| msgid "%s: unrecognized option `--%s'\n"
+msgid "unrecognized option '-%c'"
+msgstr "%s: onbekende optie `--%s'\n"
+
+#: lib/parseopt/parseopt.c:142
+#, fuzzy, c-format
+#| msgid "%s: option `%s' is ambiguous\n"
+msgid "option '%s%*.*s' is ambiguous; possibilities:"
+msgstr "%s: optie `%s' is dubbelzinnig\n"
+
+#: lib/parseopt/parseopt.c:174
+#, fuzzy, c-format
+#| msgid "%s: unrecognized option `%c%s'\n"
+msgid "unrecognized option '%s%*.*s'"
+msgstr "%s: onbekende optie `%c%s'\n"
+
+#: lib/parseopt/parseopt.c:337
+#, fuzzy, c-format
+#| msgid "%s: option `%s' requires an argument\n"
+msgid "option '%s%s' requires argument"
+msgstr "%s: optie `%s' vereist een argument\n"
+
+#: lib/parseopt/parseopt.c:351
+#, fuzzy, c-format
+#| msgid "%s: option `%c%s' doesn't allow an argument\n"
+msgid "option '%s%s' does not take argument"
+msgstr "%s: optie `%c%s' staat geen argument toe\n"
+
+#: lib/parseopt/parseopt.c:369
+#, c-format
+msgid "bad value for option '%s%s'"
+msgstr ""
+
+#: lib/parseopt/parseopt.c:395
+#, fuzzy, c-format
+#| msgid "invalid flag %c"
+msgid "invalid argument '%s'"
+msgstr "ongeldige vlag %c"
+
+#: lib/parseopt/parseopt.c:580
+#, fuzzy
+#| msgid "Common options"
+msgid "Informative options"
+msgstr "Algemene opties"
+
+#: lib/parseopt/parseopt.c:585
+#, fuzzy
+#| msgid "give this help list"
+msgid "produce this help text"
+msgstr "geef deze hulplijst"
+
+#: lib/parseopt/parseopt.c:594
+msgid "give a short usage message"
+msgstr "geef een korte gebruiksmelding"
+
+#: lib/parseopt/parseopt.c:604 lib/parseopt/parseopt.c:613
+msgid "print program version"
+msgstr "programmaversie tonen"
+
+#: radiusd/acct.c:197
+#, c-format
+msgid "no Acct-Status-Type attribute"
+msgstr "geen attribuut Acct-Status-Type"
+
+#: radiusd/acct.c:298
+#, c-format
+msgid "NAS %s started (Accounting-On packet seen)"
+msgstr "NAS %s is gestart (pakket 'Accounting-On' is gedetecteerd)"
+
+#: radiusd/acct.c:306
+#, c-format
+msgid "NAS %s shut down (Accounting-Off packet seen)"
+msgstr "NAS %s is gestopt (pakket 'Accounting-Off' is gedetecteerd)"
+
+#: radiusd/acct.c:318
+#, c-format
+msgid "unknown packet type (%d)"
+msgstr "onbekend pakkettype (%d)"
+
+#: radiusd/acct.c:372
+#, c-format
+msgid "NOT writing wtmp record"
+msgstr "wtmp-record NIET schrijven"
+
+#: radiusd/acct.c:420
+#, c-format
+msgid "System accounting is disabled"
+msgstr "Systeemadministratie is uitgeschakeld"
+
+#: radiusd/acct.c:463
+#, c-format
+msgid "Cannot stat path component: %s"
+msgstr "Kan padcomponent %s niet opvragen"
+
+#: radiusd/acct.c:480
+#, c-format
+msgid "Cannot create directory %s"
+msgstr "Kan map %s niet aanmaken"
+
+#: radiusd/acct.c:486
+#, c-format
+msgid "Path component is not a directory: %s"
+msgstr "Padcomponent is geen map: %s"
+
+#: radiusd/acct.c:502
+#, c-format
+msgid "%s: directory not writable"
+msgstr "%s: map is niet schrijfbaar"
+
+#: radiusd/acct.c:508
+#, c-format
+msgid "%s: not a directory"
+msgstr "%s: is geen map"
+
+#: radiusd/acct.c:528
+#, c-format
+msgid "Detailed accounting is disabled"
+msgstr "Uitgebreide administratie is uitgeschakeld"
+
+#: radiusd/acct.c:592 radiusd/radutil.c:460
+msgid "wrong return type"
+msgstr "ongeldig retourtype"
+
+#: radiusd/auth.c:195
+#, c-format
+msgid "Invalid password aging information for user '%s'"
+msgstr "Informatie over veroudering wachtwoord voor gebruiker '%s' is ongeldig"
+
+#: radiusd/auth.c:230
+msgid "account locked"
+msgstr "account geblokkeerd"
+
+#: radiusd/auth.c:281
+#, c-format
+msgid "No username"
+msgstr "Geen gebruikersnaam"
+
+#: radiusd/auth.c:283
+#, c-format
+msgid "Malformed username"
+msgstr "Onjuiste gebruikersnaam"
+
+#: radiusd/auth.c:314
+#, c-format
+msgid "Access denied by huntgroup %s:%d"
+msgstr "Toegang geweigerd door huntgroup %s:%d"
+
+#: radiusd/auth.c:586
+#, c-format
+msgid "unknown Password-Location value: %ld"
+msgstr "Wachtwoordlocatie onbekend: %ld"
+
+#: radiusd/auth.c:621
+#, c-format
+msgid "PAM authentication not available"
+msgstr "PAM-authenticatie is beschikbaar"
+
+#: radiusd/auth.c:876 radiusd/auth.c:986
+msgid "No such user"
+msgstr "Onbekende gebruiker"
+
+#: radiusd/auth.c:894
+msgid "Login rejected"
+msgstr "Login geweigerd"
+
+#: radiusd/auth.c:896
+msgid "denied by Scheme procedure "
+msgstr "geweigerd door Scheme-procedure"
+
+#: radiusd/auth.c:930
+#, c-format
+msgid "Invalid Auth-Failure-Trigger value: %s"
+msgstr "ongeldige waarde Auth-Failure-Trigger: %s"
+
+#: radiusd/auth.c:933
+#, c-format
+msgid "The value of Auth-Failure-Trigger attribute must begin with '/' or '('."
+msgstr "De waarde van Auth-Failure-Trigger moet beginnen met een '/' of '('."
+
+#: radiusd/auth.c:971
+msgid "Rejected"
+msgstr "Verworpen"
+
+#: radiusd/auth.c:979
+msgid "Ignored"
+msgstr "Genegeerd"
+
+#: radiusd/auth.c:995 radiusd/auth.c:1008 radiusd/auth.c:1019
+#: radiusd/auth.c:1157
+msgid "Login incorrect"
+msgstr "Login is ongeldig"
+
+#: radiusd/auth.c:1010
+msgid "Account expired"
+msgstr "Account is verlopen"
+
+#: radiusd/auth.c:1021
+msgid "Password expired"
+msgstr "Wachtwoord is verlopen"
+
+#: radiusd/auth.c:1036
+msgid "Account disabled"
+msgstr "Account is uitgeschakeld"
+
+#: radiusd/auth.c:1050
+msgid "Login failed"
+msgstr "Login is mislukt"
+
+#: radiusd/auth.c:1051
+msgid "realm quota exceeded for "
+msgstr "realm-quota overschreden voor "
+
+#: radiusd/auth.c:1076
+#, c-format
+msgid "Multiple logins: [%s] max. %ld%s"
+msgstr "Meerdere logins: [%s] max. %ld%s"
+
+#: radiusd/auth.c:1079
+msgid " [MPP attempt]"
+msgstr " [MPP-poging]"
+
+#: radiusd/auth.c:1112
+#, c-format
+msgid "Outside allowed timespan (%s)"
+msgstr "Toegestane tijdspanne overschreden (%s)"
+
+#: radiusd/auth.c:1159
+msgid "external check failed: "
+msgstr "externe controle is mislukt: "
+
+#: radiusd/auth.c:1240
+msgid "Login OK"
+msgstr "Login gelukt"
+
+#: radiusd/builddbm.c:60
+msgid "too many attributes"
+msgstr "teveel attributen"
+
+#: radiusd/builddbm.c:100
+#, c-format
+msgid "can't store datum for %s"
+msgstr "kan datum voor %s niet opgeslaan"
+
+#: radiusd/builddbm.c:357
+#, c-format
+msgid "cannot open dbm file %s"
+msgstr "kan dmb-bestand %s niet openen"
+
+#: radiusd/checkrad.c:88
+#, c-format
+msgid "unknown NAS type: %s (nas %s)"
+msgstr "onbekend NAS-type: %s (NAS %s)"
+
+#: radiusd/checkrad.c:242
+#, c-format
+msgid "timed out in waiting SNMP response from NAS %s"
+msgstr "tijdslimiet overschreden tijdens wachten op SNMP-reactie van NAS %s"
+
+#: radiusd/checkrad.c:292
+#, c-format
+msgid "no snmp_oid"
+msgstr "geen snmp_oid"
+
+#: radiusd/checkrad.c:301
+#, c-format
+msgid "invalid OID: %s"
+msgstr "ongeldige OID: %s"
+
+#: radiusd/checkrad.c:318
+#, c-format
+msgid "can't create snmp session: %s"
+msgstr "kan SNMP-sessie niet aanmaken: %s"
+
+#: radiusd/checkrad.c:326
+#, c-format
+msgid "can't open snmp session: %s"
+msgstr "kan SNMP-sessie niet openen: %s"
+
+#: radiusd/checkrad.c:334 radiusd/checkrad.c:343 radiusd/snmpserv.c:2685
+#, c-format
+msgid "can't create SNMP PDU: %s"
+msgstr "kan SNMP PDU niet aanmaken: %s"
+
+#: radiusd/checkrad.c:419
+#, c-format
+msgid "unknown host: %s"
+msgstr "onbekende host: %s"
+
+#: radiusd/checkrad.c:476
+#, c-format
+msgid "timed out in waiting for finger response from NAS %s"
+msgstr ""
+"tijdslimiet overschreden tijdens wachten op 'finger'-respons van NAS %s"
+
+#: radiusd/checkrad.c:562
+#, c-format
+msgid "path variable not set"
+msgstr "pad-variabele niet ingesteld"
+
+#: radiusd/checkrad.c:588
+#, c-format
+msgid "expr variable not set"
+msgstr "expr-variabele niet ingesteld"
+
+#: radiusd/config.y:175
+msgid "unknown block statement"
+msgstr "onbekende blokopdracht"
+
+#: radiusd/config.y:304
+#, c-format
+msgid "invalid netmask length: %d"
+msgstr "ongeldige lengte netmask: %d"
+
+#: radiusd/config.y:431
+#, c-format
+msgid "%s:%d: unexpected EOF in comment started at line %d"
+msgstr "%s:%d: onverwachte EOF in commentaar beginnend op regel %d"
+
+#: radiusd/config.y:649
+#, c-format
+msgid "%s:%d: no such service: %s"
+msgstr "%s:%d: onbekende service: %s"
+
+#: radiusd/config.y:675 radiusd/sql.c:344
+#, c-format
+msgid "%s:%d: unknown host: %s"
+msgstr "%s:%d: onbekende host: %s"
+
+#: radiusd/config.y:743
+#, c-format
+msgid "INTERNAL ERROR at %s:%d: unknown datatype %d"
+msgstr "INTERNE FOUT op %s:%d: onbekend gegevenstype %d"
+
+#: radiusd/config.y:769
+#, c-format
+msgid "%s:%d: wrong datatype (should be %s)"
+msgstr "%s:%d: ongeldig gegevenstype (moet zijn %s)"
+
+#: radiusd/config.y:779
+msgid "too few arguments"
+msgstr "te weinig argumenten"
+
+#: radiusd/config.y:800
+#, c-format
+msgid "%s:%d: obsolete statement"
+msgstr "%s:%d: achterhaalde opdracht"
+
+#: radiusd/config.y:921
+#, c-format
+msgid "can't open config file `%s'"
+msgstr "kan configuratiebestand `%s' niet openen"
+
+#: radiusd/config.y:931
+#, c-format
+msgid "reading %s"
+msgstr "inlezen %s"
+
+#: radiusd/exec.c:52
+#, c-format
+msgid "no such user: %s"
+msgstr "onbekende gebruiker: %s"
+
+#: radiusd/exec.c:74
+#, c-format
+msgid "setgroups(1, %lu) failed"
+msgstr "setgroups(1, %lu) is mislukt"
+
+#: radiusd/exec.c:85
+#, c-format
+msgid "setegid(%lu) failed"
+msgstr "setegid(%lu) is mislukt"
+
+#: radiusd/exec.c:89
+#, c-format
+msgid "setregid(%lu,%lu) failed"
+msgstr "setregid(%lu,%lu) is mislukt"
+
+#: radiusd/exec.c:94
+#, c-format
+msgid "setresgid(%lu,%lu,%lu) failed"
+msgstr "setresgid(%lu,%lu,%lu) is mislukt"
+
+#: radiusd/exec.c:103
+#, c-format
+msgid "setgid(%lu) failed"
+msgstr "setgid(%lu) is mislukt"
+
+#: radiusd/exec.c:106
+#, c-format
+msgid "cannot set effective gid to %lu"
+msgstr "kan geldende gid niet instellen op %lu"
+
+#: radiusd/exec.c:125
+#, c-format
+msgid "setreuid(%lu,-1) failed"
+msgstr "setreuid(%lu,-1) is mislukt"
+
+#: radiusd/exec.c:131
+#, c-format
+msgid "second setuid(%lu) failed"
+msgstr "tweede setuid(%lu) is mislukt"
+
+#: radiusd/exec.c:139
+#, c-format
+msgid "setuid(%lu) failed"
+msgstr "setuid(%lu) is mislukt"
+
+#: radiusd/exec.c:149
+#, c-format
+msgid "seteuid(0) succeeded when it should not"
+msgstr "seteuid(0) uitgevoerd op het verkeerde moment"
+
+#: radiusd/exec.c:153
+#, c-format
+msgid "cannot drop non-root setuid privileges"
+msgstr "kan setuid-rechten van niet-root niet verwijderen"
+
+#: radiusd/exec.c:172
+#, c-format
+msgid "radius_exec_command(): won't execute, not an absolute pathname: %s"
+msgstr "radius_exec_command(): ga niet uitvoeren, geen volledige padnaam: %s"
+
+#: radiusd/exec.c:178 radiusd/exec.c:274
+#, c-format
+msgid "can't reset SIGCHLD"
+msgstr "kan SIGCHLD niet resetten"
+
+#: radiusd/exec.c:219 radiusd/exec.c:349
+#, c-format
+msgid "can't restore SIGCHLD"
+msgstr "kan SIGCHLD niet herstellen"
+
+#: radiusd/exec.c:226 radiusd/exec.c:356
+#, c-format
+msgid ""
+"can't run external program `%s' (reason reported via syslog channel user.err)"
+msgstr ""
+"kan extern programma `%s' niet uitvoeren (gemelde reden via syslog-kanaal "
+"user,err)"
+
+#: radiusd/exec.c:237 radiusd/exec.c:365
+#, c-format
+msgid "external program `%s' %s"
+msgstr "extern programma `%s' %s"
+
+#: radiusd/exec.c:263
+#, c-format
+msgid "radius_exec_program(): won't execute, not an absolute pathname: %s"
+msgstr "radius_exec_program(): ga niet uitvoeren, geen volledig padnaam: %s"
+
+#: radiusd/exec.c:270
+#, c-format
+msgid "couldn't open pipe"
+msgstr "kan pipe niet openen"
+
+#: radiusd/exec.c:290 radiusd/exec.c:325
+#, c-format
+msgid "can't close pipe"
+msgstr "kan pipe niet sluiten"
+
+#: radiusd/exec.c:293
+#, c-format
+msgid "can't dup stdout"
+msgstr "kan stdout niet dupliceren"
+
+#: radiusd/exec.c:337 radiusd/exec.c:702
+#, c-format
+msgid "<stdout of %s>:%d: %s"
+msgstr "<stdout van %s>:%d: %s"
+
+#: radiusd/exec.c:498
+#, c-format
+msgid "filter %s (pid %d) %s (in: %u, out: %u)"
+msgstr "filter %s (pid %d) %s (in: %u, uit: %u)"
+
+#: radiusd/exec.c:552
+#, c-format
+msgid "filter %s is not declared"
+msgstr "filter %s is niet gedeclareerd"
+
+#: radiusd/exec.c:569
+#, c-format
+msgid "cannot run filter %s"
+msgstr "kan filter %s niet uitvoeren"
+
+#: radiusd/exec.c:587
+#, c-format
+msgid "filter %s"
+msgstr "filter %s"
+
+#: radiusd/exec.c:689 radiusd/exec.c:744
+#, c-format
+msgid "reading from filter %s"
+msgstr "van filter %s lezen"
+
+#: radiusd/exec.c:711
+#, c-format
+msgid "filter %s (auth): bad output: %s"
+msgstr "filter %s (auth): ongeldige uitvoer: %s"
+
+#: radiusd/exec.c:755 radiusd/exec.c:761
+#, c-format
+msgid "filter %s (acct): bad output: %s"
+msgstr "filter %s (acct): ongeldige uitvoer: %s"
+
+#: radiusd/exec.c:832
+#, c-format
+msgid "%s:%d: filter already declared at %s:%d"
+msgstr "%s:%d: filter reeds gedeclareerd bij %s:%d"
+
+#: radiusd/files.c:220
+#, c-format
+msgid "discarding entry `%s'"
+msgstr "invoer `%s' negeren"
+
+#: radiusd/files.c:418
+#, c-format
+msgid "zero length username not permitted"
+msgstr "lege gebruikersnaam niet toegestaan"
+
+#: radiusd/files.c:553
+#, c-format
+msgid "unknown attribute `%s/%s'"
+msgstr "onbekend attribuut `%s/%s'"
+
+#: radiusd/files.c:565 radiusd/files.c:591
+#, c-format
+msgid "expected %s, but found %s"
+msgstr "verwacht %s, maar gevonden %s"
+
+#. TRANSLATORS: This is used in place of the first %s in the message
+#. "expected %s, but found %s", i.e. it acts as a direct object to
+#. the verb 'expect'. Please bear this in mind when translating
+#: radiusd/files.c:569
+msgid "opcode"
+msgstr "opcode"
+
+#: radiusd/files.c:580
+#, c-format
+msgid "grad_create_pair failed on %s"
+msgstr "grad_create_pair is mislukt voor %s"
+
+#: radiusd/files.c:612
+msgid "not defined"
+msgstr "niet gedefinieerd"
+
+#: radiusd/files.c:650
+#, c-format
+msgid "cannot execute `%s'"
+msgstr "kan `%s' niet uitvoeren"
+
+#: radiusd/files.c:1047
+msgid "unknown method"
+msgstr "onbekende methode"
+
+#: radiusd/files.c:1131
+#, c-format
+msgid "user `%s' already found in %s"
+msgstr "gebruiker `%s' is al aangetroffen in %s"
+
+#: radiusd/files.c:1157
+#, c-format
+msgid "%d user disabled"
+msgid_plural "%d users disabled"
+msgstr[0] "%d gebruiker uitgeschakeld"
+msgstr[1] "%d gebruikers uitgeschakeld"
+
+#: radiusd/files.c:1711
+#, c-format
+msgid "using only dbm: USERS NOT LOADED"
+msgstr "alleen DBM in gebruik: GEBRUIKERS NIET GELADEN"
+
+#: radiusd/files.c:1719
+#, c-format
+msgid "DBM files found but no -b flag given - NOT using DBM"
+msgstr ""
+"DBM-bestanden gevonden, maar zonder opgave van vlag -b - DBM wordt NIET "
+"gebruikt"
+
+#: radiusd/files.c:1723
+#, c-format
+msgid "can't load %s: exited"
+msgstr "kan %s niet laden: stoppen"
+
+#: radiusd/files.c:1726
+#, c-format
+msgid "%s reloaded."
+msgstr "%s herladen."
+
+#: radiusd/files.c:1797
+#, c-format
+msgid "SQL Error: SQL client could not be initialized"
+msgstr "SQL-fout: SQL-client kan niet worden geïnitialiseerd"
+
+#: radiusd/files.c:1813
+#, c-format
+msgid "INTERNAL ERROR: unknown reload code: %d"
+msgstr "INTERNE FOUT: onbekende herlaadcode: %d"
+
+#: radiusd/files.c:1884
+#, c-format
+msgid "can't create parser output file `%s'"
+msgstr "kan parser-uitvoerbestand `%s' niet aanmaken"
+
+#: radiusd/files.c:1898
+#, c-format
+msgid "dumped users database to %s"
+msgstr "gebruikersdatabase weggeschreven naar %s"
+
+#: radiusd/forward.c:109
+#, c-format
+msgid "Can't forward to %s:%d"
+msgstr "Kan niet doorsturen naar %s: %d"
+
+#: radiusd/forward.c:178
+#, c-format
+msgid "Forwarding host %s not listed in clients"
+msgstr "Doorstuur-host %s niet opgesomd in clients"
+
+#: radiusd/forward.c:197
+#, c-format
+msgid "Can't open forwarding socket"
+msgstr "Kan doorstuur-socket niet openen"
+
+#: radiusd/forward.c:207
+#, c-format
+msgid "Can't bind forwarding socket"
+msgstr "Kan niet koppelen aan doorstuur-socket"
+
+#: radiusd/log.c:152
+msgid "none"
+msgstr "geen"
+
+#: radiusd/log.c:153
+msgid "Main"
+msgstr "Hoofd"
+
+#: radiusd/log.c:154
+msgid "Auth"
+msgstr "Auth"
+
+#: radiusd/log.c:155
+msgid "Acct"
+msgstr "Acct"
+
+#: radiusd/log.c:156
+msgid "Proxy"
+msgstr "Proxy"
+
+#: radiusd/log.c:157
+msgid "SNMP"
+msgstr "SNMP"
+
+#: radiusd/log.c:161
+msgid "emerg"
+msgstr "nood"
+
+#: radiusd/log.c:162
+msgid "alert"
+msgstr "waarschuwing"
+
+#: radiusd/log.c:163
+msgid "crit"
+msgstr "kritisch"
+
+#: radiusd/log.c:164
+msgid "error"
+msgstr "fout"
+
+#: radiusd/log.c:165
+msgid "warning"
+msgstr "waarschuwing"
+
+#: radiusd/log.c:166
+msgid "notice"
+msgstr "opmerking"
+
+#: radiusd/log.c:167
+msgid "info"
+msgstr "informatie"
+
+#: radiusd/log.c:168
+msgid "debug"
+msgstr "debug"
+
+#: radiusd/log.c:412
+#, c-format
+msgid "could not append to file %s"
+msgstr "kan niet aan bestand %s toevoegen"
+
+#: radiusd/log.c:491
+#, c-format
+msgid "%s: cannot change owner to %d:%d"
+msgstr "%s: kan eigenaar niet veranderen in %d:%d"
+
+#: radiusd/log.c:531
+#, c-format
+msgid "can't access log file `%s'"
+msgstr "geen toegang tot logbestand `%s'"
+
+#. TRANSLATORS: the subject will always be printed before this msgid.
+#. for example: "child 222 exited with status 0"
+#.
+#: radiusd/log.c:640
+#, c-format
+msgid "exited with status %d"
+msgstr "gestopt met status %d"
+
+#. TRANSLATORS: the subject will always be printed before this msgid.
+#: radiusd/log.c:645
+#, c-format
+msgid "terminated on signal %d"
+msgstr "beëindigd op signaal %d"
+
+#. TRANSLATORS: the subject will always be printed before this msgid.
+#: radiusd/log.c:649
+#, c-format
+msgid "terminated"
+msgstr "beëindigd"
+
+#: radiusd/log.c:764
+#, c-format
+msgid "%s:%d: no channel mode for `%s'"
+msgstr "%s:%d: geen kanaalmodus voor `%s'"
+
+#: radiusd/log.c:927
+msgid "no levels applicable for this category"
+msgstr "voor deze categorie zijn geen niveaus van toepassing"
+
+#: radiusd/log.c:953
+#, c-format
+msgid "%s:%d: channel `%s' not defined"
+msgstr "%s:%d: kanaal `%s' niet gedefinieerd"
+
+#: radiusd/log.c:997 radiusd/snmpserv.c:344
+#, c-format
+msgid "%s:%d: list item %d has wrong datatype"
+msgstr "%s:%d: lijstitem %d heeft onjuist gegevenstype"
+
+#: radiusd/log.c:1013
+#, c-format
+msgid "%s:%d: no such module name: %s"
+msgstr "%s:%d: onbekende modulenaam: %s"
+
+#: radiusd/menu.c:43 radiusd/menu.c:202
+#, c-format
+msgid "can't open menu `%s'"
+msgstr "kan menu `%s' niet openen"
+
+#: radiusd/menu.c:94
+#, c-format
+msgid "menu %s:%d: %s"
+msgstr "menu %s:%d: %s"
+
+#: radiusd/menu.c:205
+msgid ""
+"\n"
+"*** User Menu is Not Available ***\n"
+msgstr ""
+"\n"
+"*** Gebruikersmenu is niet beschikbaar ***\n"
+
+#: radiusd/mlc.c:101
+#, c-format
+msgid "check_ts(): unknown NAS"
+msgstr "check_ts(): onbekende NAS"
+
+#: radiusd/mlc.c:133
+#, c-format
+msgid "assuming `%s' is logged in"
+msgstr "verondersteld dat `%s' ingelogd is"
+
+#: radiusd/mlc.c:136
+#, c-format
+msgid "assuming `%s' is NOT logged in"
+msgstr "verondersteld dat `%s' NIET ingelogd is"
+
+#: radiusd/pam.c:62
+#, c-format
+msgid "rad_pam_conv(): no application-specific data passed"
+msgstr "rad_pam_conv(): geen applicatiespecifieke gegevens doorgegeven"
+
+#: radiusd/proxy.c:198
+#, c-format
+msgid "couldn't send request to realm %s"
+msgstr "kan geen verzoek naar realm %s sturen"
+
+#: radiusd/radck.c:81
+#, c-format
+msgid "Match-Profile refers to non-existing profile (%s)"
+msgstr "Overeenkomstig-profiel verwijst naar niet-bestaand profiel (%s)"
+
+#: radiusd/radck.c:125
+#, c-format
+msgid "circular dependency for %s"
+msgstr "cirkelafhankelijkheid voor %s"
+
+#: radiusd/radck.c:152
+#, c-format
+msgid "not enough memory for transitivity check"
+msgstr "niet voldoende geheugen voor controle op transitivity"
+
+#: radiusd/radck.c:177
+#, c-format
+msgid "USER LIST IS EMPTY"
+msgstr "GEBRUIKERSLIJST IS LEEG"
+
+#: radiusd/radck.c:185
+#, c-format
+msgid "duplicate %s attribute"
+msgstr "dubbel attribuut %s"
+
+#: radiusd/radck.c:226
+#, c-format
+msgid "attribute %s not allowed in LHS"
+msgstr "attribuut %s in linkerzijde niet toegestaan"
+
+#: radiusd/radck.c:275
+msgid "Match-Profile refers to a DEFAULT entry"
+msgstr "Overeenkomstig-profiel verwijst naar een standaardinvoer"
+
+#: radiusd/radck.c:284
+msgid "Simultaneous-Use is used, but multiple login checking is not enabled"
+msgstr ""
+"Gelijktijdig-gebruik is in gebruik, maar meervoudige-inlogcontrole is niet "
+"ingeschakeld"
+
+#: radiusd/radck.c:324 radiusd/radck.c:355
+msgid "No User-Password attribute in LHS"
+msgstr "Geen Gebruiker-wachtwoordattribuut in linkerzijde"
+
+#: radiusd/radck.c:332
+#, c-format
+msgid "Auth-Type = System can only be used when running with root privileges"
+msgstr "Auth-type = Systeem kan alleen worden gebruikt met root-rechten"
+
+#: radiusd/radck.c:342 radiusd/radck.c:379
+msgid "User-Password attribute ignored for this Auth-Type"
+msgstr "Gebruiker-wachtwoordattribuut voor dit Auth-type wordt genegeerd"
+
+#: radiusd/radck.c:347
+msgid "Password-Location attribute ignored for this Auth-Type"
+msgstr "Wachtwoord-lokatieattribuut voor dit Auth-type wordt genegeerd"
+
+#: radiusd/radck.c:363
+msgid "Authentication type not supported"
+msgstr "Authenticatietype is niet ondersteund"
+
+#: radiusd/radck.c:398
+msgid "Both Auth-Data and PAM-Auth attributes present"
+msgstr "Zowel Auth-data- en PAM-auth-attributen zijn aanwezig"
+
+#: radiusd/radck.c:421
+#, c-format
+msgid "attribute %s not allowed in RHS"
+msgstr "attribuut %s in rechterzijde niet toegestaan"
+
+#: radiusd/radck.c:436
+#, c-format
+msgid "Use of Add-Port-To-IP-Address is deprecated"
+msgstr "Gebruik van Add-Port-To-IP-Address is afgekeurd"
+
+#: radiusd/radck.c:445
+msgid "BEGIN without Fall-Through"
+msgstr "BEGIN zonder Fall-through"
+
+#: radiusd/radius.c:107
+#, c-format
+msgid "request from unknown client"
+msgstr "verzoek van onbekende client"
+
+#: radiusd/radius.c:426
+msgid "Dropping packet"
+msgstr "Pakket verwijderen"
+
+#: radiusd/radius.c:449
+#, c-format
+msgid "Retransmitting %s reply"
+msgstr "%s-antwoord opnieuw verzenden"
+
+#: radiusd/radius.c:454
+msgid "request failed"
+msgstr "verzoek is mislukt"
+
+#: radiusd/radius.c:522
+#, c-format
+msgid "Unrecognized proxy reply from server %s, proxy ID %d"
+msgstr "Proxyantwoord van server %s, proxyid %d is niet herkend"
+
+#: radiusd/radius.c:556
+#, c-format
+msgid "unknown request code %d"
+msgstr "verzoekcode %d onbekend"
+
+#: radiusd/radius.c:656
+#, c-format
+msgid "rule trace: %s"
+msgstr "regelhistorie: %s"
+
+#: radiusd/radiusd.c:146
+msgid "radiusd compiled without DBM support"
+msgstr "radiusd gecompileerd zonder DBM-ondersteuning"
+
+#: radiusd/radiusd.c:156
+#, c-format
+msgid "unknown mode: %s"
+msgstr "onbekende modus: %s"
+
+#: radiusd/radiusd.c:181
+#, c-format
+msgid "invalid IP address: %s"
+msgstr "ongeldig IP-adres: %s"
+
+#: radiusd/radiusd.c:217
+#, fuzzy, c-format
+#| msgid "invalid port type"
+msgid "%s: invalid port number"
+msgstr "ongeldig poorttype"
+
+#: radiusd/radiusd.c:228
+msgid "radiusd specific switches:"
+msgstr "radiusd-specifieke instellingen:"
+
+#: radiusd/radiusd.c:233
+msgid "Stay in foreground"
+msgstr "Op de voorgrond blijven"
+
+#: radiusd/radiusd.c:244
+msgid "Select operation mode: test, checkconf, builddbm."
+msgstr "Uitvoeringmodus selecteren: test, checkconf of builddbm."
+
+#: radiusd/radiusd.c:255
+msgid "Run in single process mode"
+msgstr "In enkelprocesmodus uitvoeren"
+
+#: radiusd/radiusd.c:266
+msgid "Store pidfile in DIR"
+msgstr "pidfile in MAP opslaan"
+
+#: radiusd/radiusd.c:278
+msgid "Show compilation defaults"
+msgstr "Standaardwaarden compilatie tonen"
+
+#: radiusd/radiusd.c:284
+msgid "Quiet mode (valid only with --mode)"
+msgstr "Stille modus (alleen geldig met --mode)"
+
+#: radiusd/radiusd.c:294
+msgid "Select port numbers from available UDP ports"
+msgstr "Poortnummers uit beschikbare UDP-poorten selecteren"
+
+#: radiusd/radiusd.c:295 radiusd/tsh.c:82 radlast/radlast.c:253
+#: radtest/main.c:135 radwho/radwho.c:204 radzap/radzap.c:91
+msgid "FILE"
+msgstr "BESTAND"
+
+#: radiusd/radiusd.c:304
+msgid "Daemon configuration options. Please use raddb/config instead."
+msgstr "Configuratieopties van deamon. Kies bijvoorkeur raddb/config."
+
+#: radiusd/radiusd.c:309
+msgid "Do detailed authentication logging"
+msgstr "Geen uitgebreide authenticatievastlegging"
+
+#: radiusd/radiusd.c:320
+msgid "Set accounting directory"
+msgstr "Administratiemap instellen"
+
+#: radiusd/radiusd.c:333
+msgid "Enable DBM support"
+msgstr "DBM-ondersteuning inschakelen"
+
+#: radiusd/radiusd.c:345
+msgid "Set logging directory name"
+msgstr "Mapnaam voor vastleggingen instellen"
+
+#: radiusd/radiusd.c:357
+msgid "Do not resolve IP addresses"
+msgstr "IP-adressen niet opzoeken"
+
+#: radiusd/radiusd.c:368
+msgid "Listen on IPADDR"
+msgstr "Op IPADRS uitluisteren"
+
+#: radiusd/radiusd.c:369 radlast/radlast.c:265
+msgid "IPADDR"
+msgstr "IPADRS"
+
+#: radiusd/radiusd.c:379
+msgid "Set authentication port number"
+msgstr "Authenticatiepoortnummer instellen"
+
+#: radiusd/radiusd.c:380 radlast/radlast.c:241 radlast/radlast.c:310
+#: radtest/main.c:157 radtest/main.c:181 radzap/radzap.c:115
+msgid "NUMBER"
+msgstr "AANTAL"
+
+#: radiusd/radiusd.c:390
+msgid "Strip prefixes/suffixes off user names before logging"
+msgstr ""
+"Voor- en achtervoegsels van gebruikersnamen verwijderen vóór vastlegging"
+
+#: radiusd/radiusd.c:401 radiusd/tsh.c:86
+msgid "Set debugging level"
+msgstr "Debugniveau instellen"
+
+#: radiusd/radiusd.c:402 radtest/main.c:124
+msgid "DEBUGSPEC"
+msgstr "DEBUGSPEC"
+
+#: radiusd/radiusd.c:412
+msgid "Log authentications"
+msgstr "Authenticaties vastleggen"
+
+#: radiusd/radiusd.c:422
+msgid "Log users' passwords"
+msgstr "Gebruikers wachtwoorden vastleggen"
+
+#: radiusd/radiusd.c:435
+msgid "GNU radius daemon"
+msgstr "GNU Radius-daemon"
+
+#: radiusd/radiusd.c:447
+msgid "Sorry, your account is currently closed\n"
+msgstr "Sorry, uw account is afgesloten\n"
+
+#: radiusd/radiusd.c:449
+msgid "Password has expired\n"
+msgstr "Wachtwoord is verlopen\n"
+
+#: radiusd/radiusd.c:451
+msgid "Password will expire in %R{Password-Expire-Days} Days\n"
+msgstr "Wachtwoord verloopt binnen %R{Password-Expire-Days} dagen\n"
+
+#: radiusd/radiusd.c:453
+msgid ""
+"\n"
+"Access denied\n"
+msgstr ""
+"\n"
+"Toegang geweigerd\n"
+
+#: radiusd/radiusd.c:455
+msgid ""
+"\n"
+"Realm quota exceeded - access denied\n"
+msgstr ""
+"\n"
+"Realm-quota overschreden - toegang geweigerd\n"
+
+#: radiusd/radiusd.c:457
+msgid ""
+"\n"
+"You are already logged in %R{Simultaneous-Use} times - access denied\n"
+msgstr ""
+"\n"
+"U bent reeds %R{Simultaneous-Use} maal ingelogd - toegang geweigerd\n"
+
+#: radiusd/radiusd.c:459
+msgid ""
+"\n"
+"You are already logged in - access denied\n"
+msgstr ""
+"\n"
+"U bent reeds ingelogd - toegang geweigerd\n"
+
+#: radiusd/radiusd.c:461
+msgid "You are calling outside your allowed timespan\n"
+msgstr "U bevindt zich buiten de toegestane tijdspanne\n"
+
+#: radiusd/radiusd.c:499
+#, c-format
+msgid "Terminating the subprocesses"
+msgstr "De subprocessen worden geëindigd"
+
+#: radiusd/radiusd.c:511
+#, c-format
+msgid "%d process left!"
+msgid_plural "%d processes left!"
+msgstr[0] "%d proces over!"
+msgstr[1] "%d processen over!"
+
+#: radiusd/radiusd.c:537
+#, c-format
+msgid "Radiusd is not listening on any port."
+msgstr "Radiusd luistert niet op enige poort."
+
+#: radiusd/radiusd.c:541
+#, c-format
+msgid "Radiusd is not listening on any port. Trying to continue anyway..."
+msgstr "Radiusd luistert niet op enige poort. Toch proberen door te gaan..."
+
+#: radiusd/radiusd.c:598
+#, c-format
+msgid "Starting"
+msgstr "Starten"
+
+#: radiusd/radiusd.c:621
+#, c-format
+msgid "Cannot open output file %s"
+msgstr "Kan uitvoerbestand %s niet openen"
+
+#: radiusd/radiusd.c:639
+#, c-format
+msgid "Ready"
+msgstr "Gereed"
+
+#: radiusd/radiusd.c:731
+#, c-format
+msgid "can't find out my own IP address"
+msgstr "kan mijn eigen IP-adres niet achterhalen"
+
+#: radiusd/radiusd.c:827
+#, c-format
+msgid "RADIUSD SUSPENDED"
+msgstr "RADIUSD OPGESCHORT"
+
+#: radiusd/radiusd.c:857
+#, c-format
+msgid "Reloading configuration now"
+msgstr "Configuratie nu herladen"
+
+#: radiusd/radiusd.c:869
+#, c-format
+msgid "Dumping users db to `%s'"
+msgstr "Gebruikersdatabase wegschrijven naar `%s'"
+
+#: radiusd/radiusd.c:926
+#, c-format
+msgid "restart initiated"
+msgstr "Herstart begonnen"
+
+#: radiusd/radiusd.c:929
+#, c-format
+msgid "can't restart: not started as absolute pathname"
+msgstr "Kan niet herstarten: niet gestart met volledige padnaam"
+
+#: radiusd/radiusd.c:941
+#, c-format
+msgid "radiusd_restart: cannot fork"
+msgstr "radiusd_restart: kan niet afsplitsten"
+
+#: radiusd/radiusd.c:956
+#, c-format
+msgid "restarting radius"
+msgstr "radius herstarten"
+
+#: radiusd/radiusd.c:959
+#, c-format
+msgid "RADIUS NOT RESTARTED: exec failed"
+msgstr "RADIUS NIET HERSTART: uitvoering is mislukt"
+
+#: radiusd/radiusd.c:996
+#, c-format
+msgid "Normal shutdown."
+msgstr "Normale uitschakeling"
+
+#: radiusd/radiusd.c:1012
+#, c-format
+msgid "Ready to process requests."
+msgstr "Klaar om verzoeken te verwerken."
+
+#: radiusd/radiusd.c:1101
+#, c-format
+msgid "Loading configuration files."
+msgstr "Configuratiebestanden laden."
+
+#: radiusd/radiusd.c:1111
+#, c-format
+msgid "Errors reading config file - EXITING"
+msgstr "Configuratiebestand lezen is mislukt - STOPPEN"
+
+#: radiusd/radiusd.c:1285
+#, c-format
+msgid "socket %s:%d is already assigned for %s"
+msgstr "socket %s:%d is al toegekend aan %s"
+
+#: radiusd/radiusd.c:1492
+#, c-format
+msgid "Ignoring exec-program-user"
+msgstr "exec-program-user negeren"
+
+#: radiusd/radutil.c:178
+#, c-format
+msgid "INTERNAL ERROR (%s:%d): attribute %d has bad type (%d)"
+msgstr "INTERNE FOUT (%s:%d): attribuut %d heeft onjuist type (%d)"
+
+#: radiusd/radutil.c:509
+#, c-format
+msgid "cannot convert \"%s\" to integer"
+msgstr "kan \"%s\" niet omzetten naar een geheel getal"
+
+#: radiusd/request.c:225
+#, c-format
+msgid "Proxy %s request expired in queue"
+msgstr "Verzoek proxy %s in wachtrij verlopen"
+
+#: radiusd/request.c:244
+#, c-format
+msgid "Killing unresponsive %s child %lu"
+msgstr "Niet-reagerend %s-child %lu beëindigen"
+
+#: radiusd/request.c:249
+#, c-format
+msgid "Cannot terminate child %lu. Attempting to kill inexisting process?"
+msgstr ""
+"Kan child %lu niet beëindigen. Proberen om niet-bestaand proces te "
+"beëindigen?"
+
+#: radiusd/request.c:259
+#, c-format
+msgid "Terminating unresponsive %s child %lu, status: %s"
+msgstr "Niet-reagerend %s-child %lu beëindigen, status: %s"
+
+#: radiusd/request.c:262
+msgid "OK"
+msgstr "OK"
+
+#: radiusd/request.c:262
+msgid "FAILURE"
+msgstr "MISLUKT"
+
+#: radiusd/request.c:290
+msgid "duplicate request"
+msgstr "dubbel verzoek"
+
+#: radiusd/request.c:365
+msgid "too many requests in queue"
+msgstr "teveel verzoeken in wachtrij"
+
+#: radiusd/request.c:372
+msgid "too many requests of this type"
+msgstr "teveel verzoeken van dit type"
+
+#: radiusd/request.c:381
+msgid "Maximum number of children active"
+msgstr "Maximum aantal children actief"
+
+#: radiusd/rewrite.y:845 gram.y:397 radtest/gram.y:397
+#, c-format
+msgid "redefinition of function `%s'"
+msgstr "herdefinitie van functie `%s'"
+
+#: radiusd/rewrite.y:847 radiusd/rewrite.y:5611
+#, c-format
+msgid "previously defined here"
+msgstr "eerder hier gedefinieerd"
+
+#: radiusd/rewrite.y:1033
+msgid "nothing to break from"
+msgstr "niets om te verlaten"
+
+#: radiusd/rewrite.y:1047
+msgid "nothing to continue"
+msgstr "niets om te continueren"
+
+#: radiusd/rewrite.y:1123
+#, c-format
+msgid "undefined variable: %s"
+msgstr "ongedefinieerde variabele: %s"
+
+#: radiusd/rewrite.y:1608
+#, c-format
+msgid "unexpected EOF in comment started at line %lu"
+msgstr "onverwachte EOF in commentaar beginnende op regel %lu"
+
+#: radiusd/rewrite.y:1669
+#, c-format
+msgid "Malformed pragma"
+msgstr "Pragma misvormd"
+
+#: radiusd/rewrite.y:1683
+#, c-format
+msgid "Unknown regexp flag: %s"
+msgstr "Onbekende reguliere expressie: %s"
+
+#: radiusd/rewrite.y:1815
+msgid "unterminated character constant"
+msgstr "karakterconstante niet-beëindigd"
+
+#: radiusd/rewrite.y:2422
+#, c-format
+msgid "%s implicit coercion %s %s"
+msgstr "%s impliciete coercion %s %s"
+
+#: radiusd/rewrite.y:2487
+msgid "operation not applicable to strings"
+msgstr "bewerking niet toepasbaar op tekenreeksen"
+
+#: radiusd/rewrite.y:2591 radiusd/rewrite.y:2657
+#, c-format
+msgid "(argument %d)"
+msgstr "(argument %d)"
+
+#: radiusd/rewrite.y:2606 radiusd/rewrite.y:2668
+#, c-format
+msgid "too many arguments in call to %s"
+msgstr "te veel argumenten in aanroep van %s"
+
+#: radiusd/rewrite.y:2611 radiusd/rewrite.y:2673
+#, c-format
+msgid "too few arguments in call to %s"
+msgstr "te weinig argumenten in aanroep van %s"
+
+#: radiusd/rewrite.y:2698 radiusd/tsh.c:242
+#, c-format
+msgid "Undefined"
+msgstr "Ongedefinieerd"
+
+#: radiusd/rewrite.y:2700 radtest/runtime.c:783
+msgid "integer"
+msgstr "geheel getal"
+
+#: radiusd/rewrite.y:2702 radtest/runtime.c:785
+msgid "string"
+msgstr "tekenreeks"
+
+#: radiusd/rewrite.y:2704
+msgid "UNKNOWN"
+msgstr "UNBEKEND"
+
+#: radiusd/rewrite.y:2713
+msgid "from Undefined"
+msgstr "van Ongedefinieerd"
+
+#: radiusd/rewrite.y:2715
+msgid "from integer"
+msgstr "van geheel getal"
+
+#: radiusd/rewrite.y:2717
+msgid "from string"
+msgstr "van tekenreeks"
+
+#: radiusd/rewrite.y:2719
+msgid "from UNKNOWN"
+msgstr "van ONBEKEND"
+
+#: radiusd/rewrite.y:2728
+msgid "to Undefined"
+msgstr "naar Ongedefinieerd"
+
+#: radiusd/rewrite.y:2730 radtest/runtime.c:796
+msgid "to integer"
+msgstr "naar geheel getal"
+
+#: radiusd/rewrite.y:2732 radtest/runtime.c:798
+msgid "to string"
+msgstr "naar tekenreeks"
+
+#: radiusd/rewrite.y:2734
+msgid "to UNKNOWN"
+msgstr "naar ONBEKEND"
+
+#: radiusd/rewrite.y:3050
+#, c-format
+msgid "missing return statement"
+msgstr "ontbrekende retouropdracht"
+
+#: radiusd/rewrite.y:3201 radiusd/rewrite.y:3211
+#, c-format
+msgid "divide by zero"
+msgstr "delen door nul"
+
+#: radiusd/rewrite.y:3859
+#, c-format
+msgid "regexp error: %s"
+msgstr "reguliere expressiefout: %s"
+
+#: radiusd/rewrite.y:3907
+msgid "out of pushdown space"
+msgstr "geen ruimte meer voor 'pushdown'"
+
+#: radiusd/rewrite.y:3921 radiusd/rewrite.y:3952
+msgid "heap overrun"
+msgstr "geheugen overschreden"
+
+#: radiusd/rewrite.y:3977
+msgid "out of heap space"
+msgstr "geheugenruimte overschreden"
+
+#: radiusd/rewrite.y:4005 radiusd/rewrite.y:4048
+msgid "out of popup"
+msgstr "popup overschreden"
+
+#: radiusd/rewrite.y:4117 radiusd/rewrite.y:4127
+msgid "rewrite runtime error"
+msgstr "uitvoeringsfout opnieuw tonen"
+
+#: radiusd/rewrite.y:4225
+msgid "no request supplied"
+msgstr "geen verzoek opgegeven"
+
+#: radiusd/rewrite.y:4262
+msgid "can't create A/V pair"
+msgstr "kan A/V-paar niet aanmaken"
+
+#: radiusd/rewrite.y:4563 radiusd/rewrite.y:4579
+msgid "division by zero!"
+msgstr "deling door nul!"
+
+#: radiusd/rewrite.y:4786
+#, c-format
+msgid "rewrite regex failure: %s. Input: %s"
+msgstr "reguliere expressiefout opnieuw tonen: %s. Invoer: %s"
+
+#: radiusd/rewrite.y:4839
+msgid "pc out of range"
+msgstr "pc buiten het bereik"
+
+#: radiusd/rewrite.y:5292
+msgid "Invalid backreference"
+msgstr "Ongeldige terugverwijzing"
+
+#: radiusd/rewrite.y:5327 radiusd/rewrite.y:5367
+msgid "regexp compile error: "
+msgstr "compileerfout reguliere expressie: "
+
+#: radiusd/rewrite.y:5609
+#, c-format
+msgid "redefinition of function %s"
+msgstr "herdefinitie van functie %s"
+
+#: radiusd/rewrite.y:5665
+#, c-format
+msgid "function %s not defined"
+msgstr "functie %s niet gedefinieerd"
+
+#: radiusd/rewrite.y:5669
+#, c-format
+msgid "function %s returns wrong data type"
+msgstr "functie %s retourneert onjuist gegevenstype"
+
+#: radiusd/rewrite.y:5677
+#, c-format
+msgid "function %s takes too many arguments"
+msgstr "functie %s krijgt te veel argumenten"
+
+#: radiusd/rewrite.y:5684
+#, c-format
+msgid "function %s: argument %d must be integer"
+msgstr "functie %s: argument %d moet een geheel getal zijn"
+
+#: radiusd/rewrite.y:5693
+#, c-format
+msgid "function %s: argument %d must be string"
+msgstr "functie %s: argument %d moet een tekenreeks zijn"
+
+#: radiusd/rewrite.y:5706
+#, c-format
+msgid "function %s takes too few arguments"
+msgstr "functie %s krijgt te weinig argumenten"
+
+#: radiusd/rewrite.y:5897
+#, c-format
+msgid "function %s() requires %d parameter"
+msgid_plural "function %s() requires %d parameters"
+msgstr[0] "functie %s() vereist %d parameter"
+msgstr[1] "functie %s() vereist %d parameters"
+
+#: radiusd/rewrite.y:6054
+#, c-format
+msgid "file not found: %s"
+msgstr "bestand niet gevonden: %s"
+
+#: radiusd/rewrite.y:6188
+msgid "function ~S not defined"
+msgstr "functie ~S niet gedefinieerd"
+
+#: radiusd/rewrite.y:6204
+msgid "too many arguments for ~S"
+msgstr "te veel argumenten voor ~S"
+
+#: radiusd/rewrite.y:6232
+msgid "type mismatch in argument ~S(~S) in call to ~S"
+msgstr "typefout in argument ~S(~S) in aanroep van ~S"
+
+#: radiusd/rewrite.y:6242
+msgid "too few arguments for ~S"
+msgstr "te weinig argumenten voor ~S"
+
+#: radiusd/scheme.c:224
+#, c-format
+msgid "%s is not a procedure object"
+msgstr "%s is geen procedure-object"
+
+#: radiusd/scheme.c:229
+#, c-format
+msgid "Procedure `%s' failed: see error output for details"
+msgstr "Procedure `%s' is mislukt: zie foutuitvoer voor meer informatie"
+
+#: radiusd/scheme.c:305 radiusd/scheme.c:341
+#, c-format
+msgid "Unexpected return value from Guile authentication function `%s'"
+msgstr "Onverwachte retourwaarde van Guile authenticatiefunctie `%s'"
+
+#: radiusd/scheme.c:361
+#, c-format
+msgid "Unexpected return value from Guile accounting function `%s'"
+msgstr "Onverwachte retourwaarde van Guile administratiefunctie `%s'"
+
+#: radiusd/scheme.c:454
+#, c-format
+msgid "Invalid hex number: %s"
+msgstr "Ongeldig hexidecimaal nummer: %s"
+
+#: radiusd/scheme.c:645
+#, fuzzy, c-format
+#| msgid "Guile authentication disabled in config"
+msgid "Guile extensions disabled in config"
+msgstr "Guile-authenticatie in configuratie uitgeschakeld"
+
+#: radiusd/scheme.c:662
+#, c-format
+msgid "Guile authentication not available"
+msgstr "Guile-authenticatie niet beschikbaar"
+
+#: radiusd/snmpserv.c:279
+#, c-format
+msgid "%s:%d: community %s already declared"
+msgstr "%s:%d: community %s reeds gedeclareerd"
+
+#: radiusd/snmpserv.c:375 radiusd/snmpserv.c:409
+#, c-format
+msgid "%s:%d: no such network: %s"
+msgstr "%s:%d: onbekend netwerk: %s"
+
+#: radiusd/snmpserv.c:383
+#, c-format
+msgid "%s:%d: undefined community %s"
+msgstr "%s:%d: ongedefinieerde community %s"
+
+#: radiusd/snmpserv.c:1332
+#, c-format
+msgid "acct server re-initializing on SNMP request"
+msgstr "acct-server herinitialiseren op verzoek SNMP"
+
+#: radiusd/snmpserv.c:1684
+#, c-format
+msgid "auth server re-initializing on SNMP request"
+msgstr "auth-server herinitialiseren op verzoek SNMP"
+
+#: radiusd/snmpserv.c:1964
+#, c-format
+msgid "server re-initializing on SNMP request"
+msgstr "server herinitialiseren op verzoek SNMP"
+
+#: radiusd/snmpserv.c:1968
+#, c-format
+msgid "server restart on SNMP request"
+msgstr "server herstarten op verzoek SNMP"
+
+#: radiusd/snmpserv.c:1972
+#, c-format
+msgid "server continuing on SNMP request"
+msgstr "server continueren op verzoek SNMP"
+
+#: radiusd/snmpserv.c:1976
+#, c-format
+msgid "server suspending on SNMP request"
+msgstr "server opschorten op verzoek SNMP"
+
+#: radiusd/snmpserv.c:1980
+#, c-format
+msgid "server shutting down on SNMP request"
+msgstr "server uitschakelen op verzoek SNMP"
+
+#: radiusd/snmpserv.c:2692
+#, c-format
+msgid "can't decode SNMP packet from %s: %s"
+msgstr "kan SNMP-pakket van %s niet decoderen: %s"
+
+#: radiusd/snmpserv.c:2702
+#, c-format
+msgid "DENIED attempt to access community %s from %s"
+msgstr "GEWEIGERDE poging tot toegang community %s van %s"
+
+#: radiusd/snmpserv.c:2757
+#, c-format
+msgid "Dropping SNMP request from client %s: %s"
+msgstr "SNMP-verzoek van client %s verwijderen: %s"
+
+#: radiusd/sql.c:315
+#, c-format
+msgid "could not read sqlserver file %s"
+msgstr "lezen sqlserverbestand %s is mislukt"
+
+#: radiusd/sql.c:327
+msgid "unrecognized keyword"
+msgstr "niet-herkend trefwoord"
+
+#: radiusd/sql.c:335
+msgid "required argument missing"
+msgstr "vereist argument ontbreekt"
+
+#: radiusd/sql.c:360 radiusd/sql.c:387
+msgid "number parse error"
+msgstr "ontleden nummer is mislukt"
+
+#: radiusd/sql.c:379 radiusd/sql.c:397 radiusd/sql.c:405
+msgid "expected boolean value"
+msgstr "booleanwaarde verwacht"
+
+#: radiusd/sql.c:420
+msgid "auth_max_connections is obsolete"
+msgstr "auth_max_connections is verouderd"
+
+#: radiusd/sql.c:427
+msgid "acct_max_connections is obsolete"
+msgstr "acct_max_connections is verouderd"
+
+#: radiusd/sql.c:434
+msgid "query_buffer_size is obsolete"
+msgstr "query_buffer_size is verouderd"
+
+#: radiusd/sql.c:442
+msgid "Unsupported SQL interface"
+msgstr "SQL-interface niet ondersteund"
+
+#: radiusd/sql.c:497
+#, c-format
+msgid "%s: missing `%s' statement"
+msgstr "%s: ontbrekende `%s'-opdracht"
+
+#: radiusd/sql.c:515
+#, c-format
+msgid "%s: SQL interface not specified"
+msgstr "%s: SQL-interface niet gespecificeerd"
+
+#: radiusd/sql.c:584
+#, c-format
+msgid "disabling SQL authentication"
+msgstr "SQL-authenticatie uitgeschakeld"
+
+#: radiusd/sql.c:586
+#, c-format
+msgid "disabling SQL accounting"
+msgstr "SQL-administratie uitgeschakeld"
+
+#: radiusd/sql.c:593
+#, c-format
+msgid "SQL configuration changed: closing existing connections"
+msgstr "SQL-configuratie veranderd: bestaande verbindingen afsluiten"
+
+#: radiusd/sql.c:812
+#, c-format
+msgid "no Acct-Status-Type attribute in rad_sql_acct()"
+msgstr "geen attribuut Acct-Status-Type in rad_sql_acct()"
+
+#: radiusd/sql.c:888 radiusd/sql.c:1201
+#, c-format
+msgid "%s updated %d record"
+msgid_plural "%s updated %d records"
+msgstr[0] "%s heeft %d record bijgewerkt"
+msgstr[1] "%s heeft %d records bijgewerkt"
+
+#: radiusd/sql.c:906
+#, c-format
+msgid "SQL Auth specified in users file, but not in sqlserver file"
+msgstr ""
+"SQL-auth in gebruikersbestand gespecificeerd, maar niet in sqlserverbestand"
+
+#: radiusd/sql.c:998
+#, c-format
+msgid "SQL: invalid operator: %s"
+msgstr "SQL: ongeldige operator: %s"
+
+#: radiusd/sql.c:1061
+msgid "SQL authentication is not enabled in raddb/sqlserver"
+msgstr "SQL-authenticatie in raddb/sqlserver is niet toegestaan"
+
+#: radiusd/sql.c:1290
+msgid "Radiusd is compiled without SQL support"
+msgstr "Radiusd is gecompileerd zonder SQL-ondersteuning"
+
+#: radiusd/stat.c:84
+#, c-format
+msgid "SNMP system disabled: file `%s' has incorrect permissions"
+msgstr "SNMP-systeem uitgeschakeld: `%s' heeft onjuiste rechten"
+
+#: radiusd/stat.c:103
+#, c-format
+msgid "mmap failed"
+msgstr "mmap is mislukt"
+
+#: radiusd/stat.c:131
+#, c-format
+msgid "shmem_get(): can't allocate %d byte"
+msgid_plural "shmem_get(): can't allocate %d bytes"
+msgstr[0] "shmem_get(): kan geen %d byte reserveren"
+msgstr[1] "shmem_get(): kan geen %d bytes reserveren"
+
+#: radiusd/stat.c:167
+#, c-format
+msgid "stat_init failed"
+msgstr "stat_init is mislukt"
+
+#: radiusd/stat.c:230
+#, c-format
+msgid ""
+"reached SNMP storage limit for the number of monitored ports: increase max-"
+"port-count"
+msgstr ""
+"SNMP-opslaglimiet voor aantal bewaakte poorten is bereikt: verhoog max-port-"
+"count"
+
+#: radiusd/stat.c:290
+#, c-format
+msgid "stat_update(): portno %d: can't find nas for IP %s"
+msgstr "stat_update(): poortnr %d: kan geen NAS vinden voor IP %s"
+
+#: radiusd/stat.c:301
+#, c-format
+msgid "stat_update(): port %d not found on NAS %s"
+msgstr "stat_update(): poort %d niet gevonden op NAS %s"
+
+#: radiusd/stat.c:315
+msgid "negative port idle time"
+msgstr "negatieve inactiviteitstijd van poort"
+
+#: radiusd/stat.c:339
+msgid "negative port session time"
+msgstr "negatieve sessietijd van poort"
+
+#: radiusd/stat.c:471
+#, c-format
+msgid ""
+"reached SNMP storage limit for the number of monitored NASes: increase max-"
+"nas-count"
+msgstr ""
+"SNMP-opslaglimiet voor aantal bewaakte NAS-en is bereikt: verhoog max-nas-"
+"count"
+
+#: radiusd/version.c:137
+msgid "GNU RADIUS server version "
+msgstr "GNU RADIUS-serverversie"
+
+#: radiusd/version.c:164
+#, fuzzy, c-format
+#| msgid "rule trace: %s"
+msgid "Build target: %s\n"
+msgstr "regelhistorie: %s"
+
+#: radiusd/version.c:168
+#, c-format
+msgid "Compilation platform: "
+msgstr "Compileerplatform"
+
+#: radiusd/version.c:172
+#, c-format
+msgid ""
+"\n"
+"Debugging flags: "
+msgstr ""
+"\n"
+"Debug-vlaggen:"
+
+#: radiusd/version.c:177
+#, c-format
+msgid ""
+"\n"
+"Compilation flags: "
+msgstr ""
+"\n"
+"Compileervlaggen:"
+
+#: radiusd/version.c:182
+#, c-format
+msgid "Compilation defaults:\n"
+msgstr "Compileerstandaarden:\n"
+
+#: radiusd/version.c:183
+#, c-format
+msgid "Ports in use:\n"
+msgstr "Poorten in gebruik:\n"
+
+#: radiusd/version.c:186
+#, c-format
+msgid "Paths:\n"
+msgstr "Padden:\n"
+
+#: radiusd/version.c:187
+#, c-format
+msgid " configuration directory: %s\n"
+msgstr " configuratiemap: %s\n"
+
+#: radiusd/version.c:188
+#, c-format
+msgid " logging directory:       %s\n"
+msgstr " vastleggingsmap:       %s\n"
+
+#: radiusd/version.c:189
+#, c-format
+msgid " accounting directory:    %s\n"
+msgstr " administratiemap:    %s\n"
+
+#: radiusd/version.c:190
+#, c-format
+msgid " pidfile directory:       %s\n"
+msgstr " map pid-bestand:       %s\n"
+
+#: radiusd/version.c:191
+#, c-format
+msgid ""
+"\n"
+"Report bugs to <%s>\n"
+msgstr ""
+"\n"
+"Meld fouten aan <%s>\n"
+
+#: radiusd/rpp.c:353
+#, c-format
+msgid "child %lu %s"
+msgstr "child %lu %s"
+
+#: radiusd/rpp.c:496
+#, c-format
+msgid "Killing process %lu: %s"
+msgstr "Afbreken proces %lu: %s"
+
+#: radiusd/rpp.c:563
+msgid "error writing header"
+msgstr "kop schrijven is mislukt"
+
+#: radiusd/rpp.c:567
+msgid "error writing data"
+msgstr "gegevens schrijven is mislukt"
+
+#: radiusd/rpp.c:598
+#, c-format
+msgid "Child exiting on timeout."
+msgstr "Child stopt na tijdslimiet."
+
+#: radiusd/rpp.c:644
+#, c-format
+msgid "Child received malformed header (len = %d, error = %s)"
+msgstr "Child ontving misvormde kop (len = %d, fout = %s)"
+
+#: radiusd/rpp.c:656
+#, c-format
+msgid "Child received malformed data"
+msgstr "Child ontving misvormde gegevens"
+
+#: radiusd/rpp.c:704
+msgid "error reading data"
+msgstr "gegevens lezen is mislukt"
+
+#: radiusd/rpp.c:717
+msgid "error reading data; wrong data size returned"
+msgstr "gegevens lezen is mislukt: onjuiste gegevensgrootte geretourneerd"
+
+#: radiusd/tsh.c:71
+msgid "Print this help screen"
+msgstr "Dit hulpscherm tonen"
+
+#: radiusd/tsh.c:72
+msgid "NAS LOGIN SID PORT [IP]"
+msgstr "NAS LOGIN SID POORT [IP]"
+
+#: radiusd/tsh.c:73
+msgid "Query the given NAS"
+msgstr "De gegeven NAS bevragen"
+
+#: radiusd/tsh.c:75
+msgid "Enter Guile"
+msgstr "Guile invoeren"
+
+#: radiusd/tsh.c:77
+msgid "[NUMBER]"
+msgstr "[AANTAL]"
+
+#: radiusd/tsh.c:78
+msgid "Print or set the Rewrite stack size"
+msgstr "de stapelgrootte Herschrijven tonen of instellen"
+
+#: radiusd/tsh.c:80
+msgid "FUNCTION(args..)"
+msgstr "FUNCTIE(args..)"
+
+#: radiusd/tsh.c:81
+msgid "Run given Rewrite function"
+msgstr "Gegeven Herschrijvenfunctie uitvoeren"
+
+#: radiusd/tsh.c:83
+msgid "Source the given Rewrite file"
+msgstr "Gegeven Herschrijvenbestand activeren"
+
+#: radiusd/tsh.c:84
+msgid "TIMESPAN [DOW [HH [MM]]]"
+msgstr "TIJDSBEREIK [WEEKDAG [HH [MM]]]"
+
+#: radiusd/tsh.c:85
+msgid "Check the timespan interval"
+msgstr "Interval tijdsbereik controleren"
+
+#: radiusd/tsh.c:86
+msgid "LEVEL"
+msgstr "NIVEAU"
+
+#: radiusd/tsh.c:87
+msgid "[PAIR [,PAIR]]"
+msgstr "[PAAR [,PAAR]]"
+
+#: radiusd/tsh.c:87
+msgid "Define a request"
+msgstr "Een verzoek definiëren"
+
+#: radiusd/tsh.c:89
+msgid "Print the request"
+msgstr "Het verzoek tonen"
+
+#: radiusd/tsh.c:91
+msgid "Quit the shell"
+msgstr "De shell verlaten"
+
+#: radiusd/tsh.c:157 radiusd/tsh.c:196 radiusd/tsh.c:219 radiusd/tsh.c:258
+#: radiusd/tsh.c:277 radiusd/tsh.c:322
+#, c-format
+msgid "%s: wrong number of arguments\n"
+msgstr "%s: onjuist aantal argumenten\n"
+
+#: radiusd/tsh.c:163
+#, c-format
+msgid "%s is a network name\n"
+msgstr "%s is een netwerknaam\n"
+
+#: radiusd/tsh.c:170
+#, c-format
+msgid "%s: unknown nas\n"
+msgstr "%s: onbekende NAS\n"
+
+#: radiusd/tsh.c:206
+#, c-format
+msgid "%s: argument is not a number\n"
+msgstr "%s: argument is geen cijfer\n"
+
+#: radiusd/tsh.c:347
+#, c-format
+msgid "Enter the pair list. End with end of file\n"
+msgstr "De gepaarde lijst invoeren. Met EOF afsluiten\n"
+
+#: radiusd/tsh.c:459
+#, c-format
+msgid "Bad command\n"
+msgstr "Onjuiste opdracht\n"
+
+#: radlast/radlast.c:117 radlast/radlast.c:131
+#, fuzzy, c-format
+#| msgid "Invalid hex number: %s"
+msgid "%s%s: invalid number"
+msgstr "Ongeldig hexidecimaal nummer: %s"
+
+#: radlast/radlast.c:158 radzap/radzap.c:54
+#, fuzzy, c-format
+#| msgid "invalid port type"
+msgid "%s: invalid port"
+msgstr "ongeldig poorttype"
+
+#: radlast/radlast.c:175
+msgid "radlast specific switches:"
+msgstr "radlast-specifieke standen:"
+
+#: radlast/radlast.c:240
+msgid "show at most NUMBER records"
+msgstr "hoogstens AANTAL records tonen"
+
+#: radlast/radlast.c:252
+msgid "use FILE as radwtmp"
+msgstr "gebruik BESTAND als radwtmp"
+
+#: radlast/radlast.c:264
+msgid "show logins with IPADDR"
+msgstr "aanmeldingen met IPADRS tonen"
+
+#: radlast/radlast.c:275
+msgid "mark records with missed stops with bump (!)"
+msgstr "records met gemiste stops met bump markeren (!)"
+
+#: radlast/radlast.c:286
+msgid "show logins from given NAS"
+msgstr "aanmeldingen van gegevens NAS tonen"
+
+#: radlast/radlast.c:287 radzap/radzap.c:103
+msgid "NASNAME"
+msgstr "NASNAAM"
+
+#: radlast/radlast.c:298
+msgid "use long output format"
+msgstr "lange uitvoeropmaak gebruiken"
+
+#: radlast/radlast.c:309
+msgid "show logins from given port"
+msgstr "aanmeldingen van gegeven poort tonen"
+
+#: radlast/radlast.c:321
+msgid "show the login session duration in seconds"
+msgstr "de tijdsduur van aanmeldsessie tonen in seconden"
+
+#: radlast/radlast.c:332
+msgid "widen the duration field to show seconds"
+msgstr "het tijdsduurveld vergroten om seconden te tonen"
+
+#: radlast/radlast.c:344
+msgid "report last logins from Radius database."
+msgstr "laatste aanmeldingen van Radius-database rapporteren"
+
+#: radlast/radlast.c:346
+#, fuzzy
+#| msgid " [OPTION...]"
+msgid "[OPTIONS] [USER...]"
+msgstr " [OPTIE...]"
+
+#: radlast/radlast.c:401 radlast/radlast.c:465 radzap/radzap.c:161
+#, c-format
+msgid "can't open file %s"
+msgstr "kan bestand %s niet openen"
+
+#: radlast/radlast.c:536 radwho/radwho.c:464
+#, c-format
+msgid "System accounting is disabled\n"
+msgstr "Systeemadministratie is uitgeschakeld\n"
+
+#: radlast/radlast.c:553
+#, c-format
+msgid ""
+"\n"
+"radwtmp begins %s\n"
+msgstr ""
+"\n"
+"radwtmp start %s\n"
+
+#: radlast/radlast.c:869
+#, c-format
+msgid "still logged in"
+msgstr "nog steeds aangemeld"
+
+#: radlast/radlast.c:908
+msgid "shutdown"
+msgstr "uitschakelen"
+
+#: radlast/radlast.c:910
+msgid "reboot"
+msgstr "herstarten"
+
+#: radlast/radlast.c:931
+msgid "acct_off"
+msgstr "acct_off"
+
+#: radlast/radlast.c:933
+msgid "acct_on"
+msgstr "acct_on"
+
+#: radscm/radscm.c:305 radtest/main.c:281
+#, c-format
+msgid "error reading dictionary file"
+msgstr "woordenlijstbestand lezen is mislukt"
+
+#: gram.y:308 radtest/gram.y:308
+msgid "not enough 'while's to break from"
+msgstr "onvoldoende 'while'-s om te verlaten"
+
+#: gram.y:316 radtest/gram.y:316
+msgid "not enough 'while's to continue"
+msgstr "onvoldoende 'while'-s om voort te zetten"
+
+#: gram.y:360 radtest/gram.y:360
+msgid "return outside of a function definition"
+msgstr "buiten een functiedefinitie retourneren"
+
+#: gram.y:372 gram.y:753 radtest/gram.y:372 radtest/gram.y:753
+#, c-format
+msgid "undefined function `%s'"
+msgstr "ongedefinieerde functie `%s'"
+
+#: gram.y:385 radtest/gram.y:385
+msgid "nested function definitions are not allowed"
+msgstr "geneste functiedefinities zijn niet toegestaan"
+
+#: gram.y:388 radtest/gram.y:388
+msgid "the current function definition begins here"
+msgstr "de huidige functiedefinitie start hier"
+
+#: gram.y:399 radtest/gram.y:399
+#, c-format
+msgid "`%s' previously defined here"
+msgstr "`%s' voorheen hier gedefinieerd"
+
+#: gram.y:478 radtest/gram.y:478
+msgid "warning: truncating binary string"
+msgstr "waarschuwing: binaire tekenreeksen worden afgebroken"
+
+#: gram.y:511 radtest/gram.y:511
+msgid "expected integer value or request code name"
+msgstr "geheel-getalwaarde of verzoek codenaam verwacht"
+
+#: gram.y:670 radtest/gram.y:670
+msgid "warning: '*' is meaningless for this attribute type"
+msgstr "waarschuwing: '*' is zonder betekenis voor dit attribuuttype"
+
+#: gram.y:904 radtest/gram.y:904
+msgid "Misplaced `end'"
+msgstr "Misplaatste `end'"
+
+#: gram.y:908 radtest/gram.y:908
+msgid "Unexpected end of line"
+msgstr "Onverwacht regeleinde"
+
+#: gram.y:936 radtest/gram.y:936
+#, c-format
+msgid "In function `%s':\n"
+msgstr "In functie `%s':\n"
+
+#: gram.y:939 radtest/gram.y:939
+#, c-format
+msgid "At top level:\n"
+msgstr "Op hoogste niveau:\n"
+
+#: radtest/main.c:60
+#, c-format
+msgid "assign: expected `='\n"
+msgstr "toekennen: verwachtte `='\n"
+
+#: radtest/main.c:107
+msgid "radtest specific switches:"
+msgstr "radtest-specifieke standen:"
+
+#: radtest/main.c:112
+msgid "assign a VALUE to VARIABLE"
+msgstr "een WAARDE aan VARIABELE toekennen"
+
+#: radtest/main.c:113
+msgid "VARIABLE=VALUE"
+msgstr "VARIABELE=WAARDE"
+
+#: radtest/main.c:123
+msgid "set debugging level"
+msgstr "debug-niveau instellen"
+
+#: radtest/main.c:134
+#, fuzzy
+#| msgid "Read input from FILE. Stops further processing of the command line."
+msgid "read input from FILE; stops further processing of the command line"
+msgstr "Invoer uit BESTAND lezen. Stopt verder verwerken van de opdrachtregel."
+
+#: radtest/main.c:145
+#, fuzzy
+#| msgid "Loading configuration files."
+msgid "don't read the configuration file"
+msgstr "Configuratiebestanden laden."
+
+#: radtest/main.c:156
+msgid "set number of retries"
+msgstr "aantal pogingen instellen"
+
+#: radtest/main.c:168
+msgid "set radius server parameters"
+msgstr "Radius-serverparameters instellen"
+
+#: radtest/main.c:169
+msgid "SERVER"
+msgstr "SERVER"
+
+#: radtest/main.c:180
+msgid "set timeout"
+msgstr "tijdslimiet instellen"
+
+#: radtest/main.c:192
+msgid "verbose mode"
+msgstr "stille modus"
+
+#: radtest/main.c:202
+msgid "disable interactive mode"
+msgstr "interactieve modus uitschakelen"
+
+#: radtest/main.c:213
+msgid "Check the input file syntax and exit"
+msgstr "De syntax van het invoerbestand controleren en stoppen"
+
+#: radtest/main.c:225
+msgid "Radius client shell"
+msgstr "Radius client-shell"
+
+#: radtest/main.c:302
+#, c-format
+msgid "can't parse server definition"
+msgstr "kan serverdefinitie niet ontleden"
+
+#: radtest/main.c:307
+#, c-format
+msgid "no shared secret for the server"
+msgstr "geen gedeeld geheim voor de server"
+
+#: radtest/main.c:319
+#, c-format
+msgid "bad IP address or host name: %s"
+msgstr "IP-adres of hostnaam is onjuist: %s"
+
+#: radtest/main.c:352
+#, c-format
+msgid "bad separator near %s"
+msgstr "scheidingsteken nabij %s is onjuist"
+
+#: radtest/main.c:371
+#, c-format
+msgid "No servers specfied. Use -s option.\n"
+msgstr "Geen servers opgegeven. Gebruik optie -s.\n"
+
+#: radtest/main.c:400
+#, c-format
+msgid "assign: missing closing quote\n"
+msgstr "toekennen: sluitaanhalingsteken ontbreekt\n"
+
+#: radtest/main.c:419 radtest/main.c:428
+#, c-format
+msgid "assign: invalid IP address: %s\n"
+msgstr "toekennen: ongeldig IP-adres: %s\n"
+
+#: radtest/runtime.c:153 radtest/runtime.c:159
+msgid "out of memory"
+msgstr "geheugen overschreden"
+
+#: radtest/runtime.c:200 radtest/runtime.c:206
+msgid "division by zero"
+msgstr "deling door nul"
+
+#. TRANSLATORS: The following operation names are used as complements,
+#. e.g.: "incompatible types in addition"
+#.
+#: radtest/runtime.c:264
+msgid "addition"
+msgstr "optelling"
+
+#: radtest/runtime.c:265
+msgid "subtraction"
+msgstr "aftrekking"
+
+#: radtest/runtime.c:266
+msgid "multiplication"
+msgstr "vermenigvuldiging"
+
+#: radtest/runtime.c:267 radtest/runtime.c:268
+msgid "division"
+msgstr "deling"
+
+#: radtest/runtime.c:269
+msgid "boolean conjunction"
+msgstr "booleaanse conjunctie"
+
+#: radtest/runtime.c:270
+msgid "boolean disjunction"
+msgstr "booleaanse disjunctie"
+
+#: radtest/runtime.c:271 radtest/runtime.c:272 radtest/runtime.c:273
+#: radtest/runtime.c:274 radtest/runtime.c:275 radtest/runtime.c:276
+msgid "comparison"
+msgstr "vergelijking"
+
+#: radtest/runtime.c:282
+#, c-format
+msgid "incompatible types in %s"
+msgstr "niet-overeenkomende typen in %s"
+
+#: radtest/runtime.c:290
+msgid "binary negation"
+msgstr "binaire tegenstelling"
+
+#: radtest/runtime.c:291
+msgid "numeric negation"
+msgstr "numerieke tegenstelling"
+
+#: radtest/runtime.c:298
+#, c-format
+msgid "incompatible data type in %s"
+msgstr "niet-overeenkomend gegevenstype in %s"
+
+#: radtest/runtime.c:442 radtest/runtime.c:511
+#, c-format
+msgid "variable `%s' used before definition"
+msgstr "variabele `%s' gebruikt voor definitie"
+
+#: radtest/runtime.c:454
+#, c-format
+msgid "%s:%d: unknown data type"
+msgstr "%s:%d: onbekend gegevenstype"
+
+#: radtest/runtime.c:477 radtest/runtime.c:571 radtest/runtime.c:1411
+#, fuzzy, c-format
+#| msgid "regexp error: %s"
+msgid "read error: %s"
+msgstr "reguliere expressiefout: %s"
+
+#: radtest/runtime.c:487 radtest/runtime.c:581 radtest/runtime.c:1420
+#, fuzzy
+#| msgid "string too long: %s"
+msgid "input line too long"
+msgstr "tekenreeks te lang: %s"
+
+#: radtest/runtime.c:628 radtest/runtime.c:677
+msgid "invalid data type"
+msgstr "onjuist gegevenstype"
+
+#. TRANSLATORS: The following six msgids are data type names in the
+#. form of *direct object*. They are used in place of the first %s
+#. in the sentence 'cannot convert %s %s'
+#: radtest/runtime.c:782
+msgid "undefined"
+msgstr "ongedefinieerd"
+
+#: radtest/runtime.c:784
+msgid "ipaddress"
+msgstr "ip-adres"
+
+#: radtest/runtime.c:786
+msgid "binary string"
+msgstr "binaire tekenreeks"
+
+#: radtest/runtime.c:787
+msgid "pairlist"
+msgstr "gepaarde lijst"
+
+#: radtest/runtime.c:788
+msgid "A/V list"
+msgstr "A/V-lijst"
+
+#. TRANSLATORS: The following six msgids are data type names in the
+#. form of *indirect object*. They are used in place of second %s
+#. in the sentence 'cannot convert %s %s'
+#: radtest/runtime.c:795
+msgid "to undefined"
+msgstr "naar ongedefinieerd"
+
+#: radtest/runtime.c:797
+msgid "to ipaddress"
+msgstr "naar ip-adres"
+
+#: radtest/runtime.c:799
+msgid "to binary string"
+msgstr "naar binaire tekenreeks"
+
+#: radtest/runtime.c:800
+msgid "to pairlist"
+msgstr "naar gepaarde lijst"
+
+#: radtest/runtime.c:801
+msgid "to A/V list"
+msgstr "naar A/V-lijst"
+
+#. TRANSLATORS: First %s is replaced with a type name,
+#. second %s -- with a type name with an appropriate preposition.
+#. For example, in English:
+#. cannot convert integer to string
+#.
+#: radtest/runtime.c:814
+#, c-format
+msgid "cannot convert %s %s"
+msgstr "Kan %s niet %s converteren"
+
+#: radtest/runtime.c:1140
+msgid "not a pair list"
+msgstr "geen gepaarde lijst"
+
+#: radtest/runtime.c:1281
+msgid "invalid data type in send statement (expected A/V list)"
+msgstr "gegevenstype in verzendopdracht onjuist (verwachtte A/V-lijst)"
+
+#: radtest/runtime.c:1297
+#, c-format
+msgid "expect %s\n"
+msgstr "verwacht %s\n"
+
+#: radtest/runtime.c:1298
+#, c-format
+msgid "got    %s\n"
+msgstr "kreeg    %s\n"
+
+#: radtest/runtime.c:1308
+msgid "expected A/V pair list"
+msgstr "verwachtte gepaarde A/V-lijst"
+
+#: radtest/runtime.c:1336
+msgid "invalid data type in exit statement"
+msgstr "gegevenstype in stop-opdracht onjuist"
+
+#: radtest/runtime.c:1559
+msgid "invalid data type in `shift'"
+msgstr "gegevenstype in `shift' onjuist"
+
+#: radtest/runtime.c:1566
+msgid "not enough arguments to shift"
+msgstr "onvoldoende argumenten om shift uit te voeren"
+
+#: radwho/radwho.c:153
+msgid "radwho specific switches:"
+msgstr "radwho-specifieke standen:"
+
+#: radwho/radwho.c:158
+msgid "print all entries, not only active ones"
+msgstr "alle invoer tonen, niet alleen de actieve"
+
+#: radwho/radwho.c:169
+msgid "display CLID in second column"
+msgstr "CLID in tweede kolom weergeven"
+
+#: radwho/radwho.c:179
+msgid "change date representation format"
+msgstr "weergave van datum veranderen"
+
+#: radwho/radwho.c:180
+msgid "DATEFMT"
+msgstr "DATUMFMT"
+
+#: radwho/radwho.c:191
+msgid "print STRING instead of an empty column"
+msgstr "TEKENREEKS tonen in plaats van een lege kolom"
+
+#: radwho/radwho.c:192
+msgid "STRING"
+msgstr "TEKENREEKS"
+
+#: radwho/radwho.c:203
+msgid "Use FILE instead of /var/log/radutmp"
+msgstr "BESTAND gebruiken in plaats van /var/log/radutmp"
+
+#: radwho/radwho.c:215
+msgid "act as a finger daemon"
+msgstr "als een 'finger'-daemon handelen"
+
+#: radwho/radwho.c:226
+msgid "do not display header line"
+msgstr "geen kopregel tonen"
+
+#: radwho/radwho.c:237
+msgid "display session ID in the second column"
+msgstr "sessie-ID in de tweede kolom tonen"
+
+#: radwho/radwho.c:256
+msgid "Long output. All fields will be printed."
+msgstr "Lange uitvoer. Alle velden worden getoond."
+
+#: radwho/radwho.c:266
+msgid "display also local users"
+msgstr "ook lokale gebruikers tonen"
+
+#: radwho/radwho.c:277
+msgid "do not resolve hostnames."
+msgstr "hostnamen niet opzoeken"
+
+#: radwho/radwho.c:288
+msgid "change output format"
+msgstr "opmaak van uitvoer veranderen"
+
+#: radwho/radwho.c:289
+msgid "FORMAT"
+msgstr "OPMAAK"
+
+#: radwho/radwho.c:299
+msgid "secure mode: requires that the username be specified"
+msgstr "beveiligde modus: vereist dat de gebruikersnaam opgegeven is"
+
+#: radwho/radwho.c:312
+msgid "display who is logged on by Radius"
+msgstr "toon wie aangemeld is bij Radius"
+
+#: radwho/radwho.c:379
+#, c-format
+msgid "must provide username\n"
+msgstr "gebruikersnaam verplicht\n"
+
+#: radwho/radwho.c:415
+#, c-format
+msgid "can't open file: %s"
+msgstr "kan bestand %s niet openen"
+
+#: radzap/radzap.c:63
+msgid "radzap specific switches:"
+msgstr "radzap-specifieke standen:"
+
+#: radzap/radzap.c:68
+msgid "ask for confirmation before zapping"
+msgstr "vraag bevestiging voor verwijdering"
+
+#: radzap/radzap.c:78
+msgid "set logging directory"
+msgstr "vastleggingsmap instellen"
+
+#: radzap/radzap.c:90
+msgid "operate on FILE instead of /var/log/radutmp"
+msgstr "bewerk BESTAND in plaats van /var/log/radutmp"
+
+#: radzap/radzap.c:102
+msgid "zap user from given NAS"
+msgstr "gebruiker verwijderen uit gegeven NAS"
+
+#: radzap/radzap.c:114
+msgid "zap user coming from given port"
+msgstr "gebruiker verwijderen afkomstig uit gegeven poort"
+
+#: radzap/radzap.c:126
+msgid "do not ask for confirmation before zapping"
+msgstr "geen bevestiging vragen voor verwijdering"
+
+#: radzap/radzap.c:139
+msgid "delete Radius login records"
+msgstr "Radius-aanmeldrecords verwijderen"
+
+#: radzap/radzap.c:141
+msgid "[OPTIONS] [USER]"
+msgstr ""
+
+#: radzap/radzap.c:201
+#, c-format
+msgid "radzap: zapping %s from %s, port %d"
+msgstr "radzap: verwijder %s uit %s, poort %d"
+
+#: radzap/radzap.c:209
+#, c-format
+msgid "Not confirmed\n"
+msgstr "Niet bevestigd\n"
+
+#: radzap/radzap.c:247
+#, c-format
+msgid "at least one port, nas or user must be specified"
+msgstr "minstens één poort, NAS of gebruikers moet worden opgegeven"
+
+#: radzap/radzap.c:269
+#, c-format
+msgid "%s: host not found.\n"
+msgstr "%s: host niet gevonden\n"
+
+#: sql/disp.c:138
+msgid "Failed query was"
+msgstr "Mislukt bevraging was"
+
+#: sql/mysql.c:78
+msgid "gave up on connect"
+msgstr "verbinden opgegeven"
+
+#: sql/mysql.c:106
+#, c-format
+msgid "[MYSQL] cannot connect to %s as %s: %s"
+msgstr "[MYSQL] kan niet verbinden met %s omdat %s: %s"
+
+#: sql/mysql.c:162
+#, c-format
+msgid "[MYSQL]: can't get result"
+msgstr "[MYSQL]: kan geen resultaat krijgen"
+
+#: sql/odbc.c:229
+#, c-format
+msgid "query returned more tuples: %s"
+msgstr "bevraging retourneerde meer tuples: %s"
+
+#: sql/odbc.c:341
+#, c-format
+msgid "too few columns returned (%d req'd)"
+msgstr "te weinig kolommen geretourneerd: (%d verzocht)"
+
+#: sql/postgres.c:69
+#, c-format
+msgid "PQconnectStart failed: %s"
+msgstr "PQconnectStart is mislukt: %s"
+
+#: sql/postgres.c:151 sql/postgres.c:201 sql/postgres.c:268
+#, c-format
+msgid "PQexec returned %s"
+msgstr "PQexec retourneerde %s"
+
+#: sql/postgres.c:192
+#, c-format
+msgid "query returned %d tuple: %s"
+msgid_plural "query returned %d tuples: %s"
+msgstr[0] "bevraging retourneerde %d tuple: %s"
+msgstr[1] "bevraging retourneerde %d tuples: %s"
+
+#, c-format
+#~ msgid "%s: option `--%s' doesn't allow an argument\n"
+#~ msgstr "%s: optie `--%s' staat geen argument toe\n"
+
+#, c-format
+#~ msgid "%s: illegal option -- %c\n"
+#~ msgstr "%s: ongeldige optie -- %c\n"
+
+#, c-format
+#~ msgid "%s: invalid option -- %c\n"
+#~ msgstr "%s: ongeldige optie -- %c\n"
+
+#, c-format
+#~ msgid "%s: option requires an argument -- %c\n"
+#~ msgstr "%s: optie vereist een argument -- %c\n"
+
+#, c-format
+#~ msgid "%s: option `-W %s' is ambiguous\n"
+#~ msgstr "%s: optie `-W %s' is dubbelzinnig\n"
+
+#, c-format
+#~ msgid "%s: option `-W %s' doesn't allow an argument\n"
+#~ msgstr "%s: optie `-W %s' staat geen argument toe\n"
+
+#, c-format
+#~ msgid "%.*s: ARGP_HELP_FMT parameter must be positive"
+#~ msgstr "%.*s: ARGP_HELP_FMT-parameter moet positief zijn"
+
+#, c-format
+#~ msgid "Garbage in ARGP_HELP_FMT: %s"
+#~ msgstr "Onzin in ARGP_HELP_FMT: %s"
+
+#~ msgid "  or: "
+#~ msgstr "  of: "
+
+#, c-format
+#~ msgid "Try `%s --help' or `%s --usage' for more information.\n"
+#~ msgstr "Gebruik `%s --help' of `%s --usage' voor meer informatie.\n"
+
+#, c-format
+#~ msgid "Report bugs to %s.\n"
+#~ msgstr "Meld fouten aan %s.\n"
+
+#~ msgid "Unknown system error"
+#~ msgstr "Onbekende systeemfout"
+
+#~ msgid "NAME"
+#~ msgstr "NAAM"
+
+#~ msgid "set the program name"
+#~ msgstr "programmanaam instellen"
+
+#~ msgid "SECS"
+#~ msgstr "SECS"
+
+#~ msgid "hang for SECS seconds (default 3600)"
+#~ msgstr "wacht SECS seconden (standaard 3600)"
+
+#, c-format
+#~ msgid "(PROGRAM ERROR) No version known!?"
+#~ msgstr "(PROGRAMMAFOUT) Geen versie bekend!?"
+
+#, c-format
+#~ msgid "%s: Too many arguments\n"
+#~ msgstr "%s: te veel argumenten\n"
+
+#~ msgid "(PROGRAM ERROR) Option should have been recognized!?"
+#~ msgstr "(PROGRAMMAFOUT) Optie zou herkend moeten zijn!?"
+
+#, c-format
+#~ msgid "low core: aborting"
+#~ msgstr "weinig geheugen: afbreken"
+
+#~ msgid "print license and exit"
+#~ msgstr "licentie tonen en stoppen"
+
+#~ msgid ""
+#~ "   This program is free software; you can redistribute it and/or modify\n"
+#~ "   it under the terms of the GNU General Public License as published by\n"
+#~ "   the Free Software Foundation; either version 3, or (at your option)\n"
+#~ "   any later version.\n"
+#~ "\n"
+#~ "   This program is distributed in the hope that it will be useful,\n"
+#~ "   but WITHOUT ANY WARRANTY; without even the implied warranty of\n"
+#~ "   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\n"
+#~ "   GNU General Public License for more details.\n"
+#~ "\n"
+#~ "   You should have received a copy of the GNU General Public License\n"
+#~ "   along with GNU Radius; if not, write to the Free Software Foundation,\n"
+#~ "   Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.\n"
+#~ "\n"
+#~ msgstr ""
+#~ "   Dit programma is vrije software; u kunt het distribueren en/of\n"
+#~ "   aanpassen onder de voorwaarden van de GNU General Public License\n"
+#~ "   zoals gepubliceerd is door de Free Software Foundation; versie 3, of\n"
+#~ "   (naar uw keuze) iedere nieuwere versie.\n"
+#~ "\n"
+#~ "   Dit programma wordt gedistribueerd in de hoop dat het bruikbaar\n"
+#~ "   zal zijn, maar ONDER ENIGE GARANTIE; zelfs zonder de impliciete\n"
+#~ "   garantie van VERKOOPBAARHEID of GESCHIKTHEID VOOR EEN BEPAALD\n"
+#~ "   DOEL.   Zie de GNU General Public License voor meer informatie.\n"
+#~ "\n"
+#~ "   U dient een kopie van de GNU General Public License samen met\n"
+#~ "   GNU Radius ontvangen te hebben, zoniet, schrijf dan naar de Free\n"
+#~ "   Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, \n"
+#~ "   MA 02110-1301 USA.\n"
+#~ "\n"
+
+#~ msgid "gsub: not enough memory"
+#~ msgstr "gsub: onvoldoende geheugen"
+
+#~ msgid "sub: not enough memory"
+#~ msgstr "sub: onvoldoende geheugen"
+
+#, c-format
+#~ msgid "%s: GNU Radius version %s"
+#~ msgstr "%s: GNU Radius-versie %s"
+
+#, c-format
+#~ msgid "--width is incompatible with --show-seconds"
+#~ msgstr "--width is niet verenigbaar met --show-seconds"
+
+#~ msgid "display hostnames without domain part"
+#~ msgstr "hostnamen zonder domeindeel tonen"

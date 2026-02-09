@@ -1,9 +1,9 @@
 @c This is part of the Radius manual.
-@c Copyright (C) 1999,2000,2001,2002,2003 Free Software Foundation, Inc.
+@c Copyright (C) 1999-2025 Free Software Foundation, Inc.
 @c Written by Sergey Poznyakoff
 @c See file radius.texi for copying conditions.
 @comment *******************************************************************
-@node Radscm, , Builddbm, Utility Programs
+@node Radscm
 @section @command{radscm}: A Guile Interface to Radius Functions
 @pindex radscm
 @cindex Guile interface
@@ -210,7 +210,7 @@ as one.
 @deffn Function rad-format-reply-msg @var{pair-list} . @var{text}
 Concatenate and print text from all @attr{Reply-Message} pairs from
 @var{pair-list}. If @var{text} is specified, it is printed before the
-concatenated 
+concatenated
 text.
 @end deffn
 
@@ -228,5 +228,3 @@ data are looked up in rad-server-list variable.
 Add the server identified by @var{id-str} to the list of current servers.
 The server data are looked up in rad-server-list variable.
 @end deffn
-
-

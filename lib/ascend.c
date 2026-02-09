@@ -1,22 +1,20 @@
 /* This file is part of GNU Radius.
-   Copyright (C) 2002,2003,2004,2005,2007 Free Software Foundation, Inc.
+   Copyright (C) 2002-2025 Free Software Foundation, Inc.
 
    Written by Sergey Poznyakoff
-  
+
    GNU Radius is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
    the Free Software Foundation; either version 3 of the License, or
    (at your option) any later version.
-  
+
    GNU Radius is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
-  
-   You should have received a copy of the GNU General Public
-   License along with GNU Radius; if not, write to the Free
-   Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-   Boston, MA 02110-1301 USA. */
+
+   You should have received a copy of the GNU General Public License
+   along with GNU Radius.  If not, see <http://www.gnu.org/licenses/>. */
 
 /* Support for ascend binary filters. */
 
@@ -50,8 +48,8 @@ enum ascend_filter_cmp_op {
 
 /* The format of an IP filter attribute value. Fields are in netorder */
 typedef struct {
-	grad_uint32_t    src_ip;       /* The source IP address.  */
-	grad_uint32_t    dst_ip;       /* The destination IP address.  */
+	uint32_t    src_ip;       /* The source IP address.  */
+	uint32_t    dst_ip;       /* The destination IP address.  */
 	u_char   src_masklen;  /* The source netmask length */
 	u_char   dst_masklen;  /* The destination netmask length */
 	u_char   proto;        /* The IP protocol number */
@@ -67,16 +65,16 @@ typedef struct {
 /* IPX stuff. Not used at the moment */
 #define IPX_NODE_ADDR_LEN 6
 
-typedef grad_uint32_t   IPXADDR;
+typedef uint32_t   IPXADDR;
 typedef char    IPXNODE[IPX_NODE_ADDR_LEN];
 typedef u_short IPXSOCKET;
 
 typedef struct {
-	IPXADDR   src_addr;    /* Source IPX Net address */ 
+	IPXADDR   src_addr;    /* Source IPX Net address */
 	IPXNODE   src_node;    /* Source IPX Node address */
 	IPXSOCKET src_socket;  /* Source IPX socket address */
-	IPXADDR   dst_addr;    /* Destination Net address */   
-	IPXNODE   dst_node;    /* Destination Node address */  
+	IPXADDR   dst_addr;    /* Destination Net address */
+	IPXNODE   dst_node;    /* Destination Node address */
 	IPXSOCKET dst_socket;  /* Destination socket address */
 	u_char    src_cmp;     /* Comparison operator for source socket */
 	u_char    dst_cmp;     /* Comparison operator for dest socket */
@@ -90,16 +88,16 @@ typedef struct {
 	u_short   more;        /* If true, the next filter is also to be
 				  applied to the packet */
 	u_char    mask[ASCEND_MAX_CMP_LENGTH];
-                               /* A bitmask specifying the bits to compare */
-	        
+			       /* A bitmask specifying the bits to compare */
+
 	u_char    value[ASCEND_MAX_CMP_LENGTH];
-                               /* A value to compare against the masked
+			       /* A value to compare against the masked
 				  bits in the packet */
 	u_char    neq;         /* True if comparison op is != */
 } ASCEND_FILTER_GENERIC;
 
 typedef struct {
-	u_char type;           /* Filter type from ascend_filter_type */ 
+	u_char type;           /* Filter type from ascend_filter_type */
 	u_char forward;        /* True if the matching packet is to be
 				  forwarded. */
 	u_char input;          /* True if this is an input filter */
@@ -227,7 +225,7 @@ _get_hex_string(struct ascend_parse_buf *pb, u_char *buf)
 	u_char tmp[2*ASCEND_MAX_CMP_LENGTH], *p;
 	char *tok = _get_token(pb, 1);
 	int len, rc, i;
-	
+
 	if (!tok)
 		return -1;
 
@@ -259,7 +257,7 @@ _get_hex_string(struct ascend_parse_buf *pb, u_char *buf)
 		}
 	}
 
-	for (i = 0; i < 2*ASCEND_MAX_CMP_LENGTH; i++)
+	for (i = 0; i < ASCEND_MAX_CMP_LENGTH; i += 2)
 		*buf++ = (tmp[i] << 4) | tmp[i+1];
 	return rc;
 }
@@ -268,10 +266,10 @@ _get_hex_string(struct ascend_parse_buf *pb, u_char *buf)
 
   "generic" dir action offset mask ["=="|"!="] value [ "more" ]
   where dir    is {"in"|"out"}
-        action is {"forward"|"drop"}
+	action is {"forward"|"drop"}
 	offset is number
 	mask and value are hex strings */
-   
+
 static int
 _ascend_parse_generic(struct ascend_parse_buf *pb)
 {
@@ -279,7 +277,7 @@ _ascend_parse_generic(struct ascend_parse_buf *pb)
 	int num;
 	char *tok = _get_token(pb, 1);
 	int len;
-	
+
 	if (!tok)
 		return 1;
 	num = strtoul(tok, &p, 0);
@@ -293,7 +291,7 @@ _ascend_parse_generic(struct ascend_parse_buf *pb)
 	pb->flt->v.generic.len = htons(len);
 
 	tok = _lookahead(pb);
-	if (!tok) 
+	if (!tok)
 		return 1;
 
 	if (strcmp(tok, "==") == 0) {
@@ -303,7 +301,7 @@ _ascend_parse_generic(struct ascend_parse_buf *pb)
 		pb->flt->v.generic.neq = 1;
 		_get_token(pb, 1);
 	}
-	
+
 	if ((num = _get_hex_string(pb, pb->flt->v.generic.value)) < 0)
 		return 1;
 	if (num != len) {
@@ -311,7 +309,7 @@ _ascend_parse_generic(struct ascend_parse_buf *pb)
 				NULL);
 		return 1;
 	}
-	
+
 	tok = _get_token(pb, 0);
 	if (!tok)
 		return 0;
@@ -335,9 +333,9 @@ _get_protocol(struct ascend_parse_buf *pb)
 	char *tok = _get_token(pb, 1);
 	char *p;
 	int num;
-	
+
 	num = strtoul(tok, &p, 0);
-	if (*p == 0) 
+	if (*p == 0)
 		pb->flt->v.ip.proto = num;
 	else {
 		/* Try /etc/protocols */
@@ -360,7 +358,7 @@ _get_direction_type(struct ascend_parse_buf *pb, char *suffix, int lookahead)
 {
 	char *tok = lookahead ? _lookahead(pb) : _get_token(pb, 1);
 
-	if (!tok && lookahead) 
+	if (!tok && lookahead)
 		return ASCEND_DIR_NONE;
 	if (tok && strlen(tok) > 3 && strcmp(tok+3, suffix) == 0) {
 		if (strncmp(tok, "dst", 3) == 0)
@@ -380,8 +378,8 @@ _get_ip(struct ascend_parse_buf *pb)
 {
 	int dir = _get_direction_type(pb, "ip", 0);
 	char *tok;
-	grad_uint32_t ip, mask;
-	
+	uint32_t ip, mask;
+
 	if (dir == ASCEND_DIR_NONE)
 		return ASCEND_DIR_NONE;
 	tok = _get_token(pb, 1);
@@ -391,7 +389,7 @@ _get_ip(struct ascend_parse_buf *pb)
 
 	if (_moreinput(pb) && _lookahead(pb)[0] == '/') {
 		char *p;
-		
+
 		_get_token(pb, 1);
 		tok = _get_token(pb, 1);
 		if (!tok)
@@ -410,7 +408,7 @@ _get_ip(struct ascend_parse_buf *pb)
 		pb->flt->v.ip.src_ip = ip;
 		pb->flt->v.ip.src_masklen = mask;
 		break;
-		
+
 	case ASCEND_DIR_DST:
 		pb->flt->v.ip.dst_ip = ip;
 		pb->flt->v.ip.dst_masklen = mask;
@@ -426,7 +424,7 @@ _ascend_parse_ip_clause(struct ascend_parse_buf *pb)
 {
 	int n;
 
-	if (_get_direction_type(pb, "ip", 1) == ASCEND_DIR_NONE) 
+	if (_get_direction_type(pb, "ip", 1) == ASCEND_DIR_NONE)
 		return 0;
 	n = _get_ip(pb);
 	if (n == ASCEND_DIR_NONE)
@@ -471,7 +469,7 @@ _get_port(struct ascend_parse_buf *pb)
 	char *p;
 	int num;
 	int op;
-	
+
 	if (dir == ASCEND_DIR_NONE)
 		return ASCEND_DIR_NONE;
 
@@ -481,9 +479,9 @@ _get_port(struct ascend_parse_buf *pb)
 	tok = _get_token(pb, 1);
 	if (!tok)
 		return ASCEND_DIR_NONE;
-	
+
 	num = strtoul(tok, &p, 0);
-	if (*p == 0) 
+	if (*p == 0)
 		num = htons(num);
 	else {
 		struct servent *sp;
@@ -509,7 +507,7 @@ _get_port(struct ascend_parse_buf *pb)
 		pb->flt->v.ip.src_port = num;
 		pb->flt->v.ip.src_cmp = op;
 		break;
-		
+
 	case ASCEND_DIR_DST:
 		pb->flt->v.ip.dst_port = num;
 		pb->flt->v.ip.dst_cmp = op;
@@ -527,10 +525,10 @@ static int
 _ascend_parse_port_clause(struct ascend_parse_buf *pb)
 {
 	int n;
-	
+
 	if (_get_direction_type(pb, "port", 1) == ASCEND_DIR_NONE)
 		return 0;
-	
+
 	n = _get_port(pb);
 
 	if (n == ASCEND_DIR_NONE)
@@ -552,11 +550,11 @@ _ascend_parse_port_clause(struct ascend_parse_buf *pb)
 /* IP filter specification is
 
    "ip" dir action [ "dstip" IP "/" NUM] [ "srcip" IP "/" NUM ]
-   	        [ PROTO [ "dstport" cmp PORT ] [ "srcport" cmp PORT ]
-                [ "est" ] ]
+		[ PROTO [ "dstport" cmp PORT ] [ "srcport" cmp PORT ]
+		[ "est" ] ]
 
    where dir    is {"in"|"out"}
-         action is {"forward"|"drop"}
+	 action is {"forward"|"drop"}
 	 cmp    is {">"|"<"|"="|"!="}
 	 IP     is IP address in dotted-quad
 	 NUM    is the decimal number, 0 <= NUM <= 32.
@@ -568,10 +566,10 @@ _ascend_parse_ip(struct ascend_parse_buf *pb)
 {
 	if (!_moreinput(pb))
 		return 0;
-	
+
 	if (_ascend_parse_ip_clause(pb))
 		return 1;
-	
+
 	if (_moreinput(pb)) {
 		if (_get_protocol(pb))
 			return 1;
@@ -604,21 +602,21 @@ _ascend_parse_ip(struct ascend_parse_buf *pb)
 /* IPX filter is:
 
    "ipx" dir action [ "srcipxnet" NETADDR "srcipxnode" NODE
-                     [ "srcipxsoc" cmp HEXNUM ]]
-                    [ "dstipxnet" NETADDR "dstipxnode" NODE
-  		     [ "dstipxsoc" cmp HEXNUM ]] */
+		     [ "srcipxsoc" cmp HEXNUM ]]
+		    [ "dstipxnet" NETADDR "dstipxnode" NODE
+		     [ "dstipxsoc" cmp HEXNUM ]] */
 static int
 _ascend_parse_ipx(struct ascend_parse_buf *pb)
 {
 	ascend_errprint(pb, "IPX filters are not yet supported", NULL);
 	return 1;
 }
- 
+
 static int
 _ascend_parse(struct ascend_parse_buf *pb)
 {
 	memset(pb->flt, 0, sizeof(pb->flt[0]));
-	
+
 	if (_get_type(pb)
 	    || _get_dir(pb)
 	    || _get_action(pb))
@@ -656,7 +654,7 @@ _ascend_parse_filter(const char *input, ASCEND_FILTER *flt, char **errp)
 	pb.errmsg = errp;
 	rc = _ascend_parse(&pb);
 	grad_argcv_free(pb.tokc, pb.tokv);
-	if (rc && !*errp) 
+	if (rc && !*errp)
 		ascend_errprint(&pb, _("Malformed attribute value"), NULL);
 	return rc;
 }
@@ -665,13 +663,12 @@ int
 grad_ascend_parse_filter(grad_avp_t *pair, char **errp)
 {
 	ASCEND_FILTER flt;
-	
-	if (_ascend_parse_filter(pair->avp_strvalue, &flt, errp)) 
+
+	if (_ascend_parse_filter(pair->avp_strvalue, &flt, errp))
 		return 1;
-	grad_free(pair->avp_strvalue);
+	free(pair->avp_strvalue);
 	pair->avp_strlength = sizeof(flt);
 	pair->avp_strvalue = grad_emalloc(pair->avp_strlength);
 	memcpy(pair->avp_strvalue, &flt, sizeof(flt));
 	return 0;
 }
-     

@@ -1,7 +1,6 @@
 %{
 /* This file is part of GNU Radius.
-   Copyright (C) 2000,2001,2002,2003,2004,2007,
-   2008 Free Software Foundation, Inc.
+   Copyright (C) 2000-2025 Free Software Foundation, Inc.
 
    Written by Sergey Poznyakoff
 
@@ -9,15 +8,14 @@
    it under the terms of the GNU General Public License as published by
    the Free Software Foundation; either version 3 of the License, or
    (at your option) any later version.
-  
+
    GNU Radius is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
-  
+
    You should have received a copy of the GNU General Public License
-   along with GNU Radius; if not, write to the Free Software Foundation,
-   Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
+   along with GNU Radius.  If not, see <http://www.gnu.org/licenses/>. */
 
 #ifdef HAVE_CONFIG_H
 # include <config.h>
@@ -28,35 +26,35 @@
 #include <sys/time.h>
 #include <sys/stat.h>
 #include <netinet/in.h>
-#include <netdb.h> 
+#include <netdb.h>
 #include <fcntl.h>
 #include <errno.h>
 #include <unistd.h>
-#include <stdlib.h>	
+#include <stdlib.h>
 #include <ctype.h>
-	
+
 #include <radiusd.h>
 #include <cfg.h>
- 
+
 #define YYMAXDEPTH 16
 
 struct cfg_memblock {
-	void (*destructor)();
+	void (*destructor)(void*);
 	int line_num;
 };
 
 static grad_list_t /* of struct cfg_memblock */ *cfg_memory_pool;
- 
+
 static grad_list_t *_cfg_vlist_create(cfg_value_t *val);
 static void _cfg_vlist_append(grad_list_t *vlist, cfg_value_t *val);
 
 void *cfg_malloc(size_t size, void (*destructor)(void *));
- 
-static void _cfg_free_memory_pool();
+
+static void _cfg_free_memory_pool(void);
 static void _cfg_run_begin(struct cfg_stmt *stmt, void *up_data);
 
-static int yylex();
-static int yyerror(char *s); 
+static int yylex(void);
+static void yyerror(char const *s);
 
 static char *typestr[] = {
 	"integer",
@@ -70,7 +68,7 @@ static char *typestr[] = {
 	"unsigned",
 	"size"
 };
-	 
+
 struct syntax_block {
 	struct syntax_block *prev;
 	struct cfg_stmt *stmt;
@@ -81,7 +79,7 @@ struct syntax_block {
 static struct syntax_block *block;
 
 static void _cfg_push_block(struct cfg_stmt *stmt, cfg_end_fp end, void *data);
-static struct syntax_block *_cfg_pop_block();
+static struct syntax_block *_cfg_pop_block(void);
 
 int _cfg_make_argv(cfg_value_t **argv, char *keyword, grad_list_t *vlist);
 void _cfg_free_argv(int argc, cfg_value_t *argv);
@@ -97,22 +95,26 @@ static char *curp;
 
 %}
 
+%define api.prefix {cc}
+%define parse.error verbose
+%expect 1
+
 %union {
-        size_t number;
-        int bool;
-        grad_uint32_t ipaddr;
-        char *string;
-        cfg_value_t value;
-        cfg_network_t network;
+	size_t number;
+	int boolean;
+	uint32_t ipaddr;
+	char *string;
+	cfg_value_t value;
+	cfg_network_t network;
 	grad_list_t *vlist;
 	struct cfg_stmt *stmt;
 };
 
 %token T_EOL
 %token <string> T_WORD T_STRING
-%token <number> T_NUMBER T_PUNCT 
-%token <bool> T_BOOL
-%token <ipaddr> T_IPADDR 
+%token <number> T_NUMBER T_PUNCT
+%token <boolean> T_BOOL
+%token <ipaddr> T_IPADDR
 
 %type <ipaddr> netmask
 %type <network> network
@@ -123,33 +125,33 @@ static char *curp;
 %%
 
 input       : list
-            ;
+	    ;
 
 list        : line
-            | list line
-            ;
+	    | list line
+	    ;
 
 opt_list    : /* empty */
-            | list
-            ;
+	    | list
+	    ;
 
 line        : /* empty */ T_EOL
-            | stmt 
-            | error T_EOL
-              {
+	    | stmt
+	    | error T_EOL
+	      {
 		      yyclearin; yyerrok;
 	      }
-            ;
+	    ;
 
-stmt        : simple_stmt 
-            | block_stmt
-            ;
+stmt        : simple_stmt
+	    | block_stmt
+	    ;
 
 block_stmt  : block_open opt_list block_close T_EOL
-            ;
+	    ;
 
 block_open  : keyword tag '{'
-              {
+	      {
 		      if ($1 && $1->type == CS_BLOCK) {
 			      if ($1->handler) {
 				      cfg_value_t *argv;
@@ -175,24 +177,24 @@ block_open  : keyword tag '{'
 			      _cfg_push_block(NULL, NULL, NULL);
 		      }
 	      }
-            ;  
+	    ;
 
 block_close : '}'
-              {
+	      {
 		      if (block->prev)
 			      _cfg_pop_block();
 	      }
-            ;
+	    ;
 
 tag         : /* empty */
-              {
+	      {
 		      $$ = NULL;
 	      }
-            | value_list
-            ;
+	    | value_list
+	    ;
 
 simple_stmt : keyword value_list T_EOL
-              {
+	      {
 		      if ($1) {
 			      if ($1->handler) {
 				      cfg_value_t *argv;
@@ -213,90 +215,90 @@ simple_stmt : keyword value_list T_EOL
 				       cfg_filename, cfg_line_num,
 				       _("unknown keyword"));
 	      }
-            ;
+	    ;
 
 value_list  : value
-              {
+	      {
 		      $$ = _cfg_vlist_create(&$1);
 	      }
-            | value_list value
-              {
+	    | value_list value
+	      {
 		      _cfg_vlist_append($1, &$2);
 		      $$ = $1;
 	      }
-            | value_list ',' value
-              {
+	    | value_list ',' value
+	      {
 		      _cfg_vlist_append($1, &$3);
 		      $$ = $1;
 	      }
-            ;
+	    ;
 
 keyword     : T_WORD
-              {
+	      {
 		      $$ = _cfg_find_keyword(block->stmt, $1);
 	      }
-            ;
+	    ;
 
 value       : T_WORD
-              {
+	      {
 		      $$.type = CFG_STRING;
 		      $$.v.string = $1;
 	      }
-            | T_STRING
-              {
+	    | T_STRING
+	      {
 		      $$.type = CFG_STRING;
 		      $$.v.string = $1;
 	      }
-            | T_NUMBER
-              {
+	    | T_NUMBER
+	      {
 		      $$.type = CFG_INTEGER;
 		      $$.v.number = $1;
 	      }
-            | T_BOOL
-              {
+	    | T_BOOL
+	      {
 		      $$.type = CFG_BOOLEAN;
-		      $$.v.bool = $1;
+		      $$.v.boolean = $1;
 	      }
-            | T_PUNCT
-              {
+	    | T_PUNCT
+	      {
 		      $$.type = CFG_CHAR;
 		      $$.v.ch = $1;
 	      }
-            | network
-              {
+	    | network
+	      {
 		      $$.type = CFG_NETWORK;
 		      $$.v.network = $1;
 	      }
-            | T_IPADDR ':' T_NUMBER
-              {
+	    | T_IPADDR ':' T_NUMBER
+	      {
 		      $$.type = CFG_HOST;
 		      $$.v.host.ipaddr = $1;
 		      $$.v.host.port = $3;
 	      }
-            ; 
+	    ;
 
 network     : T_IPADDR
-              {
+	      {
 		      $$.ipaddr = $1;
 		      $$.netmask = 0xffffffffL;
 	      }
-            | T_IPADDR slash netmask
-              {
+	    | T_IPADDR slash netmask
+	      {
 		      $$.ipaddr = $1;
 		      $$.netmask = $3;
 	      }
-            ;
+	    ;
 
 slash       : T_PUNCT
-              {
+	      {
 		      if ($1 != '/')
 			      YYERROR;
 	      }
-            ;
+	    ;
 
 netmask     : T_IPADDR
-            | T_NUMBER
-              {
+	    | T_NUMBER
+	      {
 		      if ($1 > 32) {
 			      grad_log(GRAD_LOG_ERR,
 				       _("invalid netmask length: %d"), $1);
@@ -304,103 +306,103 @@ netmask     : T_IPADDR
 		      }
 		      $$ = (0xfffffffful >> (32-$1)) << (32-$1);
 	      }
-            ; 
+	    ;
 
 %%
 
 static void
-skipws()
+skipws(void)
 {
-        while (*curp && isspace(*curp)) {
-                if (*curp == '\n')
-                        cfg_line_num++;
-                curp++;
-        }
+	while (*curp && isspace(*curp)) {
+		if (*curp == '\n')
+			cfg_line_num++;
+		curp++;
+	}
 }
 
 static void
-skipline()
+skipline(void)
 {
-        while (*curp && *curp != '\n')
-                curp++;
+	while (*curp && *curp != '\n')
+		curp++;
 }
 
 static int
 isword(int c)
 {
-        return isalnum(c) || c == '_' || c == '-';
+	return isalnum(c) || c == '_' || c == '-';
 }
 
 static char *
-copy_alpha()
+copy_alpha(void)
 {
-        do {
+	do {
 		grad_slist_append_char(cfg_slist, *curp);
-                curp++;
-        } while (*curp && isword(*curp));
+		curp++;
+	} while (*curp && isword(*curp));
 	grad_slist_append_char(cfg_slist, 0);
 	return grad_slist_finish(cfg_slist);
 }
 
 static char *
-copy_string()
+copy_string(void)
 {
-        int quote = *curp++;
+	int quote = *curp++;
 
-        while (*curp) {
+	while (*curp) {
 		if (*curp == '\\') {
 			grad_slist_grow_backslash(cfg_slist, curp, &curp);
 		} else if (*curp == quote) {
-                        curp++;
-                        break;
-                } else {
+			curp++;
+			break;
+		} else {
 			grad_slist_append_char(cfg_slist, *curp);
 			curp++;
 		}
-        } 
+	}
 	grad_slist_append_char(cfg_slist, 0);
 	return grad_slist_finish(cfg_slist);
 }
 
 static int
-copy_digit()
+copy_digit(void)
 {
-        int dot = 0;
+	int dot = 0;
 
-        if (*curp == '0') {
-                if (curp[1] == 'x' || curp[1] == 'X') {
+	if (*curp == '0') {
+		if (curp[1] == 'x' || curp[1] == 'X') {
 			grad_slist_append_char(cfg_slist, *curp);
 			curp++;
 			grad_slist_append_char(cfg_slist, *curp);
 			curp++;
-                }
-        }
-        
-        do {
+		}
+	}
+
+	do {
 		grad_slist_append_char(cfg_slist, *curp);
-                if (*curp++ == '.')
-                        dot++;
-        } while (*curp && (isdigit(*curp) || *curp == '.'));
+		if (*curp++ == '.')
+			dot++;
+	} while (*curp && (isdigit(*curp) || *curp == '.'));
 	grad_slist_append_char(cfg_slist, 0);
 	yylval.string = grad_slist_finish(cfg_slist);
-        return dot;
+	return dot;
 }
 
 static grad_keyword_t booleans[] = {
-	{ "on", 1 }, 
+	{ "on", 1 },
 	{ "off", 0 },
-	{ "yes", 1 }, 
+	{ "yes", 1 },
 	{ "no", 0 },
 	{ 0 }
 };
 
 static int
-keyword()
+keyword(void)
 {
 	int tok;
-	
+
 	if ((tok = grad_xlat_keyword(booleans, yylval.string, -1)) != -1) {
-		yylval.bool = tok;
+		yylval.boolean = tok;
 		return T_BOOL;
 	}
 	return T_WORD;
@@ -409,49 +411,49 @@ keyword()
 #define ismath(c) (strchr("=!+-/*.", c)!=NULL)
 
 static int
-yylex()
+yylex(void)
 {
 again:
-        skipws();
+	skipws();
 
-        if (*curp == '#') {
-                skipline();
-                goto again;
-        } 
-        if (*curp == '/' && curp[1] == '*') {
-                int keep_line = cfg_line_num;
+	if (*curp == '#') {
+		skipline();
+		goto again;
+	}
+	if (*curp == '/' && curp[1] == '*') {
+		int keep_line = cfg_line_num;
 
-                curp += 2;
-                do {
-                        while (*curp != '*') {
-                                if (*curp == 0) {
-                                        grad_log(GRAD_LOG_ERR, 
-                       _("%s:%d: unexpected EOF in comment started at line %d"),
-                                                 cfg_filename, 
-                                                 cfg_line_num, 
-                                                 keep_line);
-                                        return 0;
-                                } else if (*curp == '\n')
-                                        cfg_line_num++;
-                                ++curp;
-                        }
-                } while (*++curp != '/');
-                ++curp;
-                goto again;
-        }
+		curp += 2;
+		do {
+			while (*curp != '*') {
+				if (*curp == 0) {
+					grad_log(GRAD_LOG_ERR,
+		       _("%s:%d: unexpected EOF in comment started at line %d"),
+						 cfg_filename,
+						 cfg_line_num,
+						 keep_line);
+					return 0;
+				} else if (*curp == '\n')
+					cfg_line_num++;
+				++curp;
+			}
+		} while (*++curp != '/');
+		++curp;
+		goto again;
+	}
 
-        if (*curp == 0)
-                return 0;
-        
-        if (isalpha(*curp)) {
-                yylval.string = copy_alpha();
-                return keyword();
-        }
+	if (*curp == 0)
+		return 0;
 
-        if (*curp == '\"') {
-                yylval.string = copy_string();
-                return T_STRING;
-        }
+	if (isalpha(*curp)) {
+		yylval.string = copy_alpha();
+		return keyword();
+	}
+
+	if (*curp == '\"') {
+		yylval.string = copy_string();
+		return T_STRING;
+	}
 
 	if (*curp == '-' && !isspace(curp[1])) {
 		/* For the sake of passing keyword arguments
@@ -459,35 +461,35 @@ again:
 		yylval.string = copy_alpha();
 		return T_STRING;
 	}
-	
-        if (isdigit(*curp)) {
-                if (copy_digit()) {
-                        /* IP address */
-                        yylval.ipaddr = grad_ip_strtoip(yylval.string);
-                        return T_IPADDR;
-                }
-                yylval.number = strtol(yylval.string, NULL, 0);
-                return T_NUMBER;
-        } 
 
-        if (*curp == ';') {
-                curp++;
-                return T_EOL;
-        }
+	if (isdigit(*curp)) {
+		if (copy_digit()) {
+			/* IP address */
+			yylval.ipaddr = grad_ip_strtoip(yylval.string);
+			return T_IPADDR;
+		}
+		yylval.number = strtol(yylval.string, NULL, 0);
+		return T_NUMBER;
+	}
 
-        if (ismath(*curp)) {
+	if (*curp == ';') {
+		curp++;
+		return T_EOL;
+	}
+
+	if (ismath(*curp)) {
 		yylval.number = *curp++;
 		return T_PUNCT;
 	}
-        return *curp++;
+	return *curp++;
 }
 
-static int
-yyerror(char *s)
+static void
+yyerror(char const *s)
 {
-        grad_log(GRAD_LOG_ERR, "%s:%d: %s", cfg_filename, cfg_line_num, s);
+	grad_log(GRAD_LOG_ERR, "%s:%d: %s", cfg_filename, cfg_line_num, s);
 }
-                
+
 /* ************************************************************************* */
 /* Internal functions */
 
@@ -519,12 +521,12 @@ _cfg_free_item(void *item, void *data)
 	struct cfg_memblock *p = item;
 	if (p->destructor)
 		p->destructor(p+1);
-	grad_free(p);
+	free(p);
 	return 0;
 }
 
 void
-_cfg_free_memory_pool()
+_cfg_free_memory_pool(void)
 {
 	grad_list_destroy(&cfg_memory_pool, _cfg_free_item, NULL);
 }
@@ -538,7 +540,7 @@ _cfg_make_argv(cfg_value_t **argv, char *keyword, grad_list_t *vlist)
 		argc = grad_list_count(vlist) + 1;
 	else
 		argc = 1;
-	*argv = grad_emalloc(sizeof(**argv)*argc);
+	*argv = grad_ecalloc(argc, sizeof(**argv));
 	(*argv)[0].type = CFG_STRING;
 	(*argv)[0].v.string = keyword;
 	if (vlist) {
@@ -548,7 +550,7 @@ _cfg_make_argv(cfg_value_t **argv, char *keyword, grad_list_t *vlist)
 
 		if (itr) {
 			for (i = 1, val = grad_iterator_first(itr); val;
-		     	     i++, val = grad_iterator_next(itr))
+			     i++, val = grad_iterator_next(itr))
 				(*argv)[i] = *val;
 			grad_iterator_destroy(&itr);
 		}
@@ -559,7 +561,7 @@ _cfg_make_argv(cfg_value_t **argv, char *keyword, grad_list_t *vlist)
 void
 _cfg_free_argv(int argc, cfg_value_t *argv)
 {
-	grad_free(argv);
+	free(argv);
 }
 
 static void
@@ -599,7 +601,7 @@ _cfg_push_block(struct cfg_stmt *stmt, cfg_end_fp end, void *block_data)
 }
 
 struct syntax_block *
-_cfg_pop_block()
+_cfg_pop_block(void)
 {
 	struct syntax_block *p = block;
 
@@ -607,7 +609,7 @@ _cfg_pop_block()
 		block = p->prev;
 		if (p->end)
 			p->end(block ? block->data : NULL, p->data);
-		grad_free(p);
+		free(p);
 	}
 	return block;
 }
@@ -626,70 +628,70 @@ _cfg_find_keyword(struct cfg_stmt *stmt, char *str)
 int
 _get_value(cfg_value_t *arg, int type, void *base)
 {
-        struct servent *s;
-        grad_uint32_t ipaddr;
-        cfg_value_t value;
+	struct servent *s;
+	uint32_t ipaddr;
+	cfg_value_t value;
 
 	value = *arg;
-        switch (type) {
-        case CFG_PORT:
-                switch (value.type) {
-                case CFG_INTEGER:
-                        type = CFG_INTEGER;
-                        break;
-			
-                case CFG_STRING:
-                          s = getservbyname(value.v.string, "udp");
-                          if (s) 
-                                  value.v.number = ntohs(s->s_port);
-                          else {
-                                  grad_log(GRAD_LOG_ERR, 
-                                           _("%s:%d: no such service: %s"),
-                                           cfg_filename, cfg_line_num,
-                                           value.v.string);
-                                  return 0;
-                          }
-                          type = value.type = CFG_INTEGER;
-                          break;
-			  
-                default:
-                        break;
-                }
-                break;
-                        
-        case CFG_IPADDR:
-                switch (value.type) {
-                case CFG_IPADDR:
-                        break;
-			
-                case CFG_INTEGER:
-                        type = CFG_IPADDR;
-                        break;
-			
-                case CFG_STRING:
-                        ipaddr = grad_ip_gethostaddr(value.v.string);
-                        if (ipaddr == 0) {
-                                grad_log(GRAD_LOG_ERR, 
-                                         _("%s:%d: unknown host: %s"),
-                                         cfg_filename, cfg_line_num,
-                                         value.v.string);
-                        }
-                        value.v.ipaddr = ipaddr;
-                        value.type = CFG_IPADDR;
-                        break;
+	switch (type) {
+	case CFG_PORT:
+		switch (value.type) {
+		case CFG_INTEGER:
+			type = CFG_INTEGER;
+			break;
+
+		case CFG_STRING:
+			  s = getservbyname(value.v.string, "udp");
+			  if (s)
+				  value.v.number = ntohs(s->s_port);
+			  else {
+				  grad_log(GRAD_LOG_ERR,
+					   _("%s:%d: no such service: %s"),
+					   cfg_filename, cfg_line_num,
+					   value.v.string);
+				  return 0;
+			  }
+			  type = value.type = CFG_INTEGER;
+			  break;
+
+		default:
+			break;
+		}
+		break;
+
+	case CFG_IPADDR:
+		switch (value.type) {
+		case CFG_IPADDR:
+			break;
+
+		case CFG_INTEGER:
+			type = CFG_IPADDR;
+			break;
+
+		case CFG_STRING:
+			ipaddr = grad_ip_gethostaddr(value.v.string);
+			if (ipaddr == 0) {
+				grad_log(GRAD_LOG_ERR,
+					 _("%s:%d: unknown host: %s"),
+					 cfg_filename, cfg_line_num,
+					 value.v.string);
+			}
+			value.v.ipaddr = ipaddr;
+			value.type = CFG_IPADDR;
+			break;
 
 		case CFG_NETWORK:
-			if (value.v.network.netmask != 0xffffffffL) 
+			if (value.v.network.netmask != 0xffffffffL)
 				break;
 			value.v.ipaddr = value.v.network.ipaddr;
 			value.type = CFG_IPADDR;
 			break;
 
-                default:
-                        break;
-                }
+		default:
+			break;
+		}
 		break;
-		
+
 	case CFG_UNSIGNED:
 	case CFG_SIZE_T:
 	case CFG_INTEGER:
@@ -699,48 +701,48 @@ _get_value(cfg_value_t *arg, int type, void *base)
 		case CFG_INTEGER:
 			value.type = type;
 			break;
-		} 
-        }
-        
-        if (type != value.type) {
-		cfg_type_error(type);
-                return 0;
-        }
+		}
+	}
 
-        switch (type) {
-        case CFG_INTEGER:
-                *(int*) base = value.v.number;
-                break;
-		
-        case CFG_UNSIGNED:
-                *(unsigned*) base = value.v.number;
-                break;
-		
-        case CFG_SIZE_T:
-                *(size_t*) base = value.v.number;
-                break;
-		
-        case CFG_STRING:
-                grad_string_replace((char**)base, value.v.string);
-                break;
-		
-        case CFG_IPADDR:
-                *(grad_uint32_t*) base = value.v.ipaddr;
-                break;
-		
-        case CFG_BOOLEAN:
-                *(int*) base = value.v.bool;
-                break;
-		
+	if (type != value.type) {
+		cfg_type_error(type);
+		return 0;
+	}
+
+	switch (type) {
+	case CFG_INTEGER:
+		*(int*) base = value.v.number;
+		break;
+
+	case CFG_UNSIGNED:
+		*(unsigned*) base = value.v.number;
+		break;
+
+	case CFG_SIZE_T:
+		*(size_t*) base = value.v.number;
+		break;
+
+	case CFG_STRING:
+		grad_string_replace((char**)base, value.v.string);
+		break;
+
+	case CFG_IPADDR:
+		*(uint32_t*) base = value.v.ipaddr;
+		break;
+
+	case CFG_BOOLEAN:
+		*(int*) base = value.v.boolean;
+		break;
+
 	case CFG_NETWORK:
 		*(cfg_network_t *) base = value.v.network;
 		break;
-		
-        default:
-                grad_log(GRAD_LOG_CRIT,
-                         _("INTERNAL ERROR at %s:%d: unknown datatype %d"),
-                         __FILE__, __LINE__, type);
-        }
+
+	default:
+		grad_log(GRAD_LOG_CRIT,
+			 _("INTERNAL ERROR at %s:%d: unknown datatype %d"),
+			 __FILE__, __LINE__, type);
+	}
 	return 0;
 }
 
@@ -763,26 +765,26 @@ cfg_malloc(size_t size,	void (*destructor)(void *))
 void
 cfg_type_error(int type)
 {
-	grad_log(GRAD_LOG_ERR, 
-	         _("%s:%d: wrong datatype (should be %s)"),
-	         cfg_filename, cfg_line_num, typestr[type]);
+	grad_log(GRAD_LOG_ERR,
+		 _("%s:%d: wrong datatype (should be %s)"),
+		 cfg_filename, cfg_line_num, typestr[type]);
 }
 
 void
 cfg_argc_error(int few)
 {
 	grad_log(GRAD_LOG_ERR,
-	         "%s:%d: %s",
-	         cfg_filename, cfg_line_num,
-	         few ? _("too few arguments") : _("too many arguments"));
+		 "%s:%d: %s",
+		 cfg_filename, cfg_line_num,
+		 few ? _("too few arguments") : _("too many arguments"));
 }
 
 #define _check_argc(argc, max) \
  if (argc-1 > max) {\
      grad_log(GRAD_LOG_ERR, "%s:%d: %s", \
-              cfg_filename, cfg_line_num, _("too many arguments"));\
+	      cfg_filename, cfg_line_num, _("too many arguments"));\
      return 0;\
- }		
+ }
 
 int
 cfg_ignore(int argc ARG_UNUSED, cfg_value_t *argv ARG_UNUSED,
@@ -822,7 +824,7 @@ cfg_get_integer(int argc, cfg_value_t *argv, void *block_data,
 {
 	int val;
 	int rc;
-	
+
 	_check_argc(argc, 1);
 	rc = _get_value(&argv[1], CFG_INTEGER, &val);
 	*(int*)handler_data = val;
@@ -835,7 +837,7 @@ cfg_get_unsigned(int argc, cfg_value_t *argv, void *block_data,
 {
 	unsigned val;
 	int rc;
-	
+
 	_check_argc(argc, 1);
 	rc = _get_value(&argv[1], CFG_UNSIGNED, &val);
 	*(unsigned*)handler_data = val;
@@ -848,7 +850,7 @@ cfg_get_size_t(int argc, cfg_value_t *argv, void *block_data,
 {
 	size_t val;
 	int rc;
-	
+
 	_check_argc(argc, 1);
 	rc = _get_value(&argv[1], CFG_INTEGER, &val);
 	*(size_t*)handler_data = val;
@@ -898,61 +900,60 @@ cfg_get_port(int argc, cfg_value_t *argv,
 int
 cfg_read(char *fname, struct cfg_stmt *syntax, void *data)
 {
-        struct stat st;
-        int fd;
-        extern int yydebug;
+	struct stat st;
+	int fd;
+	extern int yydebug;
 
 	cfg_memory_pool = NULL;
 	block = NULL;
-	
-        cfg_filename = fname;
+
+	cfg_filename = fname;
 	_cfg_push_block(syntax, NULL, data);
-        if (stat(cfg_filename, &st)) {
-                grad_log(GRAD_LOG_ERR|GRAD_LOG_PERROR, 
-                         _("can't stat `%s'"), cfg_filename);
-                return -1;
-        }
-        fd = open(cfg_filename, O_RDONLY);
-        if (fd == -1) {
-                if (errno != ENOENT)
-                        grad_log(GRAD_LOG_ERR|GRAD_LOG_PERROR, 
-                                _("can't open config file `%s'"), cfg_filename);
-                return -1;
-        }
-        buffer = cfg_malloc(st.st_size+1, NULL);
-        
-        read(fd, buffer, st.st_size);
-        buffer[st.st_size] = 0;
-        close(fd);
-        curp = buffer;
+	if (stat(cfg_filename, &st)) {
+		grad_log(GRAD_LOG_ERR|GRAD_LOG_PERROR,
+			 _("can't stat `%s'"), cfg_filename);
+		return -1;
+	}
+	fd = open(cfg_filename, O_RDONLY);
+	if (fd == -1) {
+		if (errno != ENOENT)
+			grad_log(GRAD_LOG_ERR|GRAD_LOG_PERROR,
+				_("can't open config file `%s'"), cfg_filename);
+		return -1;
+	}
+	buffer = cfg_malloc(st.st_size+1, NULL);
 
-        grad_log(GRAD_LOG_INFO, _("reading %s"), cfg_filename);
-        cfg_line_num = 1;
+	read(fd, buffer, st.st_size);
+	buffer[st.st_size] = 0;
+	close(fd);
+	curp = buffer;
 
-        if (strncmp(curp, "#debug", 6) == 0) {
+	grad_log(GRAD_LOG_INFO, _("reading %s"), cfg_filename);
+	cfg_line_num = 1;
+
+	if (strncmp(curp, "#debug", 6) == 0) {
 		/* Note: can't check YYDEBUG here, because some yaccs
 		   (most notably, sun's) define YYDEBUG after including
-		   code block */     
-                yydebug = 1;
-        } else {
-                yydebug = 0;
-        }
+		   code block */
+		yydebug = 1;
+	} else {
+		yydebug = 0;
+	}
 
 	cfg_slist = grad_slist_create();
 	_cfg_run_begin(syntax, data);
-	
-        /* Parse configuration */
-        yyparse();
+
+	/* Parse configuration */
+	yyparse();
 
 	_cfg_run_finish(syntax, data);
 
-        /* Clean up the things */
+	/* Clean up the things */
 	while (_cfg_pop_block())
 		;
 
 	_cfg_free_memory_pool();
 	grad_slist_free(&cfg_slist);
 
-        return 0;
-}       
-
+	return 0;
+}

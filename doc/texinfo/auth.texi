@@ -1,9 +1,9 @@
 @c This is part of the Radius manual.
-@c Copyright (C) 1999,2000,2001,2002,2003,2004 Free Software Foundation, Inc.
+@c Copyright (C) 1999-2025 Free Software Foundation, Inc.
 @c Written by Sergey Poznyakoff
 @c See file radius.texi for copying conditions.
 @comment *******************************************************************
-@node Authentication, Accounting, Request Comparison, Top
+@node Authentication
 @chapter Authentication
 
 An @dfn{Authentication Type} specifies which credentials the user
@@ -21,7 +21,7 @@ of @attr{Auth-Type} attribute in @LHS{} of a @file{users} entry.
 * PAM Auth::                      Authenticate using PAM.
 * Custom Auth::                   Defining Custom Authentication Types.
 * Multiple Login Checking::       Checking for Simultaneous Logins.
-* Auth Probing::                  Controlling Authentication Probes 
+* Auth Probing::                  Controlling Authentication Probes
 
 @end menu
 
@@ -40,22 +40,22 @@ is required for authentication.
 This authentication type is used for each @file{users} entry, whose
 @LHS{} contains
 
-@smallexample
+@example
 Auth-Type = Accept
-@end smallexample
+@end example
 @noindent
 
 This authentication type can be used for guest accounts, e.g. the
 following profile in @file{users}:
 
-@smallexample
+@example
 @group
 guest   Auth-Type = Accept,
                 Simultaneous-Use = 10
         Service-Type = Framed-User,
                 Framed-Protocol = PPP
 @end group
-@end smallexample
+@end example
 
 @noindent
 allows up to 10 simultaneous guest PPP accounts. To log in using such
@@ -75,9 +75,9 @@ method of disabling user accounts, @pxref{access.deny file}).
 This authentication type is used for each @file{users} entry, whose
 @LHS{} contains
 
-@smallexample
+@example
 Auth-Type = Reject
-@end smallexample
+@end example
 
 @comment *L2****************************************************************
 @node Local Password Auth
@@ -96,24 +96,24 @@ There are two ways of using this authentication type
 To keep the plaintext passwords in @file{users} file, the profile
 entry must follow this pattern:
 
-@smallexample
+@example
 @group
 @var{user-name}  Auth-Type = Local,
                      User-Password = @var{plaintext}
 @end group
-@end smallexample
+@end example
 
 The @var{plaintext} is the user's plaintext password. Obviously,
 @var{user-name} may not be @code{DEFAULT} nor @code{BEGIN}.
 
 @subheading Specifying Passwords in SQL Database.
 
-@smallexample
+@example
 @group
 @var{user-name}   Auth-Type = Local,
                       Password-Location = SQL
 @end group
-@end smallexample
+@end example
 
 When the user is authenticated using such profile, its password
 is retrieved from the authentication database using @code{auth_query}.
@@ -131,26 +131,26 @@ two ways of using this authentication type.
 
 @subheading Specifying Passwords in users File.
 
-@smallexample
+@example
 @var{user-name}  Auth-Type = Crypt-Local,
                      User-Password = @var{crypt-pass}
-@end smallexample
+@end example
 @noindent
 
 The @attr{Crypt-Password} is a shortcut for the above notation:
 
-@smallexample
+@example
 @var{user-name}  Crypt-Password = @var{crypt-pass}
-@end smallexample
+@end example
 
 @subheading Specifying Passwords in SQL Database.
 
-@smallexample
+@example
 @group
 @var{user-name}   Auth-Type = Crypt-Local,
                       Password-Location = SQL
 @end group
-@end smallexample
+@end example
 
 Using this profile, the user's password is retrieved from the
 authentication database using @code{auth_query}.
@@ -171,9 +171,9 @@ The @dfn{System} authentication type requires that the user
 have a valid system account on the machine where the radius
 server is running. The use of this type is triggered by setting
 
-@smallexample
+@example
 Auth-Type = System
-@end smallexample
+@end example
 @noindent
 
 in the @LHS{} of a @file{users} entry.
@@ -186,9 +186,9 @@ in the @LHS{} of a @file{users} entry.
 Setting @code{Auth-Type = SQL} or @code{Auth-Type = Mysql}
 in the @LHS{} of a @file{users} entry is a synonym for
 
-@smallexample
+@example
 Auth-Type = Crypt-Local, Password-Location = SQL
-@end smallexample
+@end example
 @noindent
 
 and is provided as a shortcut and for backward compatibility with
@@ -207,9 +207,9 @@ is described in @ref{sqlserver file}.
 using @acronym{PAM} (Pluggable Authentication Module) framework. The
 simplest way of usage is:
 
-@smallexample
+@example
 Auth-Type = PAM
-@end smallexample
+@end example
 @noindent
 
 Any user whose @file{users} profile contains the above, will be
@@ -217,10 +217,10 @@ authenticated via @acronym{PAM}, using service name @samp{radius}.
 If you wish to use another service name, set it using @attr{Auth-Data}
 attribute, e.g.:
 
-@smallexample
+@example
 Auth-Type = PAM,
     Auth-Data = @var{pam-service}
-@end smallexample
+@end example
 
 @comment *L2****************************************************************
 @node Custom Auth
@@ -247,12 +247,12 @@ For example, if one wrote a procedure @code{my-auth}, to apply it to
 all users, one will place the following profile in his @file{users}
 file:
 
-@smallexample
+@example
 @group
 DEFAULT  Auth-Type = Accept
          Scheme-Procedure = "my-auth"
 @end group
-@end smallexample
+@end example
 
 For a discussion of how to write Scheme authentication procedures,
 @xref{Authentication with Scheme}.
@@ -262,9 +262,9 @@ an external program. This is less effective than the methods described
 above, but may be necessary sometimes. To invoke the program, use
 the following statement in the @RHS{} of @file{users} entry:
 
-@smallexample
+@example
 Exec-Program-Wait = "@var{progname} @var{args}"
-@end smallexample
+@end example
 @noindent
 
 The @var{progname} must be the full path to the program, @var{args} ---
@@ -330,11 +330,11 @@ following:
 
 In your @file{raddb/config} file set:
 
-@smallexample
+@example
 mlc @{
     method sql;
 @};
-@end smallexample
+@end example
 
 In your @file{raddb/sqlserver} file, specify the queries for
 retrieving the information about open sessions and, optionally, a
@@ -346,13 +346,13 @@ There are two queries for retrieving the information:
 given realm. Each of them should return a list of 4-element
 tuples@footnote{This interface is likely to change in future versions}:
 
-@smallexample
+@example
 @var{user-name}, @var{nas-ip-address}, @var{nas-port-id}, @var{acct-session-id}
-@end smallexample
+@end example
 
 Here is an example of @code{mlc_user_query} and @code{mlc_realm_query}:
 
-@smallexample     
+@example
 mlc_user_query SELECT user_name,nas_ip_address,\
                       nas_port_id,acct_session_id \
                FROM calls \
@@ -362,23 +362,23 @@ mlc_user_query SELECT user_name,nas_ip_address,\
 mlc_realm_query SELECT user_name,nas_ip_address,\
                        nas_port_id,acct_session_id \
                 FROM calls \
-                WHERE realm_name='%C@{Realm-Name@}'     
-@end smallexample
+                WHERE realm_name='%C@{Realm-Name@}'
+@end example
 
 Apart from these two queries you may also wish to provide a query for
 closing a hung record. By default, @command{radiusd} will use
 @code{acct_stop_query}. If you wish to override it, supply a query
 named @code{mlc_stop_query}, for example:
 
-@smallexample
+@example
 mlc_stop_query UPDATE calls \
                SET status=4,\
                 acct_session_time=unix_timestamp(now())-\
                                   unix_timestamp(event_date_time) \
                WHERE user_name='%C@{User-Name@}' \
                  AND status = 1 \
-                 AND acct_session_id='%C@{Acct-Session-Id@}' 
-@end smallexample
+                 AND acct_session_id='%C@{Acct-Session-Id@}'
+@end example
 
 @xref{Queries}, for detailed information on how to write these queries.
 
@@ -387,7 +387,7 @@ mlc_stop_query UPDATE calls \
 
 Whatever database @command{radiusd} uses, an open entry in it does not
 necessary mean that the corresponding session is still being
-active. So, after retrieving the information about user sessions, 
+active. So, after retrieving the information about user sessions,
 Radius verifies on corresponding @NAS{}es whether these are actually
 active.
 
@@ -405,7 +405,7 @@ count, otherwise it proceeds as if the @NAS{} returned negative reply.
 To query a @NAS{}, Radius first looks up its type and additional parameters
 in @file{naslist} file (@pxref{naslist file}). There are two
 predefined @NAS{} types that cause Radius to act immediately without
-querying tne @NAS{}: the special type @samp{true} forces Radius to act
+querying the @NAS{}: the special type @samp{true} forces Radius to act
 as if the @NAS{} returned 1, the type @samp{false} forces it to act
 as if the @NAS{} returned 0. If the type is neither of this predefined types,
 Radius uses it as a look up key into the @file{nastypes} file
@@ -426,7 +426,7 @@ is specified by the @code{function=} argument to the method. It is
 called each time a line of output is received from the @NAS{} (for
 finger queries) or a variable is received (for SNMP queries). The
 process continues until the function returns 1 or the last line
-of output is read or a timeout occurs whichever comes first.
+of output is read or a timeout occurs, whichever comes first.
 
 If the user-function returns 1 it is taken to mean the user's session is
 now active at the @NAS{}, otherwise, if it replies 0 or if the end of
@@ -443,7 +443,7 @@ detail in @ref{Login Verification Functions}.
 
 @dfn{Authentication probe} is an attempt of a user to use other user's
 account, by guessing his password. The obvious indication of an
-authentication probe is appearence of several consecutive
+authentication probe is appearance of several consecutive
 authentication failures for the same user. Of course, if the intruder
 is given sufficient number of such probes he will sooner or later
 succeed in finding the actual password. The conventional method
@@ -456,7 +456,7 @@ record the number of consecutive authentication failures and they are
 reset after each successive authentication. Secondly, the maximum number
 of allowed consecutive failures should be set sufficiently high.
 
-The version @value{VERSION} offers two ways for controlling 
+The version @value{VERSION} offers two ways for controlling
 authentication probes: using external programs and using special
 @acronym{SQL} queries.
 
@@ -478,7 +478,7 @@ allowed value. Otherwise it returns 0 and clears the counter. Another program,
 given user name. Assuming our basic authentication type is @samp{PAM},
 the @file{raddb/users} file will look as follows:
 
-@smallexample
+@example
 @group
 BEGIN   NULL
         Exec-Program-Wait = "/sbin/check_failure  %C@{User-Name@}",
@@ -489,9 +489,9 @@ DEFAULT Auth-Type = PAM
         Service-Type = Framed-User,
                 Framed-Protocol = PPP
 
-[@dots{} Other profiles @dots{}]                
+[@dots{} Other profiles @dots{}]
 @end group
-@end smallexample
+@end example
 
 The @code{BEGIN} profile will be executed before any other profile.
 It will add to the @RHS{} @attr{Exec-Program-Wait} and
@@ -501,16 +501,16 @@ attribute). When such profile is found, the user will be authenticated
 according to the method set up by the profile's @attr{Auth-Type}
 attribute. If authentication fails, @file{/sbin/count_failure}
 will be called and the user name passed to it as the argument. Otherwise,
-@file{/sbin/check_failure} will be invoked. 
+@file{/sbin/check_failure} will be invoked.
 
 To complete the example, here are working versions of both programs.
-Failure counters for each user name are kept in separate file in 
+Failure counters for each user name are kept in separate file in
 @file{/var/log/radius/fails} directory. Both programs are written
 in @command{bash}.
 
 @subheading The /sbin/count_failure program
 
-@smallexample
+@example
 @group
 #! /bin/bash
 
@@ -525,14 +525,14 @@ if [ -r "$REGDIR/$1" ]; then
 else
   COUNT=1
 fi
-echo $COUNT > "$REGDIR/$1"      
+echo $COUNT > "$REGDIR/$1"
 # End of /sbin/count_failure
 @end group
-@end smallexample
+@end example
 
 @subheading The /sbin/check_failure program
 
-@smallexample
+@example
 @group
 #! /bin/bash
 
@@ -554,7 +554,7 @@ exit 0
 
 # End of check_failure
 @end group
-@end smallexample
+@end example
 
 
 Another way of controlling authentication probes is by using
@@ -576,7 +576,7 @@ example.
 First, we create a special table for keeping authentication failure
 counters for each user:
 
-@smallexample
+@example
 @group
 CREATE TABLE authfail (
   # User name this entry refers to
@@ -589,28 +589,28 @@ CREATE TABLE authfail (
   UNIQUE uname (user_name)
 );
 @end group
-@end smallexample
+@end example
 
 The query @code{auth_fail_query} will increment the value of
 @code{count} column for the user in question:
 
-@smallexample
+@example
 @group
 auth_failure_query UPDATE authfail \
                    SET count=count+1,time=now() \
                    WHERE user_name='%C@{User-Name@}'
 @end group
-@end smallexample
+@end example
 
 The query @code{auth_success_query} will clear @code{count}:
 
-@smallexample
+@example
 @group
 auth_success_query UPDATE authfail \
                    SET count=0,time=now() \
                    WHERE user_name='%C@{User-Name@}'
 @end group
-@end smallexample
+@end example
 
 Now, the question is: how to use this counter in authentication? The
 answer is quite simple. First, let's create a special group for all the
@@ -618,14 +618,14 @@ users whose authentication failure counter has reached its maximum
 value. Let this group be called @samp{*LOCKED_ACCOUNT*}. We'll add the
 following entry to @file{raddb/users}:
 
-@smallexample
+@example
 @group
 DEFAULT Group = "*LOCKED_ACCOUNT*",
                 Auth-Type = Reject
         Reply-Message = "Your account is currently locked.\n\
 Please, contact your system administrator\n"
 @end group
-@end smallexample
+@end example
 
 @noindent
 which will reject all such users with an appropriate reply message.
@@ -636,7 +636,7 @@ maximum value. Let's say this maximum value is 8. Then the following
 query will do the job:
 
 
-@smallexample
+@example
 @group
 group_query       SELECT user_group FROM groups \
                   WHERE user_name='%u' \
@@ -645,7 +645,7 @@ group_query       SELECT user_group FROM groups \
                                                  WHERE user_name='%u')
                          THEN '*LOCKED_ACCOUNT*' END
 @end group
-@end smallexample
+@end example
 
 The default configuration comes with these queries commented out. It
 is up to you to uncomment them if you wish to use @acronym{SQL}-based
@@ -664,13 +664,7 @@ assume the database already contains an entry for each user. So,
 when adding a new user to the database, make sure to insert
 an appropriate record into @code{authfails} table, e.g.
 
-@smallexample
+@example
 INSERT INTO authfail VALUES('new-user',0,now());
-@end smallexample
+@end example
 @end enumerate
-
-
-
-
-                
-

@@ -16,7 +16,7 @@ logging {
 	channel info {
 		file "radius.info";
 		print-pid yes;
-	};	
+	};
 	channel debug {
 		file "radius.debug";
 	};
@@ -58,4 +58,4 @@ rewrite {
 
 snmp {
 	listen no;
-};	
+};

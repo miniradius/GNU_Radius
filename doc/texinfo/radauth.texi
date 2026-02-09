@@ -1,5 +1,5 @@
 @c This is part of the Radius manual.
-@c Copyright (C) 1999,2000,2001,2002,2003,2004 Free Software Foundation, Inc.
+@c Copyright (C) 1999-2025 Free Software Foundation, Inc.
 @c Written by Sergey Poznyakoff
 @c See file radius.texi for copying conditions.
 @comment *******************************************************************
@@ -17,9 +17,9 @@ Program}, for the detailed discussion of its internals.
 
 @subheading Invocation
 
-@smallexample
+@example
 radauth [@var{options}] [@var{command}] @var{user-name} [@var{password}]
-@end smallexample
+@end example
 
 @noindent
 Options are:
@@ -48,7 +48,7 @@ Valid commands are:
 Send only @code{Access-Request}. This is the default.
 
 @item acct
-Send @code{Access-Request}. If successfull, send
+Send @code{Access-Request}. If successful, send
 @code{Accounting-Request} with @code{Acct-Status-Type = Start}.
 
 @item start
@@ -60,7 +60,6 @@ Send @code{Accounting-Request} with @code{Acct-Status-Type = Start}.
 
 The program determines which Radius server to use, the authentication
 port number, and the shared secret, following the procedure common to all
-client scripts (@pxref{client.conf}).
+client scripts (@pxref{clientconf}).
 
 @c End of radauth.texi
-

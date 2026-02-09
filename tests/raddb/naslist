@@ -1,5 +1,5 @@
 # NAS Name		Short Name	Type
-#----------------	----------	----	
+#----------------	----------	----
 127.0.0.1		local		true
 127.0.0.2		second		true
 127.0.0.3		third		true

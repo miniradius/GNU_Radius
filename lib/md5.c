@@ -3,12 +3,12 @@
  * The algorithm is due to Ron Rivest.  This code was
  * written by Colin Plumb in 1993, no copyright is claimed.
  * This code is in the public domain; do with it what you wish.
- *  
+ *
  * Equivalent code is available from RSA Data Security, Inc.
  * This code has been tested against that, and is equivalent,
  * except that you don't need to include two pages of legalese
  * with every copy.
- *  
+ *
  * To compute the message digest of a chunk of bytes, declare an
  * MD5Context structure, pass it to MD5Init, call MD5Update as
  * needed on buffers full of bytes, and then call MD5Final, which
@@ -27,39 +27,39 @@
 
 void
 grad_md5_calc(unsigned char *output, unsigned char const *input,
-	      unsigned int inlen)  
+	      unsigned int inlen)
 {
-        MD5_CTX context;
-	
-        grad_MD5Init(&context);
-        grad_MD5Update(&context, input, inlen);
-        grad_MD5Final(output, &context);
+	MD5_CTX context;
+
+	grad_MD5Init(&context);
+	grad_MD5Update(&context, input, inlen);
+	grad_MD5Final(output, &context);
 }
 
 
 static void
-bytes_encode(unsigned char *output, grad_uint32_t *input, unsigned int len)
+bytes_encode(unsigned char *output, uint32_t *input, unsigned int len)
 {
-        unsigned int i, j;
+	unsigned int i, j;
 
-        for (i = 0, j = 0; j < len; i++, j += 4) {
-                output[j] = (unsigned char)(input[i] & 0xff);
-                output[j+1] = (unsigned char)((input[i] >> 8) & 0xff);
-                output[j+2] = (unsigned char)((input[i] >> 16) & 0xff);
-                output[j+3] = (unsigned char)((input[i] >> 24) & 0xff);
-        }
+	for (i = 0, j = 0; j < len; i++, j += 4) {
+		output[j] = (unsigned char)(input[i] & 0xff);
+		output[j+1] = (unsigned char)((input[i] >> 8) & 0xff);
+		output[j+2] = (unsigned char)((input[i] >> 16) & 0xff);
+		output[j+3] = (unsigned char)((input[i] >> 24) & 0xff);
+	}
 }
 
-static void 
-bytes_decode(grad_uint32_t *output, unsigned char *input, unsigned int len)
+static void
+bytes_decode(uint32_t *output, unsigned char *input, unsigned int len)
 {
-        unsigned int i, j;
-        
-        for (i = 0, j = 0; j < len; i++, j += 4)
-                output[i] = ((grad_uint32_t)input[j]) |
-                            (((grad_uint32_t)input[j+1]) << 8) |
-                            (((grad_uint32_t)input[j+2]) << 16) |
-                            (((grad_uint32_t)input[j+3]) << 24);
+	unsigned int i, j;
+
+	for (i = 0, j = 0; j < len; i++, j += 4)
+		output[i] = ((uint32_t)input[j]) |
+			    (((uint32_t)input[j+1]) << 8) |
+			    (((uint32_t)input[j+2]) << 16) |
+			    (((uint32_t)input[j+3]) << 24);
 }
 
 /*
@@ -85,37 +85,37 @@ grad_MD5Init(struct MD5Context *ctx)
 void
 grad_MD5Update(struct MD5Context *ctx, unsigned char const *buf, unsigned len)
 {
-    grad_uint32_t t;
+    uint32_t t;
 
     /* Update bitcount */
 
     t = ctx->bits[0];
-    if ((ctx->bits[0] = t + ((grad_uint32_t) len << 3)) < t)
-        ctx->bits[1]++;         /* Carry from low to high */
+    if ((ctx->bits[0] = t + ((uint32_t) len << 3)) < t)
+	ctx->bits[1]++;         /* Carry from low to high */
     ctx->bits[1] += len >> 29;
 
     t = (t >> 3) & 0x3f;        /* Bytes already in shsInfo->data */
     /* Handle any leading odd-sized chunks */
 
     if (t) {
-        unsigned char *p = (unsigned char *) ctx->in + t;
-        t = 64 - t;
-        if (len < t) {
-            memcpy(p, buf, len);
-            return;
-        }
-        memcpy(p, buf, t);
-        grad_MD5Transform(ctx->buf, (grad_uint32_t *) ctx->in);
-        buf += t;
-        len -= t;
+	unsigned char *p = (unsigned char *) ctx->in + t;
+	t = 64 - t;
+	if (len < t) {
+	    memcpy(p, buf, len);
+	    return;
+	}
+	memcpy(p, buf, t);
+	grad_MD5Transform(ctx->buf, (uint32_t *) ctx->in);
+	buf += t;
+	len -= t;
     }
     /* Process data in 64-byte chunks */
 
     while (len >= 64) {
-        memcpy(ctx->in, buf, 64);
-        grad_MD5Transform(ctx->buf, (grad_uint32_t const *) buf);
-        buf += 64;
-        len -= 64;
+	memcpy(ctx->in, buf, 64);
+	grad_MD5Transform(ctx->buf, (uint32_t const *) buf);
+	buf += 64;
+	len -= 64;
     }
 
     /* Handle any remaining bytes of data. */
@@ -124,7 +124,7 @@ grad_MD5Update(struct MD5Context *ctx, unsigned char const *buf, unsigned len)
 }
 
 /*
- * Final wrapup - pad to 64-byte boundary with the bit pattern 
+ * Final wrapup - pad to 64-byte boundary with the bit pattern
  * 1 0* (64-bit count of bits processed, MSB-first)
  */
 void
@@ -146,45 +146,45 @@ grad_MD5Final(unsigned char digest[16], struct MD5Context *ctx)
 
     /* Pad out to 56 mod 64 */
     if (count < 8) {
-        /* Two lots of padding:  Pad the first block to 64 bytes */
-        memset(p, 0, count);
-        grad_MD5Transform(ctx->buf, (grad_uint32_t *) ctx->in);
+	/* Two lots of padding:  Pad the first block to 64 bytes */
+	memset(p, 0, count);
+	grad_MD5Transform(ctx->buf, (uint32_t *) ctx->in);
 
-        /* Now fill the next block with 56 bytes */
-        memset(ctx->in, 0, 56);
+	/* Now fill the next block with 56 bytes */
+	memset(ctx->in, 0, 56);
     } else {
-        /* Pad block to 56 bytes */
-        memset(p, 0, count - 8);
+	/* Pad block to 56 bytes */
+	memset(p, 0, count - 8);
     }
 
     /* Append length in bits and transform */
-    bytes_encode((unsigned char*)((grad_uint32_t *) ctx->in + 14), ctx->bits, 8);
-    grad_MD5Transform(ctx->buf, (grad_uint32_t *) ctx->in);
-    bytes_encode(digest,ctx->buf,16);   
+    bytes_encode((unsigned char*)((uint32_t *) ctx->in + 14), ctx->bits, 8);
+    grad_MD5Transform(ctx->buf, (uint32_t *) ctx->in);
+    bytes_encode(digest,ctx->buf,16);
     memset((char *) ctx, 0, sizeof(ctx));       /* In case it's sensitive */
 }
 
 /* The four core functions - F1 is optimized somewhat */
 
-#define F1(x, y, z) (x & y | ~x & z) 
-/*#define F1(x, y, z) (z ^ (x & (y ^ z))) */
+/*#define F1(x, y, z) ((x & y) | (~x & z)) */
+#define F1(x, y, z) (z ^ (x & (y ^ z)))
 #define F2(x, y, z) F1(z, x, y)
 #define F3(x, y, z) (x ^ y ^ z)
 #define F4(x, y, z) (y ^ (x | ~z))
 
 /* This is the central step in the MD5 algorithm. */
 #define MD5STEP(f, w, x, y, z, data, s) \
-        ( w += f(x, y, z) + data,  w = w<<s | w>>(32-s),  w += x ); 
+	( w += f(x, y, z) + data,  w = w<<s | w>>(32-s),  w += x );
 
 #if 0
 dump(char *label,unsigned char *p, int len)
 {
-        int i;
-        return;
-        printf("dump: %s\n", label);
-        for (i=0; i<len; i++)
-                printf("%x\n", p[i]);
-        printf("--\n");
+	int i;
+	return;
+	printf("dump: %s\n", label);
+	for (i=0; i<len; i++)
+		printf("%x\n", p[i]);
+	printf("--\n");
 
 }
 #endif
@@ -195,10 +195,10 @@ dump(char *label,unsigned char *p, int len)
  * the data and converts bytes into longwords for this routine.
  */
 void
-grad_MD5Transform(grad_uint32_t buf[4], grad_uint32_t const cin[16])
+grad_MD5Transform(uint32_t buf[4], uint32_t const cin[16])
 {
-    register grad_uint32_t a, b, c, d;
-    grad_uint32_t in[16];
+    register uint32_t a, b, c, d;
+    uint32_t in[16];
 
     bytes_decode(in, (unsigned char *) cin, 64);
 
@@ -280,4 +280,3 @@ grad_MD5Transform(grad_uint32_t buf[4], grad_uint32_t const cin[16])
     buf[2] += c;
     buf[3] += d;
 }
-

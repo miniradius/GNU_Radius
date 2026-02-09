@@ -1,23 +1,20 @@
 /* This file is part of GNU Radius.
-   Copyright (C) 2000,2001,2002,2003,2004,2005,
-   2007,2008 Free Software Foundation, Inc.
+   Copyright (C) 2000-2025 Free Software Foundation, Inc.
 
    Written by Sergey Poznyakoff
-  
+
    GNU Radius is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
    the Free Software Foundation; either version 3 of the License, or
    (at your option) any later version.
-  
+
    GNU Radius is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
-  
-   You should have received a copy of the GNU General Public
-   License along with GNU Radius; if not, write to the Free
-   Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-   Boston, MA 02110-1301 USA. */
+
+   You should have received a copy of the GNU General Public License
+   along with GNU Radius.  If not, see <http://www.gnu.org/licenses/>. */
 
 #ifdef HAVE_CONFIG_H
 # include <config.h>
@@ -48,7 +45,7 @@ static grad_slist_t slist;
 
 #define FDATA_FH 0
 #define FDATA_STRING 1
-#define FDATA_TAB 2 
+#define FDATA_TAB 2
 #define FDATA_NEWLINE 3
 
 typedef struct format_key format_key_t;
@@ -83,9 +80,9 @@ format_key_free(format_key_t *key)
 	format_key_t *next;
 	while (key) {
 		next = key->next;
-		grad_free(key->name);
-		grad_free(key->value);
-		grad_free(key);
+		free(key->name);
+		free(key->value);
+		free(key);
 		key = next;
 	}
 }
@@ -107,19 +104,19 @@ form_free(format_data_t *form)
 
 	while (form) {
 		next = form->next;
-		
+
 		format_key_free(form->key);
 		switch (form->type) {
 		case FDATA_STRING:
-			grad_free(form->v.string);
+			free(form->v.string);
 			break;
 		case FDATA_FH:
-			grad_free(form->v.fh.header);
+			free(form->v.fh.header);
 			break;
 		default:
 			break;
 		}
-		grad_free(form);
+		free(form);
 
 		form = next;
 	}
@@ -156,7 +153,7 @@ key_nodomain(format_key_t *key)
 static int
 output_string(char *string, int width, int align)
 {
-	if (width == 0) 
+	if (width == 0)
 		width = printf("%s", string);
 	else if (align == ALIGN_LEFT)
 		width = printf("%-*.*s", width, width, string);
@@ -184,28 +181,28 @@ output_tab(int column, int tabstop)
 }
 
 static char *
-get_hostname(grad_uint32_t ipaddr, int nodomain, char *buf, size_t size)
+get_hostname(uint32_t ipaddr, int nodomain, char *buf, size_t size)
 {
-        if (ipaddr == 0 || ipaddr == (grad_uint32_t)-1 || ipaddr == (grad_uint32_t)-2)
-                return "";
+	if (ipaddr == 0 || ipaddr == (uint32_t)-1 || ipaddr == (uint32_t)-2)
+		return "";
 
-        if (nodomain) {
+	if (nodomain) {
 		char *s, *p;
-                s = grad_ip_gethostname(ntohl(ipaddr), buf, size);
-                for (p = s; *p && (isdigit(*p) || *p == '.'); p++)
-                        ;
-                if (*p == 0)
-                        return s;
-                if ((p = strchr(s, '.')) != NULL)
-                        *p = 0;
-                return s;
+		s = grad_ip_gethostname(ntohl(ipaddr), buf, size);
+		for (p = s; *p && (isdigit(*p) || *p == '.'); p++)
+			;
+		if (*p == 0)
+			return s;
+		if ((p = strchr(s, '.')) != NULL)
+			*p = 0;
+		return s;
 	}
-	
+
 	return grad_ip_gethostname(ntohl(ipaddr), buf, size);
 }
 
 static int
-output_hostname(grad_uint32_t ip, int width, format_key_t *key)
+output_hostname(uint32_t ip, int width, format_key_t *key)
 {
 	char buf[80];
 	return output_string_key(get_hostname(ip, key_nodomain(key),
@@ -216,22 +213,21 @@ output_hostname(grad_uint32_t ip, int width, format_key_t *key)
 static int
 output_time(time_t t, int width, format_key_t *key)
 {
-        int d,h,m,s;
-	
-        d = t / 86400;
-        t %= 86400;
-        
-        s = t % 60;
-        m = t / 60;
-        if (m > 59) {
-                h = m / 60;
-                m -= h*60;
-        } else
-                h = 0;
+	int d,h,m;
+
+	d = t / 86400;
+	t %= 86400;
+
+	m = t / 60;
+	if (m > 59) {
+		h = m / 60;
+		m -= h*60;
+	} else
+		h = 0;
 	if (d)
 		width = printf("%d+%02d:%02d", d, h, m);
-        else
-                width = printf("%02d:%02d", h, m);
+	else
+		width = printf("%02d:%02d", h, m);
 	return width;
 }
 
@@ -253,16 +249,17 @@ orig_login_fh(int outbytes, int width, format_key_t *key, struct radutmp *up)
 static int
 gecos_fh(int outbytes, int width, format_key_t *key, struct radutmp *up)
 {
-        struct passwd pw, *pwd;
-        char *s;
+	struct passwd pw, *pwd;
+	char *s;
 	char buffer[512];
 
-        if (pwd = grad_getpwnam_r(up->login, &pw, buffer, sizeof buffer)) {
-                if ((s = strchr(pwd->pw_gecos, ',')) != NULL)
-                        *s = 0;
-                s = pwd->pw_gecos;
-        } else
-                s = up->orig_login;
+	pwd = grad_getpwnam_r(up->login, &pw, buffer, sizeof buffer);
+	if (pwd) {
+		if ((s = strchr(pwd->pw_gecos, ',')) != NULL)
+			*s = 0;
+		s = pwd->pw_gecos;
+	} else
+		s = up->orig_login;
 	return output_string_key(s, width, key);
 }
 
@@ -271,7 +268,7 @@ static int
 nas_port_fh(int outbytes, int width, format_key_t *key, struct radutmp *up)
 {
 	char buf[6];
-	
+
 	snprintf(buf, sizeof(buf), "%0*d", width-1, up->nas_port);
 	return output_string_key(buf, width, key);
 }
@@ -289,7 +286,7 @@ nas_address_fh(int outbytes, int width, format_key_t *key, struct radutmp *up)
 {
 	if (grad_printutmp_use_naslist) {
 		grad_nas_t *nas;
-	
+
 		nas = grad_nas_lookup_ip(ntohl(up->nas_address));
 		if (!nas)
 			return output_hostname(up->nas_address, width, key);
@@ -314,11 +311,11 @@ protocol_fh(int outbytes, int width, format_key_t *key, struct radutmp *up)
 	grad_dict_value_t *dval = grad_value_lookup(up->proto, "Framed-Protocol");
 	char buf[80];
 	char *s;
-	
-        if (dval)
+
+	if (dval)
 		s = dval->name;
 	else {
-                snprintf(buf, sizeof(buf), "%u", up->proto);
+		snprintf(buf, sizeof(buf), "%u", up->proto);
 		s = buf;
 	}
 	return output_string_key(s, width, key);
@@ -328,8 +325,8 @@ protocol_fh(int outbytes, int width, format_key_t *key, struct radutmp *up)
 static int
 time_fh(int outbytes, int width, format_key_t *key, struct radutmp *up)
 {
-        char buf[80];
-	
+	char buf[80];
+
 	strftime(buf, sizeof buf, key_date_format(key), localtime(&up->time));
 	return output_string_key(buf, width, key);
 }
@@ -354,15 +351,15 @@ delay_fh(int outbytes, int width, format_key_t *key, struct radutmp *up)
 static int
 port_type_fh(int outbytes, int width, format_key_t *key, struct radutmp *up)
 {
-	grad_dict_value_t *dval = grad_value_lookup(up->porttype, 
-                                                    "NAS-Port-Type");
+	grad_dict_value_t *dval = grad_value_lookup(up->porttype,
+						    "NAS-Port-Type");
 	char buf[80];
 	char *s;
-	
-        if (dval)
+
+	if (dval)
 		s = dval->name;
 	else {
-                snprintf(buf, sizeof(buf), "%u", up->porttype);
+		snprintf(buf, sizeof(buf), "%u", up->porttype);
 		s = buf;
 	}
 	return output_string_key(s, width, key);
@@ -380,7 +377,7 @@ static int
 realm_address_fh(int outbytes, int width, format_key_t *key,
 		 struct radutmp *up)
 {
-        if (up->realm_address == 0)
+	if (up->realm_address == 0)
 		return output_string_key("", width, key);
 	else {
 		grad_realm_t *rp = grad_realm_lookup_ip(up->realm_address);
@@ -405,13 +402,13 @@ static struct {
 	{ "time", time_fh },
 	{ "duration", duration_fh },
 	{ "delay", delay_fh },
-	{ "port-type", port_type_fh }, 
+	{ "port-type", port_type_fh },
 	{ "clid", clid_fh },
 	{ "realm", realm_address_fh },
 	{ NULL }
 };
 
-static radutent_fh_t 
+static radutent_fh_t
 _lookup(char *name)
 {
 	int i;
@@ -425,7 +422,7 @@ static char *
 parse_string0(char *fmt, format_data_t *form, int (*cond)(), void *closure)
 {
 	char *p;
-	
+
 	for (p = fmt; *p && (*cond)(closure, p) == 0; p++) {
 		if (*p == '\\') {
 			int c;
@@ -433,35 +430,35 @@ parse_string0(char *fmt, format_data_t *form, int (*cond)(), void *closure)
 			case 'a':
 				c = '\a';
 				break;
-				
+
 			case 'b':
 				c = '\b';
 				break;
-				
+
 			case 'e':
 				c = '\033';
 				break;
-				
+
 			case 'f':
 				c = '\f';
 				break;
-				
+
 			case 'n':
 				c = '\n';
 				break;
-				
+
 			case 't':
 				c = '\t';
 				break;
-				
+
 			case 'r':
 				c = '\r';
 				break;
-				
+
 			case 'v':
 				c = '\v';
 				break;
-				
+
 			default:
 				c = *p;
 			}
@@ -485,11 +482,11 @@ static int
 parse_quote(char **fmtp, format_data_t *form)
 {
 	char *p;
-	p = parse_string0(*fmtp + 1, form, _is_closing_quote, *fmtp);	
+	p = parse_string0(*fmtp + 1, form, _is_closing_quote, *fmtp);
 	if (!*p) {
 		grad_log(GRAD_LOG_ERR,
-		         _("missing closing quote in string started near `%s'"),
-		         *fmtp);
+			 _("missing closing quote in string started near `%s'"),
+			 *fmtp);
 		return 1;
 	}
 	*fmtp = p + 1;
@@ -537,7 +534,7 @@ parse_form(char **fmtp, format_data_t *form)
 {
 	char *formname, *p;
 	format_key_t *key_head, *key_tail;
-	
+
 	++*fmtp;
 
 	formname = get_token(fmtp);
@@ -560,15 +557,15 @@ parse_form(char **fmtp, format_data_t *form)
 	} else {
 		radutent_fh_t fh;
 		int arg;
-		
+
 		fh = _lookup(formname);
 		if (!fh) {
 			grad_log(GRAD_LOG_ERR,
-			         _("error in format spec: unknown format %s"),
-			         formname);
+				 _("error in format spec: unknown format %s"),
+				 formname);
 			return 1;
 		}
-		
+
 		form->type = FDATA_FH;
 		form->v.fh.fun = fh;
 
@@ -587,11 +584,11 @@ parse_form(char **fmtp, format_data_t *form)
 			default:
 				grad_log(GRAD_LOG_ERR,
 				     _("wrong number of arguments to form %s"),
-				         formname);
+					 formname);
 				return 1;
 			}
 		}
-		
+
 		/* Collect keyword arguments */
 		key_head = NULL;
 		while (p && p[0] == ':') {
@@ -612,7 +609,7 @@ parse_form(char **fmtp, format_data_t *form)
 		}
 		form->key = key_head;
 	}
-	
+
 	if (p[0] != ')') {
 		grad_log(GRAD_LOG_ERR, _("form `%s' not closed"), formname);
 		return 1;
@@ -624,11 +621,11 @@ format_data_t *
 grad_utent_compile_form(char *fmt)
 {
 	format_data_t *form_head = NULL, *form_tail;
-	
+
 	slist = grad_slist_create();
 	while (*fmt) {
 		int rc;
-		
+
 		format_data_t *form = grad_emalloc(sizeof(*form));
 		if (!form_head)
 			form_head = form;
@@ -642,7 +639,7 @@ grad_utent_compile_form(char *fmt)
 			rc = parse_quote(&fmt, form);
 		else
 			rc = parse_string(&fmt, form);
-		
+
 		if (rc) {
 			form_free(form_head);
 			form_head = NULL;
@@ -651,7 +648,7 @@ grad_utent_compile_form(char *fmt)
 	}
 
 	grad_slist_free(&slist);
-	
+
 	return form_head;
 }
 
@@ -669,11 +666,11 @@ grad_utent_print(format_data_t *form, struct radutmp *up, int newline)
 						   form->key,
 						   up);
 			break;
-				
+
 		case FDATA_STRING:
 			outbytes += output_string(form->v.string, 0, ALIGN_LEFT);
 			break;
-			
+
 		case FDATA_TAB:
 			outbytes += output_tab(outbytes, form->v.tabstop);
 			break;
@@ -682,7 +679,7 @@ grad_utent_print(format_data_t *form, struct radutmp *up, int newline)
 			for (i = 0; i < form->v.nl; i++)
 				putchar('\n');
 			break;
-			
+
 		default:
 			abort();
 		}
@@ -698,10 +695,10 @@ grad_utent_print_header(format_data_t *form)
 	int i, outbytes = 0;
 	format_data_t *p;
 
-	for (p = form; p; p = p->next) 
+	for (p = form; p; p = p->next)
 		if (p->type == FDATA_NEWLINE)
 			return;
-	
+
 	for (; form; form = form->next) {
 		switch (form->type) {
 		case FDATA_FH:
@@ -712,13 +709,13 @@ grad_utent_print_header(format_data_t *form)
 			else
 				outbytes += form->v.fh.width;
 			break;
-				
+
 		case FDATA_STRING:
 			outbytes += output_string("",
 						  strlen(form->v.string),
 						  ALIGN_LEFT);
 			break;
-			
+
 		case FDATA_TAB:
 			outbytes += output_tab(outbytes, form->v.tabstop);
 			break;
@@ -727,11 +724,10 @@ grad_utent_print_header(format_data_t *form)
 			for (i = 0; i < form->v.nl; i++)
 				putchar('\n');
 			break;
-			
+
 		default:
 			abort();
 		}
 	}
 	putchar('\n');
 }
-

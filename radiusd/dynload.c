@@ -1,5 +1,5 @@
 /* This file is part of GNU Radius.
-   Copyright (C) 2004,2006,2007,2008 Free Software Foundation, Inc.
+   Copyright (C) 2004-2025 Free Software Foundation, Inc.
 
    Written by Sergey Poznyakoff
 
@@ -7,23 +7,22 @@
    it under the terms of the GNU General Public License as published by
    the Free Software Foundation; either version 3 of the License, or
    (at your option) any later version.
-  
+
    GNU Radius is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
-  
+
    You should have received a copy of the GNU General Public License
-   along with GNU Radius; if not, write to the Free Software Foundation, 
-   Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
+   along with GNU Radius.  If not, see <http://www.gnu.org/licenses/>. */
 
 #ifdef HAVE_CONFIG_H
 # include <config.h>
-#endif  
+#endif
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>  
+#include <unistd.h>
 #include <string.h>
 
 #include <radiusd.h>
@@ -49,7 +48,7 @@ _free_loaded_module (void *item, void *data)
 	lt_dlhandle handle = (lt_dlhandle) item;
 	grad_dl_done_t fp = (grad_dl_done_t) lt_dlsym(handle, "done");
 
-	GRAD_DEBUG2(1,"Freeing handle %p, grad_dl_done %p", handle, fp);
+	GRAD_DEBUG(1,"Freeing handle %p, grad_dl_done %p", handle, fp);
 	if (fp)
 		fp();
 	lt_dlclose(handle);
@@ -58,7 +57,7 @@ _free_loaded_module (void *item, void *data)
 }
 
 static void
-dynload_free_modules()
+dynload_free_modules(void)
 {
 	grad_list_iterate(handle_list, _free_loaded_module, NULL);
 	grad_list_destroy(&handle_list, NULL, NULL);
@@ -69,12 +68,12 @@ radiusd_load_ext(const char *name, const char *ident, void **symbol)
 {
 	lt_dlhandle handle;
 
-	GRAD_DEBUG2(1,"Loading module '%s', symbol '%s'", name, ident);
+	GRAD_DEBUG(1,"Loading module '%s', symbol '%s'", name, ident);
 	if (lt_dlinit()) {
-		GRAD_DEBUG(1,"lt_ldinit failed");
+		GRAD_DEBUG(1, "%s", "lt_ldinit failed");
 		return NULL;
 	}
-	
+
 	handle = lt_dlopenext(name);
 	if (handle) {
 		*symbol = lt_dlsym(handle, ident);
@@ -102,8 +101,8 @@ radiusd_load_ext(const char *name, const char *ident, void **symbol)
 		grad_log(GRAD_LOG_NOTICE, _("Cannot load module %s: %s"),
 			 name, lt_dlerror());
 
-	GRAD_DEBUG1(1,"Handle %p", handle);
-	if (!handle) 
+	GRAD_DEBUG(1,"Handle %p", handle);
+	if (!handle)
 		lt_dlexit();
 	else
 		store_handle(handle);
@@ -129,28 +128,28 @@ radiusd_set_load_path(const char *path)
 #else
 
 static void
-dynload_free_modules()
+dynload_free_modules(void)
 {
 }
 
 void *
 radiusd_load_ext(const char *name, const char *ident, void **symbol)
 {
-	GRAD_DEBUG(1,"radiusd is compiled without dynamic loading support");
+	GRAD_DEBUG(1, "%s", "radiusd is compiled without dynamic loading support");
 	return NULL;
 }
 
 int
 radiusd_add_load_path(const char *path)
 {
-	GRAD_DEBUG(1,"radiusd is compiled without dynamic loading support");
+	GRAD_DEBUG(1, "%s", "radiusd is compiled without dynamic loading support");
 	return 1;
 }
 
 int
 radiusd_set_load_path(const char *path)
 {
-	GRAD_DEBUG(1,"radiusd is compiled without dynamic loading support");
+	GRAD_DEBUG(1, "%s", "radiusd is compiled without dynamic loading support");
 	return 1;
 }
 
@@ -164,7 +163,7 @@ dynload_before_config_hook(void *a ARG_UNUSED, void *b ARG_UNUSED)
 }
 
 void
-dynload_init()
+dynload_init(void)
 {
 	radiusd_set_preconfig_hook(dynload_before_config_hook, NULL, 0);
 }
@@ -172,8 +171,9 @@ dynload_init()
 int
 dynload_stmt_term(int finish, void *block_data, void *handler_data)
 {
-	if (!finish) 
+	if (!finish)
 		radiusd_set_load_path (RADIUS_LIBDIR "/modules");
+	return 0;
 }
 
 static int
@@ -185,11 +185,11 @@ dynload_cfg_add_load_path(int argc, cfg_value_t *argv,
 		return 0;
 	}
 
- 	if (argv[1].type != CFG_STRING) {
+	if (argv[1].type != CFG_STRING) {
 		cfg_type_error(CFG_STRING);
 		return 0;
 	}
-	
+
 	radiusd_add_load_path(argv[1].v.string);
 	return 0;
 }

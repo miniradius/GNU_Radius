@@ -1,9 +1,9 @@
 @c This is part of the Radius manual.
-@c Copyright (C) 1999,2000,2001,2002,2003 Free Software Foundation, Inc.
+@c Copyright (C) 1999-2025 Free Software Foundation, Inc.
 @c Written by Sergey Poznyakoff
 @c See file radius.texi for copying conditions.
 @comment *******************************************************************
-@node Accounting, Logging, Authentication, Top
+@node Accounting
 @chapter Accounting
 @cindex Accounting Types
 
@@ -17,14 +17,14 @@ sequence:
 @enumerate 1
 @item System accounting
 @item Detailed request accounting
-@item @acronym{sql} accounting 
-@item Custom accounting 
+@item @acronym{sql} accounting
+@item Custom accounting
 @end enumerate
 
 Any method can be enabled or disabled. Thus, you can even disable them
 all, thereby disabling accounting altogether.
 
-Notice, that the multiple login checking scheme relies on 
+Notice, that the multiple login checking scheme relies on
 accounting being enabled. By default it uses system accounting, but
 can also be configured to use @acronym{sql} accounting. So, if you
 disable system accounting and still wish to use reliable multiple login
@@ -49,13 +49,14 @@ is deemed to fail and all subsequent methods are not invoked.
 
 Radius keeps files @file{radutmp} and @file{radwtmp} in its logging
 directory  and stores the accounting data there. The utilities
-@command{radwho} and @command{radlast} can be used to list information 
-about users' sessions. @FIXME{Should they work if other mlc method is used?}
+@command{radwho} and @command{radlast} can be used to list information
+about users' sessions.
+@FIXME{Should they work if other mlc method is used?}
 
-This accounting method is enabled by default. To disable it, use 
+This accounting method is enabled by default. To disable it, use
 @code{system no} statement in @file{raddb/config}. @xref{acct}, for more
 information. Please notice that disabling this authentication method will
-disable multiple login checking as well. Refer to @ref{Multiple Login Checking}, for the detailed discussion of this.  
+disable multiple login checking as well. Refer to @ref{Multiple Login Checking}, for the detailed discussion of this.
 
 @comment *L2****************************************************************
 @node Detailed Request Accounting
@@ -63,7 +64,7 @@ disable multiple login checking as well. Refer to @ref{Multiple Login Checking},
 @cindex Detailed Request Accounting
 
 Radius stores the detailed information about accounting packets it receives
-in files @file{radacct/@var{nasname}/detail} (@pxref{Naming Conventions}), 
+in files @file{radacct/@var{nasname}/detail} (@pxref{Naming Conventions}),
 where @var{nasname} is replaced with the short name of the @NAS{} from
 the @file{raddb/naslist} file (@pxref{naslist file}).
 
@@ -77,7 +78,7 @@ The accounting detail files consist of a record for each accounting
 request. A record includes the timestamp and detailed
 dump of attributes from the packet, e.g.:
 
-@smallexample
+@example
 Fri Dec 15 18:00:24 2000
         Acct-Session-Id = "2193976896017"
         User-Name = "e2"
@@ -109,7 +110,7 @@ Fri Dec 15 18:32:09 2000
         Acct-Delay-Time = 0
         Timestamp = 976897929
         Request-Authenticator = Unverified
-@end smallexample
+@end example
 
 Notice that @command{radiusd} always adds two pseudo-attributes to
 detailed listings. Attribute @attr{Timestamp} shows the UNIX timestamp
@@ -177,9 +178,9 @@ To use a Guile procedure for accounting, the name of the procedure
 must be specified as a value to the @attr{Scheme-Acct-Procedure} attribute
 in the @RHS{} list of a @file{hints} entry, e.g.:
 
-@smallexample
+@example
 DEFAULT NULL Scheme-Acct-Procedure = "my-acct"
-@end smallexample
+@end example
 @noindent
 
 For a detailed description of Scheme accounting procedures,
@@ -190,9 +191,9 @@ an external program. This is less effective than the methods described
 above, but may be necessary sometimes. To invoke the program, use
 the following statement in the @LHS{} of the @file{hints} entry:
 
-@smallexample
+@example
 Acct-Ext-Program = "@var{progname} @var{args}"
-@end smallexample
+@end example
 
 The @var{progname} must be the full path to the program, and @var{args}
 any arguments it needs. The usual substitutions may be used in

@@ -1,22 +1,20 @@
 /* This file is part of GNU Radius.
-   Copyright (C) 2000,2001,2002,2003,2004,2005,
-   2007,2008 Free Software Foundation, Inc.
+   Copyright (C) 2000-2025 Free Software Foundation, Inc.
 
    Written by Sergey Poznyakoff
-  
+
    GNU Radius is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
    the Free Software Foundation; either version 3 of the License, or
    (at your option) any later version.
-  
+
    GNU Radius is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
-  
+
    You should have received a copy of the GNU General Public License
-   along with GNU Radius; if not, write to the Free Software Foundation, 
-   Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
+   along with GNU Radius.  If not, see <http://www.gnu.org/licenses/>. */
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -35,44 +33,44 @@ struct radutmp; /* declared in radutmp.h */
    fields to it. */
 typedef struct radiusd_request {
 	grad_request_t *request;
-	
-        /* Saved reply values */
-        int           reply_code;   /* Reply code */
-        grad_avp_t    *reply_pairs; /* Reply pairs */
-        char          *reply_msg;   /* Reply message */
-	                            /* FIXME: should probably be
-			 	       incorporated to reply_pairs
+
+	/* Saved reply values */
+	int           reply_code;   /* Reply code */
+	grad_avp_t    *reply_pairs; /* Reply pairs */
+	char          *reply_msg;   /* Reply message */
+				    /* FIXME: should probably be
+				       incorporated to reply_pairs
 				       at once */
 	/* List of cfg file locations that lead to the decision on this
 	   request */
 	grad_list_t   *locus_list;
-	
-        /* Proxy support fields */
-        grad_realm_t  *realm;       
-        int           validated;     /* Already md5 checked */
+
+	/* Proxy support fields */
+	grad_realm_t  *realm;
+	int           validated;     /* Already md5 checked */
 	int           server_no;
 	int           attempt_no;
-        grad_uint32_t server_id;     /* Proxy ID of the packet */
+	uint32_t server_id;     /* Proxy ID of the packet */
 	char          *remote_user;  /* Remote username */
-        u_char        remote_auth[GRAD_AUTHENTICATOR_LENGTH];
-	                             /* Remote request authenticator */	
-        int           server_code;   /* Reply code from other srv */
-        grad_avp_t    *server_reply; /* Reply from other server */
+	u_char        remote_auth[GRAD_AUTHENTICATOR_LENGTH];
+				     /* Remote request authenticator */
+	int           server_code;   /* Reply code from other srv */
+	grad_avp_t    *server_reply; /* Reply from other server */
 } radiusd_request_t;
 
 enum reload_what {
-        reload_config,
-        reload_all,
-        reload_dict,
-        reload_users,
-        reload_huntgroups,
-        reload_hints,
-        reload_clients, 
-        reload_naslist, 
-        reload_realms,
-        reload_deny,
-        reload_sql,
-        reload_rewrite
+	reload_config,
+	reload_all,
+	reload_dict,
+	reload_users,
+	reload_huntgroups,
+	reload_hints,
+	reload_clients,
+	reload_naslist,
+	reload_realms,
+	reload_deny,
+	reload_sql,
+	reload_rewrite
 };
 
 /* ********************** Request list handling **************************** */
@@ -93,7 +91,7 @@ enum reload_what {
 			       handler and is waiting for it to
 			       become free */
 #define RS_TERMINATED 4     /* TERM has been sent to the handler */
-			      
+
 /* Request comparison results */
 #define RCMP_NE     0      /* Requests not equal */
 #define RCMP_EQ     1      /* Requests equal */
@@ -102,16 +100,16 @@ enum reload_what {
 typedef struct request REQUEST;
 
 struct request {
-        int             type;         /* request type */
-        int             status;       /* request status */
-        time_t          timestamp;    /* when was the request accepted */
-        pid_t           child_id;     /* ID of the handling process */
-        int             code;         /* Child return code if completed */
-        void            *data;        /* Request-specific data */
+	int             type;         /* request type */
+	int             status;       /* request status */
+	time_t          timestamp;    /* when was the request accepted */
+	pid_t           child_id;     /* ID of the handling process */
+	int             code;         /* Child return code if completed */
+	void            *data;        /* Request-specific data */
 	void            *rawdata;     /* Raw data as received from the
-					 socket */  
+					 socket */
 	size_t          rawsize;      /* Size of the data */
-        int             fd;           /* socket the request came from */
+	int             fd;           /* socket the request came from */
 	struct sockaddr_in srv_addr;  /* Server address */
 	struct sockaddr_in addr;      /* Remote party address */
 	REQUEST         *orig;        /* Original request. For proxy */
@@ -120,44 +118,44 @@ struct request {
 /* Request class structure
  */
 typedef struct request_class {
-        char *name;           /* Class name */
-        int  max_requests;    /* Max.number of pending requests of this type */
-        int  ttl;             /* Request time-to-live */
-        int  cleanup_delay;   /* Delay before cleaning the completed request */
+	char *name;           /* Class name */
+	int  max_requests;    /* Max.number of pending requests of this type */
+	int  ttl;             /* Request time-to-live */
+	int  cleanup_delay;   /* Delay before cleaning the completed request */
 	int  (*decode)(const struct sockaddr_in *srv_sa,
 		       const struct sockaddr_in *clt_sa,
 		       void *input, size_t inputsize, void **output);
-        int  (*respond)(REQUEST *r);          /* Handler function */
-        void (*xmit)(REQUEST *r);             /* Retransmit function */
-        int  (*comp)(void *a, void *b);       /* Compare function */
-        void (*free)(void *data);             /* Free the associated data */
-        void (*drop)(int type, void *data, void *old_data, int fd,
+	int  (*respond)(REQUEST *r);          /* Handler function */
+	void (*xmit)(REQUEST *r);             /* Retransmit function */
+	int  (*comp)(void *a, void *b);       /* Compare function */
+	void (*free)(void *data);             /* Free the associated data */
+	void (*drop)(int type, void *data, void *old_data, int fd,
 		     const char *msg);        /* Drop the request */
-        void (*cleanup)(int type, void *data);/* Cleanup function */
-        int (*failure)(int type, struct sockaddr_in *addr);
+	void (*cleanup)(int type, void *data);/* Cleanup function */
+	int (*failure)(int type, struct sockaddr_in *addr);
 	void (*update)(void *req, void *ptr);
 } REQUEST_CLASS;
 
 struct queue_stat {
-        size_t waiting;
-        size_t pending;
-        size_t completed;
+	size_t waiting;
+	size_t pending;
+	size_t completed;
 };
 typedef struct queue_stat QUEUE_STAT[R_MAX];
 
 typedef struct client {
 	grad_netdef_t           netdef;
-        char                    longname[GRAD_MAX_LONGNAME+1];
-        u_char                  *secret;
-        char                    shortname[GRAD_MAX_SHORTNAME+1];
+	char                    longname[GRAD_MAX_LONGNAME+1];
+	char                    *secret;
+	char                    shortname[GRAD_MAX_SHORTNAME+1];
 } CLIENT;
 
 typedef struct proxy_state {
-	grad_uint32_t ref_ip;             /* Radius server IP */
-        grad_uint32_t proxy_id;           /* Proxy ID assigned by the server */
-        grad_uint32_t remote_ip;          /* Remote radius server IP */
-        grad_uint32_t client_ip;          /* IP of the requesting client */ 
-        grad_uint32_t id;                 /* Radius request ID */
+	uint32_t ref_ip;             /* Radius server IP */
+	uint32_t proxy_id;           /* Proxy ID assigned by the server */
+	uint32_t remote_ip;          /* Remote radius server IP */
+	uint32_t client_ip;          /* IP of the requesting client */
+	uint32_t id;                 /* Radius request ID */
 } PROXY_STATE;
 
 typedef struct {
@@ -171,13 +169,13 @@ typedef struct {
  * Internal representation of a user's profile
  */
 typedef struct user_symbol {
-        struct user_symbol *next;  /* Link to the next entry */
-        char *name;                /* Label */
-        grad_avp_t *check;         /* LHS */
-        grad_avp_t *reply;         /* RHS */
-        grad_locus_t loc;                 /* Location of the definition of
+	struct user_symbol *next;  /* Link to the next entry */
+	char *name;                /* Label */
+	grad_avp_t *check;         /* LHS */
+	grad_avp_t *reply;         /* RHS */
+	grad_locus_t loc;                 /* Location of the definition of
 				      this entry */
-        int ordnum;                /* Entry ordinal number (used for semantic
+	int ordnum;                /* Entry ordinal number (used for semantic
 				      checks */
 } User_symbol;
 
@@ -196,52 +194,52 @@ struct netname {
 
 typedef struct community Community;
 struct community {
-        char *name;
-        int access;
+	char *name;
+	int access;
 } ;
 
 typedef struct access_control_list ACL;
 struct access_control_list {
-        Community *community;   /* community or NULL to deny access */
+	Community *community;   /* community or NULL to deny access */
 	grad_list_t /* of grad_netdef_t */ *netlist;
 };
 
 struct radstat {
-        struct timeval start_time;
-        grad_counter_t port_active_count;
-        grad_counter_t port_idle_count;
+	struct timeval start_time;
+	grad_counter_t port_active_count;
+	grad_counter_t port_idle_count;
 };
 
 typedef enum {
-        port_idle = 1,
-        port_active
+	port_idle = 1,
+	port_active
 } port_status;
 
 typedef struct {
-        struct timeval start_time;
-        unsigned port_count; /* Number of ports in the port_stat array */
-        unsigned nas_count;  /* Number of NASes in the nas_stat array */
-        int nas_index; /* Next available NAS index */
-        Auth_server_stat auth;
-        Acct_server_stat acct;
-        /* struct nas_stat naslist[nas_count];
+	struct timeval start_time;
+	unsigned port_count; /* Number of ports in the port_stat array */
+	unsigned nas_count;  /* Number of NASes in the nas_stat array */
+	int nas_index; /* Next available NAS index */
+	Auth_server_stat auth;
+	Acct_server_stat acct;
+	/* struct nas_stat naslist[nas_count];
 	   struct port_stat portlist[port_count]; */
 } Server_stat;
 
 #define stat_inc(m,a,c) \
  do if (server_stat) {\
-        grad_nas_t *nas;\
-        server_stat -> m . c ++;\
-        if ((nas = grad_nas_lookup_ip(a)) != NULL && nas->app_data)\
-                ((struct nas_stat*)nas->app_data)-> m . c ++;\
+	grad_nas_t *nas;\
+	server_stat -> m . c ++;\
+	if ((nas = grad_nas_lookup_ip(a)) != NULL && nas->app_data)\
+		((struct nas_stat*)nas->app_data)-> m . c ++;\
  } while (0)
 
 extern struct radstat radstat;
 
 typedef struct snmp_req {
-        struct snmp_pdu *pdu;
-        char *community;
-        int access;
+	struct snmp_pdu *pdu;
+	char *community;
+	int access;
 	struct sockaddr_in addr;
 } SNMP_REQ;
 
@@ -268,7 +266,7 @@ enum auth_status {
 	auth_valid,           /* Authentication passed, expiration timeout
 				 is returned */
 	auth_account_expired, /* Account has expired */
-	auth_password_expired,/* Password has expired */ 
+	auth_password_expired,/* Password has expired */
 	auth_fail,
 	auth_nouser,
 	auth_reject,
@@ -324,11 +322,11 @@ extern size_t max_children;
 extern unsigned process_timeout;
 extern unsigned radiusd_write_timeout;
 extern unsigned radiusd_read_timeout;
-extern grad_uint32_t expiration_seconds;
-extern grad_uint32_t warning_seconds;
+extern uint32_t expiration_seconds;
+extern uint32_t warning_seconds;
 extern int use_dbm;
-extern grad_uint32_t myip;
-extern grad_uint32_t ref_ip;
+extern uint32_t myip;
+extern uint32_t ref_ip;
 extern int auth_port;
 extern int acct_port;
 extern int suspend_flag;
@@ -347,8 +345,8 @@ extern char *server_id;
 extern Server_stat *server_stat;
 extern struct cfg_stmt snmp_stmt[];
 #endif
-extern int auth_comp_flag; 
-extern int acct_comp_flag; 
+extern int auth_comp_flag;
+extern int acct_comp_flag;
 extern RADIUS_USER exec_user;
 extern RADIUS_USER radiusd_user;
 extern grad_symtab_t *user_tab;
@@ -357,7 +355,7 @@ extern grad_symtab_t *user_tab;
 
 typedef struct input_system INPUT;
 
-INPUT *input_create();
+INPUT *input_create(void);
 void input_register_method(INPUT *input,
 			   const char *name,
 			   int prio,
@@ -367,7 +365,7 @@ void input_register_method(INPUT *input,
 int input_register_channel(INPUT *input, char *name, int fd, void *data);
 void input_close_channels(INPUT *input);
 void input_close_channel_fd(INPUT *input, int fd);
-void input_close_channel_data(INPUT *input, char *name, void *data); 
+void input_close_channel_data(INPUT *input, char *name, void *data);
 int input_select(INPUT *input, struct timeval *tv);
 int input_select_channel(INPUT *input, char *name, struct timeval *tv);
 void *input_find_channel(INPUT *input, char *name, void *data);
@@ -375,16 +373,16 @@ void input_iterate_channels(INPUT *input, char *name, list_iterator_t fun,
 			    void *data);
 
 /* rpp.c */
-int rpp_ready();
+int rpp_ready(pid_t pid);
 int rpp_forward_request(REQUEST *req);
 void rpp_remove_pid(pid_t pid);
 void rpp_status_changed(pid_t pid, int exit_status);
 void rpp_flush(int (*fun)(void*), void *closure);
-void rpp_collect_exited();
+void rpp_collect_exited(void);
 int rpp_input_handler(int fd, void *data);
 int rpp_input_close(int fd, void *data);
 int rpp_kill(pid_t pid, int signo);
-size_t rpp_count();
+size_t rpp_count(void);
 int rpp_update(void *data, size_t size);
 pid_t rpp_check_pid(pid_t pid);
 
@@ -392,12 +390,12 @@ pid_t rpp_check_pid(pid_t pid);
 REQUEST *request_create(int type, int fd,
 			const struct sockaddr_in *srv_sa,
 			const struct sockaddr_in *clt_sa,
-			u_char *buf, size_t bufsize);
+			char *buf, size_t bufsize);
 void request_free(REQUEST *req);
 int request_respond(REQUEST *req);
 int request_handle(REQUEST *req, int (*handler)(REQUEST *));
 void request_fail(int type, struct sockaddr_in *addr);
-void request_init_queue();
+void request_init_queue(void);
 void *request_scan_list(int type, list_iterator_t itr, void *closure);
 void request_set_status(pid_t pid, int status);
 int request_stat_list(QUEUE_STAT stat);
@@ -408,21 +406,21 @@ int udp_input_handler(int fd, void *data);
 int udp_input_close(int fd, void *data);
 int udp_input_cmp(const void *a, const void *b);
 
-int udp_open(int type, grad_uint32_t ipaddr, int port, int nonblock);
+int udp_open(int type, uint32_t ipaddr, int port, int nonblock);
 
 void radiusd_pidfile_write(char *name);
 pid_t radiusd_pidfile_read(char *name);
 void radiusd_pidfile_remove(char *name);
 
-void radiusd_main();
-void radiusd_signal_init(RETSIGTYPE (*)(int));
-void radiusd_cleanup();
-void radiusd_restart();
-void radiusd_flush_queue();
-void radiusd_exit();
-void radiusd_exit0();
-void radiusd_reconfigure();
-int radiusd_master();
+void radiusd_main(void);
+void radiusd_signal_init(void (*)(int));
+void radiusd_cleanup(void);
+void radiusd_restart(void);
+void radiusd_flush_queue(void);
+void radiusd_exit(void);
+void radiusd_exit0(void);
+void radiusd_reconfigure(void);
+int radiusd_master(void);
 void radiusd_set_preconfig_hook(void (*f)(void *, void *), void *p, int once);
 void radiusd_set_postconfig_hook(void (*f)(void *, void *), void *p, int once);
 void radiusd_register_input_fd(char *name, int fd, void *data);
@@ -440,10 +438,13 @@ int filters_stmt_term(int finish, void *block_data, void *handler_data);
 extern struct cfg_stmt filters_stmt[];
 
 /* scheme.c */
-void scheme_main();
+void guile_init(void);
 void scheme_load_path(char *pathname);
 int scheme_auth(char *procname, radiusd_request_t *req,
-                grad_avp_t *user_check, grad_avp_t **user_reply_ptr);
+		grad_avp_t *user_check, grad_avp_t **user_reply_ptr);
+int scheme_try_auth(int auth_type, radiusd_request_t *req,
+		    grad_avp_t *user_check,
+		    grad_avp_t **user_reply_ptr);
 int scheme_acct(char *procname, radiusd_request_t *req);
 int scheme_eval_boolean_expr(char *expr);
 int scheme_eval_avl (radiusd_request_t *request,
@@ -451,9 +452,8 @@ int scheme_eval_avl (radiusd_request_t *request,
 		     grad_avp_t **reply,
 		     grad_avp_t **pfailed);
 void scheme_eval_unspecified_expr(char *expr);
-void scheme_read_eval_loop();
-void scheme_redirect_output();
-void start_guile();
+void scheme_read_eval_loop(void);
+void scheme_redirect_output(void);
 
 int guile_cfg_handler(int argc, cfg_value_t *argv,
 		      void *block_data, void *handler_data);
@@ -504,9 +504,9 @@ void radius_trace_path(radiusd_request_t *req);
 grad_avp_t *radius_decrypt_request_pairs(radiusd_request_t *req, grad_avp_t *pair);
 void radius_destroy_pairs(grad_avp_t **p);
 
-/* shmem.c */
+/* stat.c */
 int shmem_alloc(size_t size);
-void shmem_free();
+void shmem_free(void);
 void *shmem_get(size_t size, int zero);
 
 /* pam.c */
@@ -519,7 +519,7 @@ int proxy_receive(radiusd_request_t *radreq, radiusd_request_t *oldreq, int acti
 void proxy_retry(radiusd_request_t *radreq, int fd);
 int proxy_cmp(radiusd_request_t *qr, radiusd_request_t *r);
 grad_avp_t *proxy_request_recode(radiusd_request_t *radreq, grad_avp_t *plist,
-				 u_char *secret, u_char *authenticator);
+				 char *secret, u_char *authenticator);
 
 /* menu.c */
 #define MAX_PATH_LENGTH                 256
@@ -533,10 +533,10 @@ void menu_reply(radiusd_request_t *radreq, int fd);
 char *menu_read_text(char *menu_name);
 
 /* acct.c */
-void system_acct_init();
-void acct_init();
+void system_acct_init(void);
+void acct_init(void);
 int rad_accounting(radiusd_request_t *, int, int);
-int radzap(grad_uint32_t nas, int port, char *user, time_t t);
+int radzap(uint32_t nas, int port, char *user, time_t t);
 int write_detail(radiusd_request_t *radreq, int authtype, int rtype);
 
 int radutmp_mlc_collect_user(char *name, radiusd_request_t *request,
@@ -558,6 +558,8 @@ void mlc_register_method(char *name,
 			 mlc_collect_realm_t collect_realm,
 			 mlc_close_t close,
 			 mlc_enabled_t enabled_p);
+void mlc_init(void);
+int radius_mlc_enabled_p(void);
 
 extern struct cfg_stmt mlc_stmt[];
 int radius_mlc_user(char *name, radiusd_request_t *request,
@@ -570,28 +572,29 @@ int userparse(char *buf, grad_avp_t **first_pair, char **errmsg);
 void presuf_setup(grad_avp_t *request_pairs);
 int hints_setup(radiusd_request_t *request);
 int huntgroup_access(radiusd_request_t *radreq, grad_locus_t *loc);
-CLIENT *client_lookup_ip(grad_uint32_t ipno);
-char *client_lookup_name(grad_uint32_t ipno, char *buf, size_t size);
+CLIENT *client_lookup_ip(uint32_t ipno);
+char *client_lookup_name(uint32_t ipno, char *buf, size_t size);
 int read_clients_file(char *);
-grad_nas_t *grad_nas_find(grad_uint32_t ipno);
+grad_nas_t *grad_nas_find(uint32_t ipno);
 grad_nas_t *grad_nas_by_name(char *name);
-char *grad_nas_name(grad_uint32_t ipno);
+char *grad_nas_name(uint32_t ipno);
 char *nas_name2(radiusd_request_t *r);
 int read_nas_list_file(char *);
 int reload_config_file(enum reload_what);
 int presufcmp(grad_avp_t *check, char *name, char *rest);
-int get_config();
 int get_deny(char *user);
 grad_nas_t *findnasbyindex(int);
-char *make_server_ident();
-void dump_users_db();
+char *make_server_ident(void);
+void dump_users_db(void);
 void strip_username(int do_strip, char *name,
-                    grad_avp_t *check_item, char *stripped_name);
+		    grad_avp_t *check_item, char *stripped_name);
 int exec_program_wait (radiusd_request_t *request, grad_avp_t *rhs,
 		       grad_avp_t **reply, grad_avp_t **pfailed);
 
 /* version.c */
-void version();
+struct argp_state;
+void version(FILE *stream, struct argp_state *state);
+void show_compilation_defaults(void);
 
 /* auth.c */
 int rad_auth_init(radiusd_request_t *radreq, int activefd);
@@ -606,22 +609,22 @@ int timestr_match(char *, time_t);
 #ifdef USE_SNMP
 /* snmpserv.c */
 void snmpserv_init(void *arg);
-void snmp_auth_server_reset();
-void snmp_acct_server_reset();
+void snmp_auth_server_reset(void);
+void snmp_acct_server_reset(void);
 void snmp_attach_nas_stat(grad_nas_t *nas);
-void snmp_init_nas_stat();
-void snmp_sort_nas_stat();
+void snmp_init_nas_stat(void);
+void snmp_sort_nas_stat(void);
 int snmp_stmt_begin(int finish, void *data, void *up_data);
 extern struct cfg_stmt storage_stmt[];
 #endif
 
 /* stat.c */
 #ifdef USE_SNMP
-void stat_init();
-void stat_done();
+void stat_init(void);
+void stat_done(void);
 void stat_update(struct radutmp *ut, int status);
-void stat_count_ports();
-struct nas_stat * find_nas_stat(grad_uint32_t ip_addr);
+void stat_count_ports(void);
+struct nas_stat * find_nas_stat(uint32_t ip_addr);
 int stat_get_port_index(grad_nas_t *nas, int port_no);
 int stat_get_next_port_no(grad_nas_t *nas, int port_no);
 #else
@@ -639,26 +642,29 @@ void snmp_req_free(void *ptr);
 void snmp_req_drop(int type, void *data, void *orig_data,
 		   int fd, const char *status_str);
 int snmp_req_respond(REQUEST *request);
-        
+
 /* radutil.c */
 radiusd_request_t *radiusd_request_alloc(grad_request_t *req);
 void radiusd_request_free(radiusd_request_t *radreq);
 
-char *radius_xlate(struct obstack *obp, char *str,
-                   grad_request_t *req, grad_avp_t *reply_pairs);
+void radius_strbuf_xlate(grad_strbuf_t obp, char const *str,
+			 grad_request_t *req, grad_avp_t *reply);
+char *radius_xlate(char const *str, grad_request_t *req, grad_avp_t *reply_pairs);
 int radius_eval_avp(radiusd_request_t *req, grad_avp_t *p, grad_avp_t *reply,
 		    int allow_xlat);
 int radius_eval_avl(radiusd_request_t *req, grad_avp_t *p);
-char *util_xlate(struct obstack *sp, char *fmt, grad_request_t *radreq);
+char *util_xlate(grad_strbuf_t sp, char const *fmt, grad_request_t *radreq);
 
 /* rewrite.y */
 extern struct cfg_stmt rewrite_stmt[];
 int parse_rewrite(char *name);
+void rewrite_load_all(void);
+int rewrite_load_module(char *name);
 
 /* radck.c */
 int fix_check_pairs(int sf_file, grad_locus_t *loc, char *name, grad_avp_t **pairs);
 int fix_reply_pairs(int cf_file, grad_locus_t *loc, char *name, grad_avp_t **pairs);
-void radck();
+void radck(void);
 
 /* checkrad.c */
 int checkrad(grad_nas_t *nas, struct radutmp *up);
@@ -668,14 +674,14 @@ int rad_cfg_forward_auth(int argc, cfg_value_t *argv,
 			 void *block_data, void *handler_data);
 int rad_cfg_forward_acct(int argc, cfg_value_t *argv,
 			 void *block_data, void *handler_data);
-void forward_init();
+void forward_init(void);
 void forward_request(int type, radiusd_request_t *req);
 
 /* dynload.c */
 extern struct cfg_stmt dynload_stmt[];
 int dynload_stmt_term(int finish, void *block_data, void *handler_data);
 void *radiusd_load_ext(const char *name, const char *ident, void **symbol);
-void dynload_init();
+void dynload_init(void);
 
 /* Logging */
 
@@ -698,18 +704,18 @@ void dynload_init();
 typedef struct channel Channel;
 
 struct channel {
-        char *name;
-        int  pmask[GRAD_LOG_NCAT]; 
-        int mode;   /* LM_ constant */
-        union {
+	char *name;
+	int  pmask[GRAD_LOG_NCAT];
+	int mode;   /* LM_ constant */
+	union {
 		struct {
 			int prio;   /* syslog priority */
 			int fac;    /* syslog facility */
 			char *tag;  /* syslog tag */
 		} sl;
-                char *file;      /* file: output file name */
-        } id;
-        int options;
+		char *file;      /* file: output file name */
+	} id;
+	int options;
 	char *prefix_hook;       /* prefix hook function */
 	char *suffix_hook;       /* suffix hook function */
 };
@@ -717,8 +723,8 @@ struct channel {
 Channel *channel_lookup(char *name);
 void channel_free(Channel *chan);
 void channel_free_list(Channel *chan);
-Channel * log_mark();
-void log_release();
+Channel * log_mark(void);
+void log_release(Channel *chan);
 
 void register_channel(Channel *chan);
 void register_category(int cat, int pri, grad_list_t *chanlist);
@@ -727,14 +733,15 @@ void log_set_to_console(int cat, int pri);
 void log_set_default(char *name, int cat, int pri);
 
 void log_open(int cat);
-void log_close();
+void log_close(void);
 
 /* sql.c */
+int sql_auth_avail_p(const char **msg);
 #ifdef USE_SQL
-void sql_init();
-int radiusd_sql_config();
-void radiusd_sql_shutdown();
-void radiusd_sql_clear_cache();
+void sql_init(void);
+int radiusd_sql_config(void);
+void radiusd_sql_shutdown(void);
+void radiusd_sql_clear_cache(void);
 void radiusd_sql_acct(radiusd_request_t *req);
 int radiusd_sql_checkgroup(radiusd_request_t *req, char *groupname);
 int radiusd_sql_check_attr_query(radiusd_request_t *req, grad_avp_t **check_pairs);
@@ -761,3 +768,6 @@ SCM sql_run_query(int type, const char *query);
 # define radiusd_sql_auth_result_query(req, fail)
 # define radiusd_sql_cleanup (void (*)(int, void *)) NULL
 #endif
+
+/* tsh.c */
+void tsh(void);

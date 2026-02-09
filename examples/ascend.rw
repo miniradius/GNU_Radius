@@ -1,5 +1,5 @@
-/* This file is part of GNU Radius.  -*- rewrite -*- 
-   Copyright (C) 2000,2001,2002,2003,2007 Free Software Foundation, Inc.
+/* This file is part of GNU Radius.  -*- rewrite -*-
+   Copyright (C) 2000-2025 Free Software Foundation, Inc.
 
    Written by Sergey Poznyakoff
 
@@ -14,11 +14,11 @@
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with GNU Radius; if not, write to the Free Software Foundation,
-   Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
+   along with GNU Radius.  If not, see <http://www.gnu.org/licenses/>. */
+
 
 /* *************************************************************************
- * The functions for deocding MAX Ascend port numbers.
+ * The functions for decoding MAX Ascend port numbers.
  * The port number is coded as XYYZZ
  *   where X = 1 for digital, X = 2 for analog;
  *         YY = line number (1 for first PRI/T1/E1, 2 for second, so on);
@@ -35,9 +35,9 @@ max_decode_port(integer P, integer portcnt)
 	if (P > 9999) {
 		integer s, l, c;
 
-		s = P / 10000; 
-		l = (P - (10000 * s))/100; 
-		c = P - ((10000 * s) + (100 * l)); 
+		s = P / 10000;
+		l = (P - (10000 * s))/100;
+		c = P - ((10000 * s) + (100 * l));
 		return (c-1) + (l-1) * portcnt;
 	}
 	return P;
@@ -50,4 +50,3 @@ max_fixup()
 	%[NAS-Port-Id] = max_decode_port(%[NAS-Port-Id], 32);
 	return 0;
 }
-

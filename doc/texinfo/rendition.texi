@@ -1,7 +1,7 @@
 @c Let's use the concept of 'renditions' by Fra@,{c}ois Pinard
 @c I extended it by adding a FIXME_FOOTNOTE variable, which controls
 @c whether FIXME information should be placed in footnotes or
-@c inlined. 
+@c inlined.
 
 @c ======================================================================
 @c This document has three levels of rendition: PUBLISH, DISTRIB or PROOF,

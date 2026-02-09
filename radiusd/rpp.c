@@ -1,5 +1,5 @@
 /* This file is part of GNU Radius.
-   Copyright (C) 2003,2004,2006,2007,2008 Free Software Foundation, Inc.
+   Copyright (C) 2003-2025 Free Software Foundation, Inc.
 
    Written by Sergey Poznyakoff
 
@@ -7,15 +7,14 @@
    it under the terms of the GNU General Public License as published by
    the Free Software Foundation; either version 3 of the License, or
    (at your option) any later version.
-  
+
    GNU Radius is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
-  
+
    You should have received a copy of the GNU General Public License
-   along with GNU Radius; if not, write to the Free Software Foundation,
-   Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
+   along with GNU Radius.  If not, see <http://www.gnu.org/licenses/>. */
 
 /* RPP stands for Radius Process Pool */
 
@@ -78,30 +77,30 @@ pipe_write(int fd, void *ptr, size_t size, struct timeval *tv)
 				errno = ETIMEDOUT;
 				break;
 			}
-			
+
 			rc = select(fd + 1, NULL, &wr_set, NULL, &tval);
 			if (rc == 0) {
 				errno = ETIMEDOUT;
-				GRAD_DEBUG(100, "rc = 0");
+				GRAD_DEBUG(100, "%s",  "rc = 0");
 				break;
 			} else if (rc < 0) {
-				if (errno == EINTR) 
+				if (errno == EINTR)
 					continue;
-				GRAD_DEBUG2(100, "rc = %d, errno = %d", 
-                                            rc, errno);
+				GRAD_DEBUG(100, "rc = %d, errno = %d",
+					    rc, errno);
 				break;
 			} else if (rc > 0) {
 				rc = write(fd, data, 1);
 				if (rc != 1) {
-					GRAD_DEBUG2(100, "rc = %d, errno = %d", 
-                                                    rc, errno);
+					GRAD_DEBUG(100, "rc = %d, errno = %d",
+						    rc, errno);
 					break;
 				}
 				data++;
 				n++;
 			}
 		}
-		GRAD_DEBUG1(100,"n = %d",n);
+		GRAD_DEBUG(100,"n = %d",n);
 		return n;
 	}
 }
@@ -133,7 +132,7 @@ pipe_read(int fd, void *ptr, size_t size, struct timeval *tv)
 		struct timeval tval, start;
 		fd_set rd_set;
 		size_t n;
-		
+
 		gettimeofday(&start, NULL);
 		for (n = 0; n < size;) {
 
@@ -157,7 +156,7 @@ pipe_read(int fd, void *ptr, size_t size, struct timeval *tv)
 				break;
 			} else if (rc > 0) {
 				rc = read(fd, data, 1);
-				if (rc != 1) 
+				if (rc != 1)
 					break;
 				data++;
 				n++;
@@ -180,19 +179,19 @@ rpp_fd_read(int fd, void *data, size_t size, struct timeval *tv)
 	sz = pipe_read(fd, &nbytes, sizeof(nbytes), tv);
 	if (sz == 0)
 		return 0; /* eof */
-	GRAD_DEBUG1(100,"nbytes=%lu",nbytes);
-	if (sz != sizeof(nbytes)) 
+	GRAD_DEBUG(100,"nbytes=%lu",nbytes);
+	if (sz != sizeof(nbytes))
 		return -1;
 	sz = nbytes > size ? size : nbytes;
 	if (pipe_read (fd, data, sz, tv) != sz)
 		return -2;
 	for (;nbytes > size; nbytes--) {
 		char c;
-		if (pipe_read(fd, &c, 1, tv) != 1) 
+		if (pipe_read(fd, &c, 1, tv) != 1)
 			return -3;
 	}
-	
-	GRAD_DEBUG1(100,"return %lu", (unsigned long)sz);
+
+	GRAD_DEBUG(100,"return %lu", (unsigned long)sz);
 	return sz;
 }
 
@@ -200,13 +199,12 @@ rpp_fd_read(int fd, void *data, size_t size, struct timeval *tv)
 static int
 rpp_fd_write(int fd, void *data, size_t size, struct timeval *tv)
 {
-	int rc;
-	GRAD_DEBUG1(100,"size=%lu",size);
-	if (pipe_write(fd, &size, sizeof(size), tv) != sizeof(size)) 
+	GRAD_DEBUG(100,"size=%lu",size);
+	if (pipe_write(fd, &size, sizeof(size), tv) != sizeof(size))
 		return -1;
-	if (pipe_write(fd, data, size, tv) != size) 
+	if (pipe_write(fd, data, size, tv) != size)
 		return -2;
-	GRAD_DEBUG1(1,"return %lu", (unsigned long)size);
+	GRAD_DEBUG(1,"return %lu", (unsigned long)size);
 	return size;
 }
 
@@ -222,12 +220,12 @@ rpp_start_process(rpp_proc_t *proc, int (*proc_main)(void *), void *data)
 	int inp[2];
 	int outp[2];
 	pid_t pid;
-	
+
 	if (pipe(inp)) {
 		grad_log(GRAD_LOG_ERR, "pipe(inp): %s", strerror(errno));
 		return -1;
 	}
-	
+
 	if (pipe(outp)) {
 		grad_log (GRAD_LOG_ERR, "pipe(outp): %s", strerror(errno));
 		return -1;
@@ -250,7 +248,7 @@ rpp_start_process(rpp_proc_t *proc, int (*proc_main)(void *), void *data)
 
 		rpp_stdin = outp[0];
 		rpp_stdout = inp[1];
-		
+
 		/* Run the main process */
 		exit(proc_main(data));
 	}
@@ -266,7 +264,7 @@ rpp_start_process(rpp_proc_t *proc, int (*proc_main)(void *), void *data)
 	return 0;
 }
 
-  
+
 
 static grad_list_t *process_list; /* List of rpp_proc_t */
 
@@ -302,12 +300,12 @@ rpp_lookup_ready(int (*proc_main)(void *), void *data)
 		process_list = grad_list_create();
 		p = NULL;
 	}
-	
+
 	if (!p) {
 		rpp_proc_t proc;
-		if (grad_list_count(process_list) == max_children) 
+		if (grad_list_count(process_list) == max_children)
 			return NULL;
-		if (rpp_start_process(&proc, proc_main, data)) 
+		if (rpp_start_process(&proc, proc_main, data))
 			return NULL;
 		radiusd_register_input_fd("rpp", proc.p[0], NULL);
 		p = grad_emalloc(sizeof(*p));
@@ -342,7 +340,7 @@ _rpp_remove(rpp_proc_t *p)
 	close(p->p[1]);
 	radiusd_close_channel(p->p[0]);
 	if (grad_list_remove(process_list, p, NULL))
-		grad_free(p);
+		free(p);
 }
 
 /* Remove the given rpp_proc_t from the list. Output diagnostics about
@@ -382,7 +380,7 @@ rpp_status_changed(pid_t pid, int exit_status)
 /* Collect rpp_proc's whose handler have exited. Free any associated
    resources */
 void
-rpp_collect_exited()
+rpp_collect_exited(void)
 {
 	rpp_proc_t *p;
 	grad_iterator_t *itr = grad_iterator_create(process_list);
@@ -400,7 +398,7 @@ static int rpp_request_handler(void *arg);
 int
 rpp_ready(pid_t pid)
 {
-	if (pid == 0) {  
+	if (pid == 0) {
 		if (rpp_lookup_ready(rpp_request_handler, NULL))
 			return 1;
 	} else {
@@ -412,7 +410,7 @@ rpp_ready(pid_t pid)
 				break;
 			}
 		}
-	        grad_iterator_destroy(&itr);
+		grad_iterator_destroy(&itr);
 		if (p && p->status == process_ready)
 			return 1;
 	}
@@ -468,8 +466,8 @@ rpp_kill(pid_t pid, int signo)
 			kill(p->pid, signo);
 			rpp_check_pid(p->pid);
 		} else
-     		        return 1;
-	} else 
+			return 1;
+	} else
 		grad_list_iterate(process_list, _kill_itr, &signo);
 	return 0;
 }
@@ -495,15 +493,15 @@ rpp_check_pid(pid_t pid)
 static void
 _rpp_slay(rpp_proc_t *p, char *msg)
 {
-	grad_log(GRAD_LOG_NOTICE, _("Killing process %lu: %s"), 
-                 (u_long) p->pid, msg);
+	grad_log(GRAD_LOG_NOTICE, _("Killing process %lu: %s"),
+		 (u_long) p->pid, msg);
 	kill(p->pid, SIGKILL);
 	_rpp_remove(p);
 }
 
 /* Return number of the handlers registered in the process list */
 size_t
-rpp_count()
+rpp_count(void)
 {
 	return grad_list_count(process_list);
 }
@@ -535,22 +533,22 @@ rpp_forward_request(REQUEST *req)
 	rpp_proc_t *p;
 	struct rpp_request frq;
 	struct timeval tv, *tvp;
-	
-	if (req->child_id) 
+
+	if (req->child_id)
 		p = rpp_lookup_pid(req->child_id);
 	else
 		p = rpp_lookup_ready(rpp_request_handler, NULL);
 
 	if (!p)
 		return 1;
-	GRAD_DEBUG1(1, "sending request to %d", p->pid);
-	
+	GRAD_DEBUG(1, "sending request to %d", p->pid);
+
 	frq.type = req->type;
 	frq.srv_addr = req->srv_addr;
 	frq.clt_addr = req->addr;
 	frq.fd = req->fd;
 	frq.size = req->rawsize;
-	
+
 	p->status = process_busy;
 	req->child_id = p->pid;
 
@@ -560,8 +558,8 @@ rpp_forward_request(REQUEST *req)
 		tvp = &tv;
 	} else
 		tvp = NULL;
-	
- 	if (rpp_fd_write(p->p[1], &frq, sizeof frq, tvp) != sizeof frq) {
+
+	if (rpp_fd_write(p->p[1], &frq, sizeof frq, tvp) != sizeof frq) {
 		_rpp_slay(p, _("error writing header"));
 		return 1;
 	}
@@ -573,42 +571,42 @@ rpp_forward_request(REQUEST *req)
 }
 
 static void
-child_cleanup()
+child_cleanup(void)
 {
 	pid_t pid;
 	int status;
-		
-        for (;;) {
+
+	for (;;) {
 		pid = waitpid((pid_t)-1, &status, WNOHANG);
-                if (pid <= 0)
-                        break;
+		if (pid <= 0)
+			break;
 		filter_cleanup(pid, status);
 	}
 }
 
-static RETSIGTYPE
+static void
 sig_handler(int sig)
 {
-        switch (sig) {
+	switch (sig) {
 	case SIGHUP:
 	case SIGUSR1:
 	case SIGUSR2:
 		/*Ignored*/
 		break;
-		
+
 	case SIGALRM:
 		grad_log(GRAD_LOG_INFO, _("Child exiting on timeout."));
 		/*FALLTHRU*/
-		
+
 	case SIGTERM:
 	case SIGQUIT:
 		/* FIXME: Possibly unsafe, it calls free() etc. */
-	        radiusd_exit0();
+		radiusd_exit0();
 
 	case SIGCHLD:
 		child_cleanup();
 		break;
-		
+
 	case SIGPIPE:
 		/*FIXME: Any special action? */
 		break;
@@ -616,7 +614,6 @@ sig_handler(int sig)
 	default:
 		abort();
 	}
-	grad_reset_signal(sig, sig_handler);
 }
 
 /* Main loop for a child process */
@@ -632,7 +629,7 @@ rpp_request_handler(void *arg ARG_UNUSED)
 	radiusd_signal_init(sig_handler);
 	grad_set_signal(SIGALRM, sig_handler);
 	request_init_queue();
-	
+
 	while (1) {
 		int rc;
 		int len;
@@ -644,8 +641,8 @@ rpp_request_handler(void *arg ARG_UNUSED)
 			if (errno == EINTR)
 				continue;
 			grad_log(GRAD_LOG_ERR,
-			         _("Child received malformed header (len = %d, error = %s)"),
-			         len, strerror(errno));
+				 _("Child received malformed header (len = %d, error = %s)"),
+				 len, strerror(errno));
 			radiusd_exit0();
 		}
 
@@ -653,10 +650,10 @@ rpp_request_handler(void *arg ARG_UNUSED)
 			datasize = frq.size;
 			data = grad_erealloc(data, datasize);
 		}
-		
+
 		if (rpp_fd_read(rpp_stdin, data, frq.size, NULL) != frq.size) {
 			grad_log(GRAD_LOG_ERR,
-			         _("Child received malformed data"));
+				 _("Child received malformed data"));
 			radiusd_exit0();
 		}
 
@@ -666,9 +663,9 @@ rpp_request_handler(void *arg ARG_UNUSED)
 
 		req->status = RS_COMPLETED;
 		rc = request_handle(req, request_respond);
-			
+
 		/* Inform the master */
-		GRAD_DEBUG(1, "notifying the master");
+		GRAD_DEBUG(1, "%s",  "notifying the master");
 		repl.code = RPP_COMPLETE;
 		repl.size = 0;
 		rpp_fd_write(rpp_stdout, &repl, sizeof repl, NULL);
@@ -688,7 +685,7 @@ rpp_input_handler(int fd, void *data)
 	int sz;
 
 	grad_insist(p != NULL);
-	
+
 	if (radiusd_read_timeout) {
 		tv.tv_sec = radiusd_read_timeout;
 		tv.tv_usec = 0;
@@ -705,22 +702,22 @@ rpp_input_handler(int fd, void *data)
 			if (rpp_fd_read(fd, data, repl.size, tvp)
 			    != repl.size) {
 				_rpp_slay(p, _("error reading data"));
-				grad_free(data);
+				free(data);
 				return 1;
 			}
 		}
-		
+
 		if (p) {
-		        GRAD_DEBUG1(1, "updating pid %d", p->pid);
+			GRAD_DEBUG(1, "updating pid %d", p->pid);
 			p->status = process_ready;
 			request_update(p->pid, RS_COMPLETED, data);
-		} 
-		grad_free(data);
+		}
+		free(data);
 	} else if (sz != 0) {
 		_rpp_slay(p, _("error reading data; wrong data size returned"));
 		return 1;
 	}
-	
+
 	return 0;
 }
 
@@ -749,8 +746,8 @@ rpp_input_close(int fd, void *data)
 
 
 /* Don't use it. It's a debugging hook */
-int
-wd()
+void
+wd(void)
 {
 	int volatile _st=0;
 	while (!_st)

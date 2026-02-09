@@ -1,32 +1,32 @@
-/* 
+/*
    Unix SMB/Netbios implementation.
    Version 1.9.
 
-   a partial implementation of DES designed for use in the 
+   a partial implementation of DES designed for use in the
    SMB authentication protocol
 
    Copyright (C) Andrew Tridgell 1997
-   
+
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
    the Free Software Foundation; either version 2 of the License, or
    (at your option) any later version.
-   
+
    This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
-   
+
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
 
-/* NOTES: 
+/* NOTES:
 
    This code makes no attempt to be fast! In fact, it is a very
-   slow implementation 
+   slow implementation
 
    This code is NOT a complete DES implementation. It implements only
    the minimum necessary for SMB authentication, as used by all SMB
@@ -62,13 +62,13 @@ static int perm1[56] = {57, 49, 41, 33, 25, 17,  9,
 			21, 13,  5, 28, 20, 12,  4};
 
 static int perm2[48] = {14, 17, 11, 24,  1,  5,
-                         3, 28, 15,  6, 21, 10,
-                        23, 19, 12,  4, 26,  8,
-                        16,  7, 27, 20, 13,  2,
-                        41, 52, 31, 37, 47, 55,
-                        30, 40, 51, 45, 33, 48,
-                        44, 49, 39, 56, 34, 53,
-                        46, 42, 50, 36, 29, 32};
+			 3, 28, 15,  6, 21, 10,
+			23, 19, 12,  4, 26,  8,
+			16,  7, 27, 20, 13,  2,
+			41, 52, 31, 37, 47, 55,
+			30, 40, 51, 45, 33, 48,
+			44, 49, 39, 56, 34, 53,
+			46, 42, 50, 36, 29, 32};
 
 static int perm3[64] = {58, 50, 42, 34, 26, 18, 10,  2,
 			60, 52, 44, 36, 28, 20, 12,  4,
@@ -80,32 +80,32 @@ static int perm3[64] = {58, 50, 42, 34, 26, 18, 10,  2,
 			63, 55, 47, 39, 31, 23, 15,  7};
 
 static int perm4[48] = {   32,  1,  2,  3,  4,  5,
-                            4,  5,  6,  7,  8,  9,
-                            8,  9, 10, 11, 12, 13,
-                           12, 13, 14, 15, 16, 17,
-                           16, 17, 18, 19, 20, 21,
-                           20, 21, 22, 23, 24, 25,
-                           24, 25, 26, 27, 28, 29,
-                           28, 29, 30, 31, 32,  1};
+			    4,  5,  6,  7,  8,  9,
+			    8,  9, 10, 11, 12, 13,
+			   12, 13, 14, 15, 16, 17,
+			   16, 17, 18, 19, 20, 21,
+			   20, 21, 22, 23, 24, 25,
+			   24, 25, 26, 27, 28, 29,
+			   28, 29, 30, 31, 32,  1};
 
 static int perm5[32] = {      16,  7, 20, 21,
-                              29, 12, 28, 17,
-                               1, 15, 23, 26,
-                               5, 18, 31, 10,
-                               2,  8, 24, 14,
-                              32, 27,  3,  9,
-                              19, 13, 30,  6,
-                              22, 11,  4, 25};
+			      29, 12, 28, 17,
+			       1, 15, 23, 26,
+			       5, 18, 31, 10,
+			       2,  8, 24, 14,
+			      32, 27,  3,  9,
+			      19, 13, 30,  6,
+			      22, 11,  4, 25};
 
 
 static int perm6[64] ={ 40,  8, 48, 16, 56, 24, 64, 32,
-                        39,  7, 47, 15, 55, 23, 63, 31,
-                        38,  6, 46, 14, 54, 22, 62, 30,
-                        37,  5, 45, 13, 53, 21, 61, 29,
-                        36,  4, 44, 12, 52, 20, 60, 28,
-                        35,  3, 43, 11, 51, 19, 59, 27,
-                        34,  2, 42, 10, 50, 18, 58, 26,
-                        33,  1, 41,  9, 49, 17, 57, 25};
+			39,  7, 47, 15, 55, 23, 63, 31,
+			38,  6, 46, 14, 54, 22, 62, 30,
+			37,  5, 45, 13, 53, 21, 61, 29,
+			36,  4, 44, 12, 52, 20, 60, 28,
+			35,  3, 43, 11, 51, 19, 59, 27,
+			34,  2, 42, 10, 50, 18, 58, 26,
+			33,  1, 41,  9, 49, 17, 57, 25};
 
 
 static int sc[16] = {1, 1, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 1};
@@ -211,8 +211,8 @@ dohash(char *out, char *in, char *key)
 		lshift(c, sc[i], 28);
 		lshift(d, sc[i], 28);
 
-		concat(cd, c, d, 28, 28); 
-		permute(ki[i], cd, perm2, 48); 
+		concat(cd, c, d, 28, 28);
+		permute(ki[i], cd, perm2, 48);
 	}
 
 	permute(pd1, in, perm3, 64);
@@ -242,10 +242,10 @@ dohash(char *out, char *in, char *key)
 			int m, n;
 			m = (b[j][0]<<1) | b[j][5];
 
-			n = (b[j][1]<<3) | (b[j][2]<<2) | (b[j][3]<<1) | b[j][4]; 
+			n = (b[j][1]<<3) | (b[j][2]<<2) | (b[j][3]<<1) | b[j][4];
 
-			for (k=0;k<4;k++) 
-				b[j][k] = (sbox[j][m][n] & (1<<(3-k)))?1:0; 
+			for (k=0;k<4;k++)
+				b[j][k] = (sbox[j][m][n] & (1<<(3-k)))?1:0;
 		}
 
 		for (j=0;j<8;j++)
@@ -337,7 +337,7 @@ grad_lmpwdhash(const unsigned char *password, unsigned char *lmhash)
 
 /*
  *	Take the NT or LM password, and return the MSCHAP response
- *  
+ *
  *	The win_password MUST be exactly 16 bytes long.
  */
 void

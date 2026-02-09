@@ -1,5 +1,5 @@
 /* This file is part of GNU Radius.
-   Copyright (C) 2003,2004,2006,2007 Free Software Foundation, Inc.
+   Copyright (C) 2003-2025 Free Software Foundation, Inc.
 
    Written by Sergey Poznyakoff
 
@@ -7,15 +7,14 @@
    it under the terms of the GNU General Public License as published by
    the Free Software Foundation; either version 3 of the License, or
    (at your option) any later version.
-  
+
    GNU Radius is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
-  
+
    You should have received a copy of the GNU General Public License
-   along with GNU Radius; if not, write to the Free Software Foundation,
-   Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
+   along with GNU Radius.  If not, see <http://www.gnu.org/licenses/>. */
 
 #ifdef HAVE_CONFIG_H
 # include <config.h>
@@ -50,7 +49,7 @@ struct input_channel {
 };
 
 INPUT *
-input_create()
+input_create(void)
 {
 	INPUT *p = grad_emalloc(sizeof(*p));
 	p->methods = grad_list_create();
@@ -108,7 +107,7 @@ input_register_channel(INPUT *input, char *name, int fd, void *data)
 
 	if (!m)
 		return -1;
-	
+
 	c = grad_emalloc(sizeof(*c));
 	c->fd = fd;
 	c->data = data;
@@ -123,17 +122,17 @@ input_register_channel(INPUT *input, char *name, int fd, void *data)
 static void
 channel_close(INPUT *input, CHANNEL *chan)
 {
-	if (chan->method->close) 
+	if (chan->method->close)
 		chan->method->close(chan->fd, chan->data);
 	FD_CLR(chan->fd, &input->fdset);
 	input->fd_max = -2;
-	grad_free(chan);
+	free(chan);
 }
 
 static int
 channel_handle(CHANNEL *chan)
 {
-	GRAD_DEBUG1(1, "handling method %s", chan->method->name);
+	GRAD_DEBUG(1, "handling method %s", chan->method->name);
 	return chan->method->handler(chan->fd, chan->data);
 }
 
@@ -180,7 +179,7 @@ void
 input_close_channel_fd(INPUT *input, int fd)
 {
 	CHANNEL *p = grad_list_locate(input->channels, &fd, _channel_cmp_fd);
-	
+
 	if (p) {
 		grad_list_remove(input->channels, p, NULL);
 		channel_close(input, p);
@@ -198,7 +197,7 @@ input_find_channel(INPUT *input, char *name, void *data)
 	p = grad_list_locate(input->channels, &clos, _channel_cmp);
 	return p ? p->data : NULL;
 }
-		   
+
 void
 input_close_channel_data(INPUT *input, char *name, void *data)
 {
@@ -221,7 +220,7 @@ input_select(INPUT *input, struct timeval *tv)
 	int status;
 	fd_set readfds;
 
-	GRAD_DEBUG(100,"enter");
+	GRAD_DEBUG(100, "%s", "enter");
 	if (!input->citr)
 		input->citr = grad_iterator_create(input->channels);
 
@@ -239,23 +238,23 @@ input_select(INPUT *input, struct timeval *tv)
 		pause();
 		return errno;
 	}
-	
+
 	readfds = input->fdset;
 
 	status = select(input->fd_max + 1, &readfds, NULL, NULL, tv);
-        
+
 	if (status == -1) {
-		if (errno == EINTR) 
+		if (errno == EINTR)
 			return 0;
 	} else if (status > 0) {
-		GRAD_DEBUG1(1, "select returned %d", status);
-		
+		GRAD_DEBUG(1, "select returned %d", status);
+
 		for (p = grad_iterator_first(input->citr); p;
-		     p = grad_iterator_next(input->citr)) 
-			if (FD_ISSET(p->fd, &readfds)) 
+		     p = grad_iterator_next(input->citr))
+			if (FD_ISSET(p->fd, &readfds))
 				channel_handle(p);
-	} 
-	GRAD_DEBUG(100,"exit");
+	}
+	GRAD_DEBUG(100, "%s", "exit");
 	return status;
 }
 
@@ -268,8 +267,8 @@ input_select_channel(INPUT *input, char *name, struct timeval *tv)
 	int fd_max = -1;
 	METHOD *m = grad_list_locate(input->methods, name, _method_comp);
 
-	GRAD_DEBUG(100,"enter");
-	
+	GRAD_DEBUG(100, "%s", "enter");
+
 	if (!m)
 		return -1;
 	if (!input->citr)
@@ -287,21 +286,21 @@ input_select_channel(INPUT *input, char *name, struct timeval *tv)
 
 	if (fd_max == -1)
 		return -1;
-	
+
 	status = select(fd_max + 1, &readfds, NULL, NULL, tv);
-        
+
 	if (status == -1) {
-		if (errno == EINTR) 
+		if (errno == EINTR)
 			return 0;
 	} else if (status > 0) {
-		GRAD_DEBUG1(1, "select returned %d", status);
-		
+		GRAD_DEBUG(1, "select returned %d", status);
+
 		for (p = grad_iterator_first(input->citr); p;
-		     p = grad_iterator_next(input->citr)) 
-			if (FD_ISSET(p->fd, &readfds)) 
+		     p = grad_iterator_next(input->citr))
+			if (FD_ISSET(p->fd, &readfds))
 				channel_handle(p);
-	} 
-	GRAD_DEBUG(100,"exit");
+	}
+	GRAD_DEBUG(100, "%s", "exit");
 	return status;
 }
 
@@ -317,7 +316,7 @@ _chan_itr(void *item, void *data)
 	CHANNEL *chan = item;
 	struct iterate_closure *cp = data;
 	int rc = 0;
-	
+
 	if (cp->name == NULL || strcmp(chan->method->name, cp->name) == 0)
 		rc = cp->fun(chan->data, cp->data);
 	return rc;

@@ -1,20 +1,18 @@
 /* This file is part of GNU Radius.
-   Copyright (C) 2003,2004,2007 Free Software Foundation
-  
+   Copyright (C) 2003-2025 Free Software Foundation
+
    GNU Radius is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
    the Free Software Foundation; either version 3 of the License, or
    (at your option) any later version.
-  
+
    GNU Radius is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
-  
-   You should have received a copy of the GNU General Public
-   License along with GNU Radius; if not, write to the Free
-   Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-   Boston, MA 02110-1301 USA. */
+
+   You should have received a copy of the GNU General Public License
+   along with GNU Radius.  If not, see <http://www.gnu.org/licenses/>. */
 
 #ifdef HAVE_CONFIG_H
 # include <config.h>
@@ -26,25 +24,12 @@
 #include <pwd.h>
 #ifdef HAVE_READLINE_READLINE_H
 # include <readline/readline.h>
+# include <readline/history.h>
 #endif
 #include <common.h>
 
 static volatile int _interrupted;
 static int _interactive;
-
-static void
-grad_clear_interrupt()
-{
-	_interrupted = 0;
-}
-
-static int
-grad_got_interrupt()
-{
-	int rc = _interrupted;
-	_interrupted = 0;
-	return rc;
-}
 
 static char *
 grad_readline_internal(FILE *input)
@@ -55,7 +40,7 @@ grad_readline_internal(FILE *input)
 
 	if (!input)
 		input = stdin;
-	
+
 	p = line = calloc(1, 255);
 	if (!p) {
 		fprintf(stderr, _("Not enough memory\n"));
@@ -137,14 +122,14 @@ grad_getc(FILE * stream)
 void
 grad_readline_init(char *name,
 		   int interactive,
-		   char **(*completion_fp)(char *cmd, int start, int end))
+		   char **(*completion_fp)(const char *cmd, int start, int end))
 {
 	_interactive = interactive;
 	if (!interactive)
 		return;
 #ifdef WITH_READLINE
 	rl_readline_name = name;
-	rl_attempted_completion_function = (CPPFunction *) completion_fp;
+	rl_attempted_completion_function = completion_fp;
 	rl_getc_function = grad_getc;
 #endif
 }
@@ -178,7 +163,7 @@ grad_add_history (char *line)
 
 #ifdef WITH_READLINE
 static char *
-get_history_file_name()
+get_history_file_name(void)
 {
 	static char *filename = NULL;
 
@@ -198,7 +183,7 @@ get_history_file_name()
 #endif
 
 int
-grad_read_history_file()
+grad_read_history_file(void)
 {
 #ifdef WITH_READLINE
 	return _interactive ? read_history(get_history_file_name()) : 0;
@@ -206,10 +191,9 @@ grad_read_history_file()
 }
 
 int
-grad_write_history_file()
+grad_write_history_file(void)
 {
 #ifdef WITH_READLINE
 	return _interactive ? write_history(get_history_file_name()) : 0;
 #endif
 }
-

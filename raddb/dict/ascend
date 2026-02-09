@@ -1,6 +1,6 @@
 # NOTE: This file may be overwritten by radius installation procedure.
 # Please add your customizations to the main dictionary file.
-# Run 
+# Run
 #	info Radius dictionary
 # for detailed description of the format of this file.
 # Please report errors to <bug-gnu-radius@gnu.org>
@@ -68,11 +68,11 @@ ATTRIBUTE	Ascend-FR-DCE-N393		164	integer
 ATTRIBUTE	Ascend-FR-DTE-N393		165	integer
 ATTRIBUTE	Ascend-FR-T391			166	integer
 ATTRIBUTE	Ascend-FR-T392			167	integer
-ATTRIBUTE	Ascend-Bridge-Address  	 	168	string
+ATTRIBUTE	Ascend-Bridge-Address		168	string
 ATTRIBUTE       Ascend-TS-Idle-Limit            169     integer
 ATTRIBUTE       Ascend-TS-Idle-Mode             170     integer
-ATTRIBUTE	Ascend-DBA-Monitor	 	171	integer
-ATTRIBUTE	Ascend-Base-Channel-Count 	172	integer
+ATTRIBUTE	Ascend-DBA-Monitor		171	integer
+ATTRIBUTE	Ascend-Base-Channel-Count	172	integer
 ATTRIBUTE	Ascend-Minimum-Channels		173	integer
 ATTRIBUTE	Ascend-IPX-Route		174	string
 ATTRIBUTE	Ascend-FT1-Caller		175	integer
@@ -142,8 +142,8 @@ ATTRIBUTE	Ascend-Seconds-Of-History	238	integer
 ATTRIBUTE	Ascend-History-Weigh-Type	239	integer
 ATTRIBUTE	Ascend-Add-Seconds		240	integer
 ATTRIBUTE	Ascend-Remove-Seconds		241	integer
-ATTRIBUTE       Ascend-Data-Filter              242     abinary       
-ATTRIBUTE       Ascend-Call-Filter              243     abinary        
+ATTRIBUTE       Ascend-Data-Filter              242     abinary
+ATTRIBUTE       Ascend-Call-Filter              243     abinary
 ATTRIBUTE	Ascend-Idle-Limit		244	integer
 ATTRIBUTE	Ascend-Preempt-Limit		245	integer
 ATTRIBUTE	Ascend-Callback			246	integer
@@ -205,9 +205,9 @@ VALUE		Ascend-Route-IPX	Route-IPX-No		0
 VALUE		Ascend-Route-IPX	Route-IPX-Yes		1
 VALUE		Ascend-Bridge		Bridge-No		0
 VALUE		Ascend-Bridge		Bridge-Yes		1
-VALUE  		Ascend-TS-Idle-Mode     TS-Idle-None		0
-VALUE	  	Ascend-TS-Idle-Mode     TS-Idle-Input		1
-VALUE  		Ascend-TS-Idle-Mode     TS-Idle-Input-Output	2
+VALUE		Ascend-TS-Idle-Mode     TS-Idle-None		0
+VALUE		Ascend-TS-Idle-Mode     TS-Idle-Input		1
+VALUE		Ascend-TS-Idle-Mode     TS-Idle-Input-Output	2
 VALUE		Ascend-Send-Auth	Send-Auth-None		0
 VALUE		Ascend-Send-Auth	Send-Auth-PAP		1
 VALUE		Ascend-Send-Auth	Send-Auth-CHAP		2
@@ -280,7 +280,7 @@ VALUE		Ascend-Require-Auth	Require-Auth		1
 VALUE		Ascend-Token-Immediate	Tok-Imm-No		0
 VALUE		Ascend-Token-Immediate	Tok-Imm-Yes		1
 VALUE		Ascend-DBA-Monitor		DBA-Transmit		0
-VALUE 		Ascend-DBA-Monitor	DBA-Transmit-Recv	1
+VALUE		Ascend-DBA-Monitor	DBA-Transmit-Recv	1
 VALUE		Ascend-DBA-Monitor	DBA-None		2
 VALUE		Ascend-FR-Type		Ascend-FR-DTE		0
 VALUE		Ascend-FR-Type		Ascend-FR-DCE		1

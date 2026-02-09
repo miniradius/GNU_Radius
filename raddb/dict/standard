@@ -1,4 +1,4 @@
-## NOTES: 
+## NOTES:
 
 ## 1. This file may be overwritten by radius installation procedure.
 ## Please add your customizations to the main dictionary file.
@@ -20,9 +20,9 @@ ATTRIBUTE	User-Password		2	string	[L-----]E
 ATTRIBUTE	CHAP-Password		3	string	[L-----]b
 ATTRIBUTE	NAS-IP-Address		4	ipaddr	[L--RLR]
 ATTRIBUTE	NAS-Port-Id		5	integer	[LR-RLR]
-ATTRIBUTE	Service-Type		6	integer	[LR-RLR]=P	
-ATTRIBUTE	Framed-Protocol		7	integer	[LR-RLR]=P	
-ATTRIBUTE	Framed-IP-Address	8	ipaddr	[LR-RLR]=	
+ATTRIBUTE	Service-Type		6	integer	[LR-RLR]=P
+ATTRIBUTE	Framed-Protocol		7	integer	[LR-RLR]=P
+ATTRIBUTE	Framed-IP-Address	8	ipaddr	[LR-RLR]=
 ATTRIBUTE	Framed-IP-Netmask	9	ipaddr	[LR-RLR]=
 ATTRIBUTE	Framed-Routing		10	integer	[-R-R-R]=
 ATTRIBUTE	Filter-Id		11	string	[-R-R-R]=P
@@ -33,7 +33,7 @@ ATTRIBUTE	Login-Service		15	integer	[-R-R-R]=P
 ATTRIBUTE	Login-TCP-Port		16	integer	[-R-R-R]=
 ATTRIBUTE	Reply-Message		18	string	[-R----]+P
 ATTRIBUTE	Callback-Number		19	string	[-R----]=
-ATTRIBUTE	Callback-Id		20	string	[-R----]=	
+ATTRIBUTE	Callback-Id		20	string	[-R----]=
 ATTRIBUTE	Framed-Route		22	string	[-R----]+
 ATTRIBUTE	Framed-IPX-Network	23	ipaddr	[-R----]=
 ATTRIBUTE	State			24	string	[LRLRLR]P
@@ -92,7 +92,7 @@ ATTRIBUTE	Acct-Interim-Interval	85	integer	[]
 # Note: according to rfc2869, this attribute is named NAS-Port-Id
 # which conflicts with the name for attribute 5. The latter should
 # be called NAS-Port!
-ATTRIBUTE	NAS-Port-Id-String	87	integer []
+ATTRIBUTE	NAS-Port-Id-String	87	string  []
 ATTRIBUTE	Framed-Pool		88	string	[]
 
 ATTRIBUTE       User-UID                99      integer	[LRLRLR]
@@ -126,7 +126,7 @@ VALUE		Acct-Type		Detail	2
 VALUE		Acct-Type		SQL	3
 
 ATTRIBUTE	Match-Profile		2004	string	[LR-R-R]
-## ATTRIBUTE	Include-Profile		2005	string 
+## ATTRIBUTE	Include-Profile		2005	string
 ATTRIBUTE	Auth-Data		2006	string	[L--R-R]=
 
 ATTRIBUTE	Log-Mode-Mask		2007	integer	[L--R-R]+
@@ -144,8 +144,8 @@ ATTRIBUTE       Password-Location       2011    integer [L-----]
 VALUE           Password-Location       SQL			1
 
 ATTRIBUTE	Proxy-Replied		2012	integer	[L-L-L-]=
-VALUE           Proxy-Replied	        No                    0
-VALUE           Proxy-Replied	        Yes                   1
+VALUE           Proxy-Replied		No                    0
+VALUE           Proxy-Replied		Yes                   1
 
 ATTRIBUTE	Realm-Name		2013	string	[L-L-L-]
 
@@ -165,7 +165,7 @@ ATTRIBUTE	GNU-Server-Port		2147	integer	[L-LRLR]=
 # These attributes are used internally by the server
 #
 ATTRIBUTE	Expiration		  21	date	[L-----]
-ATTRIBUTE	Auth-Type		1000	integer	[L--R-R]	
+ATTRIBUTE	Auth-Type		1000	integer	[L--R-R]
 ATTRIBUTE	Menu			1001	string	[-R----]=
 ATTRIBUTE	Termination-Menu	1002	string	[-R----]=
 ATTRIBUTE	Prefix			1003	string	[L-L-LR]
@@ -287,6 +287,3 @@ VALUE		Add-Port-To-IP-Address	No			0
 VALUE		Add-Port-To-IP-Address	Yes			1
 VALUE		Strip-User-Name		No			0
 VALUE		Strip-User-Name		Yes			1
-
-
-

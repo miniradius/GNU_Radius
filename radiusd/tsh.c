@@ -1,19 +1,18 @@
 /* This file is part of GNU Radius.
-   Copyright (C) 2003,2004,2005,2007,2008 Free Software Foundation
-  
+   Copyright (C) 2003-2025 Free Software Foundation
+
    GNU Radius is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
    the Free Software Foundation; either version 3 of the License, or
    (at your option) any later version.
-  
+
    GNU Radius is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
-  
+
    You should have received a copy of the GNU General Public License
-   along with GNU Radius; if not, write to the Free Software Foundation,
-   Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
+   along with GNU Radius.  If not, see <http://www.gnu.org/licenses/>. */
 
 #ifdef HAVE_CONFIG_H
 # include <config.h>
@@ -34,7 +33,7 @@
 #endif
 
 #include <radiusd.h>
-#include <radius/radargp.h>
+#include <radcli.h>
 #include <radius/radutmp.h>
 #include <rewrite.h>
 #include <snmp/asn1.h>
@@ -45,8 +44,6 @@ static int interactive;
 static grad_request_t test_req;
 static char *tsh_ps1 = "(radiusd) ";
 static char *tsh_ps2 = "[radiusd] ";
-
-static char *tsh_readline(const char *prompt);
 
 static void tsh_help(int argc, char **argv, char *cmd);
 static void tsh_query_nas(int argc, char **argv, char *cmd);
@@ -107,18 +104,18 @@ print_doc (int n, char *s)
 		putchar('\n');
 		n = 0;
 	}
-	
+
 	do {
 		char *p;
 		char *space = NULL;
-		
+
 		for (; n < OPT_DOC_COL; n++)
 			putchar(' ');
 
 		for (p = s; *p && p < s + (RMARGIN - OPT_DOC_COL); p++)
 			if (isspace(*p))
 				space = p;
-		
+
 		if (!space || p < s + (RMARGIN - OPT_DOC_COL)) {
 			printf("%s", s);
 			s += strlen (s);
@@ -132,17 +129,15 @@ print_doc (int n, char *s)
 		n = 1;
 	} while (*s);
 }
-      
+
 
 static void
 tsh_help(int argc, char **argv, char *cmd ARG_UNUSED)
 {
 	struct command_table *cp;
 	int n;
-	
-	for (cp = command_table; cp->shortname; cp++) {
-		int len = strlen(cp->shortname);
 
+	for (cp = command_table; cp->shortname; cp++) {
 		n = printf("%-8.8s%s", cp->shortname, cp->longname);
 		if (cp->usage)
 			n += printf(" %s", cp->usage);
@@ -201,12 +196,12 @@ tsh_rewrite_stack(int argc, char **argv, char *cmd)
 			_("%s: wrong number of arguments\n"), argv[0]);
 		return;
 	}
-	if (argc == 1) 
+	if (argc == 1)
 		printf("%lu\n", (long unsigned) rewrite_get_stack_size());
 	else {
 		char *p;
 		size_t n = strtoul(argv[1], &p, 0);
-		if (*p) 
+		if (*p)
 			fprintf(stderr,
 				_("%s: argument is not a number\n"), argv[0]);
 		else
@@ -218,7 +213,7 @@ static void
 tsh_run_rewrite(int argc, char **argv, char *cmd)
 {
 	grad_value_t val;
-	
+
 	if (argc < 2) {
 		fprintf(stderr,
 			_("%s: wrong number of arguments\n"), argv[0]);
@@ -270,47 +265,46 @@ tsh_source_rewrite(int argc, char **argv, char *cmd ARG_UNUSED)
 static void
 tsh_timespan(int argc, char **argv, char *cmd ARG_UNUSED)
 {
-        time_t          t;
-        TIMESPAN       *ts;
-        char           *p;
-        unsigned       rest;
-        int i;
-        struct tm tm;
+	time_t          t;
+	TIMESPAN       *ts;
+	char           *p;
+	unsigned       rest;
+	struct tm tm;
 	int diff, dow;
-	
+
 	if (argc < 2 || argc > 5) {
 		fprintf(stderr,
 			_("%s: wrong number of arguments\n"), argv[0]);
 		return;
 	}
 
-        time(&t);
-        localtime_r(&t, &tm);
-        
-        switch (argc) {
-        default:
+	time(&t);
+	localtime_r(&t, &tm);
+
+	switch (argc) {
+	default:
 		return;
-        case 5:
-                tm.tm_min = atoi(argv[4]);
-        case 4:
-                tm.tm_hour = atoi(argv[3]);
-        case 3:
+	case 5:
+		tm.tm_min = atoi(argv[4]);
+	case 4:
+		tm.tm_hour = atoi(argv[3]);
+	case 3:
 		dow = atoi(argv[2]);
 		diff = dow - tm.tm_wday;
 		tm.tm_wday = dow;
 		tm.tm_mday += diff;
 		tm.tm_yday += diff;
-                t = mktime(&tm);
-                break;
-        case 2:
-                break;
-        }
+		t = mktime(&tm);
+		break;
+	case 2:
+		break;
+	}
 
-        printf("ctime: %s", ctime(&t));
-        
-        if (ts_parse(&ts, argv[1], &p)) {
-                printf("bad timestring near %s\n", p);
-        } else {
+	printf("ctime: %s", ctime(&t));
+
+	if (ts_parse(&ts, argv[1], &p)) {
+		printf("bad timestring near %s\n", p);
+	} else {
 		int l = ts_match(ts, &t, &rest);
 		if (l == 0)
 			printf("inside %s: %d seconds left\n", argv[1], rest);
@@ -337,7 +331,7 @@ tsh_req_define(int argc, char **argv, char *cmd)
 {
 	char *errp;
 	grad_avp_t *vp = NULL;
-	
+
 	if (argc > 1) {
 		while (*cmd && isspace(*cmd))
 			cmd++;
@@ -345,7 +339,7 @@ tsh_req_define(int argc, char **argv, char *cmd)
 			cmd++;
 
 		if (userparse(cmd, &vp, &errp)) {
-                        grad_log(GRAD_LOG_ERR, "%s", errp);
+			grad_log(GRAD_LOG_ERR, "%s", errp);
 			return;
 		}
 	} else {
@@ -412,7 +406,7 @@ tsh_command_generator(const char *text, int state)
  * readline tab completion
  */
 static char **
-tsh_command_completion(char *cmd, int start ARG_UNUSED, int end ARG_UNUSED)
+tsh_command_completion(char const *cmd, int start ARG_UNUSED, int end ARG_UNUSED)
 {
 	if (start == 0)
 		return rl_completion_matches(cmd, tsh_command_generator);
@@ -481,8 +475,8 @@ tsh_run_command(char *cmd)
 	grad_argcv_free(argc, argv);
 }
 
-int
-tsh()
+void
+tsh(void)
 {
 	char *cmd;
 

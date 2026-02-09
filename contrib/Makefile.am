@@ -1,5 +1,6 @@
 # This file is part of GNU Radius.
-# Copyright (C) 2000,2001,2003,2004 Free Software Foundation, Inc.
+# Copyright (C) 2000, 2001, 2003, 2004, 2010, 2013 Free Software Foundation,
+# Inc.
 #
 # Written by Sergey Poznyakoff
 #
@@ -12,4 +13,4 @@
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 EXTRA_DIST = README
-SUBDIRS = web-radact passcvt passwd_to_db radsend php
+SUBDIRS = web-radact passcvt passwd_to_db radsend 

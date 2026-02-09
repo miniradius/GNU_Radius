@@ -1,5 +1,5 @@
 # This file is part of GNU Radius.
-# Copyright (C) 2000,2001,2003,2004,2007,2008 Free Software Foundation, Inc.
+# Copyright (C) 2000-2025 Free Software Foundation, Inc.
 #
 # Written by Sergey Poznyakoff
 #
@@ -11,20 +11,15 @@
 # WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
-SUBDIRS=guile
 EXTRA_DIST=\
- debugdef.m4\
  dict.awk\
  dot.emacs\
  gud-wrapper\
- gylwrap\
  mksnmp-h.awk\
  radius-devel.el\
  request.list\
  sqlmod.sh\
  update-dict.awk
-
-noinst_PROGRAMS = mktypes
 
 m4datadir = $(datadir)/aclocal
 dist_m4data_DATA = radius.m4

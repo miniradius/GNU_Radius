@@ -1,6 +1,5 @@
-/*
-   This file is part of GNU Radius SNMP Library.
-   Copyright (C) 2001,2007 Free Software Foundation, Inc.
+/* This file is part of GNU Radius SNMP Library.
+   Copyright (C) 2001-2025 Free Software Foundation, Inc.
    Written by Sergey Poznyakoff
 
    This library is free software; you can redistribute it and/or
@@ -13,10 +12,8 @@
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
    Lesser General Public License for more details.
 
-   You should have received a copy of the GNU Lesser General Public
-   License along with this library; see the file COPYING.LIB.  If not,
-   write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
-   Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU Lesser General Public License
+   along with GNU Radius.  If not, see <http://www.gnu.org/licenses/>. */
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -43,7 +40,7 @@ typedef u_int ip_addr_t;
 #define E_SNMP_UNKNOWN_REQ 12
 #define E_SNMP_BAD_VARTYPE 13
 
-extern int * __snmp_errno_location();
+extern int * __snmp_errno_location(void);
 #define snmp_errno (*__snmp_errno_location())
 #define SNMP_SET_ERRNO(e) snmp_errno = (e)
 
@@ -92,37 +89,37 @@ extern int * __snmp_errno_location();
 
 /* variable */
 struct snmp_var {
-        struct snmp_var *next;
-        oid_t name;
-        int val_length;
-        u_char type;
-        union {
-                int i;
-                u_char *s;
-                oid_t o;
-        } v;
+	struct snmp_var *next;
+	oid_t name;
+	u_int val_length;
+	u_char type;
+	union {
+		int i;
+		u_char *s;
+		oid_t o;
+	} v;
 #define var_int v.i
 #define var_str v.s
 #define var_oid v.o
 };
 
 struct snmp_pdu {
-        u_char type;
-        struct sockaddr_in peer_sin; /*??*/
-        int req_id;
-        int err_stat;
-        int err_ind;
-        struct snmp_var *var;
+	u_char type;
+	struct sockaddr_in peer_sin; /*??*/
+	int req_id;
+	int err_stat;
+	int err_ind;
+	struct snmp_var *var;
 };
 
 /* request list */
 struct snmp_request {
-        struct snmp_request *next;
-        int retries;           /* number of retries this request already
-                                  suffered */
-        int timeout;           /* timeout for next retry */
-        struct timeval expire; /* when this request will expire */
-        struct snmp_pdu *pdu;  /* PDU of the request */
+	struct snmp_request *next;
+	int retries;           /* number of retries this request already
+				  suffered */
+	int timeout;           /* timeout for next retry */
+	struct timeval expire; /* when this request will expire */
+	struct snmp_pdu *pdu;  /* PDU of the request */
 };
 
 #define SNMP_CONV_TIMEOUT            0
@@ -134,27 +131,27 @@ struct snmp_session;
 typedef int (*snmp_cfn)(int type, struct snmp_session *sp, struct snmp_pdu *pdu, void *closure);
 
 struct snmp_session {
-        struct snmp_session *next;
+	struct snmp_session *next;
 
-        int version;
-        struct {
-                u_char *str;
-                int len;
-        } community;
-        int retries;
-        int timeout;
-        char *remote_host;
-        u_short remote_port;
-        u_short local_port;
-        int sd;
-        struct sockaddr_in local_sin;
-        struct sockaddr_in remote_sin;
-        
-        snmp_cfn converse;
-        void *app_closure;
+	int version;
+	struct {
+		char *str;
+		int len;
+	} community;
+	int retries;
+	int timeout;
+	char *remote_host;
+	u_short remote_port;
+	u_short local_port;
+	int sd;
+	struct sockaddr_in local_sin;
+	struct sockaddr_in remote_sin;
 
-        struct snmp_pdu *pdu;
-        struct snmp_request *request_list;  /* list of outstanding requests */
+	snmp_cfn converse;
+	void *app_closure;
+
+	struct snmp_pdu *pdu;
+	struct snmp_request *request_list;  /* list of outstanding requests */
 };
 
 typedef void *(*snmp_alloc_t)(size_t);
@@ -165,7 +162,7 @@ void snmp_free(void*);
 char *snmp_strdup(char *str);
 
 void snmp_init(int retries, int timeout,
-               snmp_alloc_t memalloc, snmp_free_t memfree);
+	       snmp_alloc_t memalloc, snmp_free_t memfree);
 
 oid_t oid_dup(oid_t oid);
 oid_t oid_create(int len);
@@ -178,18 +175,18 @@ char * sprint_oid(char *buf, int buflen, oid_t oid);
 struct snmp_pdu *snmp_pdu_create(int type);
 void snmp_pdu_free(struct snmp_pdu *pdu);
 void snmp_pdu_add_var(struct snmp_pdu *pdu, struct snmp_var *var);
-u_char *snmp_pdu_encode(u_char *data, int *length, struct snmp_pdu *pdu);
-u_char *snmp_pdu_decode(u_char *data, int *length, struct snmp_pdu *pdu);
+u_char *snmp_pdu_encode(u_char *data, u_int *length, struct snmp_pdu *pdu);
+u_char *snmp_pdu_decode(u_char *data, u_int *length, struct snmp_pdu *pdu);
 
 int snmp_send(struct snmp_session *sess, struct snmp_pdu *pdu);
 int snmp_request_xmit(struct snmp_session *sess, struct snmp_request *req);
 
 int snmp_req_id(void);
 struct snmp_session *snmp_session_create(char *community, char *host,
-                                         int port, snmp_cfn cfn,
-                                         void *closure);
+					 int port, snmp_cfn cfn,
+					 void *closure);
 int snmp_session_open(struct snmp_session *sp, ip_addr_t local_ip,
-                      int local_port, int timeout, int retries);
+		      int local_port, int timeout, int retries);
 void snmp_session_close(struct snmp_session *sess);
 void snmp_session_free(struct snmp_session *sess);
 
@@ -198,15 +195,16 @@ void snmp_var_free_list(struct snmp_var *var);
 struct snmp_var *snmp_var_create(oid_t oid);
 struct snmp_var *snmp_var_dup(struct snmp_var *src);
 struct snmp_var *snmp_var_dup_list(struct snmp_var *var);
-u_char *snmp_var_encode(u_char *data, int *length, struct snmp_var *var,
-                        int version);
-u_char *snmp_var_decode(u_char *data, int *length, struct snmp_var **var,
-                        int version);
+u_char *snmp_var_encode(u_char *data, u_int *length, struct snmp_var *var,
+			int version);
+u_char *snmp_var_decode(u_char *data, u_int *length, struct snmp_var **var,
+			int version);
 
 int snmp_encode_request(struct snmp_session *sess, struct snmp_pdu *pdu,
-                        u_char *packet_buf, int  *length);
+			u_char *packet_buf, u_int  *length);
 int snmp_decode_request(struct snmp_session *sess, struct snmp_pdu *pdu,
-                        u_char *packet, int length, char *comm, int *comm_len);
+			u_char *packet, u_int length, char *comm,
+			u_int *comm_len);
 
 void snmp_poll(struct snmp_session *sess);
 int snmp_query(struct snmp_session *sess, struct snmp_pdu *pdu);

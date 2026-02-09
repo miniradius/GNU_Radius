@@ -1,9 +1,9 @@
 @c This is part of the Radius manual.
-@c Copyright (C) 1999,2000,2001,2002,2003 Free Software Foundation, Inc.
+@c Copyright (C) 1999-2025 Free Software Foundation, Inc.
 @c Written by Sergey Poznyakoff
 @c See file radius.texi for copying conditions.
 @comment *******************************************************************
-@node Radwho, Radlast, , Utility Programs
+@node Radwho
 @section @command{radwho}
 @pindex radwho
 
@@ -64,20 +64,20 @@ users are shown with @samp{Proto} field set to HUP.
 Display the calling station @sc{id} in the second column. Equivalent to
 @option{--format clid}.
 
-@item -d NAME
-@itemx --directory NAME
+@item -d @var{name}
+@itemx --directory=@var{name}
 Set the Radius configuration directory name.
 
 @item -D @var{fmt}
-@itemx --date-format @var{fmt}
-Set the date representation. Th @var{fmt} is usual @code{strftime(3)}
-format string. It defaults to @code{%a %H:%M}, i.e. the abbreviated weekday
-name according to the current locale, and the hour and the minutes as two-digit
-decimal numbers.
+@itemx --date-format=@var{fmt}
+Set the date representation. The @var{fmt} argument is a usual
+@code{strftime(3)} format string. It defaults to @code{%a %H:%M},
+i.e. the abbreviated weekday name according to the current locale, and
+the hour and the minutes as two-digit decimal numbers.
 
-@item -e @var{STRING}
-@itemx --empty @var{STRING}
-Display any empty field as @var{STRING}. This is useful when the output of
+@item -e @var{string}
+@itemx --empty=@var{string}
+Display any empty field as @var{string}. This is useful when the output of
 @command{radwho} is fed to some analyzing program, as it helps to keep
 the same number of columns on each line of output.
 
@@ -89,10 +89,10 @@ behavior of the @command{fingerd(8)} utility. Use this option if starting
 split on two lines to fit the page width. It must occupy a
 @emph{single line} in the real configuration file.}:
 
-@smallexample
+@example
 finger stream tcp nowait nobody /usr/sbin/radwho
 radwho -fL
-@end smallexample
+@end example
 
 @noindent
 This mode is also enabled by default if @command{radwho} notices that its
@@ -107,7 +107,7 @@ Don't display header line.
 Display session @sc{id} instead of @sc{gecos} in the second column.
 Equivalent to @option{--format sid}.
 
-@item -I 
+@item -I
 @itemx --ip-strip-domain
 Display hostnames without domain part.
 
@@ -121,11 +121,11 @@ May prove useful when running @command{radwho} as a finger daemon.
 Do not resolve IP.
 
 @item -o @var{format}
-@itemx --format @var{format}
+@itemx --format=@var{format}
 Select customized output format. This can also be changed by setting
 the value of environment variable @code{RADWHO_FORMAT}. The @var{format}
-is either a symbolic name of one of the predefined formats or a format
-specification (see next subsection).
+argument is either a symbolic name of one of the predefined formats or
+a format specification (see next subsection).
 
 @item -s
 @itemx --secure
@@ -148,7 +148,7 @@ Each format specification starts with an opening brace and ends with
 a closing brace. The first word after the brace is the name of the
 format specification. The rest of words are @dfn{positional arguments}
 followed by @dfn{keyword arguments}. Both are optional. The keyword
-arguments begin with a colon and must follow the positional arguments. 
+arguments begin with a colon and must follow the positional arguments.
 
 The full list of format specifications follows.
 
@@ -199,7 +199,7 @@ Print original login name as supplied with the request.
 The @sc{gecos} field from the local @file{/etc/passwd} corresponding
 to the login name.
 If the user does not have a local account, his login name is output.
-@end deffn 
+@end deffn
 
 @deffn {Format Spec} nas-port @var{width} @var{title} [:empty @var{repl}][:right]
 @NAS{} port number
@@ -221,7 +221,7 @@ Framed IP assigned to the user, if any.
 
 The @code{:nodomain} keyword suppresses the output of the domain part of
 the name, i.e. the hostname is displayed only up to the first dot.
-@end deffn 
+@end deffn
 
 @deffn {Format Spec} protocol @var{width} @var{title} [:empty @var{repl}][:right]
 Connection protocol as reported by @attr{Framed-Protocol} attribute.
@@ -280,12 +280,12 @@ the connection was initiated, @NAS{} IP, and assigned framed IP. This
 corresponds to the following format specification (split in several
 lines for readability:
 
-@smallexample
+@example
 (login 10 Login) (gecos 17 Name) \
 (protocol 5 Proto) (nas-port 5 TTY) \
 (time 9 When) (nas-address 9 From) \
 (framed-address 16 Location)
-@end smallexample
+@end example
 
 @item sid
 The same as @samp{default}, except that the session ID is output in
@@ -299,19 +299,19 @@ the second column.
 Outputs all information from each @file{radutmp} record. It is
 equivalent to specifying the following format string:
 
-@smallexample
+@example
 (login 32 Login) (session-id 32 SID) \
 (protocol 5 Proto) (nas-port 5 Port) \
 (time 27 Date) (nas-address 32 NAS) \
 (clid 17 CLID) (duration 7 Duration) \
 (framed-address 16 Location) (realm 16 Realm)
-@end smallexample
+@end example
 
 @item gnu
 Each @file{radutmp} record is represented as a table. It is
 equivalent to specifying the following format string:
 
-@smallexample
+@example
 User: (login)(newline)\
 In real life: (gecos)(newline)\
 Logged in: (time)(newline)\
@@ -323,10 +323,6 @@ Session ID: (session-id)(newline)\
 Uptime: (duration)(newline)\
 Assigned IP: (framed-address)(newline)\
 Realm: (realm)(newline)"
-@end smallexample
+@end example
 
 @end table
-
-
-
-

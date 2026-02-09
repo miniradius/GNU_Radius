@@ -1,22 +1,20 @@
 # Process this file with autom4te to create testsuite. -*- Autotest -*-
 
 # Test suite for GNU Radius.
-# Copyright (C) 2004,2007 Free Software Foundation, Inc.
+# Copyright (C) 2004-2025 Free Software Foundation, Inc.
 
-# This program is free software; you can redistribute it and/or modify
+# GNU Radius is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 3, or (at your option)
 # any later version.
 
-# This program is distributed in the hope that it will be useful,
+# GNU Radius is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 
 # You should have received a copy of the GNU General Public License
-# along with this program; if not, write to the Free Software
-# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
-# 02110-1301 USA.
+# along with GNU Radius.  If not, see <http://www.gnu.org/licenses/>.
 
 # We need a recent Autotest.
 m4_version_prereq([2.52g])
@@ -54,12 +52,12 @@ catlog $PROXY_CONF/log radius.log radius.debug radius.stderr
 
 m4_define([RA_PREREQ],
  [AT_CHECK([radiusd --show-defaults|grep "$1" || AT_SKIP_TEST],
-           [0],
-           [$1
+	   [0],
+	   [$1
 ],
-           [],
-           [AT_SKIP_TEST],
-           [$2])])
+	   [],
+	   [AT_SKIP_TEST],
+	   [$2])])
 
 m4_define([RA_ALL_KEYWORDS],[status-server basic-auth reply begin-kw default-kw match-profile hints huntgroups scheme-auth acl expiration menu acct ext-acct rewrite execwait filter scheme-acct tunnel log-mode])
 
@@ -70,22 +68,19 @@ m4_define([RA_PROXY_KEYWORDS],[proxy-basic-auth proxy-ignorecase proxy-vsa proxy
 m4_include([begin.at])
 
 m4_foreach([keyword],
-           m4_split(RA_ALL_KEYWORDS,[[
+	   m4_split(RA_ALL_KEYWORDS,[[
 	 ]]+),
-           [m4_include(keyword[.at])])
+	   [m4_include(keyword[.at])])
 
 m4_include([end.at])
 
 m4_include([begin-proxy.at])
 
 m4_foreach([keyword],
-           m4_split(RA_PROXY_KEYWORDS,[[
+	   m4_split(RA_PROXY_KEYWORDS,[[
 	 ]]+),
-           [m4_include(keyword[.at])])
+	   [m4_include(keyword[.at])])
 
 m4_include([end-proxy.at])
 
 # End of testsuite.at
-
-	     
-

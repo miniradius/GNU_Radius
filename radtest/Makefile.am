@@ -1,5 +1,5 @@
 # This file is part of GNU Radius.
-# Copyright (C) 2000,2001,2003,2004 Free Software Foundation, Inc.
+# Copyright (C) 2000-2025 Free Software Foundation, Inc.
 #
 # Written by Sergey Poznyakoff
 #
@@ -12,9 +12,19 @@
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 bin_PROGRAMS    = radtest
-radtest_SOURCES = main.c gram.y input.l radtest.h runtime.c completion.c
+radtest_SOURCES = main.c gram.c input.c radtest.h runtime.c completion.c
 radtest_LDADD   = @LIBGNURADIUS@ @LIBRADEXTRA@ ../lib/libradextra.a @READLINE_LIBS@ @LIBINTL@
 noinst_HEADERS  = gram.h
-INCLUDES        = @RADIUS_INCLUDE_PATH@ -I$(srcdir) 
-AM_YFLAGS = -vdt 
+AM_CPPFLAGS     = @RADIUS_INCLUDE_PATH@ -I$(srcdir) 
 
+BUILT_SOURCES = gram.c gram.h input.c
+EXTRA_DIST    = gram.y input.l
+
+gram.c gram.h: gram.y
+input.c: input.l
+
+AM_YFLAGS = -vdt 
+.l.c:
+	$(FLEX) -o $@ $(AM_LFLAGS) $<
+.y.c:
+	$(BISON) -o $@ $(AM_YFLAGS) $<

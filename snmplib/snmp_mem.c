@@ -1,6 +1,6 @@
 /*
    This file is part of GNU Radius SNMP Library.
-   Copyright (C) 2001,2003,2004,2007 Free Software Foundation, Inc.
+   Copyright (C) 2001-2025 Free Software Foundation, Inc.
 
    Written by Sergey Poznyakoff
 
@@ -14,10 +14,8 @@
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
    Lesser General Public License for more details.
 
-   You should have received a copy of the GNU Lesser General Public
-   License along with this library; see the file COPYING.LIB.  If not,
-   write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
-   Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU Lesser General Public License
+   along with GNU Radius.  If not, see <http://www.gnu.org/licenses/>. */
 
 #ifdef HAVE_CONFIG_H
 # include <config.h>
@@ -35,23 +33,22 @@ snmp_free_t  __snmp_free_fp  = (snmp_free_t) free;
 void *
 snmp_alloc(size_t size)
 {
-        return (*__snmp_alloc_fp)(size);
+	return (*__snmp_alloc_fp)(size);
 }
 
 void
 snmp_free(void *ptr)
 {
-        if (ptr)
-                (*__snmp_free_fp)(ptr);
+	if (ptr)
+		(*__snmp_free_fp)(ptr);
 }
 
 char *
 snmp_strdup(char *str)
 {
-        int len = strlen(str)+1;
-        char *p = snmp_alloc(len);
-        if (p)
-                strcpy(p, str);
-        return p;
+	int len = strlen(str)+1;
+	char *p = snmp_alloc(len);
+	if (p)
+		strcpy(p, str);
+	return p;
 }
-

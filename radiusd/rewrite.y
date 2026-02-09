@@ -1,23 +1,21 @@
 %{
 /* This file is part of GNU Radius.
-   Copyright (C) 2000,2001,2002,2003,2004,2005,
-   2006,2007,2008 Free Software Foundation, Inc.
+   Copyright (C) 2000-2025 Free Software Foundation, Inc.
 
    Written by Sergey Poznyakoff
-  
+
    GNU Radius is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
    the Free Software Foundation; either version 3 of the License, or
    (at your option) any later version.
-  
+
    GNU Radius is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
-  
+
    You should have received a copy of the GNU General Public License
-   along with GNU Radius; if not, write to the Free Software Foundation,
-   Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
+   along with GNU Radius.  If not, see <http://www.gnu.org/licenses/>. */
 
 #if defined(HAVE_CONFIG_H)
 # include <config.h>
@@ -27,50 +25,31 @@
 #include <string.h>
 #include <ctype.h>
 #include <errno.h>
+#include <limits.h>
 
 #include <radiusd.h>
 #include <setjmp.h>
 #include <rewrite.h>
-#ifdef USE_SERVER_GUILE 
+#ifdef USE_SERVER_GUILE
 # include <libguile.h>
-# include <radius/radscm.h>	
+# include <radius/radscm.h>
 #endif
-        
-typedef long RWSTYPE;
+
 #define RW_MIN(a,b) ((a)<(b)) ? (a) : (b)
- 
-/*
- * Generalized list structure
- */
-typedef struct rw_list RWLIST;
-#define RWLIST(type) \
-        type     *next;\
-        type     *prev
-
-struct rw_list {
-        RWLIST(RWLIST);
-};
 
 /*
- * Generalized object 
+ * Generalized object
  */
-typedef struct object_t OBJECT ;
+typedef struct objhdr {
+	SLIST_ENTRY(objhdr) link;
+} OBJHDR;
+
+static void obj_free_all(void);
 
 #define OBJ(type) \
-        RWLIST(type);\
-        type    *alloc
+	OBJHDR  header; \
+	DLIST_ENTRY(type) link;
 
-struct object_t {
-        OBJ(OBJECT);
-};
-
-typedef struct {
-        size_t   size;        /* Size of an element */
-        void     (*free)();   /* deallocator */ 
-        OBJECT   *alloc_list; /* list of allocated elements */
-} OBUCKET;
-
-        
 
 /* ************************************************************
  * Basic data types
@@ -78,107 +57,131 @@ typedef struct {
 
 typedef int stkoff_t;             /* Offset on stack */
 typedef unsigned int pctr_t;      /* Program counter */
+typedef void (*INSTR)(void);      /* program instruction */
+
+typedef union rw_code_cell {
+	void     *v_ptr;
+	char     *v_str;
+	int      v_int;
+	long     v_long;
+	u_int    v_u_int;
+	stkoff_t v_off;
+	pctr_t   v_pc;
+	struct comp_regex *v_rx;
+	size_t   v_size;
+} RWSTYPE;
+
+#define rw_cat(a,b) a ## b
+#define rw_c_val(x,t) ((x).rw_cat(v_,t))
+#define rw_c_cast(x,t) ((RWSTYPE)(t)(x))
+
+typedef union {
+	INSTR   c_instr;
+	RWSTYPE c_value;
+} RWCODE;
+
+#define rw_code_instr(p) ((p).c_instr)
+#define rw_code_value(p) ((p).c_value)
 
 #define RW_REG ('z'-'a'+1)
 
 typedef struct {
-        RWSTYPE    reg[RW_REG];       /* Registers */
-        #define rA reg[0]
-        char       *sA;               /* String accumulator */
-        pctr_t     pc;                /* Program counter */  
-        
-        RWSTYPE    *stack;            /* Stack+heap space */
-        int        stacksize;         /* Size of stack */
-        int        st;                /* Top of stack */
-        int        sb;                /* Stack base */
-        int        ht;                /* Top of heap */
-        
-        int        nmatch;
-        regmatch_t *pmatch;
+	RWSTYPE    reg[RW_REG];       /* Registers */
+	#define rA reg[0]
+	char       *sA;               /* String accumulator */
+	pctr_t     pc;                /* Program counter */
 
-        grad_request_t *req;
-        
-        jmp_buf    jmp;
+	RWSTYPE    *stack;            /* Stack+heap space */
+	int        stacksize;         /* Size of stack */
+	int        st;                /* Top of stack */
+	int        sb;                /* Stack base */
+	int        ht;                /* Top of heap */
+
+	int        nmatch;
+	regmatch_t *pmatch;
+
+	grad_request_t *req;
+
+	jmp_buf    jmp;
 } RWMACH;
 
-typedef void (*INSTR)();       /* program instruction */
- 
 /* Compiled regular expression
  */
 typedef struct comp_regex COMP_REGEX;
 struct comp_regex {
-        OBJ(COMP_REGEX);
-        regex_t      regex;    /* compiled regex itself */
-        int          nmatch;   /* number of \( ... \) groups */
+	OBJ(comp_regex);
+	regex_t      regex;    /* compiled regex itself */
+	int          nmatch;   /* number of \( ... \) groups */
 };
 
+typedef DLIST_HEAD(, comp_regex) COMP_REGEX_HEAD;
 /*
  * Binary Operations
  */
 typedef enum {
-        Eq,
-        Ne,
-        Lt,
-        Le,
-        Gt,
-        Ge,
-        BAnd,
-        BXor,
-        BOr,
-        And,
-        Or,
-        Shl,
-        Shr,
-        Add,
-        Sub,
-        Mul,
-        Div,
-        Rem,
-        Max_opcode
+	Eq,
+	Ne,
+	Lt,
+	Le,
+	Gt,
+	Ge,
+	BAnd,
+	BXor,
+	BOr,
+	And,
+	Or,
+	Shl,
+	Shr,
+	Add,
+	Sub,
+	Mul,
+	Div,
+	Rem,
+	Max_opcode
 } Bopcode;
 
 /*
  * Unary operations
  */
 typedef enum {
-        Neg,
-        Not,
-        Max_unary
+	Neg,
+	Not,
+	Max_unary
 } Uopcode;
 
 /*
  * Matrix types
  */
 typedef enum {
-        Generic,
-        Nop,
-        Enter,
-        Leave,
-        Stop,
-        Constant,
-        Matchref,
-        Variable,
-        Unary,
-        Binary,
-        Cond,
-        Asgn,
-        Match,
-        Coercion,
-        Expression,
-        Return,
-        Jump,
-        Branch,
-        Target,
-        Call,
-        Builtin,
-        Pop,
-        Pusha,
-        Popa,
-        Attr,
-        Attr_asgn,
-        Attr_check,
+	Generic,
+	Nop,
+	Enter,
+	Leave,
+	Stop,
+	Constant,
+	Matchref,
+	Variable,
+	Unary,
+	Binary,
+	Cond,
+	Asgn,
+	Match,
+	Coercion,
+	Expression,
+	Return,
+	Jump,
+	Branch,
+	Target,
+	Call,
+	Builtin,
+	Pop,
+	Pusha,
+	Popa,
+	Attr,
+	Attr_asgn,
+	Attr_check,
 	Attr_delete,
-        Max_mtxtype
+	Max_mtxtype
 } Mtxtype;
 
 /*
@@ -186,10 +189,10 @@ typedef enum {
  */
 typedef struct parm_t PARAMETER;
 struct parm_t {
-        PARAMETER   *prev;     /* Previous parameter */
-        PARAMETER   *next;     /* Next parameter */
-        grad_data_type_t    datatype;  /* type */
-        stkoff_t    offset;    /* Offset on stack */
+	PARAMETER   *prev;     /* Previous parameter */
+	PARAMETER   *next;     /* Next parameter */
+	grad_data_type_t    datatype;  /* type */
+	stkoff_t    offset;    /* Offset on stack */
 };
 
 /*
@@ -197,33 +200,33 @@ struct parm_t {
  */
 typedef struct variable VAR;
 struct variable {
-        OBJ(VAR);
-        VAR       *dcllink;  /* Link to the next variable vithin the
-                              * same declaration
-                              */
-        char      *name;     /* name of the variable */
-        int       level;     /* nesting level */
-        int       offset;    /* offset on stack */
-        grad_data_type_t  datatype;  /* type */
-        int       constant;  /* true if assigned a constant value */
-        grad_datum_t     datum;     /* constant value itself */
+	OBJ(variable);
+	VAR       *dcllink;  /* Link to the next variable vithin the
+			      * same declaration
+			      */
+	char      *name;     /* name of the variable */
+	int       level;     /* nesting level */
+	int       offset;    /* offset on stack */
+	grad_data_type_t  datatype;  /* type */
+	int       constant;  /* true if assigned a constant value */
+	grad_datum_t     datum;     /* constant value itself */
 };
 
 /*
  * Function definition
  */
 typedef struct function_def {
-        struct function_def *next;
-        char       *name;        /* Function name */
-        grad_data_type_t   rettype;      /* Return type */
-        pctr_t     entry;        /* Code entry */
-        COMP_REGEX *rx_list;     /* List of compiled regexps */
-        int        nparm;        /* Number of parameters */
-        PARAMETER  *parm;        /* List of parameters */
-        stkoff_t   stack_alloc;  /* required stack allocation */
-        grad_locus_t      loc;   /* source location where the function
-                                  * was declared
-                                  */
+	struct function_def *next;
+	char       *name;        /* Function name */
+	grad_data_type_t   rettype;      /* Return type */
+	pctr_t     entry;        /* Code entry */
+	COMP_REGEX_HEAD rx_head; /* List of compiled regexps */
+	int        nparm;        /* Number of parameters */
+	PARAMETER  *parm;        /* List of parameters */
+	stkoff_t   stack_alloc;  /* required stack allocation */
+	grad_locus_t      loc;   /* source location where the function
+				  * was declared
+				  */
 } FUNCTION;
 
 #define STACK_BASE 2
@@ -232,16 +235,16 @@ typedef struct function_def {
  * Built-in function
  */
 typedef struct  {
-        INSTR    handler;        /* Function itself */
-        char     *name;          /* Function name */
-        grad_data_type_t rettype;        /* Return type */
-        char     *parms;         /* coded parameter types */
+	INSTR    handler;        /* Function itself */
+	char     *name;          /* Function name */
+	grad_data_type_t rettype;        /* Return type */
+	char     *parms;         /* coded parameter types */
 } builtin_t;
 
 /*
  * Operation matrices
  */
-typedef union mtx MTX;
+typedef struct mtx MTX;
 /*
  * All matrices contain the following common fields:
  *    alloc- link to the previously allocated matrix.
@@ -252,162 +255,144 @@ typedef union mtx MTX;
  * Additionally, all expression matrices contain the field
  * `datatype' which contains the data type for this matrix.
  */
-#if defined(MAINTAINER_MODE)
-# define COMMON_MTX \
-        OBJ(MTX);\
-        int      id;\
-        grad_locus_t    loc;\
-        Mtxtype  type;
-#else
-# define COMMON_MTX \
-        OBJ(MTX);\
-        grad_locus_t    loc;\
-        Mtxtype  type;
-#endif
-        
+
 #define COMMON_EXPR_MTX \
-        COMMON_MTX\
-        grad_data_type_t datatype;\
-        MTX      *uplink;\
-        MTX      *arglink;
+	grad_data_type_t datatype;\
+	MTX      *uplink;\
+	MTX      *arglink;
 
 /*
  * Generic matrix: nothing special
  * Type: Generic
  */
 typedef struct {
-        COMMON_EXPR_MTX
+	COMMON_EXPR_MTX
 } GEN_MTX;
 /*
  * Constant matrix
  * Type: Constant
  */
 typedef struct {
-        COMMON_EXPR_MTX
-        grad_datum_t    datum;     /* Constant value */      
+	COMMON_EXPR_MTX
+	grad_datum_t    datum;     /* Constant value */
 } CONST_MTX;
 /*
  * Reference to a previous regexp: corresponds to a \N construct
  * Type: Matchref
  */
 typedef struct {
-        COMMON_EXPR_MTX
-        int      num;       /* Number of \( ... \) to be referenced */
+	COMMON_EXPR_MTX
+	int      num;       /* Number of \( ... \) to be referenced */
 } MATCHREF_MTX;
 /*
  * Reference to a variable
  * Type: Variable
  */
 typedef struct {
-        COMMON_EXPR_MTX
-        VAR      *var;      /* Variable being referenced */ 
+	COMMON_EXPR_MTX
+	VAR      *var;      /* Variable being referenced */
 } VAR_MTX;
 /*
  * Unary operation matrix
  * Type: Unary
  */
 typedef struct {
-        COMMON_EXPR_MTX
-        Uopcode  opcode;    /* Operation code */
-        MTX      *arg;      /* Argument */
+	COMMON_EXPR_MTX
+	Uopcode  opcode;    /* Operation code */
+	MTX      *arg;      /* Argument */
 } UN_MTX;
 /*
  * Binary operation matrix
  * Type: Binary
  */
 typedef struct {
-        COMMON_EXPR_MTX
-        Bopcode   opcode;   /* Operation code */ 
-        MTX      *arg[2];   /* Arguments */ 
+	COMMON_EXPR_MTX
+	Bopcode   opcode;   /* Operation code */
+	MTX      *arg[2];   /* Arguments */
 } BIN_MTX;
 /*
  * Assignment matrix
  * Type: Asgn
  */
 typedef struct {
-        COMMON_EXPR_MTX
-        VAR      *lval;     /* Lvalue */
-        MTX      *arg;      /* Rvalue */
+	COMMON_EXPR_MTX
+	VAR      *lval;     /* Lvalue */
+	MTX      *arg;      /* Rvalue */
 } ASGN_MTX;
 /*
  * Conditional expression matrix
  * Type: Cond
  */
 typedef struct {
-        COMMON_MTX
-        MTX      *expr;     /* Conditional expression */
-        MTX      *if_true;  /* Branch if true */
-        MTX      *if_false; /* Branch if false */ 
+	MTX      *expr;     /* Conditional expression */
+	MTX      *if_true;  /* Branch if true */
+	MTX      *if_false; /* Branch if false */
 } COND_MTX;
 /*
  * Regexp match
  * Type: Match
  */
 typedef struct {
-        COMMON_EXPR_MTX
-        int        negated; /* Is the match negated ? */
-        MTX        *arg;    /* Argument (lhs) */
-        COMP_REGEX *rx;     /* Regexp (rhs) */
+	COMMON_EXPR_MTX
+	int        negated; /* Is the match negated ? */
+	MTX        *arg;    /* Argument (lhs) */
+	COMP_REGEX *rx;     /* Regexp (rhs) */
 } MATCH_MTX;
 /*
  * Type coercion
  * Type: Coerce
  */
 typedef struct {
-        COMMON_EXPR_MTX
-        MTX      *arg;      /* Argument of the coercion */ 
+	COMMON_EXPR_MTX
+	MTX      *arg;      /* Argument of the coercion */
 } COERCE_MTX;
 /*
  * Expression
  * Type: Expression
  */
 typedef struct {
-        COMMON_EXPR_MTX
-        MTX      *expr;
+	COMMON_EXPR_MTX
+	MTX      *expr;
 } EXPR_MTX;
 /*
  * Return from function
  * Type: Return
  */
 typedef struct {
-        COMMON_EXPR_MTX
-        MTX      *expr;     /* Return value */
+	COMMON_EXPR_MTX
+	MTX      *expr;     /* Return value */
 } RET_MTX;
 /*
  * Unconditional branch (jump)
  * Type: Jump
  */
 typedef struct {
-        COMMON_MTX
-        MTX *link;          /* Link to the next jump matrix
-                             * (for break and continue matrices)
-                             */
-        MTX      *dest;     /* Jump destination (usually a NOP matrix) */
+	MTX *link;          /* Link to the next jump matrix
+			     * (for break and continue matrices)
+			     */
+	MTX      *dest;     /* Jump destination (usually a NOP matrix) */
 } JUMP_MTX;
 /*
  * Conditional branch
  * Type: Branch
  */
 typedef struct {
-        COMMON_MTX
-        int      cond;      /* Condition: 1 - equal, 0 - not equal */
-        MTX      *dest;     /* Jump destination (usually a NOP matrix) */
+	int      cond;      /* Condition: 1 - equal, 0 - not equal */
+	MTX      *dest;     /* Jump destination (usually a NOP matrix) */
 } BRANCH_MTX;
 /*
  * Stack frame matrix
  * Type: Enter, Leave
  */
 typedef struct {
-        COMMON_MTX
-        stkoff_t  stacksize;/* Required stack size */
+	stkoff_t  stacksize;/* Required stack size */
 } FRAME_MTX;
 /*
  * Jump target
  * Type: Target
  */
 typedef struct {
-        COMMON_MTX
-        pctr_t  pc;         /* Target's program counter */
+	pctr_t  pc;         /* Target's program counter */
 } TGT_MTX;
 /*
  * No-op matrix. It is always inserted at the branch destination
@@ -416,62 +401,70 @@ typedef struct {
  * Type: Nop
  */
 typedef struct {
-        COMMON_MTX
-        TGT_MTX   *tgt;     /* Target list */
-        pctr_t     pc;      /* Program counter for backward
-                               references */
+	MTX       *tgt;     /* Target list.
+			       FIXME: This should be DLIST_HEAD.
+			     */
+	pctr_t     pc;      /* Program counter for backward
+			       references */
 } NOP_MTX;
 /*
  * Function call
  * Type: Call
  */
 typedef struct {
-        COMMON_EXPR_MTX
-        FUNCTION  *fun;     /* Called function */
-        int       nargs;    /* Number of arguments */
-        MTX       *args;    /* Arguments */
+	COMMON_EXPR_MTX
+	FUNCTION  *fun;     /* Called function */
+	int       nargs;    /* Number of arguments */
+	MTX       *args;    /* Arguments */
 } CALL_MTX;
 /*
  * Builtin function call
  * Type: Builtin
  */
 typedef struct {
-        COMMON_EXPR_MTX
-        INSTR     fun;      /* Handler function */
-        int       nargs;    /* Number of arguments */   
-        MTX       *args;    /* Arguments */
+	COMMON_EXPR_MTX
+	INSTR     fun;      /* Handler function */
+	int       nargs;    /* Number of arguments */
+	MTX       *args;    /* Arguments */
 } BTIN_MTX;
 /*
  * Attribute matrix
  * Type: Attr, Attr_asgn, Attr_check
  */
 typedef struct {
-        COMMON_EXPR_MTX
-        int       attrno;   /* Attribute number */
+	COMMON_EXPR_MTX
+	int       attrno;   /* Attribute number */
 	MTX       *index;   /* Index expression */
-        MTX       *rval;    /* Rvalue */
+	MTX       *rval;    /* Rvalue */
 } ATTR_MTX;
 
-union mtx {
-        GEN_MTX    gen;
-        NOP_MTX    nop;
-        FRAME_MTX  frame;
-        CONST_MTX  cnst;
-        MATCHREF_MTX    ref;
-        VAR_MTX    var;
-        UN_MTX     un;
-        BIN_MTX    bin;
-        COND_MTX   cond;
-        ASGN_MTX   asgn;
-        MATCH_MTX  match;
-        COERCE_MTX coerce;
-        RET_MTX    ret;
-        JUMP_MTX   jump;
-        BRANCH_MTX branch;
-        TGT_MTX    tgt;
-        CALL_MTX   call;
-        BTIN_MTX   btin;
-        ATTR_MTX   attr;
+struct mtx {
+	OBJ(mtx);
+	int             id;
+	grad_locus_t    loc;
+	Mtxtype         type;
+
+	union {
+		GEN_MTX    gen;
+		NOP_MTX    nop;
+		FRAME_MTX  frame;
+		CONST_MTX  cnst;
+		MATCHREF_MTX    ref;
+		VAR_MTX    var;
+		UN_MTX     un;
+		BIN_MTX    bin;
+		COND_MTX   cond;
+		ASGN_MTX   asgn;
+		MATCH_MTX  match;
+		COERCE_MTX coerce;
+		RET_MTX    ret;
+		JUMP_MTX   jump;
+		BRANCH_MTX branch;
+		TGT_MTX    tgt;
+		CALL_MTX   call;
+		BTIN_MTX   btin;
+		ATTR_MTX   attr;
+	};
 };
 
 /*
@@ -480,9 +473,9 @@ union mtx {
 typedef struct frame_t FRAME;
 
 struct frame_t {
-        OBJ(FRAME);
-        int       level;        /* nesting level */
-        stkoff_t  stack_offset; /* offset in the stack */
+	OBJ(frame_t);
+	int       level;        /* nesting level */
+	stkoff_t  stack_offset; /* offset in the stack */
 };
 
 
@@ -492,55 +485,69 @@ struct frame_t {
 /*
  * Stack Frame list
  */
-static OBUCKET frame_bkt = { sizeof(FRAME), NULL };
-static FRAME *frame_first, *frame_last;
-#define curframe frame_last
+static DLIST_HEAD(, frame_t) frame_head = DLIST_HEAD_INITIALIZER(frame_head);
 
-static int errcnt;         /* Number of errors detected */ 
+static inline FRAME *
+frame_cur(void)
+{
+	return DLIST_LAST(&frame_head);
+}
+
+static int errcnt;         /* Number of errors detected */
 static FUNCTION *function; /* Function being compiled */
-static grad_symtab_t *rewrite_tab;/* Function table */  
+static grad_symtab_t *rewrite_tab;/* Function table */
 
-static MTX *mtx_first, *mtx_last;  /* Matrix list */
-static VAR *var_first, *var_last;  /* Variable list */ 
+static DLIST_HEAD(, mtx) mtx_head = DLIST_HEAD_INITIALIZER(mtx_head);
+static DLIST_HEAD(, variable) var_head = DLIST_HEAD_INITIALIZER(var_head);
 
 /*
  * Loops
  */
 typedef struct loop_t LOOP;
 struct loop_t {
-        OBJ(LOOP);
-        JUMP_MTX *lp_break;
-        JUMP_MTX *lp_cont;
+	OBJ(loop_t);
+	MTX *lp_break;
+	MTX *lp_cont;
 };
-static OBUCKET loop_bkt = { sizeof(LOOP), NULL };
-static LOOP *loop_first, *loop_last;
+static DLIST_HEAD(, loop_t) loop_head = DLIST_HEAD_INITIALIZER(loop_head);
 
-void loop_push(MTX *mtx);
-void loop_pop();
-void loop_fixup(JUMP_MTX *list, MTX *target);
-void loop_init();
-void loop_free_all();
-void loop_unwind_all();
+static inline int
+in_loop(void)
+{
+	return !DLIST_EMPTY(&loop_head);
+}
+
+static inline LOOP *
+loop_last(void)
+{
+	return DLIST_LAST(&loop_head);
+}
+
+static void loop_push(MTX *mtx);
+static void loop_pop(void);
+static void loop_fixup(MTX *list, MTX *target);
+static void loop_init(void);
+static void loop_unwind_all(void);
 
 /*
  * Lexical analyzer stuff
  */
-static FILE *infile;               /* Input file */ 
+static FILE *infile;               /* Input file */
 static grad_locus_t locus;         /* Input location */
 
 static char *inbuf;                /* Input string */
 static char *curp;                 /* Current pointer */
- 
-static int   yyeof;                /* rised when EOF is encountered */ 
-static struct obstack input_stk;   /* Symbol stack */ 
+
+static int   yyeof;                /* rised when EOF is encountered */
+static grad_strbuf_t tokbuf;       /* token buffer */
 
 static grad_data_type_t return_type = Undefined;
-                                   /* Data type of the topmost expression. */
+				   /* Data type of the topmost expression. */
 
 static int regcomp_flags = 0;      /* Flags to be used with regcomps */
 
 #define regex_init() regcomp_flags = 0
- 
+
 /* Runtime */
 static size_t rewrite_stack_size = 4096;  /* Size of stack+heap */
 static RWSTYPE *runtime_stack;
@@ -549,7 +556,7 @@ static RWMACH mach;
 /* Default domain for gettext functions. It is initialized to PACKAGE
    by default */
 static char *default_gettext_domain;
- 
+
 
 /* ***************************************************************
  * Function declarations
@@ -558,41 +565,38 @@ static char *default_gettext_domain;
 /*
  * Lexical analyzer
  */
-static int yylex(); 
-static void yysync();
-static int yyerror(char *s);
- 
+static int yylex(void);
+static void yysync(void);
+static int yyerror(char const *s);
+
 /*
  * Frames
  */
-static void frame_init();
-static void frame_push();
-static void frame_pop();
-static void frame_unwind_all();
-static void frame_free_all();
+static void frame_init(void);
+static void frame_push(void);
+static void frame_pop(void);
+static void frame_unwind_all(void);
 /*
  * Variables
  */
-static void var_init();
+static void var_init(void);
 static VAR * var_alloc(grad_data_type_t type, char *name, int grow);
-static void var_unwind_level();
-static void var_unwind_all();
+static void var_unwind_level(void);
+static void var_unwind_all(void);
 static void var_type(grad_data_type_t type, VAR *var);
-static void var_free_all();
 static VAR *var_lookup(char *name);
 /*
  * Matrices
  */
-static void mtx_init();
-static void mtx_free_all();
-static void mtx_unwind_all();
-static MTX * mtx_cur();
-static MTX * mtx_nop();
-static MTX * mtx_jump();
+static void mtx_init(void);
+static void mtx_unwind_all(void);
+static MTX * mtx_cur(void);
+static MTX * mtx_nop(void);
+static MTX * mtx_jump(void);
 static MTX * mtx_frame(Mtxtype type, stkoff_t stksize);
-static MTX * mtx_stop();
-static MTX * mtx_pop();
-static MTX * mtx_return();
+static MTX * mtx_stop(void);
+static MTX * mtx_pop(void);
+static MTX * mtx_return(MTX *arg);
 static MTX * mtx_alloc(Mtxtype type);
 static MTX * mtx_const(grad_value_t *val);
 static MTX * mtx_ref(int num);
@@ -615,15 +619,15 @@ static MTX * coerce(MTX  *arg, grad_data_type_t type);
  * Regular expressions
  */
 static COMP_REGEX * rx_alloc(regex_t  *regex, int nmatch);
-static void rx_free(COMP_REGEX *rx);
+static void rx_head_free(COMP_REGEX_HEAD *rx);
 static COMP_REGEX * compile_regexp(char *str);
 /*
  * Functions
  */
 static FUNCTION * function_install(FUNCTION *fun);
-static int  function_free(FUNCTION *fun);
-static void function_delete();
-static void function_cleanup();
+static void function_free(void *);
+static void function_delete(void);
+static void function_cleanup(void);
 /*
  * Built-in functions
  */
@@ -632,15 +636,14 @@ static builtin_t * builtin_lookup(char *name);
 /*
  * Code optimizer and generator
  */
-static int optimize();
-static pctr_t codegen();
-static void code_init();
-static void code_check();
+static int optimize(void);
+static pctr_t codegen(void);
+static void code_init(void);
+static void code_check(void);
 
 /*
  * Auxiliary and debugging functions
  */
-static void debug_dump_code();
 static const char * datatype_str_nom(grad_data_type_t type);
 static const char * datatype_str_acc(grad_data_type_t type);
 static const char * datatype_str_abl(grad_data_type_t type);
@@ -649,15 +652,15 @@ static grad_data_type_t attr_datatype(grad_dict_attr_t *);
 /*
  * Run-Time
  */
-static void gc();
+static void gc(void);
 static void run(pctr_t pc);
 static int run_init(pctr_t pc, grad_request_t *req);
 static int rw_error(const char *msg);
 static int rw_error_free(char *msg);
- 
+
 /* These used to lock/unlock access to rw_code array. Now this is
    not needed. However, I left the placeholders for a while... */
-#define rw_code_lock() 
+#define rw_code_lock()
 #define rw_code_unlock()
 
 #define AVPLIST(m) ((m)->req ? (m)->req->avlist : NULL)
@@ -665,24 +668,28 @@ static int rw_error_free(char *msg);
 static FUNCTION fmain;
 %}
 
+%define api.prefix {rw_yy}
+%define parse.error verbose
+%expect 1
+
 
 %union {
-        int   number;
-        int   type;
-        VAR   *var;
-        MTX   *mtx;
-        FUNCTION  *fun;
-        builtin_t *btin;
-        grad_dict_attr_t *attr;
-        struct {
-                MTX *arg_first;
-                MTX *arg_last;
-        } arg;
-        struct {
-                int nmatch;
-                regex_t regex;
-        } rx;
-        char  *string;
+	int   number;
+	int   type;
+	VAR   *var;
+	MTX   *mtx;
+	FUNCTION  *fun;
+	builtin_t *btin;
+	grad_dict_attr_t *attr;
+	struct {
+		MTX *arg_first;
+		MTX *arg_last;
+	} arg;
+	struct {
+		int nmatch;
+		regex_t regex;
+	} rx;
+	char  *string;
 };
 
 %token <type>   TYPE
@@ -695,7 +702,7 @@ static FUNCTION fmain;
 %token <attr> ATTR
 %token BOGUS
 
-%type <arg> arglist 
+%type <arg> arglist
 %type <mtx> stmt expr list cond else while do arg args
 %type <var> varlist parmlist parm dclparm
 
@@ -707,7 +714,7 @@ static FUNCTION fmain;
 %left '|'
 %left '^'
 %left '&'
-%left EQ NE 
+%left EQ NE
 %left LT LE GT GE
 %left SHL SHR
 %left '+' '-'
@@ -717,564 +724,561 @@ static FUNCTION fmain;
 %%
 
 program : input
-          {
-                  var_free_all();
-                  loop_free_all();
-                  frame_free_all();
-                  mtx_free_all();
-          }
-        ;
+	  {
+		  obj_free_all();
+	  }
+	;
 
 input   : dcllist
-          {
+	  {
 		  return_type = Undefined;
 	  }
-        | expr
-          {
-                  if (errcnt) {
-                          YYERROR;
-                  }
-		  
+	| expr
+	  {
+		  if (errcnt) {
+			  YYERROR;
+		  }
+
 		  mtx_return($1);
-                  
+
 		  memset(&fmain, 0, sizeof(fmain));
 		  fmain.name = "main";
 		  fmain.rettype = return_type = $1->gen.datatype;
 		  function = &fmain;
 
-                  if (optimize() == 0) {
-                          codegen();
-                          if (errcnt) {
-                                  YYERROR;
-                          }
-                  }
-          }
-        ;
+		  if (optimize() == 0) {
+			  codegen();
+			  if (errcnt) {
+				  YYERROR;
+			  }
+		  }
+	  }
+	;
 
 dcllist : decl
-        | dcllist decl
-        | dcllist error
-          {
-                  /* Roll back all changes done so far */
-                  var_unwind_all();
-                  loop_unwind_all();
-                  frame_unwind_all();
-                  mtx_unwind_all();
-                  function_delete();
-                  /* Synchronize input after error */
-                  yysync();
-                  /* Clear input and error condition */
-                  yyclearin;
-                  yyerrok;
-                  errcnt = 0;
-          }
-        ;
+	| dcllist decl
+	| dcllist error
+	  {
+		  /* Roll back all changes done so far */
+		  var_unwind_all();
+		  loop_unwind_all();
+		  frame_unwind_all();
+		  mtx_unwind_all();
+		  function_delete();
+		  /* Synchronize input after error */
+		  yysync();
+		  /* Clear input and error condition */
+		  yyclearin;
+		  yyerrok;
+		  errcnt = 0;
+	  }
+	;
 
 decl    : fundecl begin list end
-          {
-                  if (errcnt) {
-                          function_delete();
-                          YYERROR;
-                  }
-                  
-                  if (optimize() == 0) {
-                          codegen();
-                          if (errcnt) {
-                                  function_delete();
-                                  YYERROR;
-                          }
-                  } else {
-                          function_delete();
-                  }
-                  
-                  /* clean up things */
-                  var_unwind_all();
-                  loop_unwind_all();
-                  frame_unwind_all();
-                  mtx_unwind_all();
-                  function_cleanup();
-          }
-        ;
+	  {
+		  if (errcnt) {
+			  function_delete();
+			  YYERROR;
+		  }
+
+		  if (optimize() == 0) {
+			  codegen();
+			  if (errcnt) {
+				  function_delete();
+				  YYERROR;
+			  }
+		  } else {
+			  function_delete();
+		  }
+
+		  /* clean up things */
+		  var_unwind_all();
+		  loop_unwind_all();
+		  frame_unwind_all();
+		  mtx_unwind_all();
+		  function_cleanup();
+	  }
+	;
 
 fundecl : TYPE IDENT dclparm
-          {
-                  VAR *var;
-                  PARAMETER *last, *parm;
-                  FUNCTION f;
-                  
-                  if (errcnt)
-                          YYERROR;
-                  
-                  memset(&f, 0, sizeof(f));
-                  f.name    = $2;
-                  f.rettype = $1;
-                  f.entry   = 0;
-                  f.loc     = locus;
-                  
-                  f.nparm   = 0;
-                  f.parm    = NULL;
+	  {
+		  VAR *var;
+		  PARAMETER *last, *parm;
+		  FUNCTION f;
 
-                  /* Count number of parameters */
-                  for (var = $3; var; var = var->next) 
-                          f.nparm++;
+		  if (errcnt)
+			  YYERROR;
 
-                  f.parm = last = NULL;
-                  for (var = $3; var; var = var->next) {
-                          parm = grad_emalloc(sizeof(*parm));
-                          parm->datatype = var->datatype;
-                          var->offset = -(STACK_BASE+
-                                          f.nparm - var->offset);
-                          parm->offset   = var->offset;
-                          parm->prev     = last;
-                          parm->next     = NULL;
-                          if (f.parm == NULL)
-                                  f.parm = parm;
-                          else 
-                                  last->next = parm;
-                          last = parm;
-                  }
-                  function = function_install(&f);
-          }
-        | TYPE FUN dclparm
-          {
+		  memset(&f, 0, sizeof(f));
+		  f.name    = $2;
+		  f.rettype = $1;
+		  f.entry   = 0;
+		  f.loc     = locus;
+
+		  f.nparm   = 0;
+		  f.parm    = NULL;
+
+		  /* Count number of parameters */
+		  for (var = $3; var; var = DLIST_NEXT(var, link))
+			  f.nparm++;
+
+		  f.parm = last = NULL;
+		  for (var = $3; var; var = DLIST_NEXT(var, link)) {
+			  parm = grad_emalloc(sizeof(*parm));
+			  parm->datatype = var->datatype;
+			  var->offset = -(STACK_BASE+
+					  f.nparm - var->offset);
+			  parm->offset   = var->offset;
+			  parm->prev     = last;
+			  parm->next     = NULL;
+			  if (f.parm == NULL)
+				  f.parm = parm;
+			  else
+				  last->next = parm;
+			  last = parm;
+		  }
+		  function = function_install(&f);
+	  }
+	| TYPE FUN dclparm
+	  {
 		  grad_log_loc(GRAD_LOG_ERR, &locus,
 			       _("redefinition of function `%s'"), $2->name);
 		  grad_log_loc(GRAD_LOG_ERR, &$2->loc,
 			       _("previously defined here"));
 		  errcnt++;
 		  YYERROR;
-          }
-        ;
+	  }
+	;
 
 begin   : obrace
-        | obrace autodcl
-        ;
+	| obrace autodcl
+	;
 
 end     : cbrace
-        ;
-                  
+	;
+
 obrace  : '{'
-          {
-                  frame_push();
-          }
-        ;
+	  {
+		  frame_push();
+	  }
+	;
 
 cbrace  : '}'
-          {
-                  var_unwind_level();
-                  frame_pop();
-          }
-        ;
+	  {
+		  var_unwind_level();
+		  frame_pop();
+	  }
+	;
 
 /*
  * Automatic variables
  */
 
 autodcl : autovar
-        | autodcl autovar
-        ;
+	| autodcl autovar
+	;
 
 autovar : TYPE varlist ';'
-          {
-                  var_type($1, $2);
-          }
-        ;
+	  {
+		  var_type($1, $2);
+	  }
+	;
 
 varlist : IDENT
-          {
-                  $$ = var_alloc(Undefined, $1, +1);
-                  $$->dcllink = NULL;
-          }
-        | varlist ',' IDENT
-          {
-                  VAR *var = var_alloc(Undefined, $3, +1);
-                  var->dcllink = $1;
-                  $$ = var;
-          }
-        ;
+	  {
+		  $$ = var_alloc(Undefined, $1, +1);
+		  $$->dcllink = NULL;
+	  }
+	| varlist ',' IDENT
+	  {
+		  VAR *var = var_alloc(Undefined, $3, +1);
+		  var->dcllink = $1;
+		  $$ = var;
+	  }
+	;
 
 /*
  * Function Parameters
  */
 dclparm : '(' ')'
-          {
-                  $$ = NULL;
-          }
-        | '(' parmlist ')'
-          {
-                  $$ = $2;
-          }
-        ;
+	  {
+		  $$ = NULL;
+	  }
+	| '(' parmlist ')'
+	  {
+		  $$ = $2;
+	  }
+	;
 
 parmlist: parm
-          {
-                  /*FIXME*/
-                  /*$$->dcllink = NULL;*/
-          }
-        | parmlist ',' parm
-          {
-                  /*$1->dcllink = $3;*/
-                  $$ = $1;
-          }
-        ;
+	  {
+		  /*FIXME*/
+		  /*$$->dcllink = NULL;*/
+	  }
+	| parmlist ',' parm
+	  {
+		  /*$1->dcllink = $3;*/
+		  $$ = $1;
+	  }
+	;
 
 parm    : TYPE IDENT
-          {
-                  $$ = var_alloc($1, $2, +1);
-          }
-        ;
+	  {
+		  $$ = var_alloc($1, $2, +1);
+	  }
+	;
 
 /* Argument lists
  */
 
 args    : /* empty */
-          {
-                  $$ = NULL;
-          }
-        | arglist
-          {
-                  $$ = $1.arg_first;
-          }
-        ;
+	  {
+		  $$ = NULL;
+	  }
+	| arglist
+	  {
+		  $$ = $1.arg_first;
+	  }
+	;
 
 arglist : arg
-          {
-                  $1->gen.arglink = NULL;
-                  $$.arg_first = $$.arg_last = $1;
-          }
-        | arglist ',' arg
-          {
-                  $1.arg_last->gen.arglink = $3;
-                  $1.arg_last = $3;
-                  $$ = $1;
-          }
-        ;
+	  {
+		  $1->gen.arglink = NULL;
+		  $$.arg_first = $$.arg_last = $1;
+	  }
+	| arglist ',' arg
+	  {
+		  $1.arg_last->gen.arglink = $3;
+		  $1.arg_last = $3;
+		  $$ = $1;
+	  }
+	;
 
 arg     : expr
-        ;
+	;
 
 /*
  * Statement list and individual statements
  */
 list    : stmt
-        | list stmt
-        ;
+	| list stmt
+	;
 
 stmt    : begin list end
-          {
-                  $$ = $2;
-          }
-        | expr ';'
-          {
-                  mtx_stop();
-                  mtx_pop();
-          }
-        | IF cond stmt
-          {
-                  $2->cond.if_false = mtx_nop();
-                  $$ = mtx_cur();
-          }
-        | IF cond stmt else stmt
-          {
-                  mtx_stop();
-                  $2->cond.if_false = $4;
-                  $4->nop.prev->jump.dest = mtx_nop();
-                  $$ = mtx_cur();
-          }
-        | RETURN expr ';'
-          {
-                  /*mtx_stop();*/
-                  $$ = mtx_return($2);
-          }
-        | while cond stmt
-          {
-                  MTX *mtx;
-                  
-                  mtx_stop();
-                  mtx = mtx_jump();
-                  mtx->jump.dest = $1;
-                  $2->cond.if_false = mtx_nop();
-                  $$ = mtx_cur();
-                  
-                  /* Fixup possible breaks */
-                  loop_fixup(loop_last->lp_break, $$);
-                  /* Fixup possible continues */
-                  loop_fixup(loop_last->lp_cont, $1);
-                  loop_pop();
-          }       
-        | do stmt { $<mtx>$ = mtx_nop(); } WHILE cond ';' 
-          {
-                  /* Default cond rule sets if_true to the next NOP matrix
-                   * Invert this behaviour.
-                   */
-                  $5->cond.if_false = $5->cond.if_true;
-                  $5->cond.if_true = $1;
-                  $$ = mtx_cur();
+	  {
+		  $$ = $2;
+	  }
+	| expr ';'
+	  {
+		  mtx_stop();
+		  mtx_pop();
+	  }
+	| IF cond stmt
+	  {
+		  $2->cond.if_false = mtx_nop();
+		  $$ = mtx_cur();
+	  }
+	| IF cond stmt else stmt
+	  {
+		  mtx_stop();
+		  $2->cond.if_false = $4;
+		  DLIST_PREV($4, link)->jump.dest = mtx_nop();
+		  $$ = mtx_cur();
+	  }
+	| RETURN expr ';'
+	  {
+		  /*mtx_stop();*/
+		  $$ = mtx_return($2);
+	  }
+	| while cond stmt
+	  {
+		  MTX *mtx;
 
-                  /* Fixup possible breaks */
-                  loop_fixup(loop_last->lp_break, $$);
-                  /* Fixup possible continues */
-                  loop_fixup(loop_last->lp_cont, $<mtx>3);
-                  loop_pop();
-          }
+		  mtx_stop();
+		  mtx = mtx_jump();
+		  mtx->jump.dest = $1;
+		  $2->cond.if_false = mtx_nop();
+		  $$ = mtx_cur();
+
+		  /* Fixup possible breaks */
+		  loop_fixup(loop_last()->lp_break, $$);
+		  /* Fixup possible continues */
+		  loop_fixup(loop_last()->lp_cont, $1);
+		  loop_pop();
+	  }
+	| do stmt { $<mtx>$ = mtx_nop(); } WHILE cond ';'
+	  {
+		  /* Default cond rule sets if_true to the next NOP matrix
+		   * Invert this behaviour.
+		   */
+		  $5->cond.if_false = $5->cond.if_true;
+		  $5->cond.if_true = $1;
+		  $$ = mtx_cur();
+
+		  /* Fixup possible breaks */
+		  loop_fixup(loop_last()->lp_break, $$);
+		  /* Fixup possible continues */
+		  loop_fixup(loop_last()->lp_cont, $<mtx>3);
+		  loop_pop();
+	  }
 /* ***********************
    For future use:
-        | FOR '(' for_expr for_expr for_expr ')' stmt
+	| FOR '(' for_expr for_expr for_expr ')' stmt
    *********************** */
-        | BREAK ';'
-          {
-                  if (!loop_last) {
-                          grad_log_loc(GRAD_LOG_ERR, &locus,
+	| BREAK ';'
+	  {
+		  if (!in_loop()) {
+			  grad_log_loc(GRAD_LOG_ERR, &locus,
 				       "%s",
 				       _("nothing to break from"));
-                          errcnt++;
-                          YYERROR;
-                  }
+			  errcnt++;
+			  YYERROR;
+		  }
 
-                  $$ = mtx_jump();
-                  $$->jump.link = (MTX*)loop_last->lp_break;
-                  loop_last->lp_break = (JUMP_MTX*)$$;
-          }
-        | CONTINUE ';'
-          {
-                  if (!loop_last) {
-                          grad_log_loc(GRAD_LOG_ERR, &locus,
+		  $$ = mtx_jump();
+		  $$->jump.link = loop_last()->lp_break;
+		  loop_last()->lp_break = $$;
+	  }
+	| CONTINUE ';'
+	  {
+		  if (!in_loop()) {
+			  grad_log_loc(GRAD_LOG_ERR, &locus,
 				       "%s",
 				       _("nothing to continue"));
-                          errcnt++;
-                          YYERROR;
-                  }
-                  $$ = mtx_jump();
-                  $$->jump.link = (MTX*)loop_last->lp_cont;
-                  loop_last->lp_cont = (JUMP_MTX*)$$;
-          }
-        | DELETE ATTR ';'
-          {
+			  errcnt++;
+			  YYERROR;
+		  }
+		  $$ = mtx_jump();
+		  $$->jump.link = loop_last()->lp_cont;
+		  loop_last()->lp_cont = $$;
+	  }
+	| DELETE ATTR ';'
+	  {
 		  $$ = mtx_attr_delete($2, NULL);
 	  }
 	| DELETE ATTR '(' expr ')' ';'
-          {
+	  {
 		  $$ = mtx_attr_delete($2, $4);
 	  }
-        ;
+	;
 
 while   : WHILE
-          {
-                  $$ = mtx_nop();
-                  loop_push($$);
-          }
-        ;
+	  {
+		  $$ = mtx_nop();
+		  loop_push($$);
+	  }
+	;
 
 do      : DO
-          {
-                  $$ = mtx_nop();
-                  loop_push($$);
-          }
-        ;
+	  {
+		  $$ = mtx_nop();
+		  loop_push($$);
+	  }
+	;
 
 else    : ELSE
-          {
-                  mtx_stop();
-                  mtx_jump();
-                  $$ = mtx_nop();
-          }
-        ;
+	  {
+		  mtx_stop();
+		  mtx_jump();
+		  $$ = mtx_nop();
+	  }
+	;
 
 cond    : '(' expr ')'
-          {
-                  mtx_stop();
-                  $$ = mtx_cond($2, NULL, NULL);
-                  $$->cond.if_true = mtx_nop();
-          }
-        ;
+	  {
+		  mtx_stop();
+		  $$ = mtx_cond($2, NULL, NULL);
+		  $$->cond.if_true = mtx_nop();
+	  }
+	;
 
 /*
  * Expressions
  */
 expr    : NUMBER
-          {
+	  {
 		  grad_value_t val;
 		  val.type = Integer;
 		  val.datum.ival = $1;
-                  $$ = mtx_const(&val);
-          }
-        | STRING
-          {
+		  $$ = mtx_const(&val);
+	  }
+	| STRING
+	  {
 		  grad_value_t val;
 		  val.type = String;
 		  val.datum.sval.size = strlen($1);
 		  val.datum.sval.data = $1;
-                  $$ = mtx_const(&val);
-          }
-        | REFERENCE
-          {
-                  $$ = mtx_ref($1);
-          }
-        | VARIABLE
-          {
-                  $$ = mtx_var($1);
-          }
-        | IDENT
-          {
-                  grad_log_loc(GRAD_LOG_ERR, &locus, _("undefined variable: %s"), $1);
-                  errcnt++;
-                  YYERROR;
-          }
-        | VARIABLE '=' expr
-          {
-                  $$ = mtx_asgn($1, $3);
-          }
-        | ATTR
-          {
-                  $$ = mtx_attr($1, NULL);
-          }
-        | ATTR '(' expr ')'
-          {
-                  $$ = mtx_attr($1, $3);
-          }
-        | '*' ATTR
-          {
-                  $$ = mtx_attr_check($2, NULL);
-          }
-        | '*' ATTR '(' expr ')'
-          {
+		  $$ = mtx_const(&val);
+	  }
+	| REFERENCE
+	  {
+		  $$ = mtx_ref($1);
+	  }
+	| VARIABLE
+	  {
+		  $$ = mtx_var($1);
+	  }
+	| IDENT
+	  {
+		  grad_log_loc(GRAD_LOG_ERR, &locus, _("undefined variable: %s"), $1);
+		  errcnt++;
+		  YYERROR;
+	  }
+	| VARIABLE '=' expr
+	  {
+		  $$ = mtx_asgn($1, $3);
+	  }
+	| ATTR
+	  {
+		  $$ = mtx_attr($1, NULL);
+	  }
+	| ATTR '(' expr ')'
+	  {
+		  $$ = mtx_attr($1, $3);
+	  }
+	| '*' ATTR
+	  {
+		  $$ = mtx_attr_check($2, NULL);
+	  }
+	| '*' ATTR '(' expr ')'
+	  {
 		  $$ = mtx_attr_check($2, $4);
 	  }
-        | ATTR '=' expr
-          {
-                  $$ = mtx_attr_asgn($1, NULL, $3);
-          }
-        | ATTR '(' expr ')' '=' expr
-          {
-                  $$ = mtx_attr_asgn($1, $3, $6);
-          }
-        | FUN '(' args ')'
-          {
-                  $$ = mtx_call($1, $3);
-          }
-        | BUILTIN '(' args ')'
-          {
-                  $$ = mtx_builtin($1, $3);
-          }
-        | expr '+' expr
-          {
-                  $$ = mtx_bin(Add, $1, $3);
-          }
-        | expr '-' expr
-          {
-                  $$ = mtx_bin(Sub, $1, $3);
-          }
-        | expr '*' expr
-          {
-                  $$ = mtx_bin(Mul, $1, $3);
-          }
-        | expr '/' expr
-          {
-                  $$ = mtx_bin(Div, $1, $3);
-          }
-        | expr '%' expr
-          {
-                  $$ = mtx_bin(Rem, $1, $3);
-          }
-        | expr '|' expr
-          {
-                  $$ = mtx_bin(BOr, $1, $3);
-          }
-        | expr '&' expr
-          {
-                  $$ = mtx_bin(BAnd, $1, $3);
-          }
-        | expr '^' expr
-          {
-                  $$ = mtx_bin(BXor, $1, $3);
-          }
-        | expr SHL expr
-          {
-                  $$ = mtx_bin(Shl, $1, $3);
-          }
-        | expr SHR expr
-          {
-                  $$ = mtx_bin(Shr, $1, $3);
-          }
-        | expr AND expr
-          {
-                  $$ = mtx_bin(And, $1, $3);
-          }
-        | expr OR expr
-          {
-                  $$ = mtx_bin(Or, $1, $3);
-          }
-        | '-' expr %prec UMINUS
-          {
-                  $$ = mtx_un(Neg, $2);
-          }
-        | '+' expr %prec UMINUS
-          {
-                  $$ = $2;
-          }
-        | NOT expr
-          {
-                  $$ = mtx_un(Not, $2);
-          }
-        | '(' expr ')'
-          {
-                  $$ = $2;
-          }
-        | '(' TYPE ')' expr %prec TYPECAST
-          {
-                  $$ = mtx_coerce($2, $4);
-          }
-        | expr EQ expr
-          {
-                  $$ = mtx_bin(Eq, $1, $3);
-          }
-        | expr NE expr
-          {
-                  $$ = mtx_bin(Ne, $1, $3);
-          }
-        | expr LT expr
-          {
-                  $$ = mtx_bin(Lt, $1, $3);
-          }
-        | expr LE expr
-          {
-                  $$ = mtx_bin(Le, $1, $3);
-          }
-        | expr GT expr
-          {
-                  $$ = mtx_bin(Gt, $1, $3);
-          }
-        | expr GE expr
-          {
-                  $$ = mtx_bin(Ge, $1, $3);
-          }
-        | expr MT STRING
-          {
-                  COMP_REGEX *rx;
-                  if ((rx = compile_regexp($3)) == NULL) {
-                          errcnt++;
-                          YYERROR;
-                  }
-                  $$ = mtx_match(0, $1, rx);
-          }
-        | expr NM STRING
-          {
-                  COMP_REGEX *rx;
-                  if ((rx = compile_regexp($3)) == NULL) {
-                          errcnt++;
-                          YYERROR;
-                  }
-                  $$ = mtx_match(1, $1, rx);
-          }
-        ;
+	| ATTR '=' expr
+	  {
+		  $$ = mtx_attr_asgn($1, NULL, $3);
+	  }
+	| ATTR '(' expr ')' '=' expr
+	  {
+		  $$ = mtx_attr_asgn($1, $3, $6);
+	  }
+	| FUN '(' args ')'
+	  {
+		  $$ = mtx_call($1, $3);
+	  }
+	| BUILTIN '(' args ')'
+	  {
+		  $$ = mtx_builtin($1, $3);
+	  }
+	| expr '+' expr
+	  {
+		  $$ = mtx_bin(Add, $1, $3);
+	  }
+	| expr '-' expr
+	  {
+		  $$ = mtx_bin(Sub, $1, $3);
+	  }
+	| expr '*' expr
+	  {
+		  $$ = mtx_bin(Mul, $1, $3);
+	  }
+	| expr '/' expr
+	  {
+		  $$ = mtx_bin(Div, $1, $3);
+	  }
+	| expr '%' expr
+	  {
+		  $$ = mtx_bin(Rem, $1, $3);
+	  }
+	| expr '|' expr
+	  {
+		  $$ = mtx_bin(BOr, $1, $3);
+	  }
+	| expr '&' expr
+	  {
+		  $$ = mtx_bin(BAnd, $1, $3);
+	  }
+	| expr '^' expr
+	  {
+		  $$ = mtx_bin(BXor, $1, $3);
+	  }
+	| expr SHL expr
+	  {
+		  $$ = mtx_bin(Shl, $1, $3);
+	  }
+	| expr SHR expr
+	  {
+		  $$ = mtx_bin(Shr, $1, $3);
+	  }
+	| expr AND expr
+	  {
+		  $$ = mtx_bin(And, $1, $3);
+	  }
+	| expr OR expr
+	  {
+		  $$ = mtx_bin(Or, $1, $3);
+	  }
+	| '-' expr %prec UMINUS
+	  {
+		  $$ = mtx_un(Neg, $2);
+	  }
+	| '+' expr %prec UMINUS
+	  {
+		  $$ = $2;
+	  }
+	| NOT expr
+	  {
+		  $$ = mtx_un(Not, $2);
+	  }
+	| '(' expr ')'
+	  {
+		  $$ = $2;
+	  }
+	| '(' TYPE ')' expr %prec TYPECAST
+	  {
+		  $$ = mtx_coerce($2, $4);
+	  }
+	| expr EQ expr
+	  {
+		  $$ = mtx_bin(Eq, $1, $3);
+	  }
+	| expr NE expr
+	  {
+		  $$ = mtx_bin(Ne, $1, $3);
+	  }
+	| expr LT expr
+	  {
+		  $$ = mtx_bin(Lt, $1, $3);
+	  }
+	| expr LE expr
+	  {
+		  $$ = mtx_bin(Le, $1, $3);
+	  }
+	| expr GT expr
+	  {
+		  $$ = mtx_bin(Gt, $1, $3);
+	  }
+	| expr GE expr
+	  {
+		  $$ = mtx_bin(Ge, $1, $3);
+	  }
+	| expr MT STRING
+	  {
+		  COMP_REGEX *rx;
+		  if ((rx = compile_regexp($3)) == NULL) {
+			  errcnt++;
+			  YYERROR;
+		  }
+		  $$ = mtx_match(0, $1, rx);
+	  }
+	| expr NM STRING
+	  {
+		  COMP_REGEX *rx;
+		  if ((rx = compile_regexp($3)) == NULL) {
+			  errcnt++;
+			  YYERROR;
+		  }
+		  $$ = mtx_match(1, $1, rx);
+	  }
+	;
 
 %%
 
 int
-yyerror(char *s)
+yyerror(char const *s)
 {
-        grad_log_loc(GRAD_LOG_ERR, &locus, "%s", s);
-        errcnt++;
+	grad_log_loc(GRAD_LOG_ERR, &locus, "%s", s);
+	errcnt++;
 	return 0;
 }
 
@@ -1285,84 +1289,81 @@ yyerror(char *s)
 int
 parse_rewrite(char *path)
 {
-        locus.file = path;
-        infile = fopen(locus.file, "r");
-        if (!infile) {
-                if (errno != ENOENT) {
-                        grad_log(GRAD_LOG_ERR|GRAD_LOG_PERROR,
-                                 _("can't open file `%s'"),
-                                 locus.file);
+	locus.file = path;
+	infile = fopen(locus.file, "r");
+	if (!infile) {
+		if (errno != ENOENT) {
+			grad_log(GRAD_LOG_ERR|GRAD_LOG_PERROR,
+				 _("can't open file `%s'"),
+				 locus.file);
 			return -1;
-                }
-                return -2;
-        }
+		}
+		return -2;
+	}
 
-	GRAD_DEBUG1(1, "Loading file %s", locus.file);
-        rw_code_lock();
-        yyeof = 0;
-        locus.line = 1;
+	GRAD_DEBUG(1, "Loading file %s", locus.file);
+	rw_code_lock();
+	yyeof = 0;
+	locus.line = 1;
 	errcnt = 0;
-        regex_init();
-        obstack_init(&input_stk);
+	regex_init();
+	tokbuf = grad_strbuf_create();
 
-        mtx_init();
-        var_init();
-        loop_init();
-        frame_init();
-        
-        frame_push();
-	
-        yyparse();
+	mtx_init();
+	var_init();
+	loop_init();
+	frame_init();
 
-        var_free_all();
-        frame_free_all();
-        mtx_free_all();
-                
-        fclose(infile);
-        obstack_free(&input_stk, NULL);
-        rw_code_unlock();
-        return errcnt;
+	frame_push();
+
+	yyparse();
+
+	obj_free_all();
+
+	fclose(infile);
+	grad_strbuf_free(tokbuf);
+	rw_code_unlock();
+	return errcnt;
 }
 
+static void debug_dump_code(void);
+
 static int
-parse_rewrite_string(char *str)
+parse_rewrite_string(char const *str)
 {
-        rw_code_lock();
+	rw_code_lock();
 	code_check();
-        yyeof = 0;
+	yyeof = 0;
 	locus.file = "<string>";
 	locus.line = 1;
 	errcnt = 0;
-        regex_init();
-        obstack_init(&input_stk);
+	regex_init();
+	tokbuf = grad_strbuf_create();
 
-        mtx_init();
-        var_init();
-        loop_init();
-        frame_init();
-        
-        frame_push();
-        
-        if (GRAD_DEBUG_LEVEL(50))
-                yydebug++;
+	mtx_init();
+	var_init();
+	loop_init();
+	frame_init();
+
+	frame_push();
+
+	if (GRAD_DEBUG_LEVEL(50))
+		yydebug++;
 
 	infile = 0;
-	inbuf = curp = str;
-	
-        yyparse();
+	inbuf = curp = grad_estrdup(str);
 
-#if defined(MAINTAINER_MODE)
-        if (GRAD_DEBUG_LEVEL(100))
-                debug_dump_code();
-#endif
-        
-        var_free_all();
-        frame_free_all();
-        mtx_free_all();
-                
-        obstack_free(&input_stk, NULL);
-        rw_code_unlock();
-        return errcnt;
+	yyparse();
+
+	if (GRAD_DEBUG_LEVEL(100))
+		debug_dump_code();
+
+	obj_free_all();
+
+	free(inbuf);
+	grad_strbuf_free(tokbuf);
+	rw_code_unlock();
+	return errcnt;
 }
 
 
@@ -1381,11 +1382,11 @@ unput(int c)
 	return c;
 }
 
-static int 
-input()
+static int
+input(void)
 {
-        if (yyeof)
-                yychar = 0;
+	if (yyeof)
+		yychar = 0;
 	else if (infile) {
 		if ((yychar = getc(infile)) <= 0) {
 			yyeof++;
@@ -1396,18 +1397,18 @@ input()
 		if (!yychar)
 			yyeof++;
 	}
-        return yychar;
+	return yychar;
 }
 
-static int  rw_backslash();
+static int  rw_backslash(void);
 static int  c2d(int c);
-static int  read_number();
+static int  read_number(void);
 static int  read_num(int n, int base);
-static char *read_string();
+static char *read_string(void);
 static char *read_ident(int c);
 static char *read_to_delim(int c);
-static int  skip_to_nl();
-static int c_comment();
+static int  skip_to_nl(void);
+static int c_comment(void);
 
 /*
  * Convert a character to digit. Only octal, decimal and hex digits are
@@ -1417,56 +1418,56 @@ static int c_comment();
 int
 c2d(int c)
 {
-        switch (c) {
-        case '0':
-        case '1':
-        case '2':
-        case '3':
-        case '4':
-        case '5':
-        case '6':
-        case '7':
-        case '8':
-        case '9':
-                return c - '0';
-        case 'A':
-        case 'B':
-        case 'C':
-        case 'D':
-        case 'E':
-        case 'F':
-                return c - 'A' + 16;
-        case 'a':
-        case 'b':
-        case 'c':
-        case 'd':
-        case 'e':
-        case 'f':
-                return c - 'a' + 10;
-        }
-        return 100;
+	switch (c) {
+	case '0':
+	case '1':
+	case '2':
+	case '3':
+	case '4':
+	case '5':
+	case '6':
+	case '7':
+	case '8':
+	case '9':
+		return c - '0';
+	case 'A':
+	case 'B':
+	case 'C':
+	case 'D':
+	case 'E':
+	case 'F':
+		return c - 'A' + 16;
+	case 'a':
+	case 'b':
+	case 'c':
+	case 'd':
+	case 'e':
+	case 'f':
+		return c - 'a' + 10;
+	}
+	return 100;
 }
 
 /*
- * Read a number. Usual C conventions apply. 
+ * Read a number. Usual C conventions apply.
  */
 int
-read_number()
+read_number(void)
 {
-        int c;
-        int base;
+	int c;
+	int base;
 	int res;
-	
-        c = yychar;
-        if (c == '0') {
-                if (input() == 'x' || yychar == 'X') {
-                        base = 16;
-                } else {
-                        base = 8;
-                        unput(yychar);
-                }
-        } else
-                base = 10;
+
+	c = yychar;
+	if (c == '0') {
+		if (input() == 'x' || yychar == 'X') {
+			base = 16;
+		} else {
+			base = 8;
+			unput(yychar);
+		}
+	} else
+		base = 10;
 
 	res = read_num(c2d(c), base);
 	if (base == 10 && yychar == '.') {
@@ -1474,7 +1475,7 @@ read_number()
 
 		for (n = 0; n < 3 && yychar == '.'; n++) {
 			int val;
-			
+
 			input();
 			val = read_num(0, base);
 			res = (res << 8) + val;
@@ -1488,61 +1489,60 @@ read_number()
 int
 read_num(int n, int base)
 {
-        int d;
+	int d;
 
-        while (input() && (d = c2d(yychar)) < 16) 
-                n = n*base + d;
-        unput(yychar);
-        return n;
+	while (input() && (d = c2d(yychar)) < 16)
+		n = n*base + d;
+	unput(yychar);
+	return n;
 }
 
 int
-rw_backslash()
+rw_backslash(void)
 {
-        switch (input()) {
-        case '\\':
-                return '\\';
-        case 'a':
-                return '\a';
-        case 'b':
-                return '\b';
-        case 'f':
-                return '\f';
-        case 'n':
-                return '\n';
-        case 'r':
-                return '\r';
-        case 't':
-                return '\t';
-        case 'e':
-                return '\033';
-        case '0':
-                return read_number();
-        case 'x':
-        case 'X':
-                return read_num(0, 16);
-        case '(':
-        case ')':
-                /* Preserve regular expressions */
-                unput(yychar);
-                yychar = '\\';
-        }
-        return yychar;
+	switch (input()) {
+	case '\\':
+		return '\\';
+	case 'a':
+		return '\a';
+	case 'b':
+		return '\b';
+	case 'f':
+		return '\f';
+	case 'n':
+		return '\n';
+	case 'r':
+		return '\r';
+	case 't':
+		return '\t';
+	case 'e':
+		return '\033';
+	case '0':
+		return read_number();
+	case 'x':
+	case 'X':
+		return read_num(0, 16);
+	case '(':
+	case ')':
+		/* Preserve regular expressions */
+		unput(yychar);
+		yychar = '\\';
+	}
+	return yychar;
 }
 
 /*
  * Read a string up to the closing doublequote
  */
 char *
-read_string()
+read_string(void)
 {
-        while (input() && yychar != '"') {
-                if (yychar == '\\')
-                        yychar = rw_backslash();
-                obstack_1grow(&input_stk, yychar);
-        }
-        obstack_1grow(&input_stk, 0);
-        return obstack_finish(&input_stk);
+	while (input() && yychar != '"') {
+		if (yychar == '\\')
+			yychar = rw_backslash();
+		grad_strbuf_grow_char(tokbuf, yychar);
+	}
+	return grad_strbuf_finish(tokbuf, 0);
 }
 
 /*
@@ -1551,10 +1551,9 @@ read_string()
 char *
 read_to_delim(int c)
 {
-        while (input() && yychar != c)
-                obstack_1grow(&input_stk, yychar);
-        obstack_1grow(&input_stk, 0);
-        return obstack_finish(&input_stk);
+	while (input() && yychar != c)
+		grad_strbuf_grow_char(tokbuf, yychar);
+	return grad_strbuf_finish(tokbuf, 0);
 }
 
 /*
@@ -1573,52 +1572,51 @@ read_to_delim(int c)
 char *
 read_ident(int c)
 {
-        obstack_1grow(&input_stk, c);
-        while (input() && isword(yychar))
-                obstack_1grow(&input_stk, yychar);
-        obstack_1grow(&input_stk, 0);
-        unput(yychar);
-        return obstack_finish(&input_stk);
+	grad_strbuf_grow_char(tokbuf, c);
+	while (input() && isword(yychar))
+		grad_strbuf_grow_char(tokbuf, yychar);
+	unput(yychar);
+	return grad_strbuf_finish(tokbuf, 0);
 }
 
 /*
  * Skip input up to the next newline
  */
 int
-skip_to_nl()
+skip_to_nl(void)
 {
-        while (input() && yychar != '\n')
-                ;
-        return unput(yychar);
+	while (input() && yychar != '\n')
+		;
+	return unput(yychar);
 }
 
 /*
  * Skip a C-style comment
  */
 int
-c_comment()
+c_comment(void)
 {
-        if (yychar != '/')
-                return 0;
-        if (input() == '*') {
-                size_t keep_line = locus.line;
+	if (yychar != '/')
+		return 0;
+	if (input() == '*') {
+		size_t keep_line = locus.line;
 
-                do {
-                        while (input() != '*') {
-                                if (yychar == 0) {
-                                        grad_log_loc(GRAD_LOG_ERR, &locus,
+		do {
+			while (input() != '*') {
+				if (yychar == 0) {
+					grad_log_loc(GRAD_LOG_ERR, &locus,
 		       _("unexpected EOF in comment started at line %lu"),
 						     (unsigned long) keep_line);
-                                        return 0;
-                                } else if (yychar == '\n')
-                                        locus.line++;
-                        }
-                } while (input() != '/');
-                return 1;
-        }
-        unput(yychar);
-        yychar = '/';
-        return 0;
+					return 0;
+				} else if (yychar == '\n')
+					locus.line++;
+			}
+		} while (input() != '/');
+		return 1;
+	}
+	unput(yychar);
+	yychar = '/';
+	return 0;
 }
 
 
@@ -1639,19 +1637,19 @@ regex_pragma (enum pragma_handler_phase phase)
 	int bit;
 	char *s;
 	static int regexp_accum;
-	
+
 	switch (phase) {
 	case pragma_begin:
 		regexp_accum = 0;
 		return 0;
-		
+
 	case pragma_end:
 		regcomp_flags = regexp_accum;
 		return 0;
 
 	case pragma_error:
 		return 0;
-		
+
 	case pragma_cont:
 		break;
 	}
@@ -1671,7 +1669,7 @@ regex_pragma (enum pragma_handler_phase phase)
 		grad_log_loc(GRAD_LOG_ERR, &locus, _("Malformed pragma"));
 		return 1;
 	}
-	
+
 	s = read_ident(yychar);
 
 	if (strcmp (s, "extended") == 0)
@@ -1702,18 +1700,18 @@ find_pragma_handler(char *s)
 }
 
 static void
-handle_pragma()
+handle_pragma(void)
 {
 	int rc;
 	pragma_handler_fp pragma_handler;
-	
+
 	while (input() && isws(yychar))
 		;
 	if (yychar == 0)
 		return;
-			
+
 	pragma_handler = find_pragma_handler (read_ident(yychar));
-		
+
 	if (pragma_handler) {
 		pragma_handler(pragma_begin);
 
@@ -1724,7 +1722,7 @@ handle_pragma()
 				break;
 			rc = pragma_handler(pragma_cont);
 		} while (rc == 0 && yychar != '\n' && yychar != 0);
-		
+
 		pragma_handler(rc ? pragma_error : pragma_end);
 	}
 }
@@ -1734,7 +1732,7 @@ handle_pragma()
 
 /* Parse a 'sharp' (single-line) comment */
 void
-sharp_comment()
+sharp_comment(void)
 {
 	while (input() && isws(yychar))
 		;
@@ -1747,345 +1745,254 @@ sharp_comment()
 		if (strcmp(read_ident(yychar), "pragma") == 0)
 			handle_pragma();
 	}
-		
+
 	skip_to_nl();
 }
 
 
-#if defined(MAINTAINER_MODE)
-# define DEBUG_LEX1(s) if (GRAD_DEBUG_LEVEL(60)) printf("yylex: " s "\n")
-# define DEBUG_LEX2(s,v) if (GRAD_DEBUG_LEVEL(60)) printf("yylex: " s "\n", v)
-#else
-# define DEBUG_LEX1(s)
-# define DEBUG_LEX2(s,v)
-#endif
+#define DEBUG_LEX1(s) if (GRAD_DEBUG_LEVEL(60)) printf("yylex: " s "\n")
+#define DEBUG_LEX2(s,v) if (GRAD_DEBUG_LEVEL(60)) printf("yylex: " s "\n", v)
 
 static grad_keyword_t rw_kw[] = {
-        { "if",       IF },
-        { "else",     ELSE },
-        { "return",   RETURN },
-        { "for",      FOR },
-        { "do",       DO },
-        { "while",    WHILE },
-        { "break",    BREAK },
-        { "continue", CONTINUE },
+	{ "if",       IF },
+	{ "else",     ELSE },
+	{ "return",   RETURN },
+	{ "for",      FOR },
+	{ "do",       DO },
+	{ "while",    WHILE },
+	{ "break",    BREAK },
+	{ "continue", CONTINUE },
 	{ "delete",   DELETE },
-        { NULL }
+	{ NULL }
 };
 
 int
-yylex()
+yylex(void)
 {
-        int nl;
-        int c;
-        VAR *var;
-        FUNCTION *fun;
-        builtin_t *btin;
-        
-        /* Skip whitespace and comment lines */
-        do {
-                nl = 0;
-                while (input() && isspace(yychar))
-                        if (yychar == '\n')
-                                locus.line++;
-        
-                if (!yychar)
-                        return 0;
+	int nl;
+	int c;
+	VAR *var;
+	FUNCTION *fun;
+	builtin_t *btin;
 
-                if (yychar == '#') {
-                        sharp_comment();
-                        nl = 1;
-                }
-        } while (nl || c_comment());
+	/* Skip whitespace and comment lines */
+	do {
+		nl = 0;
+		while (input() && isspace(yychar))
+			if (yychar == '\n')
+				locus.line++;
 
-        /*
-         * A regexp reference
-         */
-        if (yychar == '\\') {
-                input();
-                yylval.number = read_number();
-                DEBUG_LEX2("REFERENCE %d", yylval.number);
-                return REFERENCE;
-        }
+		if (!yychar)
+			return 0;
 
-        /*
-         * A character
-         */
-        if (yychar == '\'') {
-                if (input() == '\\')
-                        c = rw_backslash();
-                else
-                        c = yychar;
-                if (input() != '\'') {
-                        grad_log_loc(GRAD_LOG_ERR, &locus,
+		if (yychar == '#') {
+			sharp_comment();
+			nl = 1;
+		}
+	} while (nl || c_comment());
+
+	/*
+	 * A regexp reference
+	 */
+	if (yychar == '\\') {
+		input();
+		yylval.number = read_number();
+		DEBUG_LEX2("REFERENCE %d", yylval.number);
+		return REFERENCE;
+	}
+
+	/*
+	 * A character
+	 */
+	if (yychar == '\'') {
+		if (input() == '\\')
+			c = rw_backslash();
+		else
+			c = yychar;
+		if (input() != '\'') {
+			grad_log_loc(GRAD_LOG_ERR, &locus,
 				     "%s",
 				     _("unterminated character constant"));
-                        errcnt++;
-                }
-                yylval.number = c;
-                DEBUG_LEX2("CHAR %d", c);
-                return NUMBER;
-        }
-        
-        /*
-         * A number
-         */
-        if (isdigit(yychar)) {
-                yylval.number = read_number();
-                DEBUG_LEX2("NUMBER %d", yylval.number);
-                return NUMBER;
-        }
+			errcnt++;
+		}
+		yylval.number = c;
+		DEBUG_LEX2("CHAR %d", c);
+		return NUMBER;
+	}
 
-        /*
-         * Quoted string
-         */
-        if (yychar == '"') {
-                yylval.string = read_string();
-                DEBUG_LEX2("STRING %s", yylval.string);
-                return STRING;
-        }
+	/*
+	 * A number
+	 */
+	if (isdigit(yychar)) {
+		yylval.number = read_number();
+		DEBUG_LEX2("NUMBER %d", yylval.number);
+		return NUMBER;
+	}
 
-        /* A/V  pair reference.
-           We do not allow %<number> sequences, since it would result
-           in conflict with binary '%' operator.
-           Thanks to Clement Gerouville for noticing.  */
-        if (yychar == '%') {
-                grad_dict_attr_t *attr = 0;
-                char *attr_name;
-                
-                input();
-                if (yychar == '[' || yychar == '{') {
-                        attr_name = read_to_delim(yychar == '[' ? ']' : '}');
-                        attr = grad_attr_name_to_dict(attr_name);
-                } else {
-                        unput(yychar);
-                        return '%';
-                }
-                if (!attr) {
-                        grad_log_loc(GRAD_LOG_ERR, &locus,
+	/*
+	 * Quoted string
+	 */
+	if (yychar == '"') {
+		yylval.string = read_string();
+		DEBUG_LEX2("STRING %s", yylval.string);
+		return STRING;
+	}
+
+	/* A/V  pair reference.
+	   We do not allow %<number> sequences, since it would result
+	   in conflict with binary '%' operator.
+	   Thanks to Clement Gerouville for noticing.  */
+	if (yychar == '%') {
+		grad_dict_attr_t *attr = 0;
+		char *attr_name;
+
+		input();
+		if (yychar == '[' || yychar == '{') {
+			attr_name = read_to_delim(yychar == '[' ? ']' : '}');
+			attr = grad_attr_name_to_dict(attr_name);
+		} else {
+			unput(yychar);
+			return '%';
+		}
+		if (!attr) {
+			grad_log_loc(GRAD_LOG_ERR, &locus,
 				     _("unknown attribute `%s'"),
 				     attr_name);
-                        errcnt++;
-                        return BOGUS;
-                }
-                yylval.attr = attr;
-                DEBUG_LEX2("ATTR: %s", attr->name);
-                return ATTR;
-        }
-                               
-                
-        /*
-         * Data type or identifier
-         */
-        if (isword(yychar)) {
-                yylval.string = read_ident(yychar);
-
-                if (strcmp(yylval.string, "integer") == 0) {
-                        DEBUG_LEX1("TYPE(Integer)");
-                        yylval.type = Integer;
-                        return TYPE;
-                } else if (strcmp(yylval.string, "string") == 0) {
-                        DEBUG_LEX1("TYPE(String)");
-                        yylval.type = String;
-                        return TYPE;
+			errcnt++;
+			return BOGUS;
 		}
-		
-                if ((c = grad_xlat_keyword(rw_kw, yylval.string, 0)) != 0) {
-                        DEBUG_LEX2("KW: %s", yylval.string);
-                        return c;
-                }
+		yylval.attr = attr;
+		DEBUG_LEX2("ATTR: %s", attr->name);
+		return ATTR;
+	}
 
-                if (var = var_lookup(yylval.string)) {
-                        DEBUG_LEX2("VARIABLE: %s", yylval.string);
-                        yylval.var = var;
-                        return VARIABLE;
-                }
-                
-                if (fun = (FUNCTION*) grad_sym_lookup(rewrite_tab, yylval.string)) {
-                        DEBUG_LEX2("FUN %s", yylval.string);
-                        yylval.fun = fun;
-                        return FUN;
-                }
 
-                if (btin = builtin_lookup(yylval.string)) {
-                        DEBUG_LEX2("BUILTIN %s", yylval.string);
-                        yylval.btin = btin;
-                        return BUILTIN;
-                }
-                DEBUG_LEX2("IDENT: %s", yylval.string);
-                return IDENT;
-        }
+	/*
+	 * Data type or identifier
+	 */
+	if (isword(yychar)) {
+		yylval.string = read_ident(yychar);
 
-        /*
-         * Boolean expressions
-         */
-        if (yychar == '&' || yychar == '|') {
-                int c = yychar;
+		if (strcmp(yylval.string, "integer") == 0) {
+			DEBUG_LEX1("TYPE(Integer)");
+			yylval.type = Integer;
+			return TYPE;
+		} else if (strcmp(yylval.string, "string") == 0) {
+			DEBUG_LEX1("TYPE(String)");
+			yylval.type = String;
+			return TYPE;
+		}
 
-                if (input() == c) { 
-                        DEBUG_LEX2("%s", yychar == '&' ? "AND" : "OR"); 
-                        return yychar == '&' ? AND : OR;
-                }
-                unput(yychar);
-                
-                DEBUG_LEX2("%c", c); 
-                return c;
-        }
-        
-        /*
-         * Comparison operator
-         */
-        if (strchr("<>=!", yychar)) {
-                int c = yychar;
-                if (input() == '=') {
-                        switch (c) {
-                        case '<':
-                                DEBUG_LEX1("LE");
-                                return LE;
-                        case '>':
-                                DEBUG_LEX1("GE");
-                                return GE;
-                        case '=':
-                                DEBUG_LEX1("EQ");
-                                return EQ;
-                        case '!':
-                                DEBUG_LEX1("NE");
-                                return NE;
-                        }
-                } else if (c == yychar) {
-                        if (c == '<') {
-                                DEBUG_LEX1("SHL");
-                                return SHL;
-                        }
-                        if (c == '>') {
-                                DEBUG_LEX1("SHR");
-                                return SHR;
-                        }
-                        unput(yychar);
-                        DEBUG_LEX2("%c", yychar);
-                        return yychar;
-                } else if (yychar == '~') {
-                        if (c == '=') {
-                                DEBUG_LEX1("MT");
-                                return MT;
-                        }
-                        if (c == '!') {
-                                DEBUG_LEX1("NM");
-                                return NM;
-                        }
-                }
-                unput(yychar);
-                switch (c) {
-                case '<':
-                        DEBUG_LEX1("LT");
-                        return LT;
-                case '>':
-                        DEBUG_LEX1("GT");
-                        return GT;
-                case '!':
-                        DEBUG_LEX1("NOT");
-                        return NOT;
-                default:
-                        return c;
-                }
-        }
+		if ((c = grad_xlat_keyword(rw_kw, yylval.string, 0)) != 0) {
+			DEBUG_LEX2("KW: %s", yylval.string);
+			return c;
+		}
 
-        DEBUG_LEX2("%c", yychar);
-        return yychar;
+		if ((var = var_lookup(yylval.string))) {
+			DEBUG_LEX2("VARIABLE: %s", yylval.string);
+			yylval.var = var;
+			return VARIABLE;
+		}
+
+		if ((fun = (FUNCTION*) grad_sym_lookup(rewrite_tab, yylval.string))) {
+			DEBUG_LEX2("FUN %s", yylval.string);
+			yylval.fun = fun;
+			return FUN;
+		}
+
+		if ((btin = builtin_lookup(yylval.string))) {
+			DEBUG_LEX2("BUILTIN %s", yylval.string);
+			yylval.btin = btin;
+			return BUILTIN;
+		}
+		DEBUG_LEX2("IDENT: %s", yylval.string);
+		return IDENT;
+	}
+
+	/*
+	 * Boolean expressions
+	 */
+	if (yychar == '&' || yychar == '|') {
+		int c = yychar;
+
+		if (input() == c) {
+			DEBUG_LEX2("%s", yychar == '&' ? "AND" : "OR");
+			return yychar == '&' ? AND : OR;
+		}
+		unput(yychar);
+
+		DEBUG_LEX2("%c", c);
+		return c;
+	}
+
+	/*
+	 * Comparison operator
+	 */
+	if (strchr("<>=!", yychar)) {
+		int c = yychar;
+		if (input() == '=') {
+			switch (c) {
+			case '<':
+				DEBUG_LEX1("LE");
+				return LE;
+			case '>':
+				DEBUG_LEX1("GE");
+				return GE;
+			case '=':
+				DEBUG_LEX1("EQ");
+				return EQ;
+			case '!':
+				DEBUG_LEX1("NE");
+				return NE;
+			}
+		} else if (c == yychar) {
+			if (c == '<') {
+				DEBUG_LEX1("SHL");
+				return SHL;
+			}
+			if (c == '>') {
+				DEBUG_LEX1("SHR");
+				return SHR;
+			}
+			unput(yychar);
+			DEBUG_LEX2("%c", yychar);
+			return yychar;
+		} else if (yychar == '~') {
+			if (c == '=') {
+				DEBUG_LEX1("MT");
+				return MT;
+			}
+			if (c == '!') {
+				DEBUG_LEX1("NM");
+				return NM;
+			}
+		}
+		unput(yychar);
+		switch (c) {
+		case '<':
+			DEBUG_LEX1("LT");
+			return LT;
+		case '>':
+			DEBUG_LEX1("GT");
+			return GT;
+		case '!':
+			DEBUG_LEX1("NOT");
+			return NOT;
+		default:
+			return c;
+		}
+	}
+
+	DEBUG_LEX2("%c", yychar);
+	return yychar;
 }
 
 void
-yysync()
+yysync(void)
 {
-        while (skip_to_nl() == '\n' && !isalpha(input()))
-                locus.line++;
-        unput(yychar);
-}
-
-
-/* ****************************************************************************
- * Generalized list functions
- */
-static RWLIST *_list_insert(RWLIST **first, RWLIST **last, RWLIST *prev,
-			    RWLIST *obj, int before);
-static RWLIST *_list_remove(RWLIST **first, RWLIST **last, RWLIST *obj);
-static RWLIST *_list_append(RWLIST **first, RWLIST **last, RWLIST *obj);
-
-#define rw_list_insert(first, last, prev, obj, before) \
- _list_insert((RWLIST**)first,(RWLIST**)last,(RWLIST*)prev,(RWLIST*)obj, before)
-#define rw_list_remove(first, last, obj) \
- _list_remove((RWLIST**)first,(RWLIST**)last,(RWLIST *)obj)
-#define rw_list_append(first, last, obj) \
- _list_append((RWLIST**)first, (RWLIST**)last, (RWLIST*)obj)
-        
-RWLIST *
-_list_append(RWLIST **first, RWLIST **last, RWLIST *obj)
-{
-        return rw_list_insert(first, last, *last, obj, 0);
-}
-
-RWLIST *
-_list_insert(RWLIST **first, RWLIST **last, RWLIST *prev, RWLIST *obj,
-	     int before)
-{
-        RWLIST   *next;
-
-        /*
-         * No first element: initialize whole list
-         */
-        if (!*first) {
-                *first = obj;
-                if (last)
-                        *last = obj;
-                obj->prev = obj->next = NULL;
-                return obj;
-        }
-
-        /*
-         * Insert before `prev'
-         */
-        if (before) {
-                _list_insert(first, last, prev, obj, 0);
-                _list_remove(first, last, prev);
-                _list_insert(first, last, obj, prev, 0);
-                return obj;
-        }
-
-        /*
-         * Default: insert after prev
-         */
-        obj->prev = prev;
-        obj->next = prev->next;
-        
-        if (next = prev->next)
-                next->prev = obj;
-
-        prev->next = obj;
-        if (last && prev == *last)
-                *last = obj;
-
-                
-        return obj;
-}
-
-RWLIST *
-_list_remove(RWLIST **first, RWLIST **last, RWLIST *obj)
-{
-        RWLIST *temp;
-
-        if (temp = obj->prev) 
-                temp->next = obj->next;
-        else
-                *first = obj->next;
-
-        if (temp = obj->next)
-                temp->prev = obj->prev;
-        else if (last)
-                *last = obj->prev;
-
-        obj->prev = obj->next = NULL;
-        
-        return obj;
+	while (skip_to_nl() == '\n' && !isalpha(input()))
+		locus.line++;
+	unput(yychar);
 }
 
 
@@ -2093,38 +2000,22 @@ _list_remove(RWLIST **first, RWLIST **last, RWLIST *obj)
  * Generalized object handling
  */
 
-void *obj_alloc(OBUCKET *bucket);
-void obj_free_all(OBUCKET *bucket);
- 
+static SLIST_HEAD(, objhdr) alloc_head = SLIST_HEAD_INITIALIZER(alloc_head);
 
-void *
-obj_alloc(OBUCKET *bucket)
+static void *
+obj_alloc(size_t size)
 {
-        OBJECT *optr;
-
-        optr = grad_emalloc(bucket->size);
-
-        optr->alloc        = bucket->alloc_list;
-        bucket->alloc_list = optr;
-        
-        return optr;
+	OBJHDR *p = grad_emalloc(size);
+	SLIST_INSERT_HEAD(p, &alloc_head, link);
+	return p;
 }
 
-void
-obj_free_all(OBUCKET *bucket)
+#define OBJ_ALLOC(p) p = obj_alloc(sizeof(*p))
+
+static void
+obj_free_all(void)
 {
-        OBJECT *obj, *next;
-
-        obj = bucket->alloc_list;
-
-        while (obj) {
-                next = obj->alloc;
-                if (bucket->free)
-                        bucket->free(obj);
-                grad_free(obj);
-                obj = next;
-        }
-        bucket->alloc_list = NULL;
+	SLIST_FREE(&alloc_head, link, objhdr, free);
 }
 
 
@@ -2133,58 +2024,52 @@ obj_free_all(OBUCKET *bucket)
  */
 
 void
-frame_init()
+frame_init(void)
 {
-        frame_bkt.alloc_list = NULL;
-        frame_first = frame_last = NULL;
+	DLIST_INIT(&frame_head);
 }
 
 void
-frame_push()
+frame_push(void)
 {
-        FRAME *this_frame = obj_alloc(&frame_bkt);
+	FRAME *this_frame, *curframe = frame_cur();
 
-        if (!frame_last) {
-                this_frame->level = 0;
-                this_frame->stack_offset = 0;
-        } else {
-                if (frame_last->level == 0)
-                        this_frame->stack_offset = 1;
-                else
-                        this_frame->stack_offset = frame_last->stack_offset;
-                this_frame->level = frame_last->level + 1;
-        } 
-        rw_list_append(&frame_first, &frame_last, this_frame);
+	OBJ_ALLOC(this_frame);
+
+	if (!curframe) {
+		this_frame->level = 0;
+		this_frame->stack_offset = 0;
+	} else {
+		if (curframe->level == 0)
+			this_frame->stack_offset = 1;
+		else
+			this_frame->stack_offset = curframe->stack_offset;
+		this_frame->level = curframe->level + 1;
+	}
+	DLIST_INSERT_TAIL(&frame_head, this_frame, link);
 }
 
 void
-frame_pop()
+frame_pop(void)
 {
-        rw_list_remove(&frame_first, &frame_last, frame_last);
+	DLIST_REMOVE(&frame_head, DLIST_LAST(&frame_head), link);
 }
 
 void
-frame_update_alloc()
+frame_update_alloc(void)
 {
-        FRAME *this_frame = frame_last;
+	FRAME *this_frame = DLIST_LAST(&frame_head);
 
-        if (this_frame->stack_offset > function->stack_alloc)
-                function->stack_alloc = this_frame->stack_offset;
+	if (this_frame->stack_offset > function->stack_alloc)
+		function->stack_alloc = this_frame->stack_offset;
 }
 
 void
-frame_free_all()
+frame_unwind_all(void)
 {
-        obj_free_all(&frame_bkt);
-        frame_first = frame_last = NULL;
-}
-
-void
-frame_unwind_all()
-{
-        while (frame_last)
-                rw_list_remove(&frame_first, &frame_last, frame_last);
-        frame_push();
+	while (!DLIST_EMPTY(&frame_head))
+		DLIST_REMOVE_HEAD(&frame_head, link);
+	frame_push();
 }
 
 
@@ -2193,245 +2078,228 @@ frame_unwind_all()
  */
 
 void
-loop_init()
+loop_init(void)
 {
-        loop_bkt.alloc_list = NULL;
-        loop_first = loop_last = NULL;
+	DLIST_INIT(&loop_head);
 }
 
 void
-loop_free_all()
+loop_unwind_all(void)
 {
-        obj_free_all(&loop_bkt);
-        loop_first = loop_last = NULL;
-}
-
-void
-loop_unwind_all()
-{
-        loop_first = loop_last = NULL;
+	loop_init(); // FIXME:?
 }
 
 /*ARGSUSED*/
 void
 loop_push(MTX *mtx)
 {
-        LOOP *this_loop = obj_alloc(&loop_bkt);
-        rw_list_append(&loop_first, &loop_last, this_loop);
+	LOOP *this_loop;
+	OBJ_ALLOC(this_loop);
+	DLIST_INSERT_TAIL(&loop_head, this_loop, link);
 }
 
 void
-loop_pop()
+loop_pop(void)
 {
-        rw_list_remove(&loop_first, &loop_last, loop_last);
+	DLIST_REMOVE(&loop_head, DLIST_LAST(&loop_head), link);
 }
 
 void
-loop_fixup(JUMP_MTX *list, MTX *target)
+loop_fixup(MTX *list, MTX *target)
 {
-        JUMP_MTX *jp;
+	MTX *jp;
 
-        for (jp = list; jp; jp = (JUMP_MTX*)jp->link)
-                jp->dest = target;
+	for (jp = list; jp; jp = jp->jump.link)
+		jp->jump.dest = target;
 }
 
 
 /* **************************************************************************
  * Variables
  */
-OBUCKET var_bucket = { sizeof(VAR), NULL };
-
 void
-var_init()
+var_init(void)
 {
-        var_bucket.alloc_list = NULL;
-        var_first = var_last = NULL;
+	DLIST_INIT(&var_head);
 }
 
 VAR *
 var_alloc(grad_data_type_t type, char *name, int grow)
 {
-        VAR *var;
+	VAR *var;
 
-        var = (VAR*) obj_alloc(&var_bucket);
-        rw_list_append(&var_first, &var_last, var);
+	OBJ_ALLOC(var);
+	DLIST_INSERT_TAIL(&var_head, var, link);
 
-        /* Initialize fields */
-        var->name     = name;
-        var->datatype = type; 
-        var->level    = curframe->level;
-        var->offset   = curframe->stack_offset;
-        curframe->stack_offset += grow;
+	/* Initialize fields */
+	var->name     = name;
+	var->datatype = type;
+	var->level    = frame_cur()->level;
+	var->offset   = frame_cur()->stack_offset;
+	frame_cur()->stack_offset += grow;
 
-        return var;
+	return var;
 }
 
 void
-var_unwind_level()
+var_unwind_level(void)
 {
-        int cnt = 0;
-        
-        while (var_last && var_last->level == curframe->level) {
-                rw_list_remove(&var_first, &var_last, var_last);
-                cnt++;
-        }
+	int cnt = 0;
+	VAR *last;
 
-        if (cnt)
-                frame_update_alloc();
+	while (!DLIST_EMPTY(&var_head) &&
+	       (last = DLIST_LAST(&var_head))->level == frame_cur()->level) {
+		DLIST_REMOVE(&var_head, last, link);
+		cnt++;
+	}
+
+	if (cnt)
+		frame_update_alloc();
 }
 
 void
-var_unwind_all()
+var_unwind_all(void)
 {
-        while (var_last)
-                rw_list_remove(&var_first, &var_last, var_last);
+	while (!DLIST_EMPTY(&var_head))
+		DLIST_REMOVE_HEAD(&var_head, link);
 }
 
 void
 var_type(grad_data_type_t type, VAR *var)
 {
-        for (; var; var = var->dcllink)
-                var->datatype = type;
-}
-
-void
-var_free_all()
-{
-        obj_free_all(&var_bucket);
-        var_first = var_last = NULL;
+	for (; var; var = var->dcllink)
+		var->datatype = type;
 }
 
 VAR *
 var_lookup(char *name)
 {
-        VAR *var;
+	VAR *var;
 
-        var = var_last;
-        while (var && strcmp(var->name, name))
-                var = var->prev;
-        return var;
+	DLIST_FOREACH_REVERSE(var, &var_head, link)
+		if (strcmp(var->name, name) == 0)
+			break;
+	return var;
 }
 
 
 /* **************************************************************************
  * Matrix generation
  */
-OBUCKET mtx_bucket = { sizeof(MTX), NULL };
-#if defined(MAINTAINER_MODE)
-int mtx_current_id ;
-#endif
+static int mtx_current_id;
 
 /*
  * Insert a matrix into list
  */
-#define mtx_remove(mtx) rw_list_remove(&mtx_first, &mtx_last, mtx)
-#define mtx_append(mtx) rw_list_append(&mtx_first, &mtx_last, mtx)
+static void
+mtx_append(MTX *mtx)
+{
+	DLIST_INSERT_TAIL(&mtx_head, mtx, link);
+}
+
+static void
+mtx_remove(MTX *mtx)
+{
+	DLIST_REMOVE(&mtx_head, mtx, link);
+}
 
 void
 mtx_insert(MTX *prev, MTX *mtx)
 {
-        MTX *up;
+	MTX *up;
 
-        rw_list_insert(&mtx_first, &mtx_last, prev, mtx, 0);
-        if (up = prev->gen.uplink) {
-                switch (up->gen.type) {
-                case Unary:
-                        up->un.arg = mtx;
-                        break;
-                case Binary:
-                        if (up->bin.arg[0] == prev)
-                                up->bin.arg[0] = mtx;
-                        else
-                                up->bin.arg[1] = mtx;
-                        break;
-                case Return:
-                        up->ret.expr = mtx;
-                        break;
-                default:
-                        /*should not happen*/
-                        break;
-                }
-        }
+	DLIST_INSERT_AFTER(&mtx_head, prev, mtx, link);
+	if ((up = prev->gen.uplink)) {
+		switch (up->type) {
+		case Unary:
+			up->un.arg = mtx;
+			break;
+		case Binary:
+			if (up->bin.arg[0] == prev)
+				up->bin.arg[0] = mtx;
+			else
+				up->bin.arg[1] = mtx;
+			break;
+		case Return:
+			up->ret.expr = mtx;
+			break;
+		default:
+			/*should not happen*/
+			break;
+		}
+	}
 }
 
 void
-mtx_init()
+mtx_init(void)
 {
-        mtx_bucket.alloc_list = NULL;
-        mtx_first = mtx_last = NULL;
+	DLIST_INIT(&mtx_head);
 }
 
 void
-mtx_unwind_all()
+mtx_unwind_all(void)
 {
-        while (mtx_last)
-                rw_list_remove(&mtx_first, &mtx_last, mtx_last);
-}
-
-void
-mtx_free_all()
-{
-        obj_free_all(&mtx_bucket);
-        mtx_first = mtx_last = NULL;
+	while (!DLIST_EMPTY(&mtx_head))
+		DLIST_REMOVE_HEAD(&mtx_head, link);
 }
 
 MTX *
-mtx_cur()
+mtx_cur(void)
 {
-        return mtx_last;
+	return DLIST_LAST(&mtx_head);
 }
 
 MTX *
 mtx_frame(Mtxtype type, stkoff_t stksize)
 {
-        FRAME_MTX *mtx = (FRAME_MTX *)mtx_alloc(type);
-        mtx_append(mtx);
-        mtx->stacksize = stksize;
-        return (MTX*)mtx;
+	MTX *mtx = mtx_alloc(type);
+	mtx_append(mtx);
+	mtx->frame.stacksize = stksize;
+	return mtx;
 }
 
 MTX *
-mtx_nop()
+mtx_nop(void)
 {
-        MTX *mtx = mtx_alloc(Nop);
-        mtx_append(mtx);
-        return mtx;
+	MTX *mtx = mtx_alloc(Nop);
+	mtx_append(mtx);
+	return mtx;
 }
 
 MTX *
-mtx_jump()
+mtx_jump(void)
 {
-        MTX *mtx = mtx_alloc(Jump);
-        mtx_append(mtx);
-        return mtx;
+	MTX *mtx = mtx_alloc(Jump);
+	mtx_append(mtx);
+	return mtx;
 }
 
 MTX *
-mtx_stop()
+mtx_stop(void)
 {
-        MTX *mtx = mtx_alloc(Stop);
-        mtx_append(mtx);
-        return mtx;
+	MTX *mtx = mtx_alloc(Stop);
+	mtx_append(mtx);
+	return mtx;
 }
 
 MTX *
-mtx_pop()
+mtx_pop(void)
 {
-        MTX *mtx = mtx_alloc(Pop);
-        mtx_append(mtx);
-        return mtx;
+	MTX *mtx = mtx_alloc(Pop);
+	mtx_append(mtx);
+	return mtx;
 }
-        
+
 
 MTX *
 mtx_return(MTX *arg)
 {
-        MTX *mtx = mtx_alloc(Return);
+	MTX *mtx = mtx_alloc(Return);
 
-        mtx_append(mtx);
-        mtx->ret.expr = arg;
-        arg->gen.uplink = (MTX*)mtx;
-        return (MTX*)mtx;
+	mtx_append(mtx);
+	mtx->ret.expr = arg;
+	arg->gen.uplink = (MTX*)mtx;
+	return (MTX*)mtx;
 }
 
 /*
@@ -2440,14 +2308,14 @@ mtx_return(MTX *arg)
 MTX *
 mtx_alloc(Mtxtype type)
 {
-        MTX *mtx = obj_alloc(&mtx_bucket);
+	MTX *mtx;
 
-        mtx->gen.type  = type;
-        mtx->gen.loc   = locus;
-#if defined(MAINTAINER_MODE)
-        mtx->gen.id    = mtx_current_id++;
-#endif
-        return mtx;
+	OBJ_ALLOC(mtx);
+
+	mtx->type  = type;
+	mtx->loc   = locus;
+	mtx->id    = mtx_current_id++;
+	return mtx;
 }
 
 /*
@@ -2456,12 +2324,12 @@ mtx_alloc(Mtxtype type)
 MTX *
 mtx_const(grad_value_t *val)
 {
-        CONST_MTX *mtx = (CONST_MTX *)mtx_alloc(Constant);
-        
-        mtx_append(mtx);
-        mtx->datatype = val->type;
-	mtx->datum = val->datum;
-        return (MTX*)mtx;
+	MTX *mtx = mtx_alloc(Constant);
+
+	mtx_append(mtx);
+	mtx->cnst.datatype = val->type;
+	mtx->cnst.datum = val->datum;
+	return mtx;
 }
 
 /*
@@ -2470,80 +2338,80 @@ mtx_const(grad_value_t *val)
 MTX *
 mtx_ref(int num)
 {
-        MATCHREF_MTX *mtx = (MATCHREF_MTX*)mtx_alloc(Matchref);
-        mtx_append(mtx);
-        mtx->datatype = String;
-        mtx->num = num;
-        return (MTX*)mtx;
+	MTX *mtx = mtx_alloc(Matchref);
+	mtx_append(mtx);
+	mtx->ref.datatype = String;
+	mtx->ref.num = num;
+	return mtx;
 }
 
 MTX *
 mtx_var(VAR *var)
 {
-        VAR_MTX *mtx = (VAR_MTX*)mtx_alloc(Variable);
-        mtx_append(mtx);
-        mtx->datatype = var->datatype; 
-        mtx->var = var;
-        return (MTX*)mtx;
+	MTX *mtx = mtx_alloc(Variable);
+	mtx_append(mtx);
+	mtx->var.datatype = var->datatype;
+	mtx->var.var = var;
+	return mtx;
 }
 
 MTX *
 mtx_asgn(VAR *var, MTX *arg)
 {
-        ASGN_MTX *mtx = (ASGN_MTX*)mtx_alloc(Asgn);
+	MTX *mtx = mtx_alloc(Asgn);
 
-        mtx_append(mtx);
-        if (var->datatype != arg->gen.datatype)
-                coerce(arg, var->datatype);
-        mtx->datatype = var->datatype;
-        mtx->lval = var;
-        mtx->arg  = arg;
-        return (MTX*)mtx;
+	mtx_append(mtx);
+	if (var->datatype != arg->gen.datatype)
+		coerce(arg, var->datatype);
+	mtx->asgn.datatype = var->datatype;
+	mtx->asgn.lval = var;
+	mtx->asgn.arg  = arg;
+	return mtx;
 }
 
 
 grad_data_type_t
 attr_datatype(grad_dict_attr_t *attr)
 {
-        switch (attr->type) {
-        case GRAD_TYPE_STRING:
+	switch (attr->type) {
+	case GRAD_TYPE_STRING:
 		/* FIXME: It could be a nice move to do
-		   
+
 		     (attr->prop & GRAD_AP_BINARY_STRING) ? Binstr : String;
 
-	           instead... */  
+		   instead... */
 		return String;
-        case GRAD_TYPE_DATE:
-                return String;
-        case GRAD_TYPE_INTEGER:
-        case GRAD_TYPE_IPADDR:
-                return Integer;
-        default:
-                grad_insist_fail("unknown attribute type");
-        }
-        /*NOTREACHED*/
+	case GRAD_TYPE_DATE:
+		return String;
+	case GRAD_TYPE_INTEGER:
+	case GRAD_TYPE_IPADDR:
+		return Integer;
+	}
+	grad_insist_fail("unknown attribute type");
+	/*NOTREACHED*/
+	return -1;
 }
 
 MTX *
 mtx_attr(grad_dict_attr_t *attr, MTX *index)
 {
-        ATTR_MTX *mtx = (ATTR_MTX*)mtx_alloc(Attr);
-        mtx_append(mtx);
-        mtx->attrno   = attr->value;
-        mtx->datatype = attr_datatype(attr);
-	mtx->index = index;
-        return (MTX*)mtx;
+	MTX *mtx = mtx_alloc(Attr);
+	mtx_append(mtx);
+	mtx->attr.attrno   = attr->value;
+	mtx->attr.datatype = attr_datatype(attr);
+	mtx->attr.index = index;
+	return mtx;
 }
 
 MTX *
 mtx_attr_check(grad_dict_attr_t *attr,	MTX *index)
 {
-        ATTR_MTX *mtx = (ATTR_MTX*)mtx_alloc(Attr_check);
-        mtx_append(mtx);
-        mtx->attrno   = attr->value;
-        mtx->datatype = Integer;
-	mtx->index = index;
-        return (MTX*)mtx;
+	MTX *mtx = mtx_alloc(Attr_check);
+	mtx_append(mtx);
+	mtx->attr.attrno   = attr->value;
+	mtx->attr.datatype = Integer;
+	mtx->attr.index = index;
+	return mtx;
 }
 
 
@@ -2561,674 +2429,667 @@ rw_coercion_warning(grad_data_type_t from, grad_data_type_t to, char *pref)
 MTX *
 mtx_attr_asgn(grad_dict_attr_t *attr, MTX *index, MTX *rval)
 {
-        ATTR_MTX *mtx = (ATTR_MTX*)mtx_alloc(Attr_asgn);
-        mtx_append(mtx);
-        mtx->attrno   = attr->value;
-        mtx->datatype = attr_datatype(attr);
-        if (rval->gen.datatype != mtx->datatype) {
-		rw_coercion_warning(rval->gen.datatype, mtx->datatype, NULL);
-                rval = coerce(rval, mtx->datatype);
-        }
-	mtx->index = index;
-        mtx->rval = rval;
-        return (MTX*)mtx;
+	MTX *mtx = mtx_alloc(Attr_asgn);
+	mtx_append(mtx);
+	mtx->attr.attrno   = attr->value;
+	mtx->attr.datatype = attr_datatype(attr);
+	if (rval->gen.datatype != mtx->attr.datatype) {
+		rw_coercion_warning(rval->gen.datatype, mtx->attr.datatype, NULL);
+		rval = coerce(rval, mtx->attr.datatype);
+	}
+	mtx->attr.index = index;
+	mtx->attr.rval = rval;
+	return mtx;
 }
 
 MTX *
 mtx_attr_delete(grad_dict_attr_t *attr, MTX *index)
 {
-        ATTR_MTX *mtx = (ATTR_MTX*)mtx_alloc(Attr_delete);
-        mtx_append(mtx);
-        mtx->attrno   = attr->value;
-        mtx->datatype = attr_datatype(attr);
-	mtx->index = index;
-        return (MTX*)mtx;
+	MTX *mtx = mtx_alloc(Attr_delete);
+	mtx_append(mtx);
+	mtx->attr.attrno   = attr->value;
+	mtx->attr.datatype = attr_datatype(attr);
+	mtx->attr.index = index;
+	return mtx;
 }
 
 MTX *
 mtx_bin(Bopcode opcode, MTX *arg1, MTX *arg2)
 {
-        BIN_MTX *mtx = (BIN_MTX*)mtx_alloc(Binary);
+	MTX *mtx = mtx_alloc(Binary);
 
-        mtx_append(mtx);
-        if (arg1->gen.datatype != arg2->gen.datatype) {
+	mtx_append(mtx);
+	if (arg1->gen.datatype != arg2->gen.datatype) {
 		rw_coercion_warning(String, Integer, NULL);
-                if (arg1->gen.datatype == String)
-                        arg1 = coerce(arg1, Integer);
-                else
-                        arg2 = coerce(arg2, Integer);
-        }
+		if (arg1->gen.datatype == String)
+			arg1 = coerce(arg1, Integer);
+		else
+			arg2 = coerce(arg2, Integer);
+	}
 
-        switch (arg1->gen.datatype) {
-        case String:
-                switch (opcode) {
-                case Add:
-                        mtx->datatype = String;
-                        break;
-                case Eq:
-                case Ne:
-                case Lt:
-                case Le:
-                case Gt:
-                case Ge:
-                        mtx->datatype = Integer;
-                        break;
-                default:
-                        grad_log_loc(GRAD_LOG_ERR, &locus,
+	switch (arg1->gen.datatype) {
+	case String:
+		switch (opcode) {
+		case Add:
+			mtx->bin.datatype = String;
+			break;
+		case Eq:
+		case Ne:
+		case Lt:
+		case Le:
+		case Gt:
+		case Ge:
+			mtx->bin.datatype = Integer;
+			break;
+		default:
+			grad_log_loc(GRAD_LOG_ERR, &locus,
 				     "%s",
 				     _("operation not applicable to strings"));
-                        errcnt++;
-                        return (MTX*)mtx;
-                }
-                break;
-                
-        case Integer:
-                mtx->datatype = Integer;
+			errcnt++;
+			return mtx;
+		}
+		break;
+
+	case Integer:
+		mtx->bin.datatype = Integer;
 		break;
 
 	default:
 		grad_insist_fail("unknown data type");
-        }
+	}
 
-        mtx->opcode = opcode;
-        mtx->arg[0] = arg1;
-        mtx->arg[1] = arg2;
-        arg1->gen.uplink = arg2->gen.uplink = (MTX*)mtx;
-        return (MTX*)mtx;
+	mtx->bin.opcode = opcode;
+	mtx->bin.arg[0] = arg1;
+	mtx->bin.arg[1] = arg2;
+	arg1->gen.uplink = arg2->gen.uplink = mtx;
+	return mtx;
 }
 
 MTX *
 mtx_un(Uopcode opcode, MTX *arg)
 {
-        UN_MTX *mtx = (UN_MTX*)mtx_alloc(Unary);
+	MTX *mtx = mtx_alloc(Unary);
 
-        mtx_append(mtx);
-        if (arg->gen.datatype != Integer) {
+	mtx_append(mtx);
+	if (arg->gen.datatype != Integer) {
 		rw_coercion_warning(String, Integer, NULL);
-                coerce(arg, Integer);
-        }
-        mtx->datatype = Integer;
-        mtx->opcode = opcode;
-        mtx->arg = arg;
-        arg->gen.uplink = (MTX*)mtx;
-        return (MTX*)mtx;
+		coerce(arg, Integer);
+	}
+	mtx->un.datatype = Integer;
+	mtx->un.opcode = opcode;
+	mtx->un.arg = arg;
+	arg->gen.uplink = mtx;
+	return mtx;
 }
 
 MTX *
 mtx_match(int negated, MTX *arg, COMP_REGEX *rx)
 {
-        MATCH_MTX *mtx = (MATCH_MTX*)mtx_alloc(Match);
+	MTX *mtx = mtx_alloc(Match);
 
-        mtx_append(mtx);
-        if (arg->gen.datatype != String) {
+	mtx_append(mtx);
+	if (arg->gen.datatype != String) {
 		rw_coercion_warning(Integer, String, NULL);
-                coerce(arg, String);
-        }
-        mtx->datatype = Integer;
-        mtx->negated = negated;
-        mtx->arg = arg;
-        mtx->rx  = rx;
-        return (MTX*)mtx;
+		coerce(arg, String);
+	}
+	mtx->match.datatype = Integer;
+	mtx->match.negated = negated;
+	mtx->match.arg = arg;
+	mtx->match.rx  = rx;
+	return mtx;
 }
 
 MTX *
 mtx_cond(MTX *cond, MTX *if_true, MTX *if_false)
 {
-        COND_MTX *mtx = (COND_MTX*)mtx_alloc(Cond);
+	MTX *mtx = mtx_alloc(Cond);
 
-        mtx_append(mtx);
-        mtx->expr = cond;
-        mtx->if_true   = if_true;
-        mtx->if_false  = if_false;
-        return (MTX*)mtx;
+	mtx_append(mtx);
+	mtx->cond.expr = cond;
+	mtx->cond.if_true   = if_true;
+	mtx->cond.if_false  = if_false;
+	return mtx;
 }
 
 MTX *
 mtx_coerce(grad_data_type_t type, MTX *arg)
 {
-        if (type == arg->gen.datatype)
-                return mtx_cur();
-        return coerce(arg, type);
-}       
+	if (type == arg->gen.datatype)
+		return mtx_cur();
+	return coerce(arg, type);
+}
 
 MTX *
 coerce(MTX *arg, grad_data_type_t type)
 {
-        COERCE_MTX *mtx = (COERCE_MTX*)mtx_alloc(Coercion);
+	MTX *mtx = mtx_alloc(Coercion);
 
-        mtx_insert(arg, (MTX*) mtx);
-        mtx->datatype = type;
-        mtx->arg = arg;
-        return (MTX*)mtx;
+	mtx_insert(arg, mtx);
+	mtx->coerce.datatype = type;
+	mtx->coerce.arg = arg;
+	return mtx;
 }
 
 MTX *
 mtx_call(FUNCTION *fun, MTX *args)
 {
-        MTX       *argp;
-        CALL_MTX  *call;
-        PARAMETER *parmp;
-        int       argn;
-        
-        /*
-         * Test the number and types of arguments. Insert reasonable
-         * typecasts.
-         */
-        argn = 0;
-        argp = args;
-        parmp = fun->parm;
-        while (argp && parmp) {
-                if (argp->gen.datatype != parmp->datatype) {
+	MTX       *argp;
+	MTX  *call;
+	PARAMETER *parmp;
+	int       argn;
+
+	/*
+	 * Test the number and types of arguments. Insert reasonable
+	 * typecasts.
+	 */
+	argn = 0;
+	argp = args;
+	parmp = fun->parm;
+	while (argp && parmp) {
+		if (argp->gen.datatype != parmp->datatype) {
 			char buf[24];
 			snprintf(buf, sizeof buf, _("(argument %d)"), argn);
 			rw_coercion_warning(argp->gen.datatype,
 					    parmp->datatype, buf);
-                        coerce(argp, parmp->datatype);
-                }
-                argn++;
-                argp  = argp->gen.arglink;
-                parmp = parmp->next;
-        }
+			coerce(argp, parmp->datatype);
+		}
+		argn++;
+		argp  = argp->gen.arglink;
+		parmp = parmp->next;
+	}
 
-        /*
-         * Note that the argument count mismatch is not an error!
-         */
-        if (argp) {
-                grad_log_loc(GRAD_LOG_ERR, &locus,
+	/*
+	 * Note that the argument count mismatch is not an error!
+	 */
+	if (argp) {
+		grad_log_loc(GRAD_LOG_ERR, &locus,
 			     _("too many arguments in call to %s"),
 			     fun->name);
 		errcnt++;
-        } else if (parmp) {
-                grad_log_loc(GRAD_LOG_ERR, &locus,
+	} else if (parmp) {
+		grad_log_loc(GRAD_LOG_ERR, &locus,
 			     _("too few arguments in call to %s"),
 			     fun->name);
 		errcnt++;
-        }
+	}
 
-        call = (CALL_MTX*) mtx_alloc(Call);
-        mtx_append((MTX*)call);
-        
-        call->datatype = fun->rettype;
-        call->fun  = fun;
-        call->args = args; 
-        call->nargs = argn;
-        
-        return (MTX*) call;
+	call = mtx_alloc(Call);
+	mtx_append(call);
+
+	call->call.datatype = fun->rettype;
+	call->call.fun  = fun;
+	call->call.args = args;
+	call->call.nargs = argn;
+
+	return call;
 }
 
 MTX *
 mtx_builtin(builtin_t *bin, MTX *args)
 {
-        MTX          *argp;
-        BTIN_MTX     *call;
-        int          argn;
-        char         *parmp;
-        grad_data_type_t     type;
-        /*
-         * Test the number and types of arguments. Insert reasonable
-         * typecasts.
-         */
-        argn = 0;
-        argp = args;
-        parmp = bin->parms;
-        
-        while (argp && parmp) {
-                switch (parmp[0]) {
-                case 'i':
-                        type = Integer;
-                        break;
-                case 's':
-                        type = String;
-                        break;
-                default:
-                        grad_insist_fail("malformed builtin");
-                }
+	MTX          *argp;
+	MTX          *call;
+	int          argn;
+	char         *parmp;
+	grad_data_type_t     type = Integer;
+	/*
+	 * Test the number and types of arguments. Insert reasonable
+	 * typecasts.
+	 */
+	argn = 0;
+	argp = args;
+	parmp = bin->parms;
 
-                if (argp->gen.datatype != type) {
+	while (argp && parmp) {
+		switch (parmp[0]) {
+		case 'i':
+			type = Integer;
+			break;
+		case 's':
+			type = String;
+			break;
+		default:
+			grad_insist_fail("malformed builtin");
+		}
+
+		if (argp->gen.datatype != type) {
 			char buf[24];
 			snprintf(buf, sizeof buf, _("(argument %d)"), argn);
 			rw_coercion_warning(argp->gen.datatype, type, buf);
-                        coerce(argp, type);
-                }
-                argn++;
-                argp  = argp->gen.arglink;
-                parmp++;
-        }
+			coerce(argp, type);
+		}
+		argn++;
+		argp  = argp->gen.arglink;
+		parmp++;
+	}
 
-        if (argp) {
-                grad_log_loc(GRAD_LOG_ERR, &locus,
+	if (argp) {
+		grad_log_loc(GRAD_LOG_ERR, &locus,
 			     _("too many arguments in call to %s"),
 			     bin->name);
-                errcnt++;
-        } else if (*parmp) {
-                grad_log_loc(GRAD_LOG_ERR, &locus,
+		errcnt++;
+	} else if (*parmp) {
+		grad_log_loc(GRAD_LOG_ERR, &locus,
 			     _("too few arguments in call to %s"),
 			     bin->name);
-                errcnt++;
-        }
+		errcnt++;
+	}
 
-        call = (BTIN_MTX*) mtx_alloc(Builtin);
-        mtx_append((MTX*)call);
-        
-        call->datatype = bin->rettype;
-        call->fun  = bin->handler;
-        call->args = args; 
-        call->nargs = argn;
-        
-        return (MTX*) call;
+	call = mtx_alloc(Builtin);
+	mtx_append(call);
+
+	call->btin.datatype = bin->rettype;
+	call->btin.fun  = bin->handler;
+	call->btin.args = args;
+	call->btin.nargs = argn;
+
+	return call;
 }
 
 
 /* ****************************************************************************
  * Code optimizer (rudimentary)
  */
-
-const char *
+static const char *
 datatype_str_nom(grad_data_type_t type)
 {
-        switch (type) {
-        case Undefined:
-                return _("Undefined");
-        case Integer:
-                return _("integer");
-        case String:
-                return _("string");
-        default:
-                return _("UNKNOWN");
-        }
+	switch (type) {
+	case Undefined:
+		return _("Undefined");
+	case Integer:
+		return _("integer");
+	case String:
+		return _("string");
+	default:
+		return _("UNKNOWN");
+	}
 }
 
-const char *
+static const char *
 datatype_str_abl(grad_data_type_t type)
 {
-        switch (type) {
-        case Undefined:
-                return _("from Undefined");
-        case Integer:
-                return _("from integer");
-        case String:
-                return _("from string");
-        default:
-                return _("from UNKNOWN");
-        }
+	switch (type) {
+	case Undefined:
+		return _("from Undefined");
+	case Integer:
+		return _("from integer");
+	case String:
+		return _("from string");
+	default:
+		return _("from UNKNOWN");
+	}
 }
 
-const char *
+static const char *
 datatype_str_acc(grad_data_type_t type)
 {
-        switch (type) {
-        case Undefined:
-                return _("to Undefined");
-        case Integer:
-                return _("to integer");
-        case String:
-                return _("to string");
-        default:
-                return _("to UNKNOWN");
-        }
+	switch (type) {
+	case Undefined:
+		return _("to Undefined");
+	case Integer:
+		return _("to integer");
+	case String:
+		return _("to string");
+	default:
+		return _("to UNKNOWN");
+	}
 }
 
-FILE *
-debug_open_file()
+static FILE *
+debug_open_file(void)
 {
-        FILE *fp;
-        char *path;
-        
-        path = grad_mkfilename(grad_log_dir, "radius.mtx");
-        if ((fp = fopen(path, "a")) == NULL) {
-                grad_log(GRAD_LOG_ERR|GRAD_LOG_PERROR,
-                         _("can't open file `%s'"),
-                         path);
-        }
-        grad_free(path);
-        return fp;
-}
+	FILE *fp;
+	char *path;
 
-#if defined(MAINTAINER_MODE)
+	path = grad_mkfilename(grad_log_dir, "radius.mtx");
+	if ((fp = fopen(path, "a")) == NULL) {
+		grad_log(GRAD_LOG_ERR|GRAD_LOG_PERROR,
+			 _("can't open file `%s'"),
+			 path);
+	}
+	free(path);
+	return fp;
+}
 
 static void debug_print_datum(FILE *fp, grad_data_type_t type,  grad_datum_t *datum);
 static void debug_print_var(FILE *fp, VAR *var);
-static void debug_print_unary(FILE *fp, UN_MTX *mtx);
-static void debug_print_binary(FILE *fp, BIN_MTX *mtx);
-static void debug_print_mtxlist();
+static void debug_print_unary(FILE *fp, MTX *mtx);
+static void debug_print_binary(FILE *fp, MTX *mtx);
+static void debug_print_mtxlist(char *s);
 
 static char *b_opstr[] = {
-        "Eq",
-        "Ne",
-        "Lt",
-        "Le",
-        "Gt",
-        "Ge",
-        "&",
-        "^",
-        "|",
-        "And",
-        "Or",
-        "Shl",
-        "Shr",
-        "Add",
-        "Sub",
-        "Mul",
-        "Div",
-        "Rem",
+	"Eq",
+	"Ne",
+	"Lt",
+	"Le",
+	"Gt",
+	"Ge",
+	"&",
+	"^",
+	"|",
+	"And",
+	"Or",
+	"Shl",
+	"Shr",
+	"Add",
+	"Sub",
+	"Mul",
+	"Div",
+	"Rem",
 };
 
 static char *u_opstr[] = {
-        "Neg",
-        "Not"
+	"Neg",
+	"Not"
 };
 
-#define LINK(m) (m ? m->gen.id : 0)
+#define LINK(m) (m ? m->id : 0)
 
 void
 debug_print_datum(FILE *fp, grad_data_type_t type, grad_datum_t *datum)
 {
-        fprintf(fp, "%3.3s ", datatype_str_nom(type));
-        switch (type) {
-        case Integer:
-                fprintf(fp, "%d", datum->ival);
-                break;
-		
-        case String:
-                fprintf(fp, "%s", datum->sval);
+	fprintf(fp, "%3.3s ", datatype_str_nom(type));
+	switch (type) {
+	case Integer:
+		fprintf(fp, "%d", datum->ival);
 		break;
-		
+
+	case String:
+		fprintf(fp, "%s", datum->sval.data);//FIXME: if binary?
+		break;
+
 	default:
 		grad_insist_fail("unknown data type");
-        }
+	}
 }
 
 void
 debug_print_var(FILE *fp, VAR *var)
 {
-        fprintf(fp, "%3.3s %s L:%d S:%d",
-                datatype_str_nom(var->datatype),
-                var->name,
-                var->level,
-                var->offset);
-        if (var->constant) {
-                fprintf(fp, "CONST ");
-                debug_print_datum(fp, var->datatype, &var->datum);
-        }
+	fprintf(fp, "%3.3s %s L:%d S:%d",
+		datatype_str_nom(var->datatype),
+		var->name,
+		var->level,
+		var->offset);
+	if (var->constant) {
+		fprintf(fp, "CONST ");
+		debug_print_datum(fp, var->datatype, &var->datum);
+	}
 }
 
 void
-debug_print_unary(FILE *fp, UN_MTX *mtx)
+debug_print_unary(FILE *fp, MTX *mtx)
 {
-        fprintf(fp, "OP:%s M:%d",
-                u_opstr[mtx->opcode], LINK(mtx->arg));
+	fprintf(fp, "OP:%s M:%d",
+		u_opstr[mtx->un.opcode], LINK(mtx->un.arg));
 }
 
 void
-debug_print_binary(FILE *fp, BIN_MTX *mtx)
+debug_print_binary(FILE *fp, MTX *mtx)
 {
-        fprintf(fp, "OP:%s M1:%d M2:%d",
-                b_opstr[mtx->opcode],
-                LINK(mtx->arg[0]),
-                LINK(mtx->arg[1]));
+	fprintf(fp, "OP:%s M1:%d M2:%d",
+		b_opstr[mtx->bin.opcode],
+		LINK(mtx->bin.arg[0]),
+		LINK(mtx->bin.arg[1]));
 }
 
 
 void
 debug_print_mtxlist(char *s)
 {
-        FILE *fp;
-        MTX  *mtx, *tmp;
-        
-        if ((fp = debug_open_file()) == NULL) 
-                return;
+	FILE *fp;
+	MTX  *mtx, *tmp;
 
-        #define CASE(c) case c: fprintf(fp, "%-10.10s", #c);
+	if ((fp = debug_open_file()) == NULL)
+		return;
 
-        fprintf(fp, "%s\n", s);
-        for (mtx = mtx_first; mtx; mtx = mtx->gen.next) {
-                fprintf(fp, "%4d: %4d %4d ",
-                        mtx->gen.id,
-                        LINK(mtx->gen.prev),
-                        LINK(mtx->gen.next));
-                switch (mtx->gen.type) {
-                CASE (Generic)
-                        break;
-                CASE (Nop)
-                        break;
-                CASE (Enter)
-                        fprintf(fp, "%3.3s %d",
-                                "",
-                                mtx->frame.stacksize);
-                        break;
-                CASE (Leave)
-                        fprintf(fp, "%3.3s %d",
-                                "",
-                                mtx->frame.stacksize);
-                        break;
-                CASE (Stop)
-                        break;
-                CASE (Constant)
-                        debug_print_datum(fp, mtx->cnst.datatype,
-                                          &mtx->cnst.datum);
-                        break;
-                CASE (Matchref)
-                        fprintf(fp, "%3.3s %d",
-                                datatype_str_nom(String),
-                                mtx->ref.num);
-                        break;
-                CASE (Variable)
-                        debug_print_var(fp, mtx->var.var);
-                        break;
-                CASE (Unary)
-                        fprintf(fp, "%3.3s ", datatype_str_nom(mtx->gen.datatype));
-                        debug_print_unary(fp, &mtx->un);
-                        break;
-                CASE (Binary)
-                        fprintf(fp, "%3.3s ", datatype_str_nom(mtx->gen.datatype));
-                        debug_print_binary(fp, &mtx->bin);
-                        break;
-                CASE (Cond)
-                        fprintf(fp, "%3.3s ", "");
-                        fprintf(fp, "C:%4d T:%4d F:%4d",
-                                LINK(mtx->cond.expr),
-                                LINK(mtx->cond.if_true),
-                                LINK(mtx->cond.if_false));
-                        break;
-                CASE (Asgn)
-                        fprintf(fp, "%3.3s ",
-                                datatype_str_nom(mtx->gen.datatype));
-                        fprintf(fp, "V:%s,%d,%d M:%4d",
-                                mtx->asgn.lval->name,
-                                mtx->asgn.lval->level,
-                                mtx->asgn.lval->offset,
-                                LINK(mtx->asgn.arg));
-                                break;
-                CASE (Match)
-                        fprintf(fp, "    N:%1d M:%4d RX:%p",
-                                mtx->match.negated,
-                                LINK(mtx->match.arg),
-                                mtx->match.rx);
-                        break; 
-                CASE (Coercion)
-                        fprintf(fp, "%3.3s M:%4d",
-                                datatype_str_nom(mtx->coerce.datatype),
-                                LINK(mtx->coerce.arg));
-                        break;
-                CASE (Return)
-                        fprintf(fp, "%3.3s M:%4d",
-                                datatype_str_nom(mtx->ret.expr->gen.datatype),
-                                LINK(mtx->ret.expr));
-                        break;
-                CASE (Jump)
-                        fprintf(fp, "%3.3s M:%4d",
-                                "",
-                                LINK(mtx->jump.dest));
-                        break;
-                CASE (Branch)
-                        fprintf(fp, "%3.3s M:%4d",
-                                mtx->branch.cond ? "NE" : "EQ",
-                                LINK(mtx->branch.dest));
-                        break;
-                CASE (Call)
-                        fprintf(fp, "%3.3s F:%s, A:%d:",
-                                datatype_str_nom(mtx->call.datatype),
-                                mtx->call.fun->name,
-                                mtx->call.fun->nparm);
-                        for (tmp = mtx->call.args; tmp; tmp = tmp->gen.arglink)
-                                fprintf(fp, "%d,", tmp->gen.id);
-                        break;
+	#define CASE(c) case c: fprintf(fp, "%-10.10s", #c);
 
-                CASE(Builtin)
-                        fprintf(fp, "%3.3s F:%p, A:%d:",
-                                datatype_str_nom(mtx->btin.datatype),
-                                mtx->btin.fun,
-                                mtx->btin.nargs);
-                        for (tmp = mtx->btin.args; tmp; tmp = tmp->gen.arglink)
-                                fprintf(fp, "%d,", tmp->gen.id);
-                        break;
+	fprintf(fp, "%s\n", s);
+	DLIST_FOREACH(mtx, &mtx_head, link) {
+		fprintf(fp, "%4d: %4d %4d ",
+			mtx->id,
+			LINK(DLIST_PREV(mtx, link)),
+			LINK(DLIST_NEXT(mtx, link)));
+		switch (mtx->type) {
+		CASE (Generic)
+			break;
+		CASE (Nop)
+			break;
+		CASE (Enter)
+			fprintf(fp, "%3.3s %d",
+				"",
+				mtx->frame.stacksize);
+			break;
+		CASE (Leave)
+			fprintf(fp, "%3.3s %d",
+				"",
+				mtx->frame.stacksize);
+			break;
+		CASE (Stop)
+			break;
+		CASE (Constant)
+			debug_print_datum(fp, mtx->cnst.datatype,
+					  &mtx->cnst.datum);
+			break;
+		CASE (Matchref)
+			fprintf(fp, "%3.3s %d",
+				datatype_str_nom(String),
+				mtx->ref.num);
+			break;
+		CASE (Variable)
+			debug_print_var(fp, mtx->var.var);
+			break;
+		CASE (Unary)
+			fprintf(fp, "%3.3s ",
+				datatype_str_nom(mtx->un.datatype));
+			debug_print_unary(fp, mtx);
+			break;
+		CASE (Binary)
+			fprintf(fp, "%3.3s ",
+				datatype_str_nom(mtx->gen.datatype));
+			debug_print_binary(fp, mtx);
+			break;
+		CASE (Cond)
+			fprintf(fp, "%3.3s ", "");
+			fprintf(fp, "C:%4d T:%4d F:%4d",
+				LINK(mtx->cond.expr),
+				LINK(mtx->cond.if_true),
+				LINK(mtx->cond.if_false));
+			break;
+		CASE (Asgn)
+			fprintf(fp, "%3.3s ",
+				datatype_str_nom(mtx->asgn.datatype));
+			fprintf(fp, "V:%s,%d,%d M:%4d",
+				mtx->asgn.lval->name,
+				mtx->asgn.lval->level,
+				mtx->asgn.lval->offset,
+				LINK(mtx->asgn.arg));
+				break;
+		CASE (Match)
+			fprintf(fp, "    N:%1d M:%4d RX:%p",
+				mtx->match.negated,
+				LINK(mtx->match.arg),
+				mtx->match.rx);
+			break;
+		CASE (Coercion)
+			fprintf(fp, "%3.3s M:%4d",
+				datatype_str_nom(mtx->coerce.datatype),
+				LINK(mtx->coerce.arg));
+			break;
+		CASE (Return)
+			fprintf(fp, "%3.3s M:%4d",
+				datatype_str_nom(mtx->ret.expr->gen.datatype),
+				LINK(mtx->ret.expr));
+			break;
+		CASE (Jump)
+			fprintf(fp, "%3.3s M:%4d",
+				"",
+				LINK(mtx->jump.dest));
+			break;
+		CASE (Branch)
+			fprintf(fp, "%3.3s M:%4d",
+				mtx->branch.cond ? "NE" : "EQ",
+				LINK(mtx->branch.dest));
+			break;
+		CASE (Call)
+			fprintf(fp, "%3.3s F:%s, A:%d:",
+				datatype_str_nom(mtx->call.datatype),
+				mtx->call.fun->name,
+				mtx->call.fun->nparm);
+			for (tmp = mtx->call.args; tmp; tmp = tmp->gen.arglink)
+				fprintf(fp, "%d,", tmp->id);
+			break;
 
-                CASE (Pop)
-                        break;
+		CASE(Builtin)
+			fprintf(fp, "%3.3s F:%p, A:%d:",
+				datatype_str_nom(mtx->btin.datatype),
+				mtx->btin.fun,
+				mtx->btin.nargs);
+			for (tmp = mtx->btin.args; tmp; tmp = tmp->gen.arglink)
+				fprintf(fp, "%d,", tmp->id);
+			break;
 
-                CASE (Pusha)
-                        break;
+		CASE (Pop)
+			break;
 
-                CASE (Popa)
-                        break;
-                
-                CASE (Attr)
-                        fprintf(fp, "%3.3s A:%d I:%d",
-                                datatype_str_nom(mtx->gen.datatype),
-                                mtx->attr.attrno,
-				mtx->attr.index ? mtx->attr.index->gen.id : 0);
-                        break;
+		CASE (Pusha)
+			break;
 
-                CASE (Attr_check)
-                        fprintf(fp, "%3.3s A:%d I:%d",
-                                datatype_str_nom(mtx->gen.datatype),
-                                mtx->attr.attrno,
-				mtx->attr.index ? mtx->attr.index->gen.id : 0);
-                        break;
-                        
-                CASE (Attr_asgn)
-                        fprintf(fp, "%3.3s A:%d I:%d M:%d",
-                                datatype_str_nom(mtx->gen.datatype),
-                                mtx->attr.attrno,
-				mtx->attr.index ? mtx->attr.index->gen.id : 0,
+		CASE (Popa)
+			break;
+
+		CASE (Attr)
+			fprintf(fp, "%3.3s A:%d I:%d",
+				datatype_str_nom(mtx->attr.datatype),
+				mtx->attr.attrno,
+				mtx->attr.index ? mtx->attr.index->id : 0);
+			break;
+
+		CASE (Attr_check)
+			fprintf(fp, "%3.3s A:%d I:%d",
+				datatype_str_nom(mtx->attr.datatype),
+				mtx->attr.attrno,
+				mtx->attr.index ? mtx->attr.index->id : 0);
+			break;
+
+		CASE (Attr_asgn)
+			fprintf(fp, "%3.3s A:%d I:%d M:%d",
+				datatype_str_nom(mtx->attr.datatype),
+				mtx->attr.attrno,
+				mtx->attr.index ? mtx->attr.index->id : 0,
 				LINK(mtx->attr.rval));
-                        break;
-                        
+			break;
+
 		CASE (Attr_delete)
 			fprintf(fp, "%3.3s A:%d I:%d",
-				datatype_str_nom(mtx->gen.datatype),
+				datatype_str_nom(mtx->attr.datatype),
 				mtx->attr.attrno,
-				mtx->attr.index ? mtx->attr.index->gen.id : 0);
-		        break;
- 
-                default:
-                        fprintf(fp, "UNKNOWN: %d", mtx->gen.type);
-                }
-                fprintf(fp, "\n");
-        }                       
-        
-        fclose(fp);
+				mtx->attr.index ? mtx->attr.index->id : 0);
+			break;
+
+		default:
+			fprintf(fp, "UNKNOWN: %d", mtx->type);
+		}
+		fprintf(fp, "\n");
+	}
+
+	fclose(fp);
 }
 
 void
-debug_print_function()
+debug_print_function(void)
 {
-        FILE      *fp;
-        PARAMETER *parm;
-        int        n;
-        
-        if ((fp = debug_open_file()) == NULL) 
-                return;
+	FILE      *fp;
+	PARAMETER *parm;
+	int        n;
 
-        fprintf(fp, "FUNCTION: %s\n", function->name);
-        fprintf(fp, "RETURNS : %s\n", datatype_str_nom(function->rettype));
-        fprintf(fp, "NPARMS  : %d\n", function->nparm);
-        fprintf(fp, "PARMS   :\n");
+	if ((fp = debug_open_file()) == NULL)
+		return;
 
-        for (parm = function->parm, n = 0; parm; parm = parm->next, n++) 
-                fprintf(fp, "    %4d: %s at %4d\n",
-                        n, datatype_str_nom(parm->datatype),
-                        parm->offset);
-        
-        fclose(fp);
+	fprintf(fp, "FUNCTION: %s\n", function->name);
+	fprintf(fp, "RETURNS : %s\n", datatype_str_nom(function->rettype));
+	fprintf(fp, "NPARMS  : %d\n", function->nparm);
+	fprintf(fp, "PARMS   :\n");
+
+	for (parm = function->parm, n = 0; parm; parm = parm->next, n++)
+		fprintf(fp, "    %4d: %s at %4d\n",
+			n, datatype_str_nom(parm->datatype),
+			parm->offset);
+
+	fclose(fp);
 }
 
-#endif /* MAINTAINER_MODE */
-        
-#if defined(MAINTAINER_MODE)
-# define DEBUG_MTX(c) if (GRAD_DEBUG_LEVEL(30)) debug_print_mtxlist(c);
-# define DEBUG_FUN()  if (GRAD_DEBUG_LEVEL(25)) debug_print_function();
-#else
-# define DEBUG_MTX(c) 
-# define DEBUG_FUN()
-#endif
+#define DEBUG_MTX(c) if (GRAD_DEBUG_LEVEL(30)) debug_print_mtxlist(c);
+#define DEBUG_FUN()  if (GRAD_DEBUG_LEVEL(25)) debug_print_function();
 
-static void pass1();
 static int pass2_unary(MTX *mtx);
 static int pass2_binary(MTX *mtx);
 
 void
-pass1()
+pass1(void)
 {
-        MTX *mtx;
-        MTX *end;
-        
-        /*
-         * Create an entry matrix
-         */
-        mtx = mtx_alloc(Enter);
-        rw_list_insert(&mtx_first, &mtx_last, mtx_first, mtx, 1);
-        mtx->frame.stacksize = function->stack_alloc;
-        
-        /*
-         * Provide a default return statement if necessary
-         */
-        if (mtx_last->gen.type != Return) {
-                grad_value_t val;
-                grad_log_loc(GRAD_LOG_WARN, &mtx_last->gen.loc,
+	MTX *mtx;
+	MTX *end;
+	MTX *last;
+
+	/*
+	 * Create an entry matrix
+	 */
+	mtx = mtx_alloc(Enter);
+	DLIST_INSERT_HEAD(&mtx_head, mtx, link);
+	mtx->frame.stacksize = function->stack_alloc;
+
+	last = DLIST_LAST(&mtx_head);
+	/*
+	 * Provide a default return statement if necessary
+	 */
+	if (last->type != Return) {
+		grad_value_t val;
+		grad_log_loc(GRAD_LOG_WARN, &last->loc,
 			     _("missing return statement"));
 
 		val.type = function->rettype;
-                switch (function->rettype) {
-                case Integer:
-                        val.datum.ival = 0;
-                        break;
-			
-                case String:
-                        val.datum.sval.data = "";
+		switch (function->rettype) {
+		case Integer:
+			val.datum.ival = 0;
+			break;
+
+		case String:
+			val.datum.sval.data = "";
 			val.datum.sval.size = 0;
 			break;
 
 		default:
 			grad_insist_fail("Unknown data type");
-                }
-                mtx_const(&val);
-                mtx_frame(Leave, function->stack_alloc);
-        } else {
-                mtx_last->gen.type = Leave;
-                mtx_last->frame.stacksize = function->stack_alloc;
-        }
+		}
+		mtx_const(&val);
+		mtx_frame(Leave, function->stack_alloc);
+	} else {
+		last->type = Leave;
+		last->frame.stacksize = function->stack_alloc;
+	}
 
-        /*
-         * Insert a no-op matrix before the `leave' one
-         */
-        end = mtx_alloc(Nop);
-        rw_list_insert(&mtx_first, &mtx_last, mtx_last, end, 1);
-        
-        for (mtx = mtx_first; mtx; mtx = mtx->gen.next) {
-                if (mtx->gen.type == Return) {
-                        if (mtx->ret.expr->gen.datatype != function->rettype) {
+	/*
+	 * Insert a no-op matrix before the `leave' one
+	 */
+	end = mtx_alloc(Nop);
+	DLIST_INSERT_BEFORE(&mtx_head, DLIST_LAST(&mtx_head), end, link);
+
+	DLIST_FOREACH(mtx, &mtx_head, link) {
+		if (mtx->type == Return) {
+			if (mtx->ret.expr->gen.datatype != function->rettype) {
 				rw_coercion_warning(
 					mtx->ret.expr->gen.datatype,
 					function->rettype, NULL);
-                                coerce(mtx->ret.expr, function->rettype);
-                        }
-                        mtx->gen.type = Jump;
-                        mtx->jump.dest = end;
-                }
-        }
+				coerce(mtx->ret.expr, function->rettype);
+			}
+			mtx->type = Jump;
+			mtx->jump.dest = end;
+		}
+	}
 }
-        
+
 /*
  * Second pass: elimination of constant sub-expressions
  */
@@ -3239,24 +3100,24 @@ pass1()
 int
 pass2_unary(MTX *mtx)
 {
-        MTX *arg = mtx->un.arg;
-        
-        switch (mtx->un.opcode) {
-        case Not:
-                arg->cnst.datum.ival = !arg->cnst.datum.ival;
-                break;
-		
-        case Neg:
-                arg->cnst.datum.ival = -arg->cnst.datum.ival;
-                break;
+	MTX *arg = mtx->un.arg;
+
+	switch (mtx->un.opcode) {
+	case Not:
+		arg->cnst.datum.ival = !arg->cnst.datum.ival;
+		break;
+
+	case Neg:
+		arg->cnst.datum.ival = -arg->cnst.datum.ival;
+		break;
 
 	default:
 		grad_insist_fail("Unexpected opcode");
-        }
-        mtx->gen.type = Constant;
-        mtx->cnst.datum = arg->cnst.datum;
-        mtx_remove(arg);
-        return 0;
+	}
+	mtx->type = Constant;
+	mtx->cnst.datum = arg->cnst.datum;
+	mtx_remove(arg);
+	return 0;
 }
 
 /*
@@ -3265,122 +3126,122 @@ pass2_unary(MTX *mtx)
 int
 pass2_binary(MTX *mtx)
 {
-        MTX *arg0 = mtx->bin.arg[0];
-        MTX *arg1 = mtx->bin.arg[1];
-        grad_datum_t dat;
-        
-        switch (mtx->bin.opcode) {
-        case Eq:
-                dat.ival = arg0->cnst.datum.ival == arg1->cnst.datum.ival;
-                break;
-		
-        case Ne:
-                dat.ival = arg0->cnst.datum.ival != arg1->cnst.datum.ival;
-                break;
-		
-        case Lt:
-                dat.ival = arg0->cnst.datum.ival < arg1->cnst.datum.ival;
-                break;
-		
-        case Le:
-                dat.ival = arg0->cnst.datum.ival <= arg1->cnst.datum.ival;
-                break;
-		
-        case Gt:
-                dat.ival = arg0->cnst.datum.ival > arg1->cnst.datum.ival;
-                break;
-		
-        case Ge:
-                dat.ival = arg0->cnst.datum.ival >= arg1->cnst.datum.ival;
-                break;
-		
-        case BAnd:
-                dat.ival = arg0->cnst.datum.ival & arg1->cnst.datum.ival;
-                break;
-		
-        case BOr:
-                dat.ival = arg0->cnst.datum.ival | arg1->cnst.datum.ival;
-                break;
-		
-        case BXor:
-                dat.ival = arg0->cnst.datum.ival ^ arg1->cnst.datum.ival;
-                break;
-		
-        case And:
-                dat.ival = arg0->cnst.datum.ival && arg1->cnst.datum.ival;
-                break;
-		
-        case Or:
-                dat.ival = arg0->cnst.datum.ival || arg1->cnst.datum.ival;
-                break;
-		
-        case Shl:
-                dat.ival = arg0->cnst.datum.ival << arg1->cnst.datum.ival;
-                break;
-		
-        case Shr:
-                dat.ival = arg0->cnst.datum.ival >> arg1->cnst.datum.ival;
-                break;
-		
-        case Add:
-                dat.ival = arg0->cnst.datum.ival + arg1->cnst.datum.ival;
-                break;
-		
-        case Sub:
-                dat.ival = arg0->cnst.datum.ival - arg1->cnst.datum.ival;
-                break;
-		
-        case Mul:
-                dat.ival = arg0->cnst.datum.ival * arg1->cnst.datum.ival;
-                break;
-		
-        case Div:
-                if (arg1->cnst.datum.ival == 0) {
-                        grad_log_loc(GRAD_LOG_ERR, &arg1->cnst.loc,
+	MTX *arg0 = mtx->bin.arg[0];
+	MTX *arg1 = mtx->bin.arg[1];
+	grad_datum_t dat;
+
+	switch (mtx->bin.opcode) {
+	case Eq:
+		dat.ival = arg0->cnst.datum.ival == arg1->cnst.datum.ival;
+		break;
+
+	case Ne:
+		dat.ival = arg0->cnst.datum.ival != arg1->cnst.datum.ival;
+		break;
+
+	case Lt:
+		dat.ival = arg0->cnst.datum.ival < arg1->cnst.datum.ival;
+		break;
+
+	case Le:
+		dat.ival = arg0->cnst.datum.ival <= arg1->cnst.datum.ival;
+		break;
+
+	case Gt:
+		dat.ival = arg0->cnst.datum.ival > arg1->cnst.datum.ival;
+		break;
+
+	case Ge:
+		dat.ival = arg0->cnst.datum.ival >= arg1->cnst.datum.ival;
+		break;
+
+	case BAnd:
+		dat.ival = arg0->cnst.datum.ival & arg1->cnst.datum.ival;
+		break;
+
+	case BOr:
+		dat.ival = arg0->cnst.datum.ival | arg1->cnst.datum.ival;
+		break;
+
+	case BXor:
+		dat.ival = arg0->cnst.datum.ival ^ arg1->cnst.datum.ival;
+		break;
+
+	case And:
+		dat.ival = arg0->cnst.datum.ival && arg1->cnst.datum.ival;
+		break;
+
+	case Or:
+		dat.ival = arg0->cnst.datum.ival || arg1->cnst.datum.ival;
+		break;
+
+	case Shl:
+		dat.ival = arg0->cnst.datum.ival << arg1->cnst.datum.ival;
+		break;
+
+	case Shr:
+		dat.ival = arg0->cnst.datum.ival >> arg1->cnst.datum.ival;
+		break;
+
+	case Add:
+		dat.ival = arg0->cnst.datum.ival + arg1->cnst.datum.ival;
+		break;
+
+	case Sub:
+		dat.ival = arg0->cnst.datum.ival - arg1->cnst.datum.ival;
+		break;
+
+	case Mul:
+		dat.ival = arg0->cnst.datum.ival * arg1->cnst.datum.ival;
+		break;
+
+	case Div:
+		if (arg1->cnst.datum.ival == 0) {
+			grad_log_loc(GRAD_LOG_ERR, &arg1->loc,
 				     _("divide by zero"));
-                        errcnt++;
-                } else
-                        dat.ival =
-                                arg0->cnst.datum.ival / arg1->cnst.datum.ival;
-                break;
-		
-        case Rem:
-                if (arg1->cnst.datum.ival == 0) {
-                        grad_log_loc(GRAD_LOG_ERR, &arg1->cnst.loc,
+			errcnt++;
+		} else
+			dat.ival =
+				arg0->cnst.datum.ival / arg1->cnst.datum.ival;
+		break;
+
+	case Rem:
+		if (arg1->cnst.datum.ival == 0) {
+			grad_log_loc(GRAD_LOG_ERR, &arg1->loc,
 				     _("divide by zero"));
-                        errcnt++;
-                } else
-                        dat.ival =
-                                arg0->cnst.datum.ival % arg1->cnst.datum.ival;
-                break;
+			errcnt++;
+		} else
+			dat.ival =
+				arg0->cnst.datum.ival % arg1->cnst.datum.ival;
+		break;
 
 	default:
 		grad_insist_fail("Unexpected opcode");
-        }
-        mtx->gen.type = Constant;
-        mtx->cnst.datum = dat;
-        mtx_remove(arg0);
-        mtx_remove(arg1);
-        return 0;
+	}
+	mtx->type = Constant;
+	mtx->cnst.datum = dat;
+	mtx_remove(arg0);
+	mtx_remove(arg1);
+	return 0;
 }
 
 MTX *
 mtx_branch(int cond, MTX *target)
 {
-        MTX *nop = mtx_alloc(Nop);
-        MTX *mtx = mtx_alloc(Branch);
-        mtx_insert(target, nop);
-        mtx->branch.cond = cond;
-        mtx->branch.dest = nop;
-        return mtx;
+	MTX *nop = mtx_alloc(Nop);
+	MTX *mtx = mtx_alloc(Branch);
+	mtx_insert(target, nop);
+	mtx->branch.cond = cond;
+	mtx->branch.dest = nop;
+	return mtx;
 }
 
 void
 mtx_bool(MTX *mtx)
 {
-        MTX *j_mtx, *p, *p1;
+	MTX *j_mtx, *p, *p1;
 
-        /* Insert after first operand:
+	/* Insert after first operand:
 	   popa
 	   pusha
 	   pusha      ;; Duplicate tos value
@@ -3393,68 +3254,68 @@ mtx_bool(MTX *mtx)
 	mtx_insert(p, p1);
 	p = mtx_alloc(Pusha);
 	mtx_insert(p1, p);
-        j_mtx = mtx_branch(mtx->bin.opcode == Or, mtx);
-        mtx_insert(p, j_mtx);
+	j_mtx = mtx_branch(mtx->bin.opcode == Or, mtx);
+	mtx_insert(p, j_mtx);
 	p1 = mtx_alloc(Popa);
 	mtx_insert(j_mtx, p1);
-        /* Remove the op matrix
+	/* Remove the op matrix
 	   Note that the mtx->cond.expr is not correct after this
 	   operation, but this does not affect the functionality */
-        mtx_remove(mtx);
+	mtx_remove(mtx);
 }
 
 /*
  * Second optimization pass: immediate computations
  */
 int
-pass2()
+pass2(void)
 {
-        MTX *mtx, *next;
-        int optcnt;
-        int errcnt = 0;
-        
-        do {
-                optcnt = 0;
-                mtx = mtx_first;
-                while (mtx) {
-                        next = mtx->gen.next;
-                        switch (mtx->gen.type) {
-                        case Unary:
-                                if (mtx->un.arg->gen.type != Constant)
-                                        break;
-                                if (pass2_unary(mtx))
-                                        errcnt++;
-                                else
-                                        optcnt++;
-                                break;
-                        
-                        case Binary:
-                                if (mtx->bin.arg[0]->gen.type == Constant
-				    && mtx->bin.arg[1]->gen.type == Constant) {
-                                        switch (mtx->bin.datatype) {
-                                        case Integer:
-                                                if (pass2_binary(mtx))
-                                                        errcnt++;
-                                                else
-                                                        optcnt++;
-                                                break;
-						
-                                        case String:
-                                                /*NO STRING OPS SO FAR */;
-					        break;
+	MTX *mtx, *next;
+	int optcnt;
+	int errcnt = 0;
+
+	do {
+		optcnt = 0;
+		mtx = DLIST_FIRST(&mtx_head);
+		while (mtx) {
+			next = DLIST_NEXT(mtx, link);
+			switch (mtx->type) {
+			case Unary:
+				if (mtx->un.arg->type != Constant)
+					break;
+				if (pass2_unary(mtx))
+					errcnt++;
+				else
+					optcnt++;
+				break;
+
+			case Binary:
+				if (mtx->bin.arg[0]->type == Constant
+				    && mtx->bin.arg[1]->type == Constant) {
+					switch (mtx->bin.datatype) {
+					case Integer:
+						if (pass2_binary(mtx))
+							errcnt++;
+						else
+							optcnt++;
+						break;
+
+					case String:
+						/*NO STRING OPS SO FAR */;
+						break;
 
 					default:
 						grad_insist_fail("Unknown data type");
-                                        }
-                                } else if (mtx->bin.opcode == And
+					}
+				} else if (mtx->bin.opcode == And
 					   || mtx->bin.opcode == Or) {
-                                        mtx_bool(mtx);
-                                }
-                                break;
-                                /*FIXME: ADD `if (1)'/`if 0' evaluation */
-                        case Jump:
-                                if (mtx->jump.dest == mtx->jump.next)
-                                        mtx_remove(mtx);
+					mtx_bool(mtx);
+				}
+				break;
+				/*FIXME: ADD `if (1)'/`if 0' evaluation */
+			case Jump:
+				if (mtx->jump.dest == DLIST_NEXT(mtx, link))
+					mtx_remove(mtx);
 				break;
 
 			case Attr:
@@ -3468,25 +3329,25 @@ pass2()
 
 			default:
 				break;
-                        }
-                        mtx = next;
-                }
-        } while (errcnt == 0 && optcnt > 0);
-        return errcnt;
+			}
+			mtx = next;
+		}
+	} while (errcnt == 0 && optcnt > 0);
+	return errcnt;
 }
 
 int
-optimize()
+optimize(void)
 {
-        DEBUG_FUN();
-        DEBUG_MTX("on entry to optimize");
-        pass1();
-        DEBUG_MTX("after first pass");
-        if (pass2())
-                return -1;
-        DEBUG_MTX("after second pass (immediate computations)");
-        return 0;
-}       
+	DEBUG_FUN();
+	DEBUG_MTX("on entry to optimize");
+	pass1();
+	DEBUG_MTX("after first pass");
+	if (pass2())
+		return -1;
+	DEBUG_MTX("after second pass (immediate computations)");
+	return 0;
+}
 
 
 /* ****************************************************************************
@@ -3494,441 +3355,465 @@ optimize()
  */
 
 
-static INSTR *rw_code;          /* Code segment */
+static RWCODE *rw_code;         /* Code segment */
 static pctr_t rw_pc;            /* PC when compiling the code */
-static size_t rw_codesize;      /* Length of code segment */ 
+static size_t rw_codesize;      /* Length of code segment */
 
 void
-code_check()
+code_check(void)
 {
-        if (rw_code == NULL) {
-                rw_codesize  = 4096;
-                rw_code  = grad_emalloc(rw_codesize * sizeof(rw_code[0]));
-        }
+	if (rw_code == NULL) {
+		rw_codesize  = 4096;
+		rw_code  = grad_ecalloc(rw_codesize, sizeof(rw_code[0]));
+	}
 }
 
 void
-code_init()
+code_init(void)
 {
 	code_check();
-        /* code cell #0 is the default return address */
-	rw_code[0] = 0;
+	/* code cell #0 is the default return address */
+	rw_c_val(rw_code_value(rw_code[0]),pc) = 0;
 	rw_pc = 1;
 }
 
-#if defined(MAINTAINER_MODE)
-void
-debug_dump_code()
+static void
+debug_dump_code(void)
 {
-        FILE    *fp;
-        pctr_t  pc;
-        int     i;
-        
-        if ((fp = debug_open_file()) == NULL)
-                return;
-        fprintf(fp, "Code size: %d\n", rw_codesize);
-        fprintf(fp, "Code dump:\n");
+	FILE    *fp;
+	pctr_t  pc;
+	int     i;
 
-        pc = 0;
-        do {
-                fprintf(fp, "%4d:", pc);
-                for (i = 0; i < 8 && pc < rw_codesize; i++, pc++)
-                        fprintf(fp, " %8x", (u_int) rw_code[pc]);
-                fprintf(fp, "\n");
-        } while (pc < rw_codesize);
-        
-        fclose(fp);
+	if ((fp = debug_open_file()) == NULL)
+		return;
+	fprintf(fp, "Code size: %zu\n", rw_codesize);
+	fprintf(fp, "Code dump:\n");
+
+	pc = 0;
+	do {
+		fprintf(fp, "%4d:", pc);
+		for (i = 0; i < 8 && pc < rw_codesize; i++, pc++)
+			fprintf(fp, " %8x",
+				rw_c_val(rw_code_value(rw_code[pc]), u_int));
+		fprintf(fp, "\n");
+	} while (pc < rw_codesize);
+
+	fclose(fp);
 }
-#endif
+
 /*
  * Runtime function prototypes
  */
-static int pushn(RWSTYPE n);
+static void pushn(RWSTYPE n);
 static int cpopn(RWSTYPE *np);
-static RWSTYPE popn();
+static RWSTYPE popn(void);
 static void checkpop(int cnt);
 static void pushref(char *str, int from, int to);
 static RWSTYPE *heap_reserve(int size);
 static void pushs(RWSTYPE *sptr, size_t size, int len);
-static void pushstr(const char *str, int len);
+static void pushstr(const char *str, size_t len);
 
-static void rw_pushn();
-static void rw_pushs();
-static void rw_pushref();
-static void rw_pushv();
-static void rw_i2s();
-static void rw_s2i();
-static void rw_eq();
-static void rw_ne();
-static void rw_lt();
-static void rw_le();
-static void rw_gt();
-static void rw_ge();
-static void rw_eqs();
-static void rw_nes();
-static void rw_lts();
-static void rw_les();
-static void rw_gts();
-static void rw_ges();
-static void rw_b_xor();
-static void rw_b_and();
-static void rw_b_or();
-static void rw_shl();
-static void rw_shr();
-static void rw_add();
-static void rw_sub();
-static void rw_mul();
-static void rw_div();
-static void rw_rem();
-static void rw_not();
-static void rw_neg();
-static void rw_asgn();
-static void rw_enter();
-static void rw_leave();
-static void rw_match();
-static void rw_jmp();
-static void rw_jne();
-static void rw_je();
-static void rw_adds();
-static void rw_adjstk();
-static void rw_popn();
-static void rw_pusha();
-static void rw_popa();
-static void rw_call();
-static void rw_builtin();
-static void rw_attrs();
-static void rw_attrs0();
-static void rw_attrn();
-static void rw_attrn0();
-static void rw_attrcheck();
-static void rw_attrcheck0();
-static void rw_attrasgn();
-static void rw_attrasgn0();
-static void rw_attr_delete();
-static void rw_attr_delete0();
+static void pushint(int);
+static int popint(void);
+
+static void rw_pushn(void);
+static void rw_pushs(void);
+static void rw_pushref(void);
+static void rw_pushv(void);
+static void rw_i2s(void);
+static void rw_s2i(void);
+static void rw_eq(void);
+static void rw_ne(void);
+static void rw_lt(void);
+static void rw_le(void);
+static void rw_gt(void);
+static void rw_ge(void);
+static void rw_eqs(void);
+static void rw_nes(void);
+static void rw_lts(void);
+static void rw_les(void);
+static void rw_gts(void);
+static void rw_ges(void);
+static void rw_b_xor(void);
+static void rw_b_and(void);
+static void rw_b_or(void);
+static void rw_shl(void);
+static void rw_shr(void);
+static void rw_add(void);
+static void rw_sub(void);
+static void rw_mul(void);
+static void rw_div(void);
+static void rw_rem(void);
+static void rw_not(void);
+static void rw_neg(void);
+static void rw_asgn(void);
+static void rw_enter(void);
+static void rw_leave(void);
+static void rw_match(void);
+static void rw_jmp(void);
+static void rw_jne(void);
+static void rw_je(void);
+static void rw_adds(void);
+static void rw_adjstk(void);
+static void rw_popn(void);
+static void rw_pusha(void);
+static void rw_popa(void);
+static void rw_call(void);
+static void rw_builtin(void);
+static void rw_attrs(void);
+static void rw_attrs0(void);
+static void rw_attrn(void);
+static void rw_attrn0(void);
+static void rw_attrcheck(void);
+static void rw_attrcheck0(void);
+static void rw_attrasgn(void);
+static void rw_attrasgn0(void);
+static void rw_attr_delete(void);
+static void rw_attr_delete0(void);
 
 INSTR bin_codetab[] = {
-        rw_eq,              
-        rw_ne,
-        rw_lt,
-        rw_le,
-        rw_gt,
-        rw_ge,
-        rw_b_and,
-        rw_b_xor,
-        rw_b_or,
-        NULL,
-        NULL,
-        rw_shl,
-        rw_shr,
-        rw_add,
-        rw_sub,
-        rw_mul,
-        rw_div,
-        rw_rem,
+	rw_eq,
+	rw_ne,
+	rw_lt,
+	rw_le,
+	rw_gt,
+	rw_ge,
+	rw_b_and,
+	rw_b_xor,
+	rw_b_or,
+	NULL,
+	NULL,
+	rw_shl,
+	rw_shr,
+	rw_add,
+	rw_sub,
+	rw_mul,
+	rw_div,
+	rw_rem,
 };
 
 INSTR bin_string_codetab[] = {
-        rw_eqs,                      
-        rw_nes,                      
-        rw_lts,                      
-        rw_les,                      
-        rw_gts,                      
-        rw_ges,                      
-        NULL,                        
-        NULL,                        
-        NULL,                        
-        NULL,                        
-        NULL,                        
-        NULL,                        
-        NULL,                        
-        rw_adds,                     
-        NULL,                        
-        NULL,                        
-        NULL,                        
-        NULL                         
-};                                   
+	rw_eqs,
+	rw_nes,
+	rw_lts,
+	rw_les,
+	rw_gts,
+	rw_ges,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	rw_adds,
+	NULL,
+	NULL,
+	NULL,
+	NULL
+};
 
 INSTR coerce_tab[Max_datatype][Max_datatype] = {
 /*                Undefined  Integer  String */
 /* Undefined */ {  NULL,      NULL,    NULL   },
-/* Integer */   {  NULL,      NULL,    rw_i2s },  
+/* Integer */   {  NULL,      NULL,    rw_i2s },
 /* String */    {  NULL,      rw_s2i,  NULL   },
 };
 
 static void check_codesize(int delta);
-static int  code(INSTR instr);
-static int  data(int val);
-static int data_str(char *ptr);
+static pctr_t code_cell(RWCODE cell);
+static pctr_t code_cell(RWCODE cell);
+static pctr_t code_instr(INSTR instr);
+static pctr_t code_value(RWSTYPE val);
+static pctr_t data(int val);
+static pctr_t data_str(char *ptr);
 static void add_target(NOP_MTX *mtx, pctr_t pc);
-
 
 void
 add_target(NOP_MTX *mtx, pctr_t pc)
 {
-        TGT_MTX *tgt = (TGT_MTX *)mtx_alloc(Target);
-        tgt->next = (MTX*)mtx->tgt;
-        mtx->tgt = tgt;
-        tgt->pc = pc;
+	MTX *tgt = mtx_alloc(Target);
+	DLIST_NEXT(tgt, link) = mtx->tgt;
+	mtx->tgt = tgt;
+	tgt->tgt.pc = pc;
 }
 
 void
 fixup_target(NOP_MTX *mtx, pctr_t pc)
 {
-        TGT_MTX   *tgt;
-        
-        for (tgt = (TGT_MTX*)mtx->tgt; tgt; tgt = (TGT_MTX*)tgt->next) 
-                rw_code[tgt->pc] = (INSTR)pc;
-        mtx->tgt = NULL;
+	MTX   *tgt;
+
+	for (tgt = mtx->tgt; tgt; tgt = DLIST_NEXT(tgt, link))
+		rw_c_val(rw_code_value(rw_code[tgt->tgt.pc]), pc) = pc;
+	mtx->tgt = NULL;
 }
 
 pctr_t
-codegen()
+codegen(void)
 {
-        MTX       *mtx;
+	MTX       *mtx;
 
-        function->entry = rw_pc;
-        for (mtx = mtx_first; mtx; mtx = mtx->gen.next) {
-                switch (mtx->gen.type) {
-                case Generic:
-                case Return:
-                default:
-                        grad_log(GRAD_LOG_CRIT,
-                                 "INTERNAL ERROR: codegen stumbled accross generic matrix!");
-                        errcnt++;
-                        return 0;
-                case Nop:
-                        /* Fix-up the references */
-                        fixup_target(&mtx->nop, rw_pc);
-                        mtx->nop.pc = rw_pc;
-                        break;
-                case Stop:
-                        break;
-                case Enter:
-                        code(rw_enter);
-                        data(mtx->frame.stacksize);
-                        break;
-                case Leave:
-                        code(rw_leave);
-                        break;
-                case Constant:
-                        switch (mtx->cnst.datatype) {
-                        case Integer:
-                                code(rw_pushn);
-                                data(mtx->cnst.datum.ival);
-                                break;
-				
-                        case String:
-                                code(rw_pushs);
-                                data_str(mtx->cnst.datum.sval.data);
-                                break;
+	function->entry = rw_pc;
+	DLIST_FOREACH(mtx, &mtx_head, link) {
+		switch (mtx->type) {
+		case Generic:
+		case Return:
+		default:
+			grad_log(GRAD_LOG_CRIT,
+				 "INTERNAL ERROR: codegen stumbled accross generic matrix!");
+			errcnt++;
+			return 0;
+		case Nop:
+			/* Fix-up the references */
+			fixup_target(&mtx->nop, rw_pc);
+			mtx->nop.pc = rw_pc;
+			break;
+		case Stop:
+			break;
+		case Enter:
+			code_instr(rw_enter);
+			data(mtx->frame.stacksize);
+			break;
+		case Leave:
+			code_instr(rw_leave);
+			break;
+		case Constant:
+			switch (mtx->cnst.datatype) {
+			case Integer:
+				code_instr(rw_pushn);
+				data(mtx->cnst.datum.ival);
+				break;
+
+			case String:
+				code_instr(rw_pushs);
+				data_str(mtx->cnst.datum.sval.data);
+				break;
 
 			default:
 				grad_insist_fail("Unknown data type");
-                        }
-                        break;
-                case Matchref:
-                        code(rw_pushref);
-                        data(mtx->ref.num);
-                        break;
-                case Variable:
-                        /* Variable dereference.
-                         */
-                        code(rw_pushv);
-                        data(mtx->var.var->offset);
-                        break;
-                case Unary:
-                        switch (mtx->un.opcode) {
-                        case Not:
-                                code(rw_not);
-                                break;
-				
-                        case Neg:
-                                code(rw_neg);
-                                break;
+			}
+			break;
+		case Matchref:
+			code_instr(rw_pushref);
+			data(mtx->ref.num);
+			break;
+		case Variable:
+			/* Variable dereference.
+			 */
+			code_instr(rw_pushv);
+			data(mtx->var.var->offset);
+			break;
+		case Unary:
+			switch (mtx->un.opcode) {
+			case Not:
+				code_instr(rw_not);
+				break;
+
+			case Neg:
+				code_instr(rw_neg);
+				break;
 
 			default:
 				grad_insist_fail("Unexpected opcode");
-                        }
-                        break;
-                case Binary:
-                        if (mtx->bin.arg[0]->gen.datatype == String)
-                                code(bin_string_codetab[mtx->bin.opcode]);
-                        else
-                                code(bin_codetab[mtx->bin.opcode]);
-                        break;
-                case Cond:
-                        /*FIXME: this needs optimization */
-                        code(rw_jne);
-                        add_target(&mtx->cond.if_true->nop, rw_pc);
-                        code(NULL);
-                        if (mtx->cond.if_false) {
-                                code(rw_jmp);
-                                add_target(&mtx->cond.if_false->nop, rw_pc);
-                                code(NULL);
-                        }
-                        break;
-                        
-                case Asgn:
-                        code(rw_asgn);
-                        data(mtx->asgn.lval->offset);
-                        break;
-                        
-                case Match:
-                        code(rw_match);
-                        code((INSTR)mtx->match.rx);
-                        if (mtx->match.negated)
-                                code(rw_not);
-                        break;
-                        
-                case Coercion:
-                        code(coerce_tab[mtx->coerce.arg->gen.datatype][mtx->coerce.datatype]);
-                        break;
-                        
-                case Jump:
-                        code(rw_jmp);
-                        add_target(&mtx->jump.dest->nop, rw_pc);
-                        code(NULL);
-                        break;
+			}
+			break;
+		case Binary:
+			if (mtx->bin.arg[0]->gen.datatype == String)
+				code_instr(bin_string_codetab[mtx->bin.opcode]);
+			else
+				code_instr(bin_codetab[mtx->bin.opcode]);
+			break;
+		case Cond:
+			/*FIXME: this needs optimization */
+			code_instr(rw_jne);
+			add_target(&mtx->cond.if_true->nop, rw_pc);
+			code_instr(NULL);
+			if (mtx->cond.if_false) {
+				code_instr(rw_jmp);
+				add_target(&mtx->cond.if_false->nop, rw_pc);
+				code_instr(NULL);
+			}
+			break;
 
-                case Branch:
-                        code(mtx->branch.cond ? rw_jne : rw_je);
-                        add_target(&mtx->branch.dest->nop, rw_pc);
-                        code(NULL);
-                        break;
-                        
-                case Call:
-                        code(rw_call);
-                        code((INSTR) mtx->call.fun->entry);
-                        code(rw_adjstk);
-                        data(mtx->call.nargs);
-                        break;
+		case Asgn:
+			code_instr(rw_asgn);
+			data(mtx->asgn.lval->offset);
+			break;
 
-                case Builtin:
-                        code(rw_builtin);
-                        code(mtx->btin.fun);
-                        code(rw_adjstk);
-                        data(mtx->btin.nargs);
-                        break;
+		case Match:
+			code_instr(rw_match);
+			code_value((RWSTYPE)mtx->match.rx);
+			if (mtx->match.negated)
+				code_instr(rw_not);
+			break;
 
-                case Pop:
-                        code(rw_popn);
-                        break;
+		case Coercion:
+			code_instr(coerce_tab[mtx->coerce.arg->gen.datatype][mtx->coerce.datatype]);
+			break;
 
-                case Popa:
-                        code(rw_popa);
-                        break;
-                        
-                case Pusha:
-                        code(rw_pusha);
-                        break;
-                        
-                case Attr:
-                        switch (mtx->attr.datatype) {
-                        case Integer:
+		case Jump:
+			code_instr(rw_jmp);
+			add_target(&mtx->jump.dest->nop, rw_pc);
+			code_instr(NULL);
+			break;
+
+		case Branch:
+			code_instr(mtx->branch.cond ? rw_jne : rw_je);
+			add_target(&mtx->branch.dest->nop, rw_pc);
+			code_instr(NULL);
+			break;
+
+		case Call:
+			code_instr(rw_call);
+			code_value((RWSTYPE) mtx->call.fun->entry);
+			code_instr(rw_adjstk);
+			data(mtx->call.nargs);
+			break;
+
+		case Builtin:
+			code_instr(rw_builtin);
+			code_instr(mtx->btin.fun);
+			code_instr(rw_adjstk);
+			data(mtx->btin.nargs);
+			break;
+
+		case Pop:
+			code_instr(rw_popn);
+			break;
+
+		case Popa:
+			code_instr(rw_popa);
+			break;
+
+		case Pusha:
+			code_instr(rw_pusha);
+			break;
+
+		case Attr:
+			switch (mtx->attr.datatype) {
+			case Integer:
 				if (mtx->attr.index)
-					code(rw_attrn);
+					code_instr(rw_attrn);
 				else
-					code(rw_attrn0);
-                                break;
-				
-                        case String:
+					code_instr(rw_attrn0);
+				break;
+
+			case String:
 				if (mtx->attr.index)
-					code(rw_attrs);
+					code_instr(rw_attrs);
 				else
-					code(rw_attrs0);
-                                break;
+					code_instr(rw_attrs0);
+				break;
 
 			default:
 				grad_insist_fail("Unknown data type");
-                        }
-                        data(mtx->attr.attrno);
-                        break;
-
-                case Attr_check:
-			if (mtx->attr.index) 
-				code(rw_attrcheck);
-			else
-				code(rw_attrcheck0);
-                        data(mtx->attr.attrno);
-                        break;
-                        
-                case Attr_asgn:
-			if (mtx->attr.index)
-				code(rw_attrasgn);
-			else
-				code(rw_attrasgn0);
-                        data(mtx->attr.attrno);
-                        break;
-                                
-		case Attr_delete:
-			if (mtx->attr.index)
-				code(rw_attr_delete);
-			else
-				code(rw_attr_delete0);
+			}
 			data(mtx->attr.attrno);
 			break;
-                }
-        }
 
-        /*
-         * Second pass: fixup backward references
-         */
-        for (mtx = mtx_first; mtx; mtx = mtx->gen.next) {
-                if (mtx->gen.type == Nop)
-                        fixup_target(&mtx->nop, mtx->nop.pc);
-        }
-        
-#if defined(MAINTAINER_MODE)    
-        if (GRAD_DEBUG_LEVEL(25)) {
-                FILE *fp = debug_open_file();
-                fprintf(fp, "entry: %d, size %d\n",
-                        function->entry, rw_pc - function->entry);
-                fclose(fp);
-        }
-#endif  
-        return function->entry;
+		case Attr_check:
+			if (mtx->attr.index)
+				code_instr(rw_attrcheck);
+			else
+				code_instr(rw_attrcheck0);
+			data(mtx->attr.attrno);
+			break;
+
+		case Attr_asgn:
+			if (mtx->attr.index)
+				code_instr(rw_attrasgn);
+			else
+				code_instr(rw_attrasgn0);
+			data(mtx->attr.attrno);
+			break;
+
+		case Attr_delete:
+			if (mtx->attr.index)
+				code_instr(rw_attr_delete);
+			else
+				code_instr(rw_attr_delete0);
+			data(mtx->attr.attrno);
+			break;
+		}
+	}
+
+	/*
+	 * Second pass: fixup backward references
+	 */
+	DLIST_FOREACH(mtx, &mtx_head, link) {
+		if (mtx->type == Nop)
+			fixup_target(&mtx->nop, mtx->nop.pc);
+	}
+
+	if (GRAD_DEBUG_LEVEL(25)) {
+		FILE *fp = debug_open_file();
+		if (fp) {
+			fprintf(fp, "entry: %d, size %d\n",
+				function->entry, rw_pc - function->entry);
+			fclose(fp);
+		}
+	}
+
+	return function->entry;
 }
 
 void
 check_codesize(int delta)
 {
-        if (rw_pc + delta >= rw_codesize) {
-                INSTR *p = grad_emalloc((rw_codesize + 4096) * sizeof(rw_code[0]));
-                memcpy(p, rw_code, rw_codesize * sizeof(rw_code[0]));
-                grad_free(rw_code);
-                rw_code = p;
-                rw_codesize += 4096;
-        }
+	if (rw_pc + delta >= rw_codesize) {
+		RWCODE *p = grad_ecalloc(rw_codesize + 4096,
+					 sizeof(rw_code[0]));
+		memcpy(p, rw_code, rw_codesize * sizeof(rw_code[0]));
+		free(rw_code);
+		rw_code = p;
+		rw_codesize += 4096;
+	}
 }
 
-int
-code(INSTR instr)
+pctr_t
+code_cell(RWCODE cell)
 {
-        check_codesize(1);
-        rw_code[rw_pc] = instr;
-        return rw_pc++;
+	check_codesize(1);
+	rw_code[rw_pc] = cell;
+	return rw_pc++;
 }
 
-int
+pctr_t
+code_instr(INSTR instr)
+{
+	RWCODE c;
+	rw_code_instr(c) = instr;
+	return code_cell(c);
+}
+
+pctr_t
+code_value(RWSTYPE val)
+{
+	RWCODE c;
+	rw_code_value(c) = val;
+	return code_cell(c);
+}
+
+pctr_t
 data(int val)
 {
-        return code((INSTR)(RWSTYPE)val);
+	return code_value((RWSTYPE)val);
 }
 
-int
+pctr_t
 data_str(char *ptr)
 {
-        int  len   = strlen(ptr) + 1;
-        RWSTYPE delta = (len + sizeof(rw_code[0])) / sizeof(rw_code[0]);
-        
-        check_codesize(delta+1);
-        rw_code[rw_pc++] = (INSTR)delta;
-        memcpy(rw_code + rw_pc, ptr, len);
-        rw_pc += delta;
-        return rw_pc;
+	int  len   = strlen(ptr) + 1;
+	u_int delta = (len + sizeof(rw_code[0])) / sizeof(rw_code[0]);
+
+	check_codesize(delta+1);
+	rw_c_val(rw_code_value(rw_code[rw_pc]), u_int) = delta;
+	rw_pc++;
+	memcpy(rw_code + rw_pc, ptr, len);
+	rw_pc += delta;
+	return rw_pc;
 }
-        
+
 
 /* ****************************************************************************
  * Regular expressions
@@ -3937,72 +3822,72 @@ data_str(char *ptr)
 COMP_REGEX *
 rx_alloc(regex_t *regex, int nmatch)
 {
-        COMP_REGEX *rx;
+	COMP_REGEX *rx;
 
-        rx = grad_emalloc(sizeof(*rx));
-        rx->regex  = *regex;
-        rx->nmatch = nmatch;
-        rw_list_insert(&function->rx_list, NULL, function->rx_list, rx, 1);
-        return rx;
+	rx = grad_emalloc(sizeof(*rx));
+	rx->regex  = *regex;
+	rx->nmatch = nmatch;
+	DLIST_INSERT_HEAD(&function->rx_head, rx, link);
+	return rx;
+}
+
+static void
+rx_free(COMP_REGEX *rx)
+{
+	regfree(&rx->regex);
+	free(rx);
 }
 
 void
-rx_free(COMP_REGEX *rx)
+rx_head_free(COMP_REGEX_HEAD *rxhead)
 {
-        COMP_REGEX *next;
-
-        while (rx) {
-                next = rx->next;
-                regfree(&rx->regex);
-                grad_free(rx);
-                rx = next;
-        }
+	DLIST_FREE(rxhead, link, comp_regex, rx_free);
 }
 
 COMP_REGEX *
 compile_regexp(char *str)
 {
-        char     *p;
-        regex_t  regex;
-        int      nmatch;
-        
-        int rc = regcomp(&regex, str, regcomp_flags);
-        if (rc) {
-                char errbuf[512];
-                regerror(rc, &regex, errbuf, sizeof(errbuf));
-                grad_log_loc(GRAD_LOG_ERR, &locus,
+	char     *p;
+	regex_t  regex;
+	int      nmatch;
+
+	int rc = regcomp(&regex, str, regcomp_flags);
+	if (rc) {
+		char errbuf[512];
+		regerror(rc, &regex, errbuf, sizeof(errbuf));
+		grad_log_loc(GRAD_LOG_ERR, &locus,
 			     _("regexp error: %s"),
 			     errbuf);
-                return NULL;
-        }
-        /* count the number of matches */
-        nmatch = 0;
-        for (p = str; *p; ) {
-                if (*p == '\\')
-                        if (p[1] == '(') {
-                                nmatch++;
-                                p += 2;
-                                continue;
-                        }
-                p++;
-        }
-        
-        return rx_alloc(&regex, nmatch);
+		return NULL;
+	}
+	/* count the number of matches */
+	nmatch = 0;
+	for (p = str; *p; ) {
+		if (*p == '\\')
+			if (p[1] == '(') {
+				nmatch++;
+				p += 2;
+				continue;
+			}
+		p++;
+	}
+
+	return rx_alloc(&regex, nmatch);
 }
 
 void
-function_delete()
+function_delete(void)
 {
-        if (function) {
-                grad_symtab_delete(rewrite_tab, (grad_symbol_t*)function);
-                function_cleanup();
-        }
+	if (function) {
+		grad_symtab_delete(rewrite_tab, (grad_symbol_t*)function);
+		function_cleanup();
+	}
 }
 
 void
-function_cleanup()
+function_cleanup(void)
 {
-        function = NULL;
+	function = NULL;
 }
 
 
@@ -4013,16 +3898,15 @@ function_cleanup()
 /*
  * Push a number on stack
  */
-int
+void
 pushn(RWSTYPE n)
 {
-        if (mach.st >= mach.ht) {
-                /*FIXME: gc();*/
-                GRAD_DEBUG2(1, "st=%d, ht=%d", mach.st, mach.ht);
-                rw_error(_("out of pushdown space"));
-        }
-        mach.stack[mach.st++] = n;
-        return 0;
+	if (mach.st >= mach.ht) {
+		/*FIXME: gc();*/
+		GRAD_DEBUG(1, "st=%d, ht=%d", mach.st, mach.ht);
+		rw_error(_("out of pushdown space"));
+	}
+	mach.stack[mach.st++] = n;
 }
 
 /*
@@ -4032,26 +3916,26 @@ void
 pushs(RWSTYPE *sptr, size_t size, int len)
 {
 	if (mach.ht - len - 1 <= mach.st) {
-                /* Heap overrun: */
-                /*gc(); */
-                rw_error(_("heap overrun"));
-        }
+		/* Heap overrun: */
+		/*gc(); */
+		rw_error(_("heap overrun"));
+	}
 
-        while (len)
-                mach.stack[mach.ht--] = sptr[--len];
-	mach.stack[mach.ht--] = size;
-        pushn((RWSTYPE) (mach.stack + mach.ht + 1));
+	while (len)
+		mach.stack[mach.ht--] = sptr[--len];
+	rw_c_val(mach.stack[mach.ht--], size) = size;
+	pushn(rw_c_cast(mach.stack + mach.ht + 1, void*));
 }
 
 void
-pushstr(const char *str, int len)
+pushstr(const char *str, size_t len)
 {
-        RWSTYPE *p = heap_reserve(sizeof(RWSTYPE) + len + 1);
+	RWSTYPE *p = heap_reserve(sizeof(RWSTYPE) + len + 1);
 	char *s = (char*)(p + 1);
-        memcpy(s, str, len);
-        s[len] = 0;
-	p[0] = len;
-        pushn((RWSTYPE)p);
+	memcpy(s, str, len);
+	s[len] = 0;
+	rw_c_val(p[0], size) = len;
+	pushn(rw_c_cast(p,void*));
 }
 
 #define B2RW(s) (s + sizeof(mach.stack[0]) - 1) / sizeof(mach.stack[0])
@@ -4061,26 +3945,26 @@ heap_reserve(int size)
 {
 	size_t words = B2RW(size);
 
-        if (mach.ht - words <= mach.st) {
-                /* Heap overrun: */
-                gc();
-                if (mach.ht - words <= mach.st) 
-                        rw_error(_("heap overrun"));
-        }
-        mach.ht -= words;
-        return mach.stack + mach.ht--;
+	if (mach.ht - words <= mach.st) {
+		/* Heap overrun: */
+		gc();
+		if (mach.ht - words <= mach.st)
+			rw_error(_("heap overrun"));
+	}
+	mach.ht -= words;
+	return mach.stack + mach.ht--;
 }
 
 
 /* Temporary space functions */
 char *
-temp_space_create()
+temp_space_create(void)
 {
 	return (char*)(mach.stack + mach.st);
 }
 
 size_t
-temp_space_size()
+temp_space_size(void)
 {
 	return (mach.ht - mach.st)*sizeof(mach.stack[0]);
 }
@@ -4088,7 +3972,7 @@ temp_space_size()
 void
 temp_space_copy(char **baseptr, char *text, size_t size)
 {
-        size_t len = (size + sizeof(mach.stack[0])) / sizeof(mach.stack[0]);
+	size_t len = (size + sizeof(mach.stack[0])) / sizeof(mach.stack[0]);
 	if (*baseptr + len >= (char*)(mach.stack + mach.ht))
 		rw_error(_("out of heap space"));
 	memcpy(*baseptr, text, size);
@@ -4104,10 +3988,10 @@ temp_space_fix(char *end)
 	temp_space_copy(&end, "", 0);
 	size = end - base;
 	len = B2RW(size);
-        mach.ht -= len;
+	mach.ht -= len;
 	memmove(mach.stack + mach.ht, base, size);
-	mach.stack[--mach.ht] = strlen(base);
-        return mach.stack + mach.ht--;
+	rw_c_val(mach.stack[--mach.ht], size) = strlen(base);
+	return mach.stack + mach.ht--;
 }
 
 
@@ -4117,11 +4001,11 @@ temp_space_fix(char *end)
 int
 cpopn(RWSTYPE *np)
 {
-        if (mach.st <= 0) {
-                rw_error(_("out of popup"));
-        }
-        *np = mach.stack[--mach.st];
-        return 0;
+	if (mach.st <= 0) {
+		rw_error(_("out of popup"));
+	}
+	*np = mach.stack[--mach.st];
+	return 0;
 }
 
 /*
@@ -4129,28 +4013,29 @@ cpopn(RWSTYPE *np)
  * should be called before calling this one.
  */
 RWSTYPE
-popn()
+popn(void)
 {
-        return mach.stack[--mach.st];
+	return mach.stack[--mach.st];
 }
 
 void
 mem2string(grad_string_t *p, RWSTYPE *loc)
 {
-	p->size = loc[0];
-	p->data = (unsigned char*) (loc + 1);
+	p->size = rw_c_val(loc[0], size);
+	p->data = (char*) (loc + 1);
 }
 
 void
 poparr(grad_string_t *p)
 {
-	mem2string(p, (RWSTYPE*) popn());
+	RWSTYPE v = popn();
+	mem2string(p, (RWSTYPE*) rw_c_val(v, ptr));
 }
 
 RWSTYPE
-tos()
+tos(void)
 {
-        return mach.stack[mach.st-1];
+	return mach.stack[mach.st-1];
 }
 
 /*
@@ -4159,10 +4044,10 @@ tos()
 void
 checkpop(int cnt)
 {
-        if (mach.st < cnt)
+	if (mach.st < cnt)
 		rw_error(_("out of popup"));
 }
-        
+
 /*
  * Push a backreference value on stack.
  * Arguments: str     --    input string
@@ -4175,35 +4060,48 @@ pushref(char *str, int from, int to)
 	pushstr(str + from, to - from);
 }
 
+static void
+pushint(int v)
+{
+	pushn((RWSTYPE)v);
+}
+
+static int
+popint(void)
+{
+	RWSTYPE t = popn();
+	return rw_c_val(t, int);
+}
+
 /*
  * Create a stack frame and enter the function
  */
 void
 enter(int n)
 {
-        pushn(mach.sb);
-        mach.sb = mach.st;
-        mach.st += n;
+	pushn((RWSTYPE)mach.sb);
+	mach.sb = mach.st;
+	mach.st += n;
 }
 
 /*
  * Destroy the stack frame and leave the function
  */
 void
-leave()
+leave(void)
 {
-        /* Save return value */
-        mach.rA = popn();
-        /* Restore stack frame */
-        mach.st = mach.sb;
-        mach.sb = popn();
-        mach.pc = (pctr_t) popn();
+	/* Save return value */
+	mach.rA = popn();
+	/* Restore stack frame */
+	mach.st = mach.sb;
+	mach.sb = rw_c_val(popn(), int);
+	mach.pc = rw_c_val(popn(), pc);
 }
 
 RWSTYPE
 getarg(int num)
 {
-        return mach.stack[mach.sb - (STACK_BASE + num)];
+	return mach.stack[mach.sb - (STACK_BASE + num)];
 }
 
 
@@ -4214,113 +4112,114 @@ getarg(int num)
 static int
 rw_error(const char *msg)
 {
-        grad_log(GRAD_LOG_ERR,
-	         "%s: %s",
-                 _("rewrite runtime error"), msg);
-        longjmp(mach.jmp, 1);
-        /*NOTREACHED*/
+	grad_log(GRAD_LOG_ERR,
+		 "%s: %s",
+		 _("rewrite runtime error"), msg);
+	longjmp(mach.jmp, 1);
+	/*NOTREACHED*/
 }
-                
+
 static int
 rw_error_free(char *msg)
 {
-        grad_log(GRAD_LOG_ERR,
-	         "%s: %s",
-                 _("rewrite runtime error"), msg);
+	grad_log(GRAD_LOG_ERR,
+		 "%s: %s",
+		 _("rewrite runtime error"), msg);
 	free(msg);
-        longjmp(mach.jmp, 1);
-        /*NOTREACHED*/
-}
-                
-void
-rw_call()
-{
-        pctr_t  pc = (pctr_t) rw_code[mach.pc++];
-        pushn(mach.pc); /* save return address */
-        mach.pc = pc;
+	longjmp(mach.jmp, 1);
+	/*NOTREACHED*/
 }
 
 void
-rw_adjstk()
+rw_call(void)
 {
-        int delta = (int) rw_code[mach.pc++];
-        mach.st -= delta;
-        pushn(mach.rA);   /* Push the return back on stack */
+	pctr_t  pc = rw_c_val(rw_code_value(rw_code[mach.pc]), pc);
+	pushn((RWSTYPE)(mach.pc + 1)); /* save return address */
+	mach.pc = pc;
 }
 
 void
-rw_enter()
+rw_adjstk(void)
 {
-        /*FIXME: runtime checking */
-        int n = (int) rw_code[mach.pc++];
-        enter(n);
+	u_int delta = rw_c_val(rw_code_value(rw_code[mach.pc]), u_int);
+	mach.pc++;
+	mach.st -= delta;
+	pushn(mach.rA);   /* Push the return back on stack */
 }
 
 void
-rw_leave()
+rw_enter(void)
 {
-        leave();
+	/*FIXME: runtime checking */
+	int n = rw_c_val(rw_code_value(rw_code[mach.pc++]), int);
+	enter(n);
+}
+
+void
+rw_leave(void)
+{
+	leave();
 }
 
 /*
  * Push a number on stack
  */
 void
-rw_pushn()
+rw_pushn(void)
 {
-        RWSTYPE n = (RWSTYPE) rw_code[mach.pc++];
-        pushn(n);
+	RWSTYPE n = rw_code_value(rw_code[mach.pc++]);
+	pushn(n);
 }
 
 /*
  * Push a reference value on stack
  */
 void
-rw_pushref()
+rw_pushref(void)
 {
-        int i = (int) rw_code[mach.pc++];
-
-        pushref(mach.sA, mach.pmatch[i].rm_so, mach.pmatch[i].rm_eo);
+	int i = rw_c_val(rw_code_value(rw_code[mach.pc]), int);
+	mach.pc++;
+	pushref(mach.sA, mach.pmatch[i].rm_so, mach.pmatch[i].rm_eo);
 }
 
 /*
  * Push a variable on stack
  */
 void
-rw_pushv()
+rw_pushv(void)
 {
-        stkoff_t n = (stkoff_t) rw_code[mach.pc++];
-
-        pushn(mach.stack[mach.sb + n]);
+	stkoff_t n = rw_c_val(rw_code_value(rw_code[mach.pc]), off);
+	mach.pc++;
+	pushn(mach.stack[mach.sb + n]);
 }
 
 void
-rw_pushs()
+rw_pushs(void)
 {
-        int   len = (int) rw_code[mach.pc++];
-        RWSTYPE *sptr = (RWSTYPE*) (rw_code + mach.pc);
+	int   len = rw_c_val(rw_code_value(rw_code[mach.pc++]), int);
+	RWSTYPE *sptr = (RWSTYPE*) (rw_code + mach.pc);
 
-        mach.pc += len;
-        pushs(sptr, strlen((char*)sptr), len);
+	mach.pc += len;
+	pushs(sptr, strlen((char*)sptr), len);
 }
 
 /*
  * Assign a value to a variable
  */
 void
-rw_asgn()
+rw_asgn(void)
 {
-        stkoff_t off = (stkoff_t) rw_code[mach.pc++];
-        RWSTYPE n;
+	stkoff_t off = rw_c_val(rw_code_value(rw_code[mach.pc++]), off);
+	RWSTYPE n;
 
-        cpopn(&n);
-        
-        mach.stack[mach.sb + off] = n;
-        pushn(n);
+	cpopn(&n);
+
+	mach.stack[mach.sb + off] = n;
+	pushn(n);
 }
 
 void
-assert_request_presence()
+assert_request_presence(void)
 {
 	if (!mach.req)
 		rw_error(_("no request supplied"));
@@ -4329,21 +4228,23 @@ assert_request_presence()
 /* Check if the A/V pair is supplied in the request
  */
 void
-rw_attrcheck0()
+rw_attrcheck0(void)
 {
-        int attr = (int) rw_code[mach.pc++];
+	int attr = rw_c_val(rw_code_value(rw_code[mach.pc++]), int);
 
-	pushn(grad_avl_find(AVPLIST(&mach), attr) != NULL);
+	pushn(rw_c_cast(grad_avl_find(AVPLIST(&mach), attr) != NULL, int));
 }
 
 void
-rw_attrcheck()
+rw_attrcheck(void)
 {
-        int attr = (int) rw_code[mach.pc++];
+	int attr = rw_c_val(rw_code_value(rw_code[mach.pc++]), int);
 	RWSTYPE index;
- 
+	int res;
+
 	cpopn(&index);
-	pushn(grad_avl_find_n(AVPLIST(&mach), attr, index) != NULL);
+	res = grad_avl_find_n(AVPLIST(&mach), attr, rw_c_val(index, int)) != NULL;
+	pushn((RWSTYPE)res);
 }
 
 /*
@@ -4353,585 +4254,593 @@ void
 attrasgn_internal(int attr, grad_avp_t *pair, RWSTYPE val)
 {
 	grad_string_t str;
-	
+
 	assert_request_presence();
 	if (!pair) {
-                 pair = grad_avp_create(attr);
-                 if (!pair)
-                        rw_error(_("can't create A/V pair"));
-                 grad_avl_add_pair(&mach.req->avlist, pair);
-         }
-		
+		 pair = grad_avp_create(attr);
+		 if (!pair)
+			rw_error(_("can't create A/V pair"));
+		 grad_avl_add_pair(&mach.req->avlist, pair);
+	 }
+
 	switch (pair->type) {
 	case GRAD_TYPE_STRING:
 	case GRAD_TYPE_DATE:
-		mem2string(&str, (RWSTYPE*)val);
-		grad_free(pair->avp_strvalue);
-		pair->avp_strvalue = grad_malloc(str.size+1);
+		mem2string(&str, (RWSTYPE*)rw_c_val(val, ptr));
+		free(pair->avp_strvalue);
+		pair->avp_strvalue = grad_emalloc(str.size+1);
 		memcpy(pair->avp_strvalue, str.data, str.size);
 		pair->avp_strvalue[str.size] = 0;
 		pair->avp_strlength = str.size;
 		break;
-		
+
 	case GRAD_TYPE_INTEGER:
 	case GRAD_TYPE_IPADDR:
-		pair->avp_lvalue = val;
+		pair->avp_lvalue = rw_c_val(val, u_int);
 		break;
 	}
-	
+
 	pushn(val);
 }
 
 void
-rw_attrasgn0()
+rw_attrasgn0(void)
 {
-        int attr = (int) rw_code[mach.pc++];
-        RWSTYPE val;
-        
-        cpopn(&val);
+	int attr = rw_c_val(rw_code_value(rw_code[mach.pc++]), int);
+	RWSTYPE val;
+
+	cpopn(&val);
 	attrasgn_internal(attr, grad_avl_find(AVPLIST(&mach), attr), val);
 }
 
 void
-rw_attrasgn()
+rw_attrasgn(void)
 {
-        int attr = (int) rw_code[mach.pc++];
-        RWSTYPE val;
+	int attr = rw_c_val(rw_code_value(rw_code[mach.pc++]), int);
+	RWSTYPE val;
 	RWSTYPE index;
- 
-        cpopn(&val);
+
+	cpopn(&val);
 	cpopn(&index);
-	attrasgn_internal(attr, grad_avl_find_n(AVPLIST(&mach), attr, index),
+	attrasgn_internal(attr,
+			  grad_avl_find_n(AVPLIST(&mach), attr,
+					  rw_c_val(index, int)),
 			  val);
 }
 
 void
-rw_attrs0()
+rw_attrs0(void)
 {
-        int attr = (int) rw_code[mach.pc++];
-        grad_avp_t *pair;
-        
-        if ((pair = grad_avl_find(AVPLIST(&mach), attr)) == NULL) 
-                pushstr("", 0);
-        else if (pair->prop & GRAD_AP_ENCRYPT) {
+	int attr = rw_c_val(rw_code_value(rw_code[mach.pc++]), int);
+	grad_avp_t *pair;
+
+	if ((pair = grad_avl_find(AVPLIST(&mach), attr)) == NULL)
+		pushstr("", 0);
+	else if (pair->prop & GRAD_AP_ENCRYPT) {
 		char string[GRAD_STRING_LENGTH+1];
 		int len;
 		req_decrypt_password(string, mach.req, pair);
 		len = strlen(string);
 		pushstr(string, len);
 	} else
-                pushstr(pair->avp_strvalue, pair->avp_strlength);
+		pushstr(pair->avp_strvalue, pair->avp_strlength);
 }
 
 void
-rw_attrn0()
+rw_attrn0(void)
 {
-        int attr = (int) rw_code[mach.pc++];
-        grad_avp_t *pair;
+	int attr = rw_c_val(rw_code_value(rw_code[mach.pc++]), int);
+	grad_avp_t *pair;
 
-        if ((pair = grad_avl_find(AVPLIST(&mach), attr)) == NULL)
-                pushn(0);
-        else
-                pushn(pair->avp_lvalue);
+	if ((pair = grad_avl_find(AVPLIST(&mach), attr)) == NULL)
+		pushn(rw_c_cast(0, int));
+	else
+		pushn(rw_c_cast(pair->avp_lvalue, u_int));
 }
 
 void
-rw_attrs()
+rw_attrs(void)
 {
-        int attr = (int) rw_code[mach.pc++];
-        grad_avp_t *pair;
+	int attr = rw_c_val(rw_code_value(rw_code[mach.pc++]), int);
+	grad_avp_t *pair;
 	RWSTYPE index;
 
 	cpopn(&index);
-        if ((pair = grad_avl_find_n(AVPLIST(&mach), attr, index)) == NULL) 
-                pushstr("", 0);
-        else
-                pushstr(pair->avp_strvalue, pair->avp_strlength);
+	pair = grad_avl_find_n(AVPLIST(&mach), attr, rw_c_val(index, int));
+	if (pair == NULL)
+		pushstr("", 0);
+	else
+		pushstr(pair->avp_strvalue, pair->avp_strlength);
 }
 
 void
-rw_attrn()
+rw_attrn(void)
 {
-        int attr = (int) rw_code[mach.pc++];
-        grad_avp_t *pair;
+	int attr = rw_c_val(rw_code_value(rw_code[mach.pc++]), int);
+	grad_avp_t *pair;
 	RWSTYPE index;
 
 	cpopn(&index);
-        if ((pair = grad_avl_find_n(AVPLIST(&mach), attr, index)) == NULL)
-                pushn(0);
-        else
-                pushn(pair->avp_lvalue);
+	pair = grad_avl_find_n(AVPLIST(&mach), attr, rw_c_val(index, int));
+	if (pair == NULL)
+		pushn(rw_c_cast(0, int));
+	else
+		pushn(rw_c_cast(pair->avp_lvalue, u_int));
 }
 
 void
-rw_attr_delete0()
+rw_attr_delete0(void)
 {
-        int attr = (int) rw_code[mach.pc++];
+	int attr = rw_c_val(rw_code_value(rw_code[mach.pc++]), int);
 	grad_avl_delete(&mach.req->avlist, attr);
 }
 
 void
-rw_attr_delete()
+rw_attr_delete(void)
 {
-        int attr = (int) rw_code[mach.pc++];
+	int attr = rw_c_val(rw_code_value(rw_code[mach.pc++]), int);
 	RWSTYPE index;
 
 	assert_request_presence();
 	cpopn(&index);
-	grad_avl_delete_n(&mach.req->avlist, attr, index);
+	grad_avl_delete_n(&mach.req->avlist, attr, rw_c_val(index, int));
 }
 
 /*
  * Pop (and discard) a value from stack
  */
 void
-rw_popn()
+rw_popn(void)
 {
-        RWSTYPE n;
-        cpopn(&n);
+	RWSTYPE n;
+	cpopn(&n);
 }
 
 /*
  * Pop a value from stack into the accumulator
  */
 void
-rw_popa()
+rw_popa(void)
 {
-        cpopn(&mach.rA);
+	cpopn(&mach.rA);
 }
 
 /*
  * Push accumulator on stack
  */
 void
-rw_pusha()
+rw_pusha(void)
 {
-        pushn(mach.rA);
+	pushn(mach.rA);
 }
 
 /*
  * String concatenation
  */
 void
-rw_adds()
+rw_adds(void)
 {
-        grad_string_t s1, s2;
+	grad_string_t s1, s2;
 	RWSTYPE *p;
 	char *s;
-	
-        checkpop(2);
-        poparr(&s2);
-        poparr(&s1);
-        p = heap_reserve(sizeof(RWSTYPE) + s1.size + s2.size + 1);
+
+	checkpop(2);
+	poparr(&s2);
+	poparr(&s1);
+	p = heap_reserve(sizeof(RWSTYPE) + s1.size + s2.size + 1);
 	s = (char*)(p + 1);
 	memcpy(s, s1.data, s1.size);
 	s += s1.size;
 	memcpy(s, s2.data, s2.size);
 	s += s2.size;
 	*s = 0;
-	p[0] = s1.size + s2.size;
-        pushn((RWSTYPE)p);
+	rw_c_val(p[0], size) = s1.size + s2.size;
+	pushn(rw_c_cast(p, void*));
 }
 
 /*
  * Unary negation
  */
 void
-rw_neg()
+rw_neg(void)
 {
-        checkpop(1);
-        pushn(-popn());
+	checkpop(1);
+	pushint(-popint());
 }
 
 /*
  * Bitwise operations
  */
 void
-rw_b_and()
+rw_b_and(void)
 {
-        int n1, n2;
+	int n1, n2;
 
-        checkpop(2);
-        n2 = popn();
-        n1 = popn();
-        pushn(n1 & n2);
+	checkpop(2);
+	n2 = popint();
+	n1 = popint();
+	pushint(n1 & n2);
 }
 
 void
-rw_b_or()
+rw_b_or(void)
 {
-        int n1, n2;
+	int n1, n2;
 
-        checkpop(2);
-        n2 = popn();
-        n1 = popn();
-        pushn(n1 | n2);
+	checkpop(2);
+	n2 = popint();
+	n1 = popint();
+	pushint(n1 | n2);
 }
 
 void
-rw_b_xor()
+rw_b_xor(void)
 {
-        int n1, n2;
+	int n1, n2;
 
-        checkpop(2);
-        n2 = popn();
-        n1 = popn();
-        pushn(n1 ^ n2);
+	checkpop(2);
+	n2 = popint();
+	n1 = popint();
+	pushint(n1 ^ n2);
 }
 
 void
-rw_shl()
+rw_shl(void)
 {
-        int n1, n2;
+	int n1, n2;
 
-        checkpop(2);
-        n2 = popn();
-        n1 = popn();
-        pushn(n1 << n2);
+	checkpop(2);
+	n2 = popint();
+	n1 = popint();
+	pushint(n1 << n2);
 }
 
 void
-rw_shr()
+rw_shr(void)
 {
-        int n1, n2;
+	int n1, n2;
 
-        checkpop(2);
-        n2 = popn();
-        n1 = popn();
-        pushn(n1 >> n2);
+	checkpop(2);
+	n2 = popint();
+	n1 = popint();
+	pushint(n1 >> n2);
 }
 
 /*
  * Addition
  */
 void
-rw_add()
+rw_add(void)
 {
-        int n1, n2;
+	int n1, n2;
 
-        checkpop(2);
-        n2 = popn();
-        n1 = popn();
-        pushn(n1+n2);
+	checkpop(2);
+	n2 = popint();
+	n1 = popint();
+	pushint(n1+n2);
 }
 
 /*
  * Subtraction
  */
 void
-rw_sub()
+rw_sub(void)
 {
-        int n1, n2;
+	int n1, n2;
 
-        checkpop(2);
-        n2 = popn();
-        n1 = popn();
-        pushn(n1-n2);
+	checkpop(2);
+	n2 = popint();
+	n1 = popint();
+	pushint(n1-n2);
 }
 
 /*
  * Multiplication
  */
 void
-rw_mul()
+rw_mul(void)
 {
-        int n1, n2;
+	int n1, n2;
 
-        checkpop(2);
-        n2 = popn();
-        n1 = popn();
-        pushn(n1*n2);
+	checkpop(2);
+	n2 = popint();
+	n1 = popint();
+	pushint(n1*n2);
 }
 
 /*
  * Division
  */
 void
-rw_div()
+rw_div(void)
 {
-        int n1, n2;
+	int n1, n2;
 
-        checkpop(2);
-        n2 = popn();
-        n1 = popn();
-        if (n2 == 0) 
-                rw_error(_("division by zero!"));
-        pushn(n1/n2);
+	checkpop(2);
+	n2 = popint();
+	n1 = popint();
+	if (n2 == 0)
+		rw_error(_("division by zero!"));
+	pushint(n1/n2);
 }
 
 /*
  * Remainder
  */
 void
-rw_rem()
+rw_rem(void)
 {
-        int n1, n2;
+	int n1, n2;
 
-        checkpop(2);
-        n2 = popn();
-        n1 = popn();
-        if (n2 == 0) 
-                rw_error(_("division by zero!"));
-        pushn(n1%n2);
+	checkpop(2);
+	n2 = popint();
+	n1 = popint();
+	if (n2 == 0)
+		rw_error(_("division by zero!"));
+	pushint(n1%n2);
 }
 
 
 /* Type conversion */
 void
-rw_i2s()
+rw_i2s(void)
 {
-        int n = popn();
-        char buf[64];
-        
-        snprintf(buf, sizeof(buf), "%d", n);
-        pushstr(buf, strlen(buf));
+	int n = popint();
+	char buf[64];
+
+	snprintf(buf, sizeof(buf), "%d", n);
+	pushstr(buf, strlen(buf));
 }
 
 void
-rw_s2i()
+rw_s2i(void)
 {
 	grad_string_t s;
-	mem2string(&s, (RWSTYPE *)popn());
-        pushn(strtol(s.data, NULL, 0));
+	mem2string(&s, (RWSTYPE *)rw_c_val(popn(), ptr));
+	pushint(strtol(s.data, NULL, 0));
 }
 
 
 
 void
-rw_eq()
+rw_eq(void)
 {
-        int n1, n2;
+	int n1, n2;
 
-        checkpop(2);
-        n2 = popn();
-        n1 = popn();
-        pushn(n1 == n2);
+	checkpop(2);
+	n2 = popint();
+	n1 = popint();
+	pushint(n1 == n2);
 }
 
 void
-rw_ne()
+rw_ne(void)
 {
-        int n1, n2;
+	int n1, n2;
 
-        checkpop(2);
-        n2 = popn();
-        n1 = popn();
-        pushn(n1 != n2);
+	checkpop(2);
+	n2 = popint();
+	n1 = popint();
+	pushint(n1 != n2);
 }
 
 void
-rw_lt()
+rw_lt(void)
 {
-        int n1, n2;
+	int n1, n2;
 
-        checkpop(2);
-        n2 = popn();
-        n1 = popn();
-        pushn(n1 < n2);
+	checkpop(2);
+	n2 = popint();
+	n1 = popint();
+	pushint(n1 < n2);
 }
 
 void
-rw_le()
+rw_le(void)
 {
-        int n1, n2;
+	int n1, n2;
 
-        checkpop(2);
-        n2 = popn();
-        n1 = popn();
-        pushn(n1 <= n2);
+	checkpop(2);
+	n2 = popint();
+	n1 = popint();
+	pushint(n1 <= n2);
 }
 
 void
-rw_gt()
+rw_gt(void)
 {
-        int n1, n2;
+	int n1, n2;
 
-        checkpop(2);
-        n2 = popn();
-        n1 = popn();
-        pushn(n1 > n2);
+	checkpop(2);
+	n2 = popint();
+	n1 = popint();
+	pushint(n1 > n2);
 }
 
 void
-rw_ge()
+rw_ge(void)
 {
-        int n1, n2;
+	int n1, n2;
 
-        checkpop(2);
-        n2 = popn();
-        n1 = popn();
-        pushn(n1 >= n2);
+	checkpop(2);
+	n2 = popint();
+	n1 = popint();
+	pushint(n1 >= n2);
 }
 
 void
-rw_eqs()
+rw_eqs(void)
 {
-        grad_string_t s1, s2;
+	grad_string_t s1, s2;
 
-        checkpop(2);
+	checkpop(2);
 	poparr(&s2);
 	poparr(&s1);
-	
-        pushn(s1.size == s2.size && memcmp(s1.data, s2.data, s1.size) == 0);
+
+	pushint(s1.size == s2.size && memcmp(s1.data, s2.data, s1.size) == 0);
 }
 
 void
-rw_nes()
+rw_nes(void)
 {
-        grad_string_t s1, s2;
+	grad_string_t s1, s2;
 
-        checkpop(2);
+	checkpop(2);
 	poparr(&s2);
 	poparr(&s1);
-	
-        pushn(!(s1.size == s2.size && memcmp(s1.data, s2.data, s1.size) == 0));
+
+	pushint(!(s1.size == s2.size && memcmp(s1.data, s2.data, s1.size) == 0));
 }
 
 void
-rw_lts()
+rw_lts(void)
 {
-        grad_string_t s1, s2;
+	grad_string_t s1, s2;
 	size_t size;
-	
-        checkpop(2);
+
+	checkpop(2);
 	poparr(&s2);
 	poparr(&s1);
 	size = RW_MIN(s1.size, s2.size);
-	pushn(memcmp(s1.data, s2.data, size < 0) || s1.size < s2.size); 
+	pushint(memcmp(s1.data, s2.data, size < 0) || s1.size < s2.size);
 }
 
 void
-rw_les()
+rw_les(void)
 {
-        grad_string_t s1, s2;
+	grad_string_t s1, s2;
 	size_t size;
-	
-        checkpop(2);
+
+	checkpop(2);
 	poparr(&s2);
 	poparr(&s1);
 	size = RW_MIN(s1.size, s2.size);
-	pushn(memcmp(s1.data, s2.data, size <= 0) || s1.size <= s2.size); 
+	pushint(memcmp(s1.data, s2.data, size <= 0) || s1.size <= s2.size);
 }
 
 void
-rw_gts()
+rw_gts(void)
 {
-        grad_string_t s1, s2;
+	grad_string_t s1, s2;
 	size_t size;
-	
-        checkpop(2);
+
+	checkpop(2);
 	poparr(&s2);
 	poparr(&s1);
 	size = RW_MIN(s1.size, s2.size);
-	pushn(memcmp(s1.data, s2.data, size > 0) || s1.size > s2.size); 
+	pushint(memcmp(s1.data, s2.data, size > 0) || s1.size > s2.size);
 }
 
 void
-rw_ges()
+rw_ges(void)
 {
-        grad_string_t s1, s2;
+	grad_string_t s1, s2;
 	size_t size;
-	
-        checkpop(2);
+
+	checkpop(2);
 	poparr(&s2);
 	poparr(&s1);
 	size = RW_MIN(s1.size, s2.size);
-	pushn(memcmp(s1.data, s2.data, size >= 0) || s1.size >= s2.size); 
+	pushint(memcmp(s1.data, s2.data, size >= 0) || s1.size >= s2.size);
 }
 
 void
-rw_not()
+rw_not(void)
 {
-        int n;
+	int n;
 
-        checkpop(1);
-        n = popn();
-        pushn(!n);
+	checkpop(1);
+	n = popint();
+	pushint(!n);
 }
 
 static void
 need_pmatch(size_t n)
 {
 	n++;
-        if (mach.nmatch < n) {
-                grad_free(mach.pmatch);
-                mach.nmatch = n;
-                mach.pmatch = grad_emalloc(n * sizeof(mach.pmatch[0]));
-        }
+	if (mach.nmatch < n) {
+		free(mach.pmatch);
+		mach.nmatch = n;
+		mach.pmatch = grad_ecalloc(n, sizeof(mach.pmatch[0]));
+	}
 }
 
 void
-rw_match()
+rw_match(void)
 {
-        COMP_REGEX *rx = (COMP_REGEX *)rw_code[mach.pc++];
-        grad_string_t s;
-        int rc;
+	COMP_REGEX *rx = rw_c_val(rw_code_value(rw_code[mach.pc++]), rx);
+	grad_string_t s;
+	int rc;
 
 	poparr(&s);
 	need_pmatch(rx->nmatch);
-        mach.sA = s.data;
-        
-        rc = regexec(&rx->regex, mach.sA, 
-                     rx->nmatch + 1, mach.pmatch, 0);
-        if (rc && GRAD_DEBUG_LEVEL(1)) {
-                char errbuf[512];
-                regerror(rc, &rx->regex,
-                         errbuf, sizeof(errbuf));
-                grad_log(GRAD_LOG_DEBUG,
-		         _("rewrite regex failure: %s. Input: %s"),
-                         errbuf, (char*)mach.rA);
-        }
-        pushn(rc == 0);
+	mach.sA = s.data;
+
+	rc = regexec(&rx->regex, mach.sA,
+		     rx->nmatch + 1, mach.pmatch, 0);
+	if (rc && GRAD_DEBUG_LEVEL(1)) {
+		char errbuf[512];
+		regerror(rc, &rx->regex,
+			 errbuf, sizeof(errbuf));
+		grad_log(GRAD_LOG_DEBUG,
+			 _("rewrite regex failure: %s. Input: %s"),
+			 errbuf, (char*)rw_c_val(mach.rA, ptr));
+	}
+	pushint(rc == 0);
 }
 
 void
-rw_jmp()
+rw_jmp(void)
 {
-        pctr_t pc = (pctr_t) rw_code[mach.pc++];
-        mach.pc = pc;
-} 
-
-void
-rw_jne()
-{
-        int n;
-        pctr_t pc = (pctr_t) rw_code[mach.pc++];
-        
-        n = popn();
-        if (n != 0)
-                mach.pc = pc;
+	pctr_t pc = rw_c_val(rw_code_value(rw_code[mach.pc++]), pc);
+	mach.pc = pc;
 }
 
 void
-rw_je()
+rw_jne(void)
 {
-        int n;
-        pctr_t pc = (pctr_t) rw_code[mach.pc++];
-        
-        n = popn();
-        if (n == 0)
-                mach.pc = pc;
+	int n;
+	pctr_t pc = rw_c_val(rw_code_value(rw_code[mach.pc++]), pc);
+
+	n = popint();
+	if (n != 0)
+		mach.pc = pc;
 }
 
 void
-rw_builtin()
+rw_je(void)
 {
-        INSTR fun = (INSTR) rw_code[mach.pc++];
-        pushn(mach.pc);
-        enter(0);
-        fun();
-        leave();
+	int n;
+	pctr_t pc = rw_c_val(rw_code_value(rw_code[mach.pc++]), pc);
+
+	n = popint();
+	if (n == 0)
+		mach.pc = pc;
+}
+
+void
+rw_builtin(void)
+{
+	INSTR fun = rw_code_instr(rw_code[mach.pc++]);
+	pushn((RWSTYPE)mach.pc);
+	enter(0);
+	fun();
+	leave();
 }
 
 void
 run(pctr_t pc)
 {
-        mach.pc = pc;
-        while (rw_code[mach.pc]) {
-                if (mach.pc >= rw_codesize)
-                        rw_error(_("pc out of range"));
-                (*(rw_code[mach.pc++]))();
-        }
+	INSTR ip;
+
+	mach.pc = pc;
+	while ((ip = rw_code_instr(rw_code[mach.pc]))) {
+		if (mach.pc >= rw_codesize)
+			rw_error(_("pc out of range"));
+//                (*(rw_code[mach.pc++]))();
+		mach.pc++;
+		(*ip)();
+	}
 }
 
 
@@ -4940,7 +4849,7 @@ run(pctr_t pc)
  */
 
 void
-gc()
+gc(void)
 {
 }
 
@@ -4953,299 +4862,304 @@ gc()
  * integer length(string s)
  */
 static void
-bi_length()
+bi_length(void)
 {
 	grad_string_t s;
-	mem2string(&s, (RWSTYPE*)getarg(1));
-        pushn(s.size);
+	mem2string(&s, (RWSTYPE*)rw_c_val(getarg(1), ptr));
+	pushn((RWSTYPE)s.size);
 }
 
 /*
  * integer index(string s, integer a)
  */
 static void
-bi_index()
+bi_index(void)
 {
-        grad_string_t s;
+	grad_string_t s;
 	char *p;
-        int   c;
+	int   c;
 
-        mem2string(&s, (RWSTYPE*) getarg(2));
-        c = (int) getarg(1);
-        p = memchr(s.data, c, s.size);
-        pushn(p ? p - s.data : -1);
+	mem2string(&s, (RWSTYPE*) rw_c_val(getarg(2), ptr));
+	c = rw_c_val(getarg(1), int);
+	p = memchr(s.data, c, s.size);
+	pushint(p ? p - s.data : -1);
 }
 
 /*
  * integer rindex(string s, integer a)
  */
 static void
-bi_rindex()
+bi_rindex(void)
 {
-        grad_string_t s;
+	grad_string_t s;
 	int i;
-        int c;
+	int c;
 
-	mem2string(&s, (RWSTYPE*) getarg(2));
+	mem2string(&s, (RWSTYPE*)rw_c_val(getarg(2), ptr));
+	c = rw_c_val(getarg(1), int);
 	for (i = s.size - 1; i >= 0; i--)
 		if (s.data[i] == c)
 			break;
-        pushn(i);
+	pushint(i);
 }
 
 /*
  * string substr(string s, int start, int length)
  */
 static void
-bi_substr()
+bi_substr(void)
 {
-        grad_string_t src;
+	grad_string_t src;
 	RWSTYPE *p;
 	char *dest;
-        int   start, length;
+	int   start, length;
 
-        mem2string(&src, (RWSTYPE*)getarg(3));
-        start  = getarg(2);
-        length = getarg(1);
-        if (length < 0)
-                length = src.size - start;
-        
-        p = heap_reserve(sizeof(RWSTYPE) + length + 1);
+	mem2string(&src, (RWSTYPE*)rw_c_val(getarg(3), ptr));
+	start  = rw_c_val(getarg(2), int);
+	length = rw_c_val(getarg(1), int);
+	if (length < 0)
+		length = src.size - start;
+
+	p = heap_reserve(sizeof(RWSTYPE) + length + 1);
 	dest = (char *)(p + 1);
-        if (length > 0) 
-                memcpy(dest, src.data + start, length);
-        dest[length] = 0;
-	p[0] = length;
-        pushn((RWSTYPE)p);
+	if (length > 0)
+		memcpy(dest, src.data + start, length);
+	dest[length] = 0;
+	rw_c_val(p[0], size) = length;
+	pushn(rw_c_cast(p, void*));
 }
 
 static void
-bi_field()
+bi_field(void)
 {
-        grad_string_t str;
+	grad_string_t str;
 	char *p, *endp;
-        int fn = getarg(1);
-        char *s = "";
-        int len = 1;
-	
-	mem2string(&str, (RWSTYPE*) getarg(2));
+	int fn = rw_c_val(getarg(1), int);
+	char *s = "";
+	int len = 1;
+
+	mem2string(&str, (RWSTYPE*) rw_c_val(getarg(2), ptr));
 	endp = str.data + str.size;
 	for (p = str.data; p < endp && fn--; ) {
-                /* skip initial whitespace */
-                while (p < endp && isspace(*p))
-                        p++;
+		/* skip initial whitespace */
+		while (p < endp && isspace(*p))
+			p++;
 
-                s = p;
-                len = 0;
-                while (p < endp && !isspace(*p)) {
-                        p++;
-                        len++;
-                }
-        }
+		s = p;
+		len = 0;
+		while (p < endp && !isspace(*p)) {
+			p++;
+			len++;
+		}
+	}
 
-	if (p == endp && fn) 
+	if (p == endp && fn)
 		pushstr("", 0);
-	else 
+	else
 		pushstr(s, len);
 }
 
 static void
-bi_logit()
+bi_logit(void)
 {
-        grad_string_t msg;
-	mem2string(&msg, (RWSTYPE*) getarg(1));
-        grad_log(GRAD_LOG_INFO, "%s", msg.data);
-        pushn(0);
+	grad_string_t msg;
+	mem2string(&msg, (RWSTYPE*) rw_c_val(getarg(1), ptr));
+	grad_log(GRAD_LOG_INFO, "%s", msg.data);
+	pushint(0);
 }
 
 static void
-bi_htonl()
+bi_htonl(void)
 {
-	pushn(htonl(getarg(1)));
+	uint32_t val = rw_c_val(getarg(1), u_int);
+	pushn(rw_c_cast(htonl(val), u_int));
 }
 
 static void
-bi_ntohl()
+bi_ntohl(void)
 {
-	pushn(ntohl(getarg(1)));
+	uint32_t val = rw_c_val(getarg(1), u_int);
+	pushn(rw_c_cast(ntohl(val), u_int));
 }
 
 static void
-bi_htons()
+bi_htons(void)
 {
-	pushn(htons(getarg(1) & 0xffff));
+	uint16_t val = rw_c_val(getarg(1), u_int); /* FIXME: range checking */
+	pushn(rw_c_cast(htons(val), u_int));
 }
 
 static void
-bi_ntohs()
+bi_ntohs(void)
 {
-	pushn(ntohs(getarg(1) & 0xffff));
+	uint16_t val = rw_c_val(getarg(1), u_int); /* FIXME: range checking */
+	pushn(rw_c_cast(ntohs(val & 0xffff), u_int));
 }
 
 static void
-bi_inet_ntoa()
+bi_inet_ntoa(void)
 {
 	char buffer[GRAD_IPV4_STRING_LENGTH];
-	char *s = grad_ip_iptostr(getarg(1), buffer);
+	char *s = grad_ip_iptostr(rw_c_val(getarg(1), u_int), buffer);
 	pushstr(s, strlen(s));
 }
 
 static void
-bi_inet_aton()
+bi_inet_aton(void)
 {
 	grad_string_t s;
-	mem2string(&s, (RWSTYPE*)getarg(1));
+	mem2string(&s, (RWSTYPE*)rw_c_val(getarg(1), ptr));
 	/* Note: inet_aton is not always present. See lib/iputils.c */
-	pushn(grad_ip_strtoip(s.data));
+	pushn(rw_c_cast(grad_ip_strtoip(s.data), u_int));
 }
 
 static void
-bi_tolower()
+bi_tolower(void)
 {
 	grad_string_t src;
 	grad_string_t dest;
 	int i;
 
-	mem2string(&src, (RWSTYPE*) getarg(1));
+	mem2string(&src, (RWSTYPE*) rw_c_val(getarg(1), ptr));
 	pushstr(src.data, src.size);
-	mem2string(&dest, (RWSTYPE*) tos());
+	mem2string(&dest, (RWSTYPE*) rw_c_val(tos(), ptr));
 	for (i = 0; i < dest.size; i++)
 		dest.data[i] = tolower(dest.data[i]);
-}	
+}
 
 static void
-bi_toupper()
+bi_toupper(void)
 {
 	grad_string_t src;
 	grad_string_t dest;
 	int i;
 
-	mem2string(&src, (RWSTYPE*) getarg(1));
+	mem2string(&src, (RWSTYPE*) rw_c_val(getarg(1), ptr));
 	pushstr(src.data, src.size);
-	mem2string(&dest, (RWSTYPE*) tos());
+	mem2string(&dest, (RWSTYPE*) rw_c_val(tos(), ptr));
 	for (i = 0; i < dest.size; i++)
 		dest.data[i] = toupper(dest.data[i]);
-}	
+}
 
 static void
-bi_request_code_string()
+bi_request_code_string(void)
 {
-        int code = (int) getarg(1);
+	int code = rw_c_val(getarg(1), int);
 	const char *s = grad_request_code_to_name(code);
 	pushstr(s, strlen(s));
 }
 
 static void
-bi_request_source_ip()
+bi_request_source_ip(void)
 {
 	assert_request_presence();
-	pushn((RWSTYPE) mach.req->ipaddr);
+	pushn(rw_c_cast(mach.req->ipaddr, u_int));
 }
 
 static void
-bi_request_source_port()
+bi_request_source_port(void)
 {
 	assert_request_presence();
-	pushn((RWSTYPE) mach.req->udp_port);
+	pushn(rw_c_cast(mach.req->udp_port, u_int));
 }
 
 static void
-bi_request_id()
+bi_request_id(void)
 {
 	assert_request_presence();
-	pushn((RWSTYPE) mach.req->id);
+	pushn(rw_c_cast(mach.req->id, u_int));
 }
 
 static void
-bi_request_code()
+bi_request_code(void)
 {
 	assert_request_presence();
-	pushn((RWSTYPE) mach.req->code);
+	pushn(rw_c_cast(mach.req->code, u_int));
 }
 
 static void
-bi_nas_name()
+bi_nas_name(void)
 {
-        grad_nas_t *nas;
-	grad_uint32_t ip = (grad_uint32_t) getarg(1);
+	grad_nas_t *nas;
+	uint32_t ip = (uint32_t) rw_c_val(getarg(1), u_int);
 
 	if ((nas = grad_nas_lookup_ip(ip)) != NULL) {
 		char *s = nas->shortname[0] ? nas->shortname : nas->longname;
 		pushstr(s, strlen(s));
-        } else {
+	} else {
 		char nasname[GRAD_MAX_LONGNAME];
-		
+
 		grad_ip_gethostname(ip, nasname, sizeof(nasname));
 		pushstr(nasname, strlen(nasname));
 	}
 }
 
 static void
-bi_nas_short_name()
+bi_nas_short_name(void)
 {
-        grad_nas_t *nas;
-	grad_uint32_t ip = (grad_uint32_t) getarg(1);
+	grad_nas_t *nas;
+	uint32_t ip = (uint32_t) rw_c_val(getarg(1), u_int);
 
 	if ((nas = grad_nas_lookup_ip(ip)) && nas->shortname[0]) {
 		pushstr(nas->shortname, strlen(nas->shortname));
-        } else {
+	} else {
 		char nasname[GRAD_MAX_LONGNAME];
-		
+
 		grad_ip_gethostname(ip, nasname, sizeof(nasname));
 		pushstr(nasname, strlen(nasname));
 	}
 }
 
 static void
-bi_nas_full_name()
+bi_nas_full_name(void)
 {
-        grad_nas_t *nas;
-	grad_uint32_t ip = (grad_uint32_t) getarg(1);
+	grad_nas_t *nas;
+	uint32_t ip = (uint32_t) rw_c_val(getarg(1), u_int);
 
 	if ((nas = grad_nas_lookup_ip(ip)) != NULL) {
 		pushstr(nas->longname, strlen(nas->longname));
-        } else {
+	} else {
 		char nasname[GRAD_MAX_LONGNAME];
-		
+
 		grad_ip_gethostname(ip, nasname, sizeof(nasname));
 		pushstr(nasname, strlen(nasname));
 	}
 }
 
 static void
-bi_gethostbyaddr()
+bi_gethostbyaddr(void)
 {
-	grad_uint32_t ip = (grad_uint32_t) getarg(1);
+	uint32_t ip = (uint32_t) rw_c_val(getarg(1), u_int);
 	char nasname[GRAD_MAX_LONGNAME];
-		
+
 	grad_ip_gethostname(ip, nasname, sizeof(nasname));
 	pushstr(nasname, strlen(nasname));
 }
 
 static void
-bi_gethostbyname()
+bi_gethostbyname(void)
 {
 	grad_string_t s;
-	mem2string(&s, (RWSTYPE*)getarg(1));
-	pushn((RWSTYPE) grad_ip_gethostaddr(s.data));
+	mem2string(&s, (RWSTYPE*) rw_c_val(getarg(1), ptr));
+	pushn(rw_c_cast(grad_ip_gethostaddr(s.data), u_int));
 }
 
 static void
-bi_time()
+bi_time(void)
 {
-	pushn((RWSTYPE) time(NULL));
+	pushn(rw_c_cast(time(NULL), u_int));
 }
 
 static void
-bi_strftime()
+bi_strftime(void)
 {
 	struct tm *tm;
 	char *base;
-	time_t t = (time_t) getarg(1);
+	time_t t = (time_t) rw_c_val(getarg(1), u_int);
 	grad_string_t fmt;
 	size_t n;
-	
-	mem2string(&fmt, (RWSTYPE*) getarg(2));
+
+	mem2string(&fmt, (RWSTYPE*) rw_c_val(getarg(2), ptr));
 	tm = localtime(&t);
 	base = temp_space_create();
 	n = strftime(base, temp_space_size(), fmt.data, tm);
@@ -5257,10 +5171,10 @@ rw_regerror(const char *prefix, regex_t *rx, int rc)
 {
 	size_t sz = regerror(rc, rx, NULL, 0);
 	char *errbuf = malloc(sz + strlen (prefix) + 1);
-	if (!errbuf) 
+	if (!errbuf)
 		rw_error(prefix);
 	else {
-		strcpy (errbuf, prefix);
+		strcpy(errbuf, prefix);
 		regerror(rc, rx, errbuf + strlen(prefix), sz);
 		rw_error_free(errbuf);
 	}
@@ -5274,17 +5188,20 @@ enum subst_segment_type {
 
 struct subst_segment {
 	enum subst_segment_type type;
+	SLIST_ENTRY(subst_segment) link;
 	union {
 		struct {
 			char *ptr;
-			size_t len; 
+			size_t len;
 		} text;      /* type == subst_text */
 		size_t ref;  /* type == subst_ref */
 	} v;
 };
 
+typedef SLIST_HEAD(,subst_segment) SUBST_HEAD;
+
 static void
-add_text_segment(grad_list_t *lst, char *ptr, char *end)
+add_text_segment(SUBST_HEAD *head, char *ptr, char *end)
 {
 	struct subst_segment *seg;
 	if (ptr >= end)
@@ -5293,95 +5210,83 @@ add_text_segment(grad_list_t *lst, char *ptr, char *end)
 	seg->type = subst_text;
 	seg->v.text.ptr = ptr;
 	seg->v.text.len = end - ptr;
-	grad_list_append(lst, seg);
+	SLIST_PUSH(head, seg, link);
 }
 
 static void
-add_match_segment(grad_list_t *lst)
+add_match_segment(SUBST_HEAD *head)
 {
 	struct subst_segment *seg = grad_emalloc(sizeof(*seg));
 	seg->type = subst_match;
-	grad_list_append(lst, seg);
+	SLIST_PUSH(head, seg, link);
 }
 
 static void
-add_ref_segment(grad_list_t *lst, size_t ref)
+add_ref_segment(SUBST_HEAD *head, size_t ref)
 {
 	struct subst_segment *seg = grad_emalloc(sizeof(*seg));
 	seg->type = subst_ref;
 	seg->v.ref = ref;
-	grad_list_append(lst, seg);
+	SLIST_PUSH(head, seg, link);
 }
 
-grad_list_t *
-subst_create(char *text)
+void
+subst_create(char *text, SUBST_HEAD *head)
 {
 	char *p;
-	grad_list_t *lst = grad_list_create();
-	if (!lst)
-		return lst;
 
+	SLIST_INIT(head);
 	p = text;
 	while (*p) {
 		if (*p == '\\' && p[1]) {
 			if (p[1] == '&') {
-				add_text_segment(lst, text, p);
+				add_text_segment(head, text, p);
 				text = ++p;
 				p++;
 			} else if (p[1] == '\\') {
-				add_text_segment(lst, text, p+1);
+				add_text_segment(head, text, p+1);
 				p += 2;
 				text = p;
 			} else if (isdigit(p[1])) {
 				size_t ref;
 				char *q;
-				
-				add_text_segment(lst, text, p);
+
+				add_text_segment(head, text, p);
 				ref = strtoul(p+1, &q, 10);
-				add_ref_segment(lst, ref);
+				add_ref_segment(head, ref);
 				text = p = q;
 			} else {
-				add_text_segment(lst, text, p);
+				add_text_segment(head, text, p);
 				text = ++p;
 			}
 		} else if (*p == '&') {
-			add_text_segment(lst, text, p);
-			add_match_segment(lst);
+			add_text_segment(head, text, p);
+			add_match_segment(head);
 			text = ++p;
 		} else
 			p++;
 	}
-	add_text_segment(lst, text, p);
-	return lst;	
-}
-
-int
-seg_free(void *item, void *data ARG_UNUSED)
-{
-	grad_free(item);
-	return 0;
+	add_text_segment(head, text, p);
 }
 
 void
-subst_destroy(grad_list_t *lst)
+subst_destroy(SUBST_HEAD *head)
 {
-	grad_list_destroy(&lst, seg_free, NULL);
+	SLIST_FREE(head, link, subst_segment, free);
 }
 
 void
-subst_run(grad_list_t *subst, size_t nsub,
-	  char **baseptr, char *arg)
+subst_run(SUBST_HEAD *head, size_t nsub, char **baseptr, char *arg)
 {
-	grad_iterator_t *itr = grad_iterator_create(subst);
 	struct subst_segment *seg;
-	
-	for (seg = grad_iterator_first(itr); seg; seg = grad_iterator_next(itr)) {
+
+	SLIST_FOREACH(seg, head, link) {
 		switch (seg->type) {
 		case subst_text:
 			temp_space_copy(baseptr,
 					seg->v.text.ptr, seg->v.text.len);
 			break;
-			
+
 		case subst_ref:
 			if (seg->v.ref >= nsub)
 				rw_error(_("Invalid backreference"));
@@ -5390,7 +5295,7 @@ subst_run(grad_list_t *subst, size_t nsub,
 					mach.pmatch[seg->v.ref].rm_eo -
 					  mach.pmatch[seg->v.ref].rm_so);
 			break;
-			    
+
 		case subst_match:
 			temp_space_copy(baseptr,
 					arg + mach.pmatch[0].rm_so,
@@ -5398,11 +5303,10 @@ subst_run(grad_list_t *subst, size_t nsub,
 					  mach.pmatch[0].rm_so);
 		}
 	}
-	grad_iterator_destroy(&itr);
 }
 
 static void
-bi_gsub()
+bi_gsub(void)
 {
 	grad_string_t re_str;
 	grad_string_t repl;
@@ -5410,42 +5314,40 @@ bi_gsub()
 	char *p;
 	char *base;
 	regex_t rx;
-	grad_list_t *subst;
+	SUBST_HEAD subst;
 	int rc;
-	
-	mem2string(&re_str, (RWSTYPE*) getarg(3));
-	mem2string(&repl, (RWSTYPE*) getarg(2));
-	mem2string(&arg, (RWSTYPE*) getarg(1));
+
+	mem2string(&re_str, (RWSTYPE*) rw_c_val(getarg(3), ptr));
+	mem2string(&repl, (RWSTYPE*) rw_c_val(getarg(2), ptr));
+	mem2string(&arg, (RWSTYPE*) rw_c_val(getarg(1), ptr));
 	p = arg.data;
-	
-        rc = regcomp(&rx, re_str.data, regcomp_flags);
-        if (rc) 
+
+	rc = regcomp(&rx, re_str.data, regcomp_flags);
+	if (rc)
 		rw_regerror(_("regexp compile error: "), &rx, rc);
 
 	need_pmatch(rx.re_nsub);
 
-	subst = subst_create(repl.data);
-	if (!subst)
-		rw_error(_("gsub: not enough memory"));
-	
+	subst_create(repl.data, &subst);
+
 	base = temp_space_create();
 	while (*p
 	       && regexec(&rx, p, rx.re_nsub + 1, mach.pmatch, 0) == 0) {
 		temp_space_copy(&base, p, mach.pmatch[0].rm_so);
-		subst_run(subst, rx.re_nsub + 1, &base, p);
+		subst_run(&subst, rx.re_nsub + 1, &base, p);
 		p += mach.pmatch[0].rm_eo;
 		if (mach.pmatch[0].rm_eo == 0)
 			p++;
 	}
 	temp_space_copy(&base, p, strlen(p) + 1);
-	subst_destroy(subst);
+	subst_destroy(&subst);
 	regfree(&rx);
 
-	pushn((RWSTYPE)temp_space_fix(base));
+	pushn(rw_c_cast(temp_space_fix(base), void *));
 }
 
 static void
-bi_sub()
+bi_sub(void)
 {
 	grad_string_t re_str;
 	grad_string_t repl;
@@ -5453,48 +5355,46 @@ bi_sub()
 	char *p;
 	char *base;
 	regex_t rx;
-	grad_list_t *subst;
+	SUBST_HEAD subst;
 	int rc;
-	
-	mem2string(&re_str, (RWSTYPE*) getarg(3));
-	mem2string(&repl, (RWSTYPE*) getarg(2));
-	mem2string(&arg, (RWSTYPE*) getarg(1));
-	
-        rc = regcomp(&rx, re_str.data, regcomp_flags);
-        if (rc) 
+
+	mem2string(&re_str, (RWSTYPE*) rw_c_val(getarg(3), ptr));
+	mem2string(&repl, (RWSTYPE*) rw_c_val(getarg(2), ptr));
+	mem2string(&arg, (RWSTYPE*) rw_c_val(getarg(1), ptr));
+
+	rc = regcomp(&rx, re_str.data, regcomp_flags);
+	if (rc)
 		rw_regerror(_("regexp compile error: "), &rx, rc);
 
 	need_pmatch(rx.re_nsub);
 
-	subst = subst_create(repl.data);
-	if (!subst)
-		rw_error(_("sub: not enough memory"));
-	
+	subst_create(repl.data, &subst);
+
 	base = temp_space_create();
 	p = arg.data;
 	if (regexec(&rx, p, rx.re_nsub + 1, mach.pmatch, 0) == 0) {
 		temp_space_copy(&base, p, mach.pmatch[0].rm_so);
-		subst_run(subst, rx.re_nsub + 1, &base, p);
+		subst_run(&subst, rx.re_nsub + 1, &base, p);
 		p += mach.pmatch[0].rm_eo;
 	}
 	temp_space_copy(&base, p, strlen(p) + 1);
-	subst_destroy(subst);
+	subst_destroy(&subst);
 	regfree(&rx);
 
-	pushn((RWSTYPE)temp_space_fix(base));
+	pushn(rw_c_cast(temp_space_fix(base), void*));
 }
 
 #define ISPRINT(c) (((unsigned char)c) < 128 && (isalnum(c) || c == '-'))
 
 static void
-bi_qprn()
+bi_qprn(void)
 {
 	grad_string_t arg;
 	char *p, *s, *end;
 	size_t count;
 	RWSTYPE *sp;
-	
-	mem2string(&arg, (RWSTYPE*)getarg(1));
+
+	mem2string(&arg, (RWSTYPE*) rw_c_val(getarg(1), ptr));
 	end = arg.data + arg.size;
 	for (count = 0, p = arg.data; p < end; p++)
 		if (!ISPRINT(*p))
@@ -5502,9 +5402,9 @@ bi_qprn()
 
 	/* Each encoded character takes 3 bytes. */
 	sp = heap_reserve(sizeof(RWSTYPE) + arg.size + 2*count + 1);
-	sp[0] = arg.size + 2*count;
-	pushn((RWSTYPE) sp);
-	
+	rw_c_val(sp[0], size) = arg.size + 2*count;
+	pushn(rw_c_cast(sp, void*));
+
 	for (p = (char*)(sp + 1), s = arg.data; s < end; s++) {
 		if (ISPRINT(*s))
 			*p++ = *s;
@@ -5520,85 +5420,83 @@ bi_qprn()
 }
 
 static void
-bi_quote_string()
+bi_quote_string(void)
 {
 	int quote;
 	grad_string_t arg;
 	RWSTYPE *sp;
 	char *p;
 	size_t size;
-	
-	mem2string(&arg, (RWSTYPE*)getarg(1));
+
+	mem2string(&arg, (RWSTYPE*) rw_c_val(getarg(1), ptr));
 	size = grad_argcv_quoted_length_n(arg.data, arg.size, &quote);
 	sp = heap_reserve(sizeof(RWSTYPE) + size + 1);
-	sp[0] = size;
-	pushn((RWSTYPE)sp);
+	rw_c_val(sp[0], size) = size;
+	pushn(rw_c_cast(sp, void*));
 	p = (char*)(sp + 1);
 	grad_argcv_quote_copy_n(p, arg.data, arg.size);
 }
 
 static void
-bi_unquote_string()
+bi_unquote_string(void)
 {
-	int quote;
 	grad_string_t arg;
 	RWSTYPE *sp;
 	char *p;
-	size_t size;
-	
-	mem2string(&arg, (RWSTYPE*)getarg(1));
+
+	mem2string(&arg, (RWSTYPE*) rw_c_val(getarg(1), ptr));
 	sp = heap_reserve(sizeof(RWSTYPE) +  arg.size + 1);
 	p = (char*)(sp + 1);
 	grad_argcv_unquote_copy(p, arg.data, arg.size);
-	sp[0] = strlen(p);
-	pushn((RWSTYPE)sp);
+	rw_c_val(sp[0], u_int) = strlen(p);
+	pushn(rw_c_cast(sp, void*));
 }
 
 static void
-bi_textdomain()
+bi_textdomain(void)
 {
 	grad_string_t s;
-	mem2string(&s, (RWSTYPE*)getarg(1));
+	mem2string(&s, (RWSTYPE*) rw_c_val(getarg(1), ptr));
 	pushstr(default_gettext_domain, strlen (default_gettext_domain));
 	grad_string_replace(&default_gettext_domain, s.data);
 }
 
 static void
-bi_gettext()
+bi_gettext(void)
 {
 	grad_string_t s;
 	const char *p;
-	
-	mem2string(&s, (RWSTYPE*)getarg(1));
+
+	mem2string(&s, (RWSTYPE*) rw_c_val(getarg(1), ptr));
 	p = dgettext(default_gettext_domain, s.data);
 	pushstr(p, strlen(p));
 }
 
 static void
-bi_dgettext()
+bi_dgettext(void)
 {
 	grad_string_t domain;
 	grad_string_t text;
 	const char *p;
-	
-	mem2string(&domain, (RWSTYPE*)getarg(2));
-	mem2string(&text, (RWSTYPE*)getarg(1));
+
+	mem2string(&domain, (RWSTYPE*) rw_c_val(getarg(2), ptr));
+	mem2string(&text, (RWSTYPE*) rw_c_val(getarg(1), ptr));
 	p = dgettext(domain.data, text.data);
 	pushstr(p, strlen(p));
 }
 
 
 static void
-bi_ngettext()
+bi_ngettext(void)
 {
 	grad_string_t s;
 	grad_string_t pl;
 	unsigned long n;
 	const char *p;
 
-	mem2string(&s, (RWSTYPE*)getarg(3));
-	mem2string(&pl, (RWSTYPE*)getarg(2));
-	n = (unsigned long) getarg(1);
+	mem2string(&s, (RWSTYPE*) rw_c_val(getarg(3), ptr));
+	mem2string(&pl, (RWSTYPE*) rw_c_val(getarg(2), ptr));
+	n = (unsigned long) rw_c_val(getarg(1), u_int);
 	p = dngettext(default_gettext_domain,
 		      s.data,
 		      pl.data,
@@ -5607,7 +5505,7 @@ bi_ngettext()
 }
 
 static void
-bi_dngettext()
+bi_dngettext(void)
 {
 	grad_string_t domain;
 	grad_string_t s;
@@ -5615,22 +5513,22 @@ bi_dngettext()
 	unsigned long n;
 	const char *p;
 
-	mem2string(&domain, (RWSTYPE*)getarg(4));
-	mem2string(&s, (RWSTYPE*)getarg(3));
-	mem2string(&pl, (RWSTYPE*)getarg(2));
-	n = (unsigned long) getarg(1);
+	mem2string(&domain, (RWSTYPE*) rw_c_val(getarg(4), ptr));
+	mem2string(&s, (RWSTYPE*) rw_c_val(getarg(3), ptr));
+	mem2string(&pl, (RWSTYPE*) rw_c_val(getarg(2), ptr));
+	n = (unsigned long) rw_c_val(getarg(1), u_int);
 
-        p = dngettext(domain.data, s.data, pl.data, n);
+	p = dngettext(domain.data, s.data, pl.data, n);
 	pushstr(p, strlen(p));
 }
 
 static builtin_t builtin[] = {
-        { bi_length,  "length", Integer, "s" },
+	{ bi_length,  "length", Integer, "s" },
 	{ bi_index,   "index",  Integer, "si" },
-        { bi_rindex,  "rindex", Integer, "si" },
-        { bi_substr,  "substr", String,  "sii" },
-        { bi_logit,   "logit",  Integer, "s" },
-        { bi_field,   "field",  String,  "si" },
+	{ bi_rindex,  "rindex", Integer, "si" },
+	{ bi_substr,  "substr", String,  "sii" },
+	{ bi_logit,   "logit",  Integer, "s" },
+	{ bi_field,   "field",  String,  "si" },
 	{ bi_ntohl, "ntohl", Integer, "i" },
 	{ bi_htonl, "htonl", Integer, "i" },
 	{ bi_ntohs, "ntohs", Integer, "i" },
@@ -5673,57 +5571,57 @@ static builtin_t builtin[] = {
 builtin_t *
 builtin_lookup(char *name)
 {
-        int i;
+	int i;
 
-        for (i = 0; builtin[i].handler; i++)
-                if (strcmp(name, builtin[i].name) == 0)
-                        return &builtin[i];
-        return NULL;
+	for (i = 0; builtin[i].handler; i++)
+		if (strcmp(name, builtin[i].name) == 0)
+			return &builtin[i];
+	return NULL;
 }
 
 
 /* ****************************************************************************
- * Function registering/unregistering 
+ * Function registering/unregistering
  */
 
-int
-function_free(FUNCTION *f)
+void
+function_free(void *p)
 {
-        PARAMETER *parm, *next;
-        
-        rx_free(f->rx_list);
-        parm = f->parm;
-        while (parm) {
-                next = parm->next;
-                grad_free(parm);
-                parm = next;
-        }
-        return 0;
+	FUNCTION *f = p;
+	PARAMETER *parm, *next;
+
+	rx_head_free(&f->rx_head);
+	parm = f->parm;
+	while (parm) {
+		next = parm->next;
+		free(parm);
+		parm = next;
+	}
 }
-                
+
 FUNCTION *
 function_install(FUNCTION *fun)
 {
-        FUNCTION *fp;
+	FUNCTION *fp;
 
-        if (fp = (FUNCTION *)grad_sym_lookup(rewrite_tab, fun->name)) {
-                grad_log_loc(GRAD_LOG_ERR, &fun->loc,
+	if ((fp = (FUNCTION *)grad_sym_lookup(rewrite_tab, fun->name))) {
+		grad_log_loc(GRAD_LOG_ERR, &fun->loc,
 			     _("redefinition of function %s"));
-                grad_log_loc(GRAD_LOG_ERR, &fp->loc,
+		grad_log_loc(GRAD_LOG_ERR, &fp->loc,
 			     _("previously defined here"));
-                errcnt++;
-                return fp;
-        }  
-        fp = (FUNCTION*)grad_sym_install(rewrite_tab, fun->name);
-        
-        fp->rettype = fun->rettype;
-        fp->entry   = fun->entry;
-        fp->rx_list = fun->rx_list;
-        fp->nparm   = fun->nparm;        
-        fp->parm    = fun->parm;
-        fp->stack_alloc = fun->stack_alloc;
+		errcnt++;
+		return fp;
+	}
+	fp = (FUNCTION*)grad_sym_install(rewrite_tab, fun->name);
+
+	fp->rettype = fun->rettype;
+	fp->entry   = fun->entry;
+	fp->rx_head = fun->rx_head;
+	fp->nparm   = fun->nparm;
+	fp->parm    = fun->parm;
+	fp->stack_alloc = fun->stack_alloc;
 	fp->loc     = fun->loc;
-        return fp;
+	return fp;
 }
 
 
@@ -5734,25 +5632,25 @@ function_install(FUNCTION *fun)
 static char pair_print_prefix[] = "    ";
 
 static void
-rw_mach_init()
+rw_mach_init(void)
 {
 	memset(&mach, 0, sizeof(mach));
 
 	if (!runtime_stack)
-		runtime_stack = grad_emalloc(rewrite_stack_size *
+		runtime_stack = grad_ecalloc(rewrite_stack_size,
 					     sizeof(runtime_stack[0]));
-	
+
 	mach.stack = runtime_stack;
-        mach.st = 0;                      /* Stack top */
-        mach.ht = rewrite_stack_size - 1; /* Heap top */
+	mach.st = 0;                      /* Stack top */
+	mach.ht = rewrite_stack_size - 1; /* Heap top */
 
 	grad_string_replace(&default_gettext_domain, PACKAGE);
 }
 
 static void
-rw_mach_destroy()
+rw_mach_destroy(void)
 {
-	grad_free(mach.pmatch);
+	free(mach.pmatch);
 	mach.pmatch = NULL;
 }
 
@@ -5761,52 +5659,52 @@ rewrite_check_function(const char *name, grad_data_type_t rettype, char *typestr
 {
 	int i;
 	PARAMETER *p;
-	
+
 	FUNCTION *fun = (FUNCTION*) grad_sym_lookup(rewrite_tab, name);
-        if (!fun) {
-                grad_log(GRAD_LOG_ERR, _("function %s not defined"), name);
-                return NULL;
-        }
+	if (!fun) {
+		grad_log(GRAD_LOG_ERR, _("function %s not defined"), name);
+		return NULL;
+	}
 	if (fun->rettype != rettype) {
 		grad_log(GRAD_LOG_ERR, _("function %s returns wrong data type"), name);
 		return NULL;
 	}
 
 	for (i = 0, p = fun->parm; i < fun->nparm; i++, p = p->next) {
-                switch (typestr[i]) {
+		switch (typestr[i]) {
 		case 0:
 			grad_log(GRAD_LOG_ERR,
-			         _("function %s takes too many arguments"),
-			         name);
+				 _("function %s takes too many arguments"),
+				 name);
 			return NULL;
-			
-                case 'i':
-                        if (p->datatype != Integer) {
+
+		case 'i':
+			if (p->datatype != Integer) {
 				grad_log(GRAD_LOG_ERR,
-				         _("function %s: argument %d must be integer"),
-				         name, i+1);
+					 _("function %s: argument %d must be integer"),
+					 name, i+1);
 				return NULL;
 			}
-                        break;
-			
-                case 's':
-                        if (p->datatype != String) {
+			break;
+
+		case 's':
+			if (p->datatype != String) {
 				grad_log(GRAD_LOG_ERR,
-				         _("function %s: argument %d must be string"),
-				         name, i+1);
+					 _("function %s: argument %d must be string"),
+					 name, i+1);
 				return NULL;
 			}
-                        break;
-			
-                default:
-                        grad_insist_fail("bad datatype");
-                }
-        }
+			break;
+
+		default:
+			grad_insist_fail("bad datatype");
+		}
+	}
 
 	if (typestr[i]) {
 		grad_log(GRAD_LOG_ERR,
-		         _("function %s takes too few arguments"),
-		         name);
+			 _("function %s takes too few arguments"),
+			 name);
 		return NULL;
 	}
 
@@ -5816,31 +5714,35 @@ rewrite_check_function(const char *name, grad_data_type_t rettype, char *typestr
 int
 run_init(pctr_t pc, grad_request_t *request)
 {
-        FILE *fp;
+	FILE *fp;
 
 	rw_mach_init();
-        if (setjmp(mach.jmp)) {
+	if (setjmp(mach.jmp)) {
 		rw_mach_destroy();
-                return -1;
+		return -1;
 	}
-        
-        mach.req = request;
-        if (GRAD_DEBUG_LEVEL(2)) {
-                fp = debug_open_file();
-                fprintf(fp, "Before rewriting:\n");
-                grad_avl_fprint(fp, pair_print_prefix, 1, AVPLIST(&mach));
-                fclose(fp);
-        }
 
-        /* Imitate a function call */
-        pushn(0);                  /* Return address */
-        run(pc);                   /* call function */
-        if (GRAD_DEBUG_LEVEL(2)) {
-                fp = debug_open_file();
-                fprintf(fp, "After rewriting\n");
-                grad_avl_fprint(fp, pair_print_prefix, 1, AVPLIST(&mach));
-                fclose(fp);
-        }
+	mach.req = request;
+	if (GRAD_DEBUG_LEVEL(2)) {
+		if ((fp = debug_open_file()) != NULL) {
+			fprintf(fp, "Before rewriting:\n");
+			grad_avl_fprint(fp, pair_print_prefix, 1,
+					AVPLIST(&mach));
+			fclose(fp);
+		}
+	}
+
+	/* Imitate a function call */
+	pushn(rw_c_cast(0, pctr_t)); /* Return address */
+	run(pc);                     /* call function */
+	if (GRAD_DEBUG_LEVEL(2)) {
+		if ((fp = debug_open_file()) != NULL) {
+			fprintf(fp, "After rewriting\n");
+			grad_avl_fprint(fp, pair_print_prefix, 1,
+					AVPLIST(&mach));
+			fclose(fp);
+		}
+	}
 	rw_mach_destroy();
 	return 0;
 }
@@ -5848,21 +5750,17 @@ run_init(pctr_t pc, grad_request_t *request)
 static void
 return_value(grad_value_t *val)
 {
-	u_char *p;
-		
 	switch (val->type) {
-	case Integer:   
-		val->datum.ival = mach.rA;
+	case Integer:
+		val->datum.ival = rw_c_val(mach.rA, u_int);
 		break;
-			
+
 	case String:
-		mem2string(&val->datum.sval, (RWSTYPE*) mach.rA);
-		p = grad_emalloc (val->datum.sval.size + 1);
-		memcpy (p, val->datum.sval.data, val->datum.sval.size);
-		p[val->datum.sval.size] = 0;
-		val->datum.sval.data = p;
+		mem2string(&val->datum.sval, (RWSTYPE*) rw_c_val(mach.rA, ptr));
+		val->datum.sval.data = grad_ebstrndup(val->datum.sval.data,
+						      val->datum.sval.size);
 		break;
-		
+
 	default:
 		abort();
 	}
@@ -5871,11 +5769,11 @@ return_value(grad_value_t *val)
 static int
 evaluate(pctr_t pc, grad_request_t *req, grad_value_t *val)
 {
-        if (run_init(pc, req))
+	if (run_init(pc, req))
 		return -1;
 	if (val)
 		return_value(val);
-        return 0;
+	return 0;
 }
 
 int
@@ -5883,63 +5781,67 @@ rewrite_invoke(grad_data_type_t rettype, grad_value_t *val,
 	       const char *name,
 	       grad_request_t *request, char *typestr, ...)
 {
-        FILE *fp;
-        va_list ap;
-        FUNCTION *fun;
-        int nargs;
-        char *s;
+	FILE *fp;
+	va_list ap;
+	FUNCTION *fun;
+	int nargs;
+	char *s;
 
-        fun = rewrite_check_function(name, rettype, typestr);
+	fun = rewrite_check_function(name, rettype, typestr);
 	if (!fun)
 		return -1;
 
 	rw_mach_init();
-        if (setjmp(mach.jmp)) {
-                rw_mach_destroy();
-                return -1;
-        }
-        
-        mach.req = request;
-        if (GRAD_DEBUG_LEVEL(2)) {
-                fp = debug_open_file();
-                fprintf(fp, "Before rewriting:\n");
-                grad_avl_fprint(fp, pair_print_prefix, 1, AVPLIST(&mach));
-                fclose(fp);
-        }
+	if (setjmp(mach.jmp)) {
+		rw_mach_destroy();
+		return -1;
+	}
 
-        /* Pass arguments */
-        nargs = 0;
+	mach.req = request;
+	if (GRAD_DEBUG_LEVEL(2)) {
+		if ((fp = debug_open_file()) != NULL) {
+			fprintf(fp, "Before rewriting:\n");
+			grad_avl_fprint(fp, pair_print_prefix, 1,
+					AVPLIST(&mach));
+			fclose(fp);
+		}
+	}
+
+	/* Pass arguments */
+	nargs = 0;
 
 	va_start(ap, typestr);
-        while (*typestr) {
-                nargs++;
-                switch (*typestr++) {
-                case 'i':
-                        pushn(va_arg(ap, int));
-                        break;
-                case 's':
-                        s = va_arg(ap, char*);
-                        pushstr(s, strlen(s));
-                        break;
-                default:
-                        grad_insist_fail("bad datatype");
-                }
-        }
-        va_end(ap);
+	while (*typestr) {
+		nargs++;
+		switch (*typestr++) {
+		case 'i':
+			pushint(va_arg(ap, int));
+			break;
+		case 's':
+			s = va_arg(ap, char*);
+			pushstr(s, strlen(s));
+			break;
+		default:
+			grad_insist_fail("bad datatype");
+		}
+	}
+	va_end(ap);
 
-        /* Imitate a function call */
-        pushn(0);                  /* Return address */
-        run(fun->entry);           /* call function */
-        if (GRAD_DEBUG_LEVEL(2)) {
-                fp = debug_open_file();
-                fprintf(fp, "After rewriting\n");
-                grad_avl_fprint(fp, pair_print_prefix, 1, AVPLIST(&mach));
-                fclose(fp);
-        }
-	val->type = fun->rettype; 
+	/* Imitate a function call */
+	pushn(rw_c_cast(0, pctr_t));   /* Return address */
+	run(fun->entry);               /* call function */
+	if (GRAD_DEBUG_LEVEL(2)) {
+		if ((fp = debug_open_file()) != NULL) {
+			fprintf(fp, "After rewriting\n");
+			grad_avl_fprint(fp, pair_print_prefix, 1,
+					AVPLIST(&mach));
+			fclose(fp);
+		}
+	}
+	val->type = fun->rettype;
 	return_value(val);
-        rw_mach_destroy();
-        return 0;
+	rw_mach_destroy();
+	return 0;
 }
 
 char *
@@ -5947,14 +5849,14 @@ rewrite_compile(char *expr)
 {
 	int rc;
 	FUNCTION *fun;
-	char *name = grad_emalloc(strlen(expr) + 3); 
+	char *name = grad_emalloc(strlen(expr) + 3);
 
 	sprintf(name, "$%s$", expr);
-        fun = (FUNCTION*) grad_sym_lookup(rewrite_tab, name);
-        if (!fun) {
+	fun = (FUNCTION*) grad_sym_lookup(rewrite_tab, name);
+	if (!fun) {
 		rc = parse_rewrite_string(expr);
 		if (rc) {
-			grad_free(name);
+			free(name);
 			return NULL;
 		}
 		function->name = name;
@@ -5964,18 +5866,18 @@ rewrite_compile(char *expr)
 }
 
 int
-rewrite_interpret(char *expr, grad_request_t *req, grad_value_t *val)
+rewrite_interpret(char const *expr, grad_request_t *req, grad_value_t *val)
 {
 	pctr_t save_pc = rw_pc;
 	int rc;
-	
+
 	rc = parse_rewrite_string(expr);
 	rw_pc = save_pc;
 	if (rc)
 		return rc;
 
 	val->type = return_type;
-	if (return_type == Undefined) 
+	if (return_type == Undefined)
 		return -1;
 
 	return evaluate(rw_pc, req, val);
@@ -5984,18 +5886,18 @@ rewrite_interpret(char *expr, grad_request_t *req, grad_value_t *val)
 int
 rewrite_eval(char *symname, grad_request_t *req, grad_value_t *val)
 {
-        FUNCTION *fun;
-	
-        fun = (FUNCTION*) grad_sym_lookup(rewrite_tab, symname);
-        if (!fun)
+	FUNCTION *fun;
+
+	fun = (FUNCTION*) grad_sym_lookup(rewrite_tab, symname);
+	if (!fun)
 		return -1;
-	
+
 	if (fun->nparm) {
 		grad_log(GRAD_LOG_ERR,
-		         ngettext("function %s() requires %d parameter",
+			 ngettext("function %s() requires %d parameter",
 				  "function %s() requires %d parameters",
 				  fun->nparm),
-		         fun->name, fun->nparm);
+			 fun->name, fun->nparm);
 		return -1;
 	}
 
@@ -6003,7 +5905,7 @@ rewrite_eval(char *symname, grad_request_t *req, grad_value_t *val)
 		val->type = fun->rettype;
 	return evaluate(fun->entry, req, val);
 }
-	
+
 
 /* ****************************************************************************
  * Configuration
@@ -6049,7 +5951,7 @@ try_load(void *item, void *data)
 		register_source_name(path);
 		rc = 1;
 	} else
-		grad_free(path);
+		free(path);
 	return rc;
 }
 
@@ -6074,7 +5976,7 @@ rewrite_load_module(char *name)
 static int
 free_path(void *item, void *data ARG_UNUSED)
 {
-	grad_free(item);
+	free(item);
 	return 0;
 }
 
@@ -6086,16 +5988,16 @@ rewrite_stmt_term(int finish, void *block_data, void *handler_data)
 {
 	if (!finish) {
 		grad_symtab_clear(rewrite_tab);
-		
+
 		yydebug = GRAD_DEBUG_LEVEL(50);
 		grad_list_destroy(&source_list, free_path, NULL);
 		grad_list_destroy(&rewrite_load_path, free_path, NULL);
 		rewrite_add_load_path(grad_config_dir);
 		rewrite_add_load_path(RADIUS_DATADIR "/rewrite");
 
-		grad_free(runtime_stack);
+		free(runtime_stack);
 		runtime_stack = NULL;
-	} 
+	}
 	return 0;
 }
 
@@ -6108,7 +6010,7 @@ rewrite_cfg_add_load_path(int argc, cfg_value_t *argv,
 		return 0;
 	}
 
- 	if (argv[1].type != CFG_STRING) {
+	if (argv[1].type != CFG_STRING) {
 		cfg_type_error(CFG_STRING);
 		return 0;
 	}
@@ -6126,7 +6028,7 @@ rewrite_cfg_load(int argc, cfg_value_t *argv,
 		return 0;
 	}
 
- 	if (argv[1].type != CFG_STRING) {
+	if (argv[1].type != CFG_STRING) {
 		cfg_type_error(CFG_STRING);
 		return 0;
 	}
@@ -6154,26 +6056,24 @@ _load_module(void *item, void *data ARG_UNUSED)
 }
 
 void
-rewrite_load_all(void *a ARG_UNUSED, void *b ARG_UNUSED)
+rewrite_load_all(void)
 {
 	if (!source_candidate_list)
 		return;
-	
+
 	/* For compatibility with previous versions load the
 	   file $grad_config_dir/rewrite, if no explicit "load" statements
 	   were given */
 	if (grad_list_count(source_candidate_list) == 0)
 		rewrite_load_module("rewrite");
-	
+
 	grad_list_iterate(source_candidate_list, _load_module, NULL);
-#if defined(MAINTAINER_MODE)
-        if (GRAD_DEBUG_LEVEL(100))
-                debug_dump_code();
-#endif
+	if (GRAD_DEBUG_LEVEL(100))
+		debug_dump_code();
 }
 
 void
-rewrite_init()
+rewrite_init(void)
 {
 	rewrite_tab = grad_symtab_create(sizeof(FUNCTION), function_free);
 	radiusd_set_preconfig_hook(rewrite_before_config_hook, NULL, 0);
@@ -6189,7 +6089,7 @@ struct cfg_stmt rewrite_stmt[] = {
 };
 
 size_t
-rewrite_get_stack_size()
+rewrite_get_stack_size(void)
 {
 	return rewrite_stack_size;
 }
@@ -6200,15 +6100,15 @@ rewrite_set_stack_size(size_t s)
 	if (s == rewrite_stack_size)
 		return;
 	rewrite_stack_size = s;
-	grad_free(runtime_stack);
+	free(runtime_stack);
 	runtime_stack = NULL;
 }
-				       
+
 void
 grad_value_free(grad_value_t *val)
 {
 	if (val->type == String)
-		grad_free(val->datum.sval.data);
+		free(val->datum.sval.data);
 }
 
 
@@ -6220,146 +6120,145 @@ grad_value_free(grad_value_t *val)
 SCM
 radscm_datum_to_scm(grad_value_t *val)
 {
-        switch (val->type) {
-        case Integer:
-                return scm_from_long(val->datum.ival);
+	switch (val->type) {
+	case Integer:
+		return scm_from_long(val->datum.ival);
 
-        case String:
+	case String:
 		/* FIXME! */
-                return scm_makfrom0str(val->datum.sval.data);
+		return scm_from_locale_string(val->datum.sval.data);
 
 	default:
 		grad_insist_fail("Unknown data type");
-        }
-        return SCM_UNSPECIFIED;
+	}
+	return SCM_UNSPECIFIED;
 }
 
 int
 radscm_scm_to_ival(SCM cell, int *val)
 {
-        if (SCM_IMP(cell)) {
-                if (SCM_INUMP(cell))  
-                        *val = SCM_INUM(cell);
-                else if (SCM_BIGP(cell)) 
-                        *val = (grad_uint32_t) scm_i_big2dbl(cell);
-                else if (SCM_CHARP(cell))
-                        *val = SCM_CHAR(cell);
-                else if (cell == SCM_BOOL_F)
-                        *val = 0;
-                else if (cell == SCM_BOOL_T)
-                        *val = 1;
-                else if (cell == SCM_EOL)
-                        *val =0;
-                else
-                        return -1;
-        } else {
-                if (scm_is_string(cell)) {
-                        char *p;
-                        *val = strtol(scm_i_string_chars(cell), &p, 0);
-                        if (*p)
-                                return -1;
-                } else
-                        return -1;
-        }
-        return 0;
+	if (scm_is_number(cell))
+		*val = scm_to_int(cell);
+	else if (SCM_CHARP(cell))
+		*val = SCM_CHAR(cell);
+	else if (scm_is_bool(cell))
+		*val = scm_to_bool(cell);
+	else if (scm_is_null(cell))
+		*val = 0;
+	else if (scm_is_string(cell)) {
+		char *p, *str = scm_to_locale_string(cell);
+		long x;
+
+		errno = 0;
+		x = strtol(str, &p, 0);
+		free(str);
+		if (errno || *p)
+			return -1;
+		if (x < INT_MIN || x > INT_MAX)
+			return -1;
+
+		*val = x;
+	} else
+		return -1;
+	return 0;
 }
 
 SCM
 radscm_rewrite_execute(const char *func_name, SCM ARGS)
 {
-        const char *name;
-        FUNCTION *fun;
-        PARAMETER *parm;
-        int nargs;
-        int n, rc;
-        grad_value_t value;
-        SCM cell;
-        SCM FNAME;
+	char *name;
+	FUNCTION *fun;
+	PARAMETER *parm;
+	int nargs;
+	int n, rc;
+	grad_value_t value;
+	SCM cell;
+	SCM FNAME;
 	SCM retval;
-	
-        FNAME = SCM_CAR(ARGS);
-        ARGS  = SCM_CDR(ARGS);
-        SCM_ASSERT(scm_is_string(FNAME), FNAME, SCM_ARG1, func_name);
 
-        name = scm_i_string_chars(FNAME);
-        fun = (FUNCTION*) grad_sym_lookup(rewrite_tab, name);
-        if (!fun) 
-                scm_misc_error(func_name,
-                               _("function ~S not defined"),
-                               scm_list_1(FNAME));
-	
-        rw_mach_init();
+	FNAME = SCM_CAR(ARGS);
+	ARGS  = SCM_CDR(ARGS);
+	SCM_ASSERT(scm_is_string(FNAME), FNAME, SCM_ARG1, func_name);
 
-        /* Pass arguments */
-        nargs = 0;
-        parm = fun->parm;
-        
-        for (cell = ARGS; cell != SCM_EOL;
+	name = scm_to_locale_string(FNAME);
+	fun = (FUNCTION*) grad_sym_lookup(rewrite_tab, name);
+	free(name);
+	if (!fun)
+		scm_misc_error(func_name,
+			       _("function ~S not defined"),
+			       scm_list_1(FNAME));
+
+	rw_mach_init();
+
+	/* Pass arguments */
+	nargs = 0;
+	parm = fun->parm;
+
+	for (cell = ARGS; !scm_is_null(cell);
 	     cell = SCM_CDR(cell), parm = parm->next) {
-                SCM car = SCM_CAR(cell);
+		SCM car = SCM_CAR(cell);
 
-                if (++nargs > fun->nparm) {
-                        rw_code_unlock();
-                        scm_misc_error(func_name,
-                                       _("too many arguments for ~S"),
-                                       scm_list_1(FNAME));
-                }
+		if (++nargs > fun->nparm) {
+			rw_code_unlock();
+			scm_misc_error(func_name,
+				       _("too many arguments for ~S"),
+				       scm_list_1(FNAME));
+		}
 
-                switch (parm->datatype) {
-                case Integer:
-                        rc = radscm_scm_to_ival(car, &n);
-                        if (!rc) 
-                                pushn(n);
-                        break;
-                        
-                case String:
-                        if (scm_is_string(car)) {
-                                const char *p = scm_i_string_chars(car);
-                                pushstr(p, strlen(p));
-                                rc = 0;
-                        } else
-                                rc = 1;
+		switch (parm->datatype) {
+		case Integer:
+			rc = radscm_scm_to_ival(car, &n);
+			if (!rc)
+				pushint(n);
+			break;
+
+		case String:
+			if (scm_is_string(car)) {
+				char *p = scm_to_locale_string(car);
+				pushstr(p, strlen(p));
+				free(p);
+				rc = 0;
+			} else
+				rc = 1;
 			break;
 
 		default:
 			grad_insist_fail("Unknown data type");
-                }
+		}
 
-                if (rc) {
-                        rw_mach_destroy();
-                        scm_misc_error(func_name,
+		if (rc) {
+			rw_mach_destroy();
+			scm_misc_error(func_name,
 				       _("type mismatch in argument ~S(~S) in call to ~S"),
-                                       scm_list_3(scm_from_int(nargs),
+				       scm_list_3(scm_from_int(nargs),
 						  car,
 						  FNAME));
-                }
-        }
+		}
+	}
 
-        if (fun->nparm != nargs) {
+	if (fun->nparm != nargs) {
 		rw_mach_destroy();
-                scm_misc_error(func_name,
-                               _("too few arguments for ~S"),
-                               scm_list_1(FNAME));
-        }
-        
-        /* Imitate a function call */
-        if (setjmp(mach.jmp)) {
-                rw_mach_destroy();
-                return SCM_BOOL_F;
-        }
+		scm_misc_error(func_name,
+			       _("too few arguments for ~S"),
+			       scm_list_1(FNAME));
+	}
 
-        pushn(0);                         /* Return address */
-        run(fun->entry);                  /* call function */
+	/* Imitate a function call */
+	if (setjmp(mach.jmp)) {
+		rw_mach_destroy();
+		return SCM_BOOL_F;
+	}
+
+	pushn(rw_c_cast(0, pctr_t));      /* Return address */
+	run(fun->entry);                  /* call function */
 
 	value.type = fun->rettype;
 	return_value(&value);
 	retval = radscm_datum_to_scm(&value);
 	grad_value_free(&value);
 	rw_mach_destroy();
-        return retval;
+	return retval;
 }
 
 
 #endif
-
-        /*HONY SOIT QUI MAL Y PENSE*/

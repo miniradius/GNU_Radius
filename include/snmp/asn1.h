@@ -1,6 +1,5 @@
-/*
-   This file is part of GNU Radius SNMP Library.
-   Copyright (C) 2001, 2007 Free Software Foundation, Inc.
+/* This file is part of GNU Radius SNMP Library.
+   Copyright (C) 2001-2025 Free Software Foundation, Inc.
    Written by Sergey Poznyakoff
 
    This library is free software; you can redistribute it and/or
@@ -13,10 +12,8 @@
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
    Lesser General Public License for more details.
 
-   You should have received a copy of the GNU Lesser General Public
-   License along with this library; see the file COPYING.LIB.  If not,
-   write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
-   Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU Lesser General Public License
+   along with GNU Radius.  If not, see <http://www.gnu.org/licenses/>. */
 
 #include <sys/types.h>
 #include <sys/time.h>
@@ -57,7 +54,7 @@ typedef subid_t *oid_t;
 #define ASN_GAUGE           (ASN_APPLICATION | 2)
 #define ASN_UNSIGNED        ASN_GAUGE
 #define ASN_TIMETICKS       (ASN_APPLICATION | 3)
-#define ASN_OPAQUE          (ASN_APPLICATION | 4)  
+#define ASN_OPAQUE          (ASN_APPLICATION | 4)
 #define ASN_COUNTER64       (ASN_APPLICATION | 6)
 #define ASN_FLOAT           (ASN_APPLICATION | 8)
 #define ASN_DOUBLE          (ASN_APPLICATION | 9)
@@ -65,30 +62,29 @@ typedef subid_t *oid_t;
 #define ASN_UNSIGNED64      (ASN_APPLICATION | 11)
 
 u_char *asn_decode_length(u_char *data, u_int *length);
-u_char *asn_encode_length(u_char *data, int *datalength, u_int length);
+u_char *asn_encode_length(u_char *data, u_int *datalength, u_int length);
 u_char *asn_recode_length(u_char *data, u_int length);
-u_char *asn_decode_header(u_char *data, int *datalength, u_char *type);
-u_char *asn_encode_header(u_char *data, int *datalength,
-                          u_char type, int length);
-u_char *asn_encode_null(u_char *data, int *datalength, u_char type);
-u_char *asn_decode_int(u_char *data, int *datalength,
-                       u_char *type, int *intp, int intsize);
-u_char *asn_encode_int(u_char *data, int *datalength,
-                       u_char type, int intval);
+u_char *asn_decode_header(u_char *data, u_int *datalength, u_char *type);
+u_char *asn_encode_header(u_char *data, u_int *datalength,
+			  u_char type, int length);
+u_char *asn_encode_null(u_char *data, u_int *datalength, u_char type);
+u_char *asn_decode_int(u_char *data, u_int *datalength,
+		       u_char *type, int *intp, int intsize);
+u_char *asn_encode_int(u_char *data, u_int *datalength,
+		       u_char type, int intval);
 
 #define asn_decode_uint(data, datalength, type, intp, intsize) \
  asn_decode_int(data, datalength, type, intp, intsize)
 #define asn_encode_uint(data, datalength, type, intval) \
  asn_encode_int(data, datalength, type, intval)
 
-u_char *asn_decode_string(u_char *data, int *datalength,
-                          u_char *type, u_char *string, int *strlen);
-u_char *asn_encode_string(u_char *data, int *datalength,
-                          u_char type, u_char *string, int strlen);
-u_char *asn_decode_oid(u_char *data, int *datalength, 
-                       u_char *type, oid_t obid, int *obidlength);
-u_char *asn_encode_oid(u_char *data, int *datalength,
-                       u_char type, oid_t obid, int obidlength);
+u_char *asn_decode_string(u_char *data, u_int *datalength,
+			  u_char *type, u_char *string, u_int *strlen);
+u_char *asn_encode_string(u_char *data, u_int *datalength,
+			  u_char type, u_char *string, u_int strlen);
+u_char *asn_decode_oid(u_char *data, u_int *datalength,
+		       u_char *type, oid_t obid, u_int *obidlength);
+u_char *asn_encode_oid(u_char *data, u_int *datalength,
+		       u_char type, oid_t obid, u_int obidlength);
 
 char *sprint_oid(char *buf, int buflen, oid_t name);
-

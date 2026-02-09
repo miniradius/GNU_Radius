@@ -1,5 +1,6 @@
 # This file is part of GNU Radius.
-# Copyright (C) 2000,2001,2002,2003,2007 Free Software Foundation, Inc.
+# Copyright (C) 2000, 2001, 2002, 2003, 2007, 2010, 2013 Free Software
+# Foundation, Inc.
 #
 # Written by Sergey Poznyakoff
 #
@@ -14,8 +15,7 @@
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with GNU Radius; if not, write to the Free Software Foundation,
-# Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+# along with GNU Radius.  If not, see <http://www.gnu.org/licenses/>.
 
 man_MANS=builddbm.8 radctl.8 radiusd.8\
 	 radping.8 radzap.8\
@@ -30,29 +30,29 @@ dist-hook:
 	-(cd $(distdir); rm -f $(CLEANFILES))
 
 builddbm.8: $(srcdir)/builddbm.8.man
-	soelim $? > $@
+	$(AM_V_GEN)soelim $? > $@
 
 radctl.8: $(srcdir)/radctl.8.man
-	soelim $? > $@
+	$(AM_V_GEN)soelim $? > $@
 
 radgrep.1: $(srcdir)/radgrep.1.man
-	soelim $? > $@
+	$(AM_V_GEN)soelim $? > $@
 
 radiusd.8: $(srcdir)/radiusd.8.man
-	soelim $? > $@
+	$(AM_V_GEN)soelim $? > $@
 
 radlast.1: $(srcdir)/radlast.1.man
-	soelim $? > $@
+	$(AM_V_GEN)soelim $? > $@
 
 radping.8: $(srcdir)/radping.8.man
-	soelim $? > $@
+	$(AM_V_GEN)soelim $? > $@
 
 raduse.1: $(srcdir)/raduse.1.man
-	soelim $? > $@
+	$(AM_V_GEN)soelim $? > $@
 
 radwho.1: $(srcdir)/radwho.1.man
-	soelim $? > $@
+	$(AM_V_GEN)soelim $? > $@
 
 radzap.8: $(srcdir)/radzap.8.man
-	soelim $? > $@
+	$(AM_V_GEN)soelim $? > $@
 

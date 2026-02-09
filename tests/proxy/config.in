@@ -1,6 +1,6 @@
 # -*- radconf -*-
 # This file is part of GNU Radius test suite.
-# Copyright (C) 2000,2001,2003,2007,2008 Free Software Foundation, Inc.
+# Copyright (C) 2000-2025 Free Software Foundation, Inc.
 #
 # Written by Sergey Poznyakoff
 #
@@ -15,15 +15,14 @@
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with GNU Radius; if not, write to the Free Software Foundation,
-# Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+# along with GNU Radius.  If not, see <http://www.gnu.org/licenses/>.
 
 option {
 	max-requests 1024;
 };
 
 logging {
-        prefix-hook "default_log_prefix";
+	prefix-hook "default_log_prefix";
 	channel default {
 		file "radius.log";
 		print-level yes;
@@ -64,17 +63,17 @@ acct {
 };
 
 rewrite {
-        load-path "@SOURCEDIR@/../raddb";
-        load "log-hook.rw";
+	load-path "@SOURCEDIR@/../raddb";
+	load "log-hook.rw";
 };
 
 @SNMP@snmp {
 @SNMP@         listen no;
 @SNMP@         storage {
 @SNMP@                  file "@BUILDDIR@/proxy/log/radius.stat";
-@SNMP@                  perms 0600;		
+@SNMP@                  perms 0600;
 @SNMP@	       };
-@SNMP@};		
+@SNMP@};
 
 @GUILE@guile {
 @GUILE@        debug yes;

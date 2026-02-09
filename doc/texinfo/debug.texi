@@ -1,9 +1,9 @@
 @c This is part of the Radius manual.
-@c Copyright (C) 1999,2000,2001,2002,2003 Free Software Foundation, Inc.
+@c Copyright (C) 1999-2025 Free Software Foundation, Inc.
 @c Written by Sergey Poznyakoff
 @c See file radius.texi for copying conditions.
 @comment *******************************************************************
-@node Problem Tracking, Extensions, Logging, Top
+@node Problem Tracking
 @chapter Problem Tracking
 @cindex Problem Tracking
 
@@ -40,12 +40,12 @@ Furthermore, if the configuration files have the same path prefix,
 then only the first file name appears with the full prefix.
 
 Here is an example of trace rule diagram:
-@smallexample
+@example
 @cartouche
 Oct 31 11:37:17 [28322]: Auth.info: (Access-Request foo 170 bar):
 rule trace: /etc/raddb/users:157,22,3; huntgroups:72; hints:34
 @end cartouche
-@end smallexample
+@end example
 
 This diagram means, that the authentication request from server
 @samp{foo} for user @samp{bar} with ID 170 matched the following
@@ -54,7 +54,7 @@ rules
 @multitable @columnfractions .40 .40
 @item File name                    @tab Line number
 @item @file{/etc/raddb/hints}      @tab 34
-@item @file{/etc/raddb/huntgroups} @tab 72 
+@item @file{/etc/raddb/huntgroups} @tab 72
 @item @file{/etc/raddb/users}      @tab 3
 @item @file{/etc/raddb/users}      @tab 22
 @item @file{/etc/raddb/users}      @tab 157
@@ -82,7 +82,7 @@ custom Scheme procedure @code{staff-acct}.
 The configuration files for this setup are showed below:
 
 Contents of @file{hints}:
-@smallexample
+@example
 @group
 DEFAULT  Group = "root"
          Scheme-Acct-Procedure = "staff-acct",
@@ -92,10 +92,10 @@ DEFAULT  Group = "staff"
          Scheme-Acct-Procedure = "staff-acct",
                    Hint = "staff"
 @end group
-@end smallexample
+@end example
 
 Contents of file @file{users}:
-@smallexample
+@example
 @group
 DEFAULT Auth-Type = SQL,
               Simultaneous-Use = 1
@@ -105,9 +105,9 @@ DEFAULT Auth-Type = SQL,
 DEFAULT Hint = "admin",
              Auth-Type = System
         Service-Type = Login-User,
-             Login-IP-Host = 192.168.0.1,              
+             Login-IP-Host = 192.168.0.1,
              Login-Service = Rlogin
-             
+
 DEFAULT Hint = "staff",
               Auth-Type = System,
               Simultaneous-Use = 1
@@ -115,39 +115,39 @@ DEFAULT Hint = "staff",
               Login-IP-Host = 192.168.0.2,
               Login-Service = Telnet
 @end group
-@end smallexample
+@end example
 
 Now, let's suppose that user @samp{svp} is in the group
 @samp{staff} and is trying to log in. However, he fails to do so and
 in @command{radiusd} logs you see:
 
-@smallexample
+@example
 @cartouche
 Nov 06 21:25:24: Auth.notice: (Access-Request local 61 svp):
   Login incorrect [svp]
 @end cartouche
-@end smallexample
+@end example
 
 @noindent
 Why? To answer this question, you add to @code{auth} block of your
 @file{config} the statement
 
-@smallexample
+@example
 trace-rules yes;
-@end smallexample
+@end example
 
 @noindent
 and ask user @samp{svp} to retry his attempt. Now you see in your
 logs:
 
-@smallexample
+@example
 @cartouche
 Nov 06 21:31:24: Auth.notice: (Access-Request local 13 svp):
   Login incorrect [svp]
 Nov 06 21:31:24: Auth.info: (Access-Request local 13 svp):
   rule trace: /etc/raddb/users:1, hints: 5
 @end cartouche
-@end smallexample
+@end example
 
 @noindent
 This means that the request for @samp{svp} has first matched rule
@@ -155,12 +155,12 @@ on the line 1 of file @file{hints}, then the rule on line 1 of file
 @file{users}. Now you see the error: the entries in @file{users}
 appear in wrong order! After fixing it your @file{users} looks like:
 
-@smallexample
+@example
 @group
 DEFAULT Hint = "admin",
              Auth-Type = System
         Service-Type = Login-User,
-             Login-IP-Host = 192.168.0.1,              
+             Login-IP-Host = 192.168.0.1,
              Login-Service = Rlogin
 
 DEFAULT  Hint = "staff",
@@ -169,37 +169,37 @@ DEFAULT  Hint = "staff",
          Service-Type = Login-User,
               Login-IP-Host = 192.168.0.2,
               Login-Service = Telnet
-             
+
 DEFAULT Auth-Type = SQL,
               Simultaneous-Use = 1
         Service-Type = Framed-User,
               Framed-Protocol = PPP
 @end group
-@end smallexample
+@end example
 
 Now, you ask @samp{svp} to log in again, and see:
 
-@smallexample
+@example
 @cartouche
 Nov 06 21:35:14: Auth.notice: (Access-Request local 42 svp):
   Login OK [svp]
 Nov 06 21:35:14: Auth.info: (Access-Request local 42 svp):
   rule trace: /etc/raddb/users:7, hints: 5
 @end cartouche
-@end smallexample
+@end example
 
 Let's also suppose that user @samp{plog} is not listed in
 groups ``root'' and ``staff'', so he is supposed to authenticate
 using SQL. When he logs in, you see in your logs:
 
-@smallexample
+@example
 @cartouche
 Nov 06 21:39:05: Auth.notice: (Access-Request local 122 plog):
   Login OK [svp]
 Nov 06 21:39:05: Auth.info: (Access-Request local 122 plog):
   rule trace: /etc/raddb/users:14
 @end cartouche
-@end smallexample
+@end example
 
 
 @comment *******************************************************************
@@ -222,16 +222,16 @@ to the first @math{N} characters, in which case the first matching module is
 selected. Several such specifications can be specified, in which case
 they should be separated by commas. For example, the following is a
 valid debug specification:
-@smallexample
+@example
         proxy.c=10,files.c,config.y=1
-@end smallexample
+@end example
 
 @noindent
 It sets debug level 10 for module @code{proxy.c}, 100 for
 @code{files.c}, and 1 for @code{config.y}.
 
 The modules and debugging levels are subject to change from release
-to release. 
+to release.
 
 @c The following describes briefly the debugging levels for this release
 @c of GNU Radius (@value{VERSION}).
@@ -247,19 +247,19 @@ to release.
 configuration, without starting the daemon. To enter test mode,
 run
 
-@smallexample
+@example
 radiusd -mt
-@end smallexample
+@end example
 
 @noindent
 You will see usual @command{radiusd} diagnostics and the following two lines:
 
-@smallexample
+@example
 @cartouche
 ** TEST SHELL **
 (radiusd) _
 @end cartouche
-@end smallexample
+@end example
 
 The string @samp{** TEST SHELL **} indicates that @command{radiusd}
 has entered test mode, the string @samp{(radiusd)} is the shell
@@ -284,7 +284,7 @@ form, @code{h}). This command takes no arguments and displays
 the short summary of all the available commands. Here is an example
 of its output:
 
-@smallexample
+@example
 @group
 @cartouche
 (radiusd) help
@@ -304,13 +304,13 @@ rp      request-print                  Print the request
 quit    quit                           Quit the shell
 @end cartouche
 @end group
-@end smallexample
+@end example
 
 Each line of the output consists of three fields. The first field
 shows the short command form. The second one lists its full form
 and its arguments, optional arguments being enclosed in square
 brackets. The third field contains short textual description of
-the command. 
+the command.
 
 
 
@@ -322,7 +322,7 @@ arguments. This command is useful in testing simultaneous login verification
 
 @table @var
 @item nas
-Specifies the @NAS{} to query. It cn be its short name as defined
+Specifies the @NAS{} to query. It can be its short name as defined
 in @file{raddb/naslist}, or its fully qualified domain name, or
 its @IP{}.
 @item login
@@ -355,21 +355,21 @@ been compiled with Guile support. For more information, @xref{Guile}.
 
 @deffn {Test Shell Command} rewrite-stack [@var{number}]
 @deffnx {Test Shell Abbreviation} rs
-Prints or sets the Rewrite stack size. 
+Prints or sets the Rewrite stack size.
 @end deffn
 
-@deffn {Test Shell Command} run-rewrite @var{function}(@var{args} @dots{})   
+@deffn {Test Shell Command} run-rewrite @var{function}(@var{args} @dots{})
 @deffnx {Test Shell Abbreviation} r
 Runs given Rewrite @var{function} and displays its return
 value. Function arguments are specified in the usual way, i.e. as a
-comma-separated list of Rewrite tokens. 
+comma-separated list of Rewrite tokens.
 
 If the function being tested operates on request contents
 (@pxref{Rewriting Incoming Requests}), you may supply the request
 using @code{request-define} command (see below).
 @end deffn
 
-@deffn {Test Shell Command} source @var{file} 
+@deffn {Test Shell Command} source @var{file}
 @deffnx {Test Shell Abbreviation} s
 Reads and compiles (``source'') the given Rewrite @var{file}. The
 command prints @samp{0} if the file was compiled
@@ -377,7 +377,7 @@ successfully. Otherwise, it prints @samp{1} and any relevant diagnostics.
 @end deffn
 
 @deffn {Test Shell Command} timespan @var{timespan} [@var{day-of-week} [@var{hour} [@var{minutes}]]]
-@deffnx {Test Shell Abbreviation} t       
+@deffnx {Test Shell Abbreviation} t
 Checks whether the given time falls within the timespan
 interval. Its first argument, @var{timespan}, contains the valid
 @radiusd{} timespan specification (@pxref{Login-Time}). Rest of
@@ -396,7 +396,7 @@ Minutes.
 
 The following set of samples illustrates this command:
 
-@smallexample
+@example
 @group
 @cartouche
 (radiusd) timespan Wk0900-1800
@@ -423,10 +423,10 @@ OUTSIDE Wk0900-1800: 39060 seconds to wait
 ctime: Mon Dec  1 09:10:44 2003
 inside Wk0900-1800: 31800 seconds left
 
-(radiusd) 
+(radiusd)
 @end cartouche
 @end group
-@end smallexample
+@end example
 @end deffn
 
 @deffn {Test Shell Command} debug @var{level}
@@ -436,13 +436,13 @@ specification (@pxref{Debugging}).
 @end deffn
 
 @deffn {Test Shell Command} request-define [@var{pair} [,@var{pair}]]
-@deffnx {Test Shell Abbreviation} rd     
+@deffnx {Test Shell Abbreviation} rd
 Define a request for testing Rewrite functions. The optional arguments
 are a comma-separated list of @AVP{}s. If they are omitted, the
 command enters interactive mode, allowing you to enter the desired
 @AVP{}s, as in the following example:
 
-@smallexample
+@example
 @group
 @cartouche
 (radiusd) request-define
@@ -450,22 +450,22 @@ Enter the pair list. End with end of file
 [radiusd] User-Name = smith, User-Password = guessme
 [radiusd] NAS-IP-Address = 10.10.10.1
 [radiusd] NAS-Port-Id = 34
-[radiusd] 
-(radiusd) 
+[radiusd]
+(radiusd)
 @end cartouche
 @end group
-@end smallexample
+@end example
 
 Notice that any number of @AVP{}s may be specified in a line. To
 finish entering the request, either type an @key{EOF} character or
 enter an empty line.
 @end deffn
 
-@deffn {Test Shell Command} request-print 
+@deffn {Test Shell Command} request-print
 @deffnx {Test Shell Abbreviation} rp
 Prints the request, defined by @code{request-define}.
 
-@smallexample
+@example
 @group
 @cartouche
 (radiusd) request-print
@@ -473,14 +473,12 @@ Prints the request, defined by @code{request-define}.
     User-Password = (STRING) guessme
     NAS-IP-Address = (IPADDR) 10.10.10.1
     NAS-Port-Id = (INTEGER) 34
-(radiusd) 
+(radiusd)
 @end cartouche
 @end group
-@end smallexample
+@end example
 @end deffn
 
 @deffn {Test Shell Command} quit
 Immediately quits the shell.
 @end deffn
-
-

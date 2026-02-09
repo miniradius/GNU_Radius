@@ -12,8 +12,7 @@
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software Foundation,
-   Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
+   along with GNU Radius.  If not, see <http://www.gnu.org/licenses/>. */
 
 /* Here's a small rewrite that may be handy for all users using a cisco NAS
    with PPPoE/PPTP/L2TP tunnels over 802.1q trunk. It maps Acct-Session-Id,
@@ -23,30 +22,29 @@
 integer
 decimal(string s)
 {
-        return (integer)("0x" + s);
+	return (integer)("0x" + s);
 }
 
 integer
 c3620_decode(string P)
 {
-        integer tmp,len,port;
+	integer tmp,len,port;
 
-        tmp = index(P, 95) + 1;
-        len = length(P);
-        port = decimal(substr(P, tmp, len - tmp));
-        logit("c3620_decode: " + P + "->" + (string) tmp
-              + "->" + (string)len + "->" + (string)port);
-        return port;
+	tmp = index(P, 95) + 1;
+	len = length(P);
+	port = decimal(substr(P, tmp, len - tmp));
+	logit("c3620_decode: " + P + "->" + (string) tmp
+	      + "->" + (string)len + "->" + (string)port);
+	return port;
 }
 
 integer
 c3620_fixup()
 {
-        %[Orig-NAS-Port-Id]=%[NAS-Port-Id];
-        %[NAS-Port-Id] = c3620_decode(%[Acct-Session-Id]);
-        logit("c3620_fixup: " + (string) %[NAS-Port-Id]);
-        return 0;
+	%[Orig-NAS-Port-Id]=%[NAS-Port-Id];
+	%[NAS-Port-Id] = c3620_decode(%[Acct-Session-Id]);
+	logit("c3620_fixup: " + (string) %[NAS-Port-Id]);
+	return 0;
 }
 
 # end of c3620.rw
-

@@ -1,5 +1,6 @@
 # This file is part of GNU Radius.
-# Copyright (C) 2000,2001,2003,2004 Free Software Foundation, Inc.
+# Copyright (C) 2000, 2001, 2003, 2004, 2010, 2013 Free Software Foundation,
+# Inc.
 #
 # Written by Sergey Poznyakoff
 #
@@ -13,5 +14,5 @@
 bin_PROGRAMS    = radzap
 radzap_SOURCES = radzap.c 
 radzap_LDADD   = @LIBGNURADIUS@ @LIBRADEXTRA@ @LIBINTL@
-INCLUDES       = @RADIUS_INCLUDE_PATH@
+AM_CPPFLAGS    = @RADIUS_INCLUDE_PATH@
 

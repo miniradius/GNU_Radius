@@ -1,9 +1,9 @@
 @c This is part of the Radius manual.
-@c Copyright (C) 1999,2000,2001,2002,2003 Free Software Foundation, Inc.
+@c Copyright (C) 1999-2025 Free Software Foundation, Inc.
 @c Written by Sergey Poznyakoff
 @c See file radius.texi for copying conditions.
 @comment *******************************************************************
-@node Request Comparison, Authentication, Configuration Files, Top
+@node Request Comparison
 @chapter Request Comparison Methods
 @cindex Comparing the requests
 
@@ -59,7 +59,7 @@ mark those for accounting. It is strongly suggested that you use
 (@pxref{PROPERTY}), instead of modifying @code{ATTRIBUTE} statements
 in the underlying dictionary files.
 
-@xref{ATTRIBUTE}, for detailed description of attribute property flags. 
+@xref{ATTRIBUTE}, for detailed description of attribute property flags.
 
 @item To enable the extended comparison for requests coming from any
 @NAS{}, declare extended comparison flags in @file{raddb/config}.
@@ -67,14 +67,14 @@ in the underlying dictionary files.
 To enable the extended comparison for authentication requests,
 add to your @code{auth} block the statement
 
-@smallexample
+@example
         compare-attribute-flag @var{flag};
-@end smallexample
+@end example
 
 The @var{flag} is the same symbol you used in the dictionary to mark
 comparable attributes for authentication.
 
-To enable the extended comparison for accounting requests, insert 
+To enable the extended comparison for accounting requests, insert
 @code{compare-attribute-flag} statement into the @code{acct} block.
 
 @item To enable the extended comparison for requests coming from
@@ -84,9 +84,9 @@ selected @NAS{}es, declare extended comparison flags in
 Add the following statement to the declaration of those @NAS{}es,
 that require using the extended comparison (in flags column):
 
-@smallexample
+@example
         compare-auth-flag=@var{flag},compare-acct-flag=@var{flag}
-@end smallexample
+@end example
 
 @noindent
 @xref{naslist file}, for a description of naslist file syntax.
@@ -108,7 +108,7 @@ the accounting comparable attributes.
 
 @subheading @file{raddb/dictionary}
 
-@smallexample
+@example
 PROPERTY       User-Name               +12
 PROPERTY       Password                +1
 PROPERTY       NAS-Port-Id             +12
@@ -118,11 +118,11 @@ PROPERTY       Calling-Station-Id      +12
 PROPERTY       Acct-Status-Type        +2
 PROPERTY       Acct-Session-Id         +2
 PROPERTY       Acct-Session-Time       +2
-@end smallexample
+@end example
 
 @subheading @file{raddb/config}
 
-@smallexample
+@example
         auth @{
                 max-requests 127;
                 request-cleanup-delay 2;
@@ -132,10 +132,10 @@ PROPERTY       Acct-Session-Time       +2
                 max-requests 127;
                 request-cleanup-delay 2;
                 compare-attribute-flag 2;
-        @};                
-@end smallexample
+        @};
+@end example
 
-@node Comparable Attributes                      
+@node Comparable Attributes
 @subsection List of attributes that can be declared comparable.
 
 The following attributes can be declared as comparable:
@@ -144,21 +144,21 @@ The following attributes can be declared as comparable:
 @item @attr{User-Name}
 @item @attr{Password}
 @item @attr{CHAP-Password}
-@item @attr{NAS-Port-Id}             
-@item @attr{State}                   
-@item @attr{Called-Station-Id}       
-@item @attr{Calling-Station-Id}      
-@item @attr{NAS-Identifier}          
-@item @attr{Acct-Status-Type}        
-@item @attr{Acct-Session-Id}         
-@item @attr{Acct-Session-Time}       
-@item @attr{User-UID}                
-@item @attr{User-GID}                
+@item @attr{NAS-Port-Id}
+@item @attr{State}
+@item @attr{Called-Station-Id}
+@item @attr{Calling-Station-Id}
+@item @attr{NAS-Identifier}
+@item @attr{Acct-Status-Type}
+@item @attr{Acct-Session-Id}
+@item @attr{Acct-Session-Time}
+@item @attr{User-UID}
+@item @attr{User-GID}
 @end itemize
 
 Notice that this list is by no means an exhaustive one. Depending on
 a particular @NAS{} other attributes may be safe to be used
-in comparisons, or, vice-versa, some attributes from this list may not 
+in comparisons, or, vice-versa, some attributes from this list may not
 be used. You should carefully analyze packets coming from your @NAS{}
 before deciding which attributes to mark as comparable.
 
@@ -175,7 +175,7 @@ request is kept in the queue. Its value must be synchronized with
 the @NAS{} settings.
 
 Each @NAS{} allows to configure two parameters:
- 
+
 @table @code
 @item Ntimeout
 The amount of time in seconds during which the @NAS{} is waiting
@@ -191,9 +191,9 @@ to find out where these values are configured.
 
 In general, these parameters must satisfy the following relation:
 
-@smallexample
+@example
      request-cleanup-delay = Nretries * Ntimeout + @var{const}
-@end smallexample
+@end example
 
 @noindent
 where @var{const} is an empirical constant that depends on the
@@ -202,25 +202,24 @@ between 0 and 10 seconds.
 
 For example, if the configuration of your @NAS{} sets
 
-@smallexample
+@example
    Nretries = 3
    Ntimeout = 10
-@end smallexample
+@end example
 
 @noindent
 then your raddb/config should contain:
 
-@smallexample
-auth @{ 
+@example
+auth @{
         request-cleanup-delay 40;
 @};
-acct @{ 
+acct @{
         request-cleanup-delay 40;
 @};
-@end smallexample
+@end example
 
 Notice the duplication of @code{request-cleanup-delay}:
 @command{radiusd} uses distinct values for authentication
 and accounting requests, however most existing @NAS{}es do
 not make such distinction.
-

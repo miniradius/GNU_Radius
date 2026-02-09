@@ -1,9 +1,9 @@
 @c This is part of the Radius manual.
-@c Copyright (C) 1999,2000,2001,2002,2003 Free Software Foundation, Inc.
+@c Copyright (C) 1999-2025 Free Software Foundation, Inc.
 @c Written by Sergey Poznyakoff
 @c See file radius.texi for copying conditions.
 @comment *******************************************************************
-@node Extensions, Utility Programs, Problem Tracking, Top
+@node Extensions
 @chapter Extensions
 @cindex Extensions
 
@@ -15,7 +15,7 @@ enabled. Use of Scheme requires Guile version 1.4 or higher.
 @menu
 * Filters::         Using external filter programs.
 * Rewrite::         The built-in extension language.
-* Guile::           Using Scheme.       
+* Guile::           Using Scheme.
 @end menu
 
 @comment *L1****************************************************************
@@ -53,7 +53,7 @@ database and @code{1} otherwise. Let's suppose for the sake of example
 that the database is a plaintext file and the filter is written in
 a shell programming language. Then it will look like
 
-@smallexample
+@example
 #! /bin/sh
 
 DB=/var/db/userlist
@@ -66,14 +66,14 @@ do
         echo "1"
     fi
 done
-@end smallexample
+@end example
 
 @node Declaring the Filter
 @subsection Declaring the Filter
 
 Here is how this filter is declared in the @file{raddb/config} file:
 
-@smallexample
+@example
 filters @{
     filter check_clid @{
         exec-path "/usr/libexec/myfilter";
@@ -83,9 +83,9 @@ filters @{
             %C@{Calling-Station-Id@}";
             wait-reply yes;
         @};
-    @};        
-@};                        
-@end smallexample       
+    @};
+@};
+@end example
 
 Let's analyze this declaration line by line:
 
@@ -123,9 +123,9 @@ the incoming request (@pxref{Macro Substitution}).
 @item @code{wait-reply yes;}
 
 @code{radiusd} will wait for the reply from this filter to decide whether to
-authenticate the user. 
+authenticate the user.
 @end enumerate
-                
+
 @node Invoking the Filter from a User Profile
 @subsection Invoking the Filter from a User Profile
 
@@ -133,19 +133,19 @@ To invoke this filter from the user profile, specify its name prefixed
 with @samp{|} in the value of @attr{Exec-Program-Wait} attribute,
 like this:
 
-@smallexample
+@example
 DEFAULT Auth-Type = System,
                 Simultaneous-Use = 1
         Exec-Program-Wait = "|check_clid"
-@end smallexample
+@end example
 
 @node Adding Reply Attributes
 @subsection Adding Reply Attributes
 
 Apart from simply deciding whether to authenticate a user, the filter
-can also modify the reply pairs. 
+can also modify the reply pairs.
 
-@smallexample
+@example
 #! /bin/sh
 
 DB=/var/db/userlist
@@ -155,16 +155,16 @@ do
     if grep "$1:$2" $DB; then
         echo "0 Service-Type = Login, Session-Timeout = 1200"
     else
-        echo "1 Reply-Message = 
+        echo "1 Reply-Message =
               \"You are not authorized to log in\""
     fi
 done
-@end smallexample
+@end example
 
 @node Accounting Filters
 @subsection Accounting Filters
 
-Let's suppose we further modify our filter to also handle 
+Let's suppose we further modify our filter to also handle
 accounting requests. To discern between the authentication and
 accounting requests we'll prefix each authentication request
 with the word @samp{auth} and each accounting request with
@@ -173,7 +173,7 @@ requests will contain a timestamp.
 
 Now, our filter program will look as follows:
 
-@smallexample
+@example
 #! /bin/sh
 
 AUTH_DB=/var/db/userlist
@@ -193,26 +193,26 @@ do
     acct)
         echo "$CODE $NAME $CLID $DATE" >> $ACCT_DB
 done
-@end smallexample
+@end example
 
 Its declaration in the @file{raddb/config} will also change:
 
-@smallexample
+@example
 filter check_clid @{
     exec-path "/usr/libexec/myfilter";
     error-log "myfilter.log";
     auth @{
-        input-format "auth %C@{User-Name@} 
+        input-format "auth %C@{User-Name@}
                       %C@{Calling-Station-Id@}";
         wait-reply yes;
     @};
     acct @{
-        input-format "acct %C@{User-Name@} 
+        input-format "acct %C@{User-Name@}
                       %C@{Calling-Station-Id@} %D";
         wait-reply no;
     @};
-@};        
-@end smallexample
+@};
+@end example
 
 @noindent
 (The @code{input-format} lines are split for readability. Each of them
@@ -220,7 +220,7 @@ is actually one line).
 
 @emph{Notice} @code{wait-reply no} in the @code{acct} statement. It
 tells @command{radiusd} that it shouldn't wait for the response on
-accounting requests from the filter. 
+accounting requests from the filter.
 
 @node Invoking Accounting Filter
 @subsection Invoking the Accounting Filter
@@ -229,10 +229,10 @@ To invoke the accounting filter, specify its name prefixed with a
 vertical bar character as a value of @attr{Acct-Ext-Program} in our
 @file{raddb/hints} file. For example:
 
-@smallexample
+@example
 DEFAULT NULL
-        Acct-Ext-Program = "|check_clid:
-@end smallexample        
+        Acct-Ext-Program = "|check_clid":
+@end example
 
 @comment *L1****************************************************************
 @node Rewrite
@@ -240,7 +240,7 @@ DEFAULT NULL
 @cindex Rewrite
 
 Rewrite is the GNU Radius extension language. Its name reflects the
-fact that it was originally designed to rewrite the broken request packets
+fact that it was originally designed to rewrite broken request packets
 so they could be processed as usual (@pxref{Rewriting Incoming
 Requests}). Beside this basic use, however, Rewrite functions are used
 to control various aspects of GNU Radius functionality, such as
@@ -258,7 +258,6 @@ information displayed in log messages, etc (@pxref{Interaction with Radius}).
 * Full Syntax Description::
 @end menu
 
-
 @comment *L2****************************************************************
 @node Syntax Overview
 @subsection Syntax Overview
@@ -268,7 +267,7 @@ The syntax of Rewrite resembles that of C. Rewrite has two basic data types:
 integer and string. It does not have global variables; all variables are
 automatic. The only exceptions are the @AVP{}s from the incoming request,
 which are accessible to Rewrite functions via the special notation
-@code{%[@var{attr}]}. 
+@code{%[@var{attr}]}.
 
 @comment *L2****************************************************************
 @node Quick Start
@@ -277,7 +276,7 @@ which are accessible to Rewrite functions via the special notation
 
 As an example, let's consider the following Rewrite function:
 
-@smallexample
+@example
 @group
 string
 foo(integer i)
@@ -290,7 +289,7 @@ foo(integer i)
     return "the number is " + rc;
 @}
 @end group
-@end smallexample
+@end example
 
 @noindent
 The function takes an integer argument and returns the string
@@ -302,7 +301,7 @@ such operation is the concatenation of operands.
 Another example is a function that adds a prefix to the @attr{User-Name}
 attribute:
 
-@smallexample
+@example
 @group
 integer
 px_add()
@@ -311,7 +310,7 @@ px_add()
         return 0;
 @}
 @end group
-@end smallexample
+@end example
 
 @noindent
 This function manipulates the contents of the incoming request; its
@@ -325,7 +324,7 @@ return value has no special meaning.
 @cindex Rewrite, applying functions
 
 A Rewrite function can be invoked in several ways, depending on its
-purpose. There are three major kinds of Rewrite functions:
+purpose. There are four major kinds of Rewrite functions:
 
 @itemize @bullet
 @item Functions used to rewrite the incoming requests.
@@ -339,7 +338,7 @@ purpose. There are three major kinds of Rewrite functions:
 @subsection Rewriting Incoming Requests
 @cindex Rewriting incoming requests
 
-The need for rewriting the incoming requests arises from the fact that
+The need for rewriting incoming requests arises from the fact that
 some @NAS{}es are very particular about the information they send with
 the requests. There are cases when the information they send
 is hardly usable or even completely unusable. For example, a
@@ -352,7 +351,7 @@ thus Radius cannot determine the session start to which the given
 session stop request corresponds (@pxref{Acct-Session-Id}).
 
 In order to cope with such @NAS{}es, GNU Radius is able to invoke
-a Rewrite function upon arrival of the packet and before 
+a Rewrite function upon arrival of the packet and before
 processing it further. This function can transform the packet so that
 it obtains the form prescribed by @sc{rfc}s and its further processing
 becomes possible.
@@ -376,25 +375,25 @@ to be invoked when the incoming request matches the huntgroup
 invoked for each packet from the @NAS{} @code{10.10.10.11}, the
 following huntgroup rule may be used:
 
-@smallexample
+@example
 @group
 DEFAULT  NAS-IP-Address = 11.10.10.11
          Rewrite-Function = "fixup"
 @end group
-@end smallexample
+@end example
 
 The @attr{Rewrite-Function} attribute may also be used in a @file{hints}
 rule. In this case, it will invoke the function if the request matches
 the rule (@pxref{Hints}). For example, this @file{hints} rule will
-cause the function to be invoked for each request containing the user name
-starting with @samp{P}:
+cause the function to be invoked for each request whose user name
+starts with @samp{P}:
 
-@smallexample
+@example
 @group
 DEFAULT  Prefix = "P"
          Rewrite-Function = "fixup"
 @end group
-@end smallexample
+@end example
 
 @noindent
 Note that in both cases the attribute can be used
@@ -403,19 +402,19 @@ either in @LHS{} or in @RHS{} pairs of a rule.
 The packet rewrite function must be declared as having no arguments
 and returning an integer value:
 
-@smallexample
+@example
 @group
 integer fixup()
 @{
 @}
 @end group
-@end smallexample
+@end example
 
 @noindent
 The actual return value from such a function is ignored, the integer
 return type is just a matter of convention.
 
-The following subsection present some examples of packet rewrite
+The following subsection presents some examples of packet rewrite
 functions.
 
 @menu
@@ -431,7 +430,7 @@ The examples found in this chapter are working functions that can be
 used with various existing @NAS{} types. They are taken from the
 @file{rewrite} file contained in distribution of GNU Radius.
 
-@subheading 1. Port rewriting for @sc{max a}scend terminal servers
+@subsubheading 1. Port rewriting for @sc{max a}scend terminal servers
 
 Some @sc{max a}scend terminal servers pack additional information
 into the @attr{NAS-Port-Id} attribute. The port number is constructed as
@@ -442,12 +441,12 @@ channel number
 (on the PRI or channelized T1/E1).
 
 The following rewrite functions are intended to compute the integer
-port number in the range (1 .. @var{portcnt}), where @var{portcnt}
+port number in the range [1, @var{portcnt}], where @var{portcnt}
 represents the real number of physical ports available on the @NAS{}.
 Such a port number can be used, for example, to create a dynamic pool
 of IP addresses (@pxref{Framed-IP-Address}).
 
-@smallexample
+@example
 @group
 /*
  * decode MAX port number
@@ -461,8 +460,8 @@ max_decode_port(integer P, integer portcnt)
         integer s, l, c;
 
         s = P / 10000;
-        l = (P - (10000 * s))/100; 
-        c = P - ((10000 * s) + (100 * l)); 
+        l = (P - (10000 * s))/100;
+        c = P - ((10000 * s) + (100 * l));
         return (c-1) + (l-1) * portcnt;
     @}
     return P;
@@ -485,9 +484,9 @@ max_fixup()
     return 0;
 @}
 @end group
-@end smallexample
+@end example
 
-@subheading 2. Session @sc{id} parsing for Cisco AS 5300 series
+@subsubheading 2. Session @sc{id} parsing for Cisco AS 5300 series
 
 Cisco @sc{voip ios} encodes a lot of other information into its
 @attr{Acct-Session-Id}. The pieces of information are separated by
@@ -505,9 +504,9 @@ the information it contains in various other attributes, generates a
 normal @attr{Acct-Session-Id}, and attempts to generate a
 @attr{NAS-Port-Id} attribute.
 
-@smallexample
+@example
 @group
-/* 
+/*
  * The port rewriting function for Cisco AS5300 used for
  * VoIP. This function is used to generate NAS-Port-Id pair
  * on the basis of vendor-specific pair 2. If the latter is
@@ -518,7 +517,7 @@ normal @attr{Acct-Session-Id}, and attempts to generate a
 integer
 cisco_pid(string A)
 @{
-    if (A =~ 
+    if (A =~
         ".*\([0-9][0-9]*\):
          [A-Z0-9][A-Z0-9]*:\([0-9][0-9]*\)") @{
         return (integer)\2;
@@ -535,7 +534,7 @@ cisco_pid(string A)
  * parsed out and saved in the Voip-* A/V pairs. The latter
  * should be defined somewhere in the dictionary.
  * Note that the regular expression in this example
- * spans several lines for readability. It should be on one 
+ * spans several lines for readability. It should be on one
  * line in real file.
  */
 string
@@ -552,7 +551,7 @@ cisco_sid(string S)
         %[Voip-Disconnect-Cause] = \7;
         %[Voip-Remote-IP] = \8;
         return \1;
-   @} 
+   @}
    return S;
 @}
 @end group
@@ -578,21 +577,21 @@ cisco_fixup()
     return 0;
 @}
 @end group
-@end smallexample
+@end example
 
-@subheading 3. User-name rewriting for @sc{nt} machines
+@subsubheading 3. User-name rewriting for @sc{nt} machines
 
 Users coming from Windows @sc{nt} machines often authenticate themselves as
 @samp{NT_DOMAIN\@var{username}}. The following function selects the
 user-name part and stores it in the @attr{User-Name} attribute:
 
-@smallexample
+@example
 @group
 integer
 login_nt(string uname)
 @{
     integer i;
-        
+
     if ((i = index(uname, '\\')) != -1)
         return substr(uname, i+1, -1);
     return uname;
@@ -606,7 +605,7 @@ nt_rewrite()
     return 0;
 @}
 @end group
-@end smallexample
+@end example
 
 @comment *L2**************************************************************
 @node Login Verification Functions
@@ -652,16 +651,15 @@ session, and 0 otherwise.
 @exindex Login verification functions
 
 @exindex Checking UNIX @code{finger} output
-As an example, let's consider the function for analyzing a 
+As an example, let's consider the function for analyzing a
 line of output from a standard @acronym{UNIX} @code{finger}
-service. In each line
-of @code{finger} output the first field contains the user name; the
-third field, the
-@c{tty} number (port @sc{id}); and the seventh field, the session @sc{id}.
+service. In each line of @code{finger} output, the first field
+contains the user name; the third field, the
+tty number (port @sc{id}); and the seventh field, the session @sc{id}.
 The function must return 1 if the three fields match the input
-user name and port and session @sc{id}s:
+user name, as well as its port and session @sc{id}s:
 
-@smallexample
+@example
 integer
 check_unix(string str, string name, integer pid, string sid)
 @{
@@ -669,7 +667,7 @@ check_unix(string str, string name, integer pid, string sid)
            && field(str, 3) == pid
            && field(str, 7) == sid;
 @}
-@end smallexample
+@end example
 
 @c @xref{UNIX Finger}.
 
@@ -678,13 +676,13 @@ The next example is a function to analyze a line of output from an SNMP
 query returning a user name. This function must return 1 if the entire input
 line matches the user name:
 
-@smallexample
+@example
 integer
 check_username(string str, string name, integer pid, string sid)
 @{
     return str == name;
 @}
-@end smallexample
+@end example
 
 @comment **L3***************************************************************
 @node Attribute Creation Functions
@@ -697,30 +695,33 @@ of its return is determined by the type of Radius attribute the
 value will be assigned to. To invoke the function, write its name
 in the @AVP{} of the @RHS{} in the @file{raddb/users} file, e.g.:
 
-@smallexample
+@example
 @group
 DEFAULT Auth-Type = SQL
         Service-Type = Framed-User,
             Framed-IP-Address = "=get_ip_addr(10.10.10.1)"
 @end group
-@end smallexample
+@end example
 
 @noindent
 The function @code{get_ip_addr} will be invoked after successful
 authentication and it will be passed the IP @code{10.10.10.1} as its
-argument. An example of a useful function that can be invoked this
-way is
+argument. In @command{Rewrite} language, an IPv4 address is
+represented as a 32-bit integer number, and can be operated upon as
+any other integer. This is illustrated in the following function,
+which can be used to compute the value of the @code{Framed-IP-Address}
+above:
 
-@smallexample
+@example
 @group
-@exindex IP pools for MAX Ascend 
+@exindex IP pools for MAX Ascend
 integer
 get_ip_address(integer base)
 @{
     return base + %[NAS-Port-Id] - %[NAS-Port-Id]/16;
 @}
 @end group
-@end smallexample
+@end example
 
 @comment **L3***************************************************************
 @node Logging Hook Functions
@@ -748,7 +749,7 @@ in particular it shall not modify the incoming request in any way.
 Following is an example prefix hook function that formats the
 incoming request data:
 
-@smallexample
+@example
 string
 compat_log_prefix(integer reqtype, string nas, integer id)
 @{
@@ -757,18 +758,18 @@ compat_log_prefix(integer reqtype, string nas, integer id)
         return "(" + request_code_string(reqtype) + " "
                    + nas + " " + (string)id + " " + %[User-Name] + ")";
 @}
-@end smallexample
+@end example
 
 Here is a sample log produced by @command{radiusd} before and after
 enabling this function:
 
-@smallexample
+@example
 @cartouche
 Auth.notice: Login OK [jsmith]
 @dots{}
 Auth.notice: (AUTHREQ nas-2 251 jsmith): Login OK [jsmith]
 @end cartouche
-@end smallexample
+@end example
 
 @comment *L2****************************************************************
 @node Full Syntax Description
@@ -779,8 +780,13 @@ Auth.notice: (AUTHREQ nas-2 251 jsmith): Login OK [jsmith]
 * Data types::
 * Symbols::
 * Identifiers::
+* Expressions::
+* Type coercion::
+* Assignments::
 * Declarations::
 * Statements::
+* Function calls::
+* Delete statement::
 * Regular Expressions::
 * Built-in Functions::
 @end menu
@@ -791,7 +797,7 @@ Auth.notice: (AUTHREQ nas-2 251 jsmith): Login OK [jsmith]
 @cindex Data types, Rewrite
 @cindex Rewrite, data types
 
-There are only two data types: @code{integer} and @code{string}, 
+There are only two data types: @code{integer} and @code{string},
 the two being coercible to each other in the sense that a string
 can be coerced to an integer if it contains a valid @sc{ascii} representation
 of a decimal, octal, or hex number, and an integer can always be coerced
@@ -843,12 +849,12 @@ integer.
 @item IP Numbers
 IP numbers are represented by a standard numbers-and-dots notation.
 IP numbers do not constitute a separate data type, rather they are
-in all respects similar to initeger numbers.
+in all respects similar to integer numbers.
 @item Characters
 These follow the usual C convention for characters, i.e., they consist
 either of
 an @sc{ascii} character itself or of its value, enclosed in a pair of
-singlequotes.
+single quotes.
 The character value begins with @samp{\} (backslash) and
 consists either of three octal or of two hexadecimal digits.
 A character does not form a special data type; it is represented
@@ -857,7 +863,7 @@ internally by an integer.
 These follow slightly modified C conventions for strings. A string is
 a sequence of characters surrounded by double quotes, as in
 @samp{"..."}. In a string, the double quote character @samp{"} must be
-preceeded by a backslash @samp{\}. A @samp{\} and an immediately following
+preceded by a backslash @samp{\}. A @samp{\} and an immediately following
 newline are ignored. Following escape sequences have special meaning:
 
 @table @asis
@@ -899,10 +905,10 @@ The incoming request is passed implicitly to functions invoked via the
 @attr{Rewrite-Function} attribute. It is kept as an associative array,
 whose entries can be accessed using the following syntax:
 
-@smallexample
+@example
 @samp{%[} @var{attribute-name} @samp{]}
 @samp{%[} @var{attribute-name} @samp{]} @samp{(} @var{n} @samp{)}
-@end smallexample
+@end example
 
 @noindent
 The first form returns the value of the attribute @var{attribute-name}.
@@ -912,16 +918,16 @@ Here @var{attribute-name} should be a valid Radius dictionary name
 The second form returns the value of the @var{n}th attribute of type
 @var{attribute-name}. The index @var{n} is counted from zero, so
 
-@smallexample
+@example
         %[@var{attribute-name}](0)
-@end smallexample
+@end example
 
 @noindent
 is equivalent to
 
-@smallexample
+@example
         %[@var{attribute-name}]
-@end smallexample
+@end example
 
 @item Identifiers
 Identifiers represent functions and variables. These are described in
@@ -929,9 +935,9 @@ the next sub-subsection.
 @item Regexp group references
 A sequence of characters in the form
 
-@smallexample
+@example
 @samp{\@var{number}}
-@end smallexample
+@end example
 
 @noindent
 
@@ -939,7 +945,7 @@ refers to the contents of parenthesized group number @var{number}
 obtained as a result of the last executed @samp{=~} command.
 The regexp group reference has always string data type. For example:
 
-@smallexample
+@example
 @group
 string
 basename(string @var{arg})
@@ -950,7 +956,7 @@ basename(string @var{arg})
         return arg;
 @}
 @end group
-@end smallexample
+@end example
 
 This function strips from @var{arg} all leading components up to the
 last slash character, and all trailing components after the last dot
@@ -975,83 +981,47 @@ alphabet or either of the following symbols: @samp{_}, @samp{$}.
 dollar signs (@samp{$}).
 @end enumerate
 
+@node Expressions
+@subsubsection Rewrite expressions
+@cindex Expressions, Rewrite
+@cindex Rewrite Expressions
 
-@comment **L4***************************************************************
-@node Declarations
-@subsubsection Rewrite Declarations
-@cindex Declarations, Rewrite
+A unary expression is a unary operator, followed by a single operand.
+A binary expression consists of two operands with a binary operator
+between them.
 
-@subheading Function declarations
+The following table ranges all operators according to their
+precedence (from lowest to highest).  All operators are
+left-associative, except as noted otherwise.
 
-A Rewrite function is declared as follows:
+@enumerate 1
+@item @code{=} (assignment, right-associative, @pxref{Assignments})
+@item @code{||}
+@item @code{&&}
+@item @code{=~}, @code{!~} (non-associative)
+@item @code{|}
+@item @code{^}
+@item @code{&}
+@item @code{==}, @code{!=}
+@item @code{<}, @code{<=}, @code{>}, @code{>=}
+@item @code{<<}, @code{>>}
+@item @code{+}, @code{-}
+@item @code{*}, @code{/}, @code{%}
+@item unary @code{-}, @code{!}
+@end enumerate
 
-@smallexample
-@var{type} @var{function-name} (@var{parameter-list})
-@end smallexample
-
-@noindent
-where @var{type} specifies the return type of the function,
-@var{function-name} declares the symbolic name of the function, and
-@var{parameter-list} declares the formal parameters to the function.
-It is a comma-separated list of declarations in the form
-
-@smallexample
-@var{type} @var{parm-name}
-@end smallexample
-
-@noindent
-@var{type} being the parameter type, and @var{parm-name} being its
-symbolic name. Both @var{function-name} and @var{parm-name} should
-be valid identifiers.
-
-@subheading Variable declarations
-
-There are no global variables in Rewrite. All variables are local.
-The local variables are declared right after the opening curly brace
-(@samp{@{}) and before any executable statements. The declaration
-syntax is
-
-@smallexample
-@var{type} @var{ident_list} ;
-@end smallexample
-
-@noindent
-Here @var{ident_list} is either a valid Rewrite identifier or a 
-comma-separated list of such identifiers.
-
-Note that, unlike in
-C, no assignments are allowed in variable declarations.
-
-@comment **L4***************************************************************
-@node Statements
-@subsubsection Rewrite Statements
-@cindex Statements, Rewrite
-
-The Rewrite statements are: expressions, assignments, conditional
-statements, and return statements. A statement is terminated by a semicolon.
-
-@subheading Expressions
-
-An @dfn{expression} is one of the following:
-
-@itemize @bullet
-@item A variable identifier
-@item A type coercion expression
-@item An arithmetic expression
-@item A boolean expression
-@item An assignment
-@item A function call
-@item A delete statement
-@end itemize
-
-@subheading Type coercion
+@node Type coercion
+@subsubsection Type coercion
+@cindex type coercion
 The type coercion is like a type cast in C. Its syntax is
 
-@smallexample
+@example
 @samp{(} @var{type} @samp{)} @var{ident}
-@end smallexample
+@end example
 
-@noindent
+Type coercion associates left, and has the same precedence as unary
+negation operators (i.e. the highest one).
+
 The result of type coercion is as follows:
 
 @multitable @columnfractions .20 .20 .60
@@ -1069,7 +1039,7 @@ the integer; otherwise the result of the conversion is undefined.
 
 @item string
 @tab integer
-@tab The @sc{ascii} representation (in decimal) of the integer number. 
+@tab The @sc{ascii} representation (in decimal) of the integer number.
 
 @item string
 @tab string
@@ -1077,41 +1047,204 @@ the integer; otherwise the result of the conversion is undefined.
 
 @end multitable
 
-@subheading Assignment
-An assignment is
+@node Assignments
+@subsubsection Assignments
+@cindex assignment, rewrite
+The @code{=} operator denotes an assignment. Syntactically, the
+assignment is
 
-@smallexample
+@example
 @var{ident} = @var{expression} ;
-@end smallexample
+@end example
+
+As a result of this statement, the variable @var{ident} is assigned
+the value of @var{expression}.  When used in expressions, assignments
+associate right and has the lowest precedence.
+
+@comment **L4***************************************************************
+@node Declarations
+@subsubsection Rewrite Declarations
+@cindex Declarations, Rewrite
+
+@subsubheading Function declarations
+
+A Rewrite function is declared as follows:
+
+@example
+@var{type} @var{function-name} (@var{parameter-list})
+@end example
 
 @noindent
-The variable @var{ident} is assigned the value of @var{expression}.
+where @var{type} specifies the return type of the function,
+@var{function-name} declares the symbolic name of the function, and
+@var{parameter-list} declares the formal parameters to the function.
+It is a comma-separated list of declarations in the form
 
-@subheading Function calls
+@example
+@var{type} @var{parm-name}
+@end example
+
+@noindent
+@var{type} being the parameter type, and @var{parm-name} being its
+symbolic name. Both @var{function-name} and @var{parm-name} should
+be valid identifiers.
+
+@subsubheading Variable declarations
+
+There are no global variables in Rewrite. All variables are local.
+The local variables are declared right after the opening curly brace
+(@samp{@{}) and before any executable statements. The declaration
+syntax is
+
+@example
+@var{type} @var{ident_list} ;
+@end example
+
+@noindent
+Here @var{ident_list} is either a valid Rewrite identifier or a
+comma-separated list of such identifiers.
+
+Note that, unlike in
+C, no assignments are allowed in variable declarations.
+
+@comment **L4***************************************************************
+@node Statements
+@subsubsection Rewrite Statements
+@cindex Statements, Rewrite
+
+The Rewrite statements are: expressions, conditionals, loops, and return
+statements. A @dfn{simple statement} is terminated by a semicolon.  A
+@dfn{compound statement} is one or more statements enclosed in curly
+brackets.
+
+@subsubheading Conditionals
+@cindex conditionals
+A conditional statement is:
+
+@example
+@group
+if (@var{expr})
+  @var{a}
+else
+  @var{b}
+@end group
+@end example
+
+@noindent
+Here, @var{expr} is any expression, @var{a} and @var{b} are statements
+(simple or compound).  The expression @var{expr} is evaluated and its
+result is coerced to boolean value.  If the resulting value is
+@samp{true}, then the statement @var{a} is executed, otherwise, the
+statement @var{b} is executed.  The @code{else} part is optional.
+Conditional expressions can be chained:
+
+@example
+@group
+if (@var{e1})
+  @var{a};
+else if (@var{e2})
+  @var{b};
+else if (@var{e3})
+  @var{c};
+else
+  @var{d};
+@end group
+@end example
+
+This is equivalent to
+
+@example
+@group
+if (@var{e1})
+  @var{a};
+else @{
+  if (@var{e2})
+    @var{b};
+  else @{
+    if (@var{e3})
+      @var{c};
+    else
+      @var{d};
+  @}
+@}
+@end group
+@end example
+
+@subsubheading Loops
+@cindex loops
+Two kinds of loops are provided: @dfn{while}, and @dfn{do-while}
+loops.
+
+A @dfn{while} loop is:
+
+@example
+while (@var{expr}) @var{stmt}
+@end example
+
+A @dfn{do-while} loop is:
+
+@example
+do @var{stmt} while (@var{expr})
+@end example
+
+Both loops run @var{stmt} (which is usually a compound statement)
+for as long as @var{expr} evaluates to @samp{true}.  The main
+difference is that a while loop is executed 0 or more times, while a
+do-while loop is executed 1 or more times.
+
+The following statements can appear within a @var{stmt} in a loop:
+
+@table @code
+@item break
+@kwindex break
+Break from the loop immediately. Control flow resumes at the first
+statement after the loop.
+
+@item continue
+@kwindex continue
+Branch to @var{expr} immediately.
+@end table
+
+@subsubheading The @code{return} statement
+@kwindex return
+
+@example
+return @var{expr}
+@end example
+
+The @code{return} statement stops execution of the current function
+and returns to the caller.  Its argument is evaluated and the
+resulting value becomes the function return value.
+
+@node Function calls
+@subsubsection Function calls
+@cindex function call, rewrite
 These take the form
 
-@smallexample
+@example
 @var{ident} ( @var{arg-list} )
-@end smallexample
+@end example
 
 @noindent
 where @var{ident} is the identifier representing the function, and
 @var{arg-list} is a comma-separated list of expressions supplying
 actual arguments to the function. The number of the expressions
 must correspond exactly to the number of formal parameters in the
-function definition. The function that @var{ident} 
+function definition. The function that @var{ident}
 references can be either a compiled function or a built-in
 function.
 
-@subheading @samp{delete} statement
+@node Delete statement
+@subsubsection @samp{delete} statement
+@kwindex delete
 
 The @samp{delete} statement is used to delete an attribute or attributes
 from the incoming request. Its syntax is:
 
-@smallexample
+@example
 delete @var{attribute-name};
 delete @var{attribute-name}(@var{n});
-@end smallexample
+@end example
 
 The first variant deletes @emph{all} the attributes of the given type.
 The second variant deletes only the @var{n}th occurrence of the matching
@@ -1129,9 +1262,9 @@ Library}, for the detailed description of these).
 You control the exact type of regular expressions by the use of the
 pragmatic comment @code{regex}. Its syntax is as follows:
 
-@smallexample
+@example
 #pragma regex @var{option-list}
-@end smallexample
+@end example
 
 @noindent
 @var{Option-list} is a whitespace-separated list of options. Each option
@@ -1145,7 +1278,7 @@ expressions.
 @item icase
 Do not differentiate case. Subsequent regular expression comparisons
 will be case insensitive.
-                            
+
 @item newline
 Match-any-character operators don't match a newline.
 
@@ -1164,19 +1297,19 @@ Prefixing an option with @samp{+} means to enable the corresponding
 behavior. Prefixing it with @samp{-} means to disable it. Thus,
 the following statement:
 
-@smallexample
+@example
 #pragma regex +extended +icase
-@end smallexample
+@end example
 
 @noindent
 will enable extended POSIX regular expressions using case-insensitive
-comparison. 
+comparison.
 
 Using the following comment:
 
-@smallexample
-#pragma regex -extended 
-@end smallexample
+@example
+#pragma regex -extended
+@end example
 
 @noindent
 will switch to the basic POSIX regular expressions.
@@ -1188,9 +1321,9 @@ whichever occurs first.
 For compatibility with previous versions, GNU Radius uses
 the following defaults:
 
-@smallexample
+@example
 #pragma regex -extended -icase -newline
-@end smallexample
+@end example
 
 @noindent
 i.e. all regular expressions are treated as basic POSIX, comparison
@@ -1206,38 +1339,38 @@ The following built-in functions are provided:
 @deftypefn Function integer length (string @var{s})
 Returns the length of the string @var{s}.
 
-@smallexample
+@example
 length("string") @result{} 6
-@end smallexample
+@end example
 @end deftypefn
 
 @deftypefn Function integer index (string @var{s}, integer @var{c})
 Returns the index of the first occurrence of the character @var{c} in
 the string @var{s}. Returns @minus{}1 if no such occurrence is found.
 
-@smallexample
+@example
 index("/raddb/users", 47) @result{} 0
 
 index("/raddb/users", 45) @result{} @minus{}1
-@end smallexample
+@end example
 @end deftypefn
 
 @deftypefn Function integer rindex (string @var{s}, integer @var{i})
 Returns the index of the last occurrence of the character @var{c} in
 the string @var{s}. Returns @minus{}1 if no such occurrence is found.
 
-@smallexample
+@example
 rindex("/raddb/users", 47) @result{} 6
-@end smallexample
+@end example
 @end deftypefn
 
 @deftypefn Function string substr (string @var{s}, integer @var{start}, integer @var{length})
 Returns the substring of @var{s} of length at most @var{length} starting at
 position @var{start}.
 
-@smallexample
+@example
 substr("foo-bar-baz", 3, 5) @result{} "-bar-"
-@end smallexample
+@end example
 @end deftypefn
 
 All character positions in strings are counted from 0.
@@ -1247,12 +1380,12 @@ This function regards the @var{buffer} argument as consisting of
 fields separated with any amount of whitespace. It extracts and
 returns the @var{n}th field. @var{n} is counted from 1.
 
-@smallexample
+@example
 field("GNU's not UNIX", 1) @result{} "GNU's"
 field("GNU's not UNIX", 2) @result{} "not"
 field("GNU's not UNIX", 3) @result{} "UNIX"
 field("GNU's not UNIX", 4) @result{} ""
-@end smallexample
+@end example
 @end deftypefn
 
 @deftypefn Function integer logit (string @var{msg})
@@ -1265,18 +1398,18 @@ Converts the Internet host address @var{str} from the
 standard numbers-and-dots notation into the equivalent integer in
 host byte order.
 
-@smallexample
+@example
 inet_aton("127.0.0.1") @result{} 2130706433
-@end smallexample
+@end example
 @end deftypefn
 
 @deftypefn Function string inet_ntoa (integer @var{ip})
 Converts the Internet host address @var{ip} given
 in host byte order to a string in standard numbers-and-dots notation.
 
-@smallexample
+@example
 inet_ntoa(2130706433) @result{} "127.0.0.1"
-@end smallexample
+@end example
 @end deftypefn
 
 @deftypefn Function integer htonl (integer @var{n})
@@ -1304,26 +1437,26 @@ For each substring matching the regular expression @var{regex} in the string
 @var{str}, substitute the string @var{repl}, and return the resulting
 string.
 
-@smallexample
+@example
 gsub("s","S","strings")
     @result{} "StringS"
 gsub("[0-9][0-9]*","N","28 or 29 days")
     @result{} "N or N days"
 gsub("[()'\"]","/","\"a\" (quoted) 'string'")
     @result{} "/a/ /quoted/ /string/"
-@end smallexample
+@end example
 @end deftypefn
 
 @deftypefn Function string qprn (string @var{str})
 Replace all non-printable characters in string S by their
-corresponding hex value preceeded by a percent sign. Return the
+corresponding hex value preceded by a percent sign. Return the
 resulting string. Printable are alphabetical characters, decimal
 digits and dash (@samp{-}). Other characters are considered non-printable.
 For example:
 
-@smallexample
+@example
 qprn("a string/value") @result{} "a%20string%2Fvalue"
-@end smallexample
+@end example
 @noindent
 @end deftypefn
 
@@ -1335,46 +1468,46 @@ depend on the locale settings. For example, suppose that the current
 locale is set to ISO-8859-1 (a so called ``Latin-1'' character set)
 and @point{} represents a tab character. Then:
 
-@smallexample
+@example
 quote_string("Fran@,{c}ois contains non@point{}printable chars")
   @result{} "Fran\347ois contains non\tprintable chars"
-@end smallexample  
+@end example
 @end deftypefn
 
 @deftypefn Function string unquote_string (string @var{str})
 Replace C escape notations in string @var{str} with corresponding
 characters using current locale. For example, for ISO-8859-1 locale:
 
-@smallexample
+@example
 unquote_string("Fran\347ois") @result{} "Fran@,{c}ois"
-@end smallexample
+@end example
 @end deftypefn
 
 @deftypefn Function string toupper (string @var{str})
 Returns the copy of the string @var{str} with all alphabetical characters
 converted to upper case. For example:
 
-@smallexample
+@example
 toupper("a-string") @result{} "A-STRING"
-@end smallexample
+@end example
 @end deftypefn
 
 @deftypefn Function string tolower (string @var{str})
 Returns the copy of the string @var{str} with all alphabetical characters
 converted to lower case. For example:
 
-@smallexample
+@example
 tolower("A-STRING") @result{} "a-string"
-@end smallexample
+@end example
 @end deftypefn
 
 @deftypefn Function string request_code_string (integer @var{code})
 Converts integer RADIUS request code to its textual representation as
 per RFC 3575. This function is useful in logging hooks (@pxref{hooks}).
 
-@smallexample
+@example
 request_code_string(4) @result{} "Accounting-Request"
-@end smallexample
+@end example
 @end deftypefn
 
 @subheading Native Language Support
@@ -1390,7 +1523,7 @@ The default current textual domain is @samp{radius}.
 @deftypefn Function string textdomain (string @var{domain})
 Sets the new value for the current textual domain. This domain is used by
 the functions @code{gettext} and @code{ngettext}.
-Returns the name of the previously used domain. 
+Returns the name of the previously used domain.
 @end deftypefn
 
 @deftypefn Function string gettext (string @var{msgid})
@@ -1402,7 +1535,7 @@ argument itself is returned.
 The second form of this function provides a traditional shortcut
 notation.
 
-For a detailed description of the GNU @code{gettext} interface, 
+For a detailed description of the GNU @code{gettext} interface,
 refer to @ref{Interface to gettext,,,gettext,GNU @code{gettext} utilities}.
 @end deftypefn
 
@@ -1423,7 +1556,7 @@ catalog is found @var{msgid_singular} is returned if
 @code{@var{number} == 1}, otherwise @var{msgid_plural}.
 
 For a detailed description of the GNU @code{gettext} interface for the
-plural translation, 
+plural translation,
 refer to @ref{Plural forms,,Additional functions for plural forms,gettext,GNU @code{gettext} utilities}.
 
 @end deftypefn
@@ -1442,7 +1575,7 @@ Returns source @IP{} of the currently processed request. This function
 can be used to add @attr{NAS-IP-Address} attribute to the requests
 lacking one, e.g.:
 
-@smallexample
+@example
 integer
 restore_nas_ip()
 @{
@@ -1450,7 +1583,7 @@ restore_nas_ip()
                 %[NAS-IP-Address] = request_source_ip();
         return 0;
 @}
-@end smallexample
+@end example
 @end deftypefn
 
 @deftypefn Function Integer request_source_port ()
@@ -1502,9 +1635,9 @@ address these issues in more detail.
 is extremely convenient for representation of such objects. A Radius @AVP{}
 is represented by a Scheme pair; e.g.,
 
-@smallexample
+@example
         Session-Timeout = 10
-@end smallexample
+@end example
 
 @noindent
 is represented in Guile as
@@ -1527,14 +1660,14 @@ written in Scheme as
 Lists of @AVP{}s are represented by Scheme lists. For example,
 the Radius pair list
 
-@smallexample
+@example
 @group
         User-Name = "jsmith",
                 User-Password = "guessme",
                 NAS-IP-Address = 10.10.10.1,
                 NAS-Port-Id = 10
 @end group
-@end smallexample
+@end example
 
 @noindent
 is written in Scheme as
@@ -1548,7 +1681,7 @@ is written in Scheme as
           (cons "NAS-Port-Id" 10))
 @end group
 @end smalllisp
-        
+
 @comment **L2***************************************************************
 @node Authentication with Scheme
 @subsection Authentication with Scheme
@@ -1616,7 +1749,7 @@ internal database:
          (cons
           '()
           (list (cons "Framed-MTU" "256"))))))
-  
+
 (define (auth req check reply)
   (let* ((username (assoc "User-Name" req))
          (reqlist (assoc username req))
@@ -1649,12 +1782,12 @@ corresponding @file{raddb/users} profile. For example:
 
 @exindex Invoking Scheme authentication function
 @exindex Scheme authentication function, invocation
-@smallexample
+@example
 @group
 DEFAULT Auth-Type = SQL
         Scheme-Procedure = "auth"
 @end group
-@end smallexample
+@end example
 
 @comment **L2***************************************************************
 @node Accounting with Scheme

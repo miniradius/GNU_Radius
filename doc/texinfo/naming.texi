@@ -1,5 +1,5 @@
 @c This is part of the GNU Radius manual.
-@c Copyright (C) 2003 Free Software Foundation
+@c Copyright (C) 2003-2025 Free Software Foundation, Inc.
 @c See file radius.texi for copying conditions.
 @comment *******************************************************************
 @node Naming Conventions, Operation, Intro, Top
@@ -67,9 +67,9 @@ These locations may differ depending on your local site configuration.
 Throughout this document we will refer to these directories by their
 short names.  For example, when we say:
 
-@smallexample
+@example
 ... this information is contained in file @file{raddb/sqlserver} 
-@end smallexample
+@end example
 
 @noindent
 we actually mean @file{@value{RADDB}/sqlserver}.

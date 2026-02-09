@@ -1,6 +1,6 @@
 divert(-1)dnl
 dnl This file is part of GNU Radius.
-dnl Copyright (C) 2004, 2007 Free Software Foundation, Inc.
+dnl Copyright (C) 2004-2025 Free Software Foundation, Inc.
 dnl
 dnl Written by Sergey Poznyakoff
 dnl 
@@ -15,12 +15,11 @@ dnl MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 dnl GNU General Public License for more details.
 dnl 
 dnl You should have received a copy of the GNU General Public License
-dnl along with GNU Radius; if not, write to the Free Software Foundation,
-dnl Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  
-changequote([,])
+dnl along with GNU Radius.  If not, see <http://www.gnu.org/licenses/>. 
 changecom(%%)
-define([SHIFT],[[shift]])
-define([TEST],[[ [ $1 ] ]])
+changequote([,])
+define([SHIFT],[shift])
+define([TEST],[[[ $1 ]]])
 define([OPT_HELP],[-h|--h|--he|--hel|--help])
 define([OPT_VERSION],[--v|--ve|--ver|--vers|--versi|--versio|--version])
 define([NOEDIT],[ifdef([__file__],[Generated from __file__],[This script is generated authomatically. Please do not edit.])])

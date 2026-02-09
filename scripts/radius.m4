@@ -1,4 +1,4 @@
-dnl Copyright (C) 2008 Free Software Foundation, Inc.
+dnl Copyright (C) 2008, 2010, 2013 Free Software Foundation, Inc.
 dnl GNU Radius is free software; you can redistribute it and/or modify
 dnl it under the terms of the GNU General Public License as published by
 dnl the Free Software Foundation; either version 3 of the License, or
@@ -52,13 +52,13 @@ AC_DEFUN([AM_GNU_RADIUS],
                   [grad_cv_radius=no])
    fi
    if test $grad_cv_radius = yes; then
-     _AM_GRAD_PREPROC([
-#include <radius/types.h>
+     _AM_GRAD_PREPROC([AC_LANG_PROGRAM([
+#include <radius/version.h>
 version=GRAD_VERSION_MAJOR.GRAD_VERSION_MINOR.GRAD_VERSION_PATCH
-],
+],[])],
       [version=],
       [grad_version_string])          
-  
+     
      GNU_RADIUS_VERSION=
      for f in $grad_version_string
      do

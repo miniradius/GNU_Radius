@@ -3,7 +3,7 @@ include(SRCDIR/radscripts.m4)dnl
 # NOEDIT
 #
 # This file is part of GNU Radius.
-# Copyright (C) 2001,2003 Free Software Foundation, Inc.
+# Copyright (C) 2001-2025 Free Software Foundation, Inc.
 #
 # Written by Sergey Poznyakoff
 #
@@ -23,7 +23,7 @@ usage() {
     exit ${1:-0}
 }
 
-while TEST($# -ne 0); 
+while TEST($# -ne 0)
 do
   case $1 in
       OPT_HELP) usage;;

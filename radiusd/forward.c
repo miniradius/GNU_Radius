@@ -1,21 +1,20 @@
 /* This file is part of GNU Radius.
-   Copyright (C) 2003,2004,2007,2008 Free Software Foundation, Inc.
+   Copyright (C) 2003-2025 Free Software Foundation, Inc.
 
    Written by Sergey Poznyakoff
-  
+
    GNU Radius is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
    the Free Software Foundation; either version 3 of the License, or
    (at your option) any later version.
-  
+
    GNU Radius is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
-  
+
    You should have received a copy of the GNU General Public License
-   along with GNU Radius; if not, write to the Free Software Foundation,
-   Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
+   along with GNU Radius.  If not, see <http://www.gnu.org/licenses/>. */
 
 #ifdef HAVE_CONFIG_H
 # include <config.h>
@@ -37,16 +36,16 @@ static int forward_fd = -1;
 static grad_list_t *forward_list;
 
 static void
-add_forward(int type, grad_uint32_t ip, int port)
+add_forward(int type, uint32_t ip, int port)
 {
 	grad_server_t *srv;
 
 	if (!forward_list) {
 		forward_list = grad_list_create();
-		if (!forward_list) 
+		if (!forward_list)
 			return; /* FIXME */
 	}
-		
+
 	srv = grad_emalloc(sizeof(*srv));
 	srv->name = NULL;
 	srv->addr = ip;
@@ -58,13 +57,13 @@ static int
 rad_cfg_forward(int argc, cfg_value_t *argv, int type, int defport)
 {
 	int i, errcnt = 0;
-	
-	for (i = 1; i < argc; i++)  
+
+	for (i = 1; i < argc; i++)
 		if (argv[i].type != CFG_HOST) {
 			cfg_type_error(CFG_HOST);
 			errcnt++;
 		}
-	
+
 	if (errcnt == 0 && radius_mode == MODE_DAEMON) {
 		for (i = 1; i < argc; i++) {
 			add_forward(type,
@@ -82,7 +81,7 @@ rad_cfg_forward_auth(int argc, cfg_value_t *argv,
 {
 	return rad_cfg_forward(argc, argv, R_AUTH, auth_port);
 }
-	
+
 int
 rad_cfg_forward_acct(int argc, cfg_value_t *argv,
 		     void *block_data, void *handler_data)
@@ -107,9 +106,9 @@ forward_data(grad_server_t *srv, int type, void *data, size_t size)
 		char buffer[GRAD_IPV4_STRING_LENGTH];
 
 		grad_log(GRAD_LOG_ERR|GRAD_LOG_PERROR,
-		         _("Can't forward to %s:%d"),
-		         grad_ip_iptostr(srv->addr, buffer),
-		         srv->port[type]);
+			 _("Can't forward to %s:%d"),
+			 grad_ip_iptostr(srv->addr, buffer),
+			 srv->port[type]);
 	}
 }
 
@@ -118,15 +117,14 @@ forwarder(void *item, void *data)
 {
 	grad_server_t *srv = item;
 	struct request_data *r = data;
-	int rc;
 
 	if (srv->port[r->type] != 0) {
 		grad_avp_t *vp = NULL, *plist;
 		void *pdu;
 		size_t size;
 		int id;
-		u_char *secret;
-		
+		char *secret;
+
 		if (srv->secret) {
 			secret = srv->secret;
 			vp = proxy_request_recode(r->req,
@@ -149,7 +147,7 @@ forwarder(void *item, void *data)
 				       NULL);
 		grad_avl_free(vp);
 		forward_data(srv, r->type, pdu, size);
-		grad_free(pdu);
+		free(pdu);
 	}
 	return 0;
 }
@@ -157,7 +155,7 @@ forwarder(void *item, void *data)
 static int
 free_mem(void *item, void *data ARG_UNUSED)
 {
-	grad_free(item);
+	free(item);
 	return 0;
 }
 
@@ -177,8 +175,8 @@ fixup_forward_server(void *item, void *data)
 	if (!cl) {
 		char buffer[GRAD_IPV4_STRING_LENGTH];
 		grad_log(GRAD_LOG_NOTICE,
-		         _("Forwarding host %s not listed in clients"),
-		         grad_ip_iptostr(srv->addr, buffer));
+			 _("Forwarding host %s not listed in clients"),
+			 grad_ip_iptostr(srv->addr, buffer));
 	} else
 		srv->secret = cl->secret;
 	return 0;
@@ -188,31 +186,31 @@ static void
 forward_after_config_hook(void *a ARG_UNUSED, void *b ARG_UNUSED)
 {
 	struct sockaddr_in s;
-	
+
 	if (grad_list_count(forward_list) == 0)
 		return;
-	
+
 	forward_fd = socket(PF_INET, SOCK_DGRAM, 0);
 
 	if (forward_fd == -1) {
 		grad_log(GRAD_LOG_ERR|GRAD_LOG_PERROR,
-		         _("Can't open forwarding socket"));
+			 _("Can't open forwarding socket"));
 		return;
 	}
 
-        memset (&s, 0, sizeof (s));
-        s.sin_family = AF_INET;
-        s.sin_addr.s_addr = htonl(ref_ip);
+	memset (&s, 0, sizeof (s));
+	s.sin_family = AF_INET;
+	s.sin_addr.s_addr = htonl(ref_ip);
 	s.sin_port = 0;
-	if (bind(forward_fd, (struct sockaddr*)&s, sizeof (s)) < 0) 
-		grad_log(GRAD_LOG_ERR|GRAD_LOG_PERROR, 
-		         _("Can't bind forwarding socket"));
-	
+	if (bind(forward_fd, (struct sockaddr*)&s, sizeof (s)) < 0)
+		grad_log(GRAD_LOG_ERR|GRAD_LOG_PERROR,
+			 _("Can't bind forwarding socket"));
+
 	grad_list_iterate(forward_list, fixup_forward_server, NULL);
 }
 
 void
-forward_init()
+forward_init(void)
 {
 	radiusd_set_preconfig_hook(forward_before_config_hook, NULL, 0);
 	radiusd_set_postconfig_hook(forward_after_config_hook, NULL, 0);
@@ -223,9 +221,9 @@ forward_request(int type, radiusd_request_t *req)
 {
 	struct request_data rd;
 
-	if (!forward_list || forward_fd == -1) 
+	if (!forward_list || forward_fd == -1)
 		return;
-	
+
 	switch (type) {
 	case R_AUTH:
 	case R_ACCT:
@@ -233,9 +231,8 @@ forward_request(int type, radiusd_request_t *req)
 	default:
 		return;
 	}
-	
+
 	rd.type = type;
 	rd.req = req;
 	grad_list_iterate(forward_list, forwarder, &rd);
 }
-

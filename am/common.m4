@@ -22,27 +22,6 @@ else
   ]ifelse([$4], , [:], [$4])[
 fi]])dnl
 
-dnl RA_CHECK_STRUCT_FIELD -- See if a structure has a particular field
-dnl   $1 - NAME  -- name of structure
-dnl   $2 - FIELD -- name of field to test
-dnl   $3 - INCLS -- C program text to inculde necessary files for testing
-dnl   $4 - TRUE  -- what to do if struct NAME has FIELD; defaults to 
-dnl		    `AC_DEFINE(HAVE_NAME_FIELD)'
-dnl   $5 - FALSE -- what to do if not; defaults to `:'
-dnl
-dnl NOTE: We still don't use AC_CHECK_MEMBERS, since it has (as of
-dnl autoconf 2.53) a bug which prevents it from recognizing members
-dnl of aggregate type.
-
-AC_DEFUN([RA_CHECK_STRUCT_FIELD], [
-  define([ra_CVAR], [ra_cv_struct_]translit($1_$2, [A-Z], [a-z]))dnl
-  AC_CACHE_CHECK([whether struct $1 has $2 field], ra_CVAR,
-    AC_TRY_COMPILE(RA_FLUSHLEFT([$3]),
-      [struct $1 ra_x; int ra_y = sizeof ra_x.$2;],
-      ra_CVAR[=yes], ra_CVAR[=no]))
-  RA_RESULT_ACTIONS(ra_CVAR, [$1_$2], [$4], [$5])dnl
-  undefine([ra_CVAR])])dnl
-
 AC_SUBST(RADIUSD_LDADD_LIST)
 AC_DEFUN([RA_RADIUSD_LDADD],
  RADIUSD_LDADD_LIST="$RADIUSD_LDADD_LIST [$1]")

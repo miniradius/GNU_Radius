@@ -1,12 +1,13 @@
 # @configure_input@                                     -*- shell-script -*-
 # Configurable variable values for tar test suite.
-# Copyright (C) 2004, 2007, 2008 Free Software Foundation, Inc
+# Copyright (C) 2004-2025 Free Software Foundation, Inc
 
 SOURCEDIR=$abs_srcdir
 BUILDDIR=$abs_builddir
 PATH=@abs_builddir@:@abs_top_builddir@/radiusd:@abs_top_builddir@/radtest:$top_srcdir:$srcdir:$PATH
 GUILE_LOAD_PATH=$abs_top_builddir/radscm
-export GUILE_LOAD_PATH
+GUILE_AUTO_COMPILE=0
+export GUILE_LOAD_PATH GUILE_AUTO_COMPILE
 
 ZERO_LOGS=1
 
@@ -22,12 +23,12 @@ make_raddb() {
 
     EXPR="s^@BUILDDIR@^$BUILDDIR^;\
 s^@SOURCEDIR@^$SOURCEDIR^;\
-s^@GUILE@^@GUILE_CONFIG@^;\
+s^@GUILE@^@RA_GUILE_ENABLE@^;\
 s^@SNMP@^@SNMP_CONFIG@^;"
 
     for file in $*
     do
-        sed "$EXPR" $ABS_NAME/${file}.in > $ABS_NAME/$file
+	sed "$EXPR" $ABS_NAME/${file}.in > $ABS_NAME/$file
 	case $file in
 	*.bin) chmod +x $ABS_NAME/$file
 	esac
@@ -36,7 +37,7 @@ s^@SNMP@^@SNMP_CONFIG@^;"
     [ -d $ABS_NAME/log ] || mkdir $ABS_NAME/log
     [ -d $ABS_NAME/acct ] || mkdir $ABS_NAME/acct
     if [ x"$ZERO_LOGS" != x ]; then
-	for file in radwtmp radutmp radius.log radius.info radius.debug radius.stderr 
+	for file in radwtmp radutmp radius.log radius.info radius.debug radius.stderr
 	do
 	    cat /dev/null > $ABS_NAME/log/$file
 	done
@@ -46,21 +47,21 @@ s^@SNMP@^@SNMP_CONFIG@^;"
 start_server() {
     DIR=$1
     shift
-    
+
     rm -rf $DIR/ports
     @abs_top_builddir@/radiusd/radiusd -d $DIR \
-             -l $DIR/log \
+	     -l $DIR/log \
 	     -a $DIR/acct \
 	     -P $DIR \
 	     --select-free-ports=$DIR/ports
-    N=1	     
+    N=1
     while [ ! -r $DIR/radiusd.pid ]
     do
-        sleep 1
+	sleep 1
 	N=`expr $N + 1`
 	if [ $N -gt 5 ]; then
 		exit 1
-	fi	  
+	fi
     done
 
     while read expr
@@ -72,20 +73,20 @@ start_server() {
 stop_server() {
     for dir in $*
     do
-        if test -r $dir/radiusd.pid; then
-            kill -TERM `cat $dir/radiusd.pid`
-            sleep 2
-            if test -r $dir/radiusd.pid ; then
-                kill -KILL `cat $dir/radiusd.pid` 	     
-            fi
-        fi
+	if test -r $dir/radiusd.pid; then
+	    kill -TERM `cat $dir/radiusd.pid`
+	    sleep 2
+	    if test -r $dir/radiusd.pid ; then
+		kill -KILL `cat $dir/radiusd.pid`
+	    fi
+	fi
     done
 }
 
 LOCAL_CONF=$BUILDDIR/raddb
 PROXY_CONF=$BUILDDIR/proxy
 
-rm -f $LOCAL_CONF/radiusd.pid $PROXY_CONF/radiusd.pid 
+rm -f $LOCAL_CONF/radiusd.pid $PROXY_CONF/radiusd.pid
 
 begin_server() {
   case $1 in
@@ -96,7 +97,7 @@ begin_server() {
      :
   else
      make_raddb raddb dictionary config hints users acct.bin acct.scm
-     make_raddb proxy dictionary config 
+     make_raddb proxy dictionary config
      test "$1" = "proxy" && start_server $PROXY_CONF PROXY_
      start_server $LOCAL_CONF
      trap "stop_server $LOCAL_CONF $PROXY_CONF" 1 3 15
@@ -105,9 +106,9 @@ begin_server() {
      do
        for file in realms client.conf
        do
-          sed "s/{AUTH}/$AUTH/;s/{ACCT}/$ACCT/;\
+	  sed "s/{AUTH}/$AUTH/;s/{ACCT}/$ACCT/;\
 	       s/{PROXY_AUTH}/$PROXY_AUTH/;s/{PROXY_ACCT}/$PROXY_ACCT/" \
-             $dir/$file.in > $dir/$file
+	     $dir/$file.in > $dir/$file
        done
      done
      if [ "$1" = "proxy" ]; then
@@ -127,11 +128,10 @@ catlog() {
   for file in $*
   do
     if test -r $dir/$file; then
-	echo "$dir/$file reports:" 
-	cat $dir/$file 
+	echo "$dir/$file reports:"
+	cat $dir/$file
     else
 	echo "$dir/$file not available"
     fi
   done
-}  
-
+}
